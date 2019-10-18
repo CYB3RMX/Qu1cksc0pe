@@ -1,0 +1,204 @@
+# This file is for explain some of the keywords.
+
+==========REGISTRY==========
+RegOpenKey: Opens the specified registry key. 
+Note: This function is provided only for compatibility with 16-bit versions of Windows. Applications should use the RegOpenKeyEx function.
+Header: winreg.h (include Windows.h)
+Library: Advapi32.lib
+DLL: Advapi32.lib
+-----------------------
+RegSetValue: Sets the data and type of a specified value under a registry key.
+Header: winreg.h (include Windows.h)
+Library: Advapi32.lib
+DLL: Advapi32.lib
+-----------------------
+RegGetValue: Retrieves the type and data for the specified registry value.
+Header: winreg.h (include Windows.h)
+Library: Advapi32.lib
+DLL: Advapi32.lib
+
+==========FILE==========
+NtQueryDirectoryFile: The NtQueryDirectoryFile routine returns various kinds of information about files in the directory specified by a given file handle.
+Header: ntifs.h (include Ntifs.h)
+Library: NtosKrnl.lib
+DLL: NtosKrnl.exe
+-----------------------
+CreateFileMapping: Creates or opens a named or unnamed file mapping object for a specified file.
+Header: winbase.h (include Windows.h, Memoryapi.h)
+Library: Kernel32.lib
+DLL: Kernel32.dll
+-----------------------
+MapViewOfFile: Maps a view of a file mapping into the address space of a calling process. To specify a suggested base address for the view, use the MapViewOfFileEx function. However, this practice is not recommended.
+Header: memoryapi.h (include Windows.h, Memoryapi.h)
+Library: Kernel32.lib
+DLL: Kernel32.dll
+
+==========NETWORK==========
+WSAStartup: This function initiates use of the Winsock DLL by a process.
+Header: winsock.h (include Winsock2.h)
+Library: Ws2_32.lib
+DLL: Ws2_32.dll
+-----------------------
+WSAGetLastError: This function returns the error status for the last Windows Sockets operation that failed.
+Header: winsock.h (include Winsock2.h)
+Library: Ws2_32.lib
+DLL: Ws2_32.dll
+
+==========WEB==========
+InternetOpen: Initializes an application's use of the WinINet functions.
+Header: wininet.h
+Library: Wininet.lib
+DLL: Wininet.dll
+-----------------------
+InternetOpenURL: Opens a resource specified by a complete FTP or HTTP URL.
+Header: wininet.h
+Library: Wininet.lib
+DLL: Wininet.dll
+-----------------------
+InternetConnect: Opens an File Transfer Protocol (FTP) or HTTP session for a given site.
+Header: wininet.h
+Library: Wininet.lib
+DLL: Wininet.dll
+-----------------------
+InternetReadFile: Reads data from a handle opened by the InternetOpenUrl, FtpOpenFile, or HttpOpenRequest function.
+Header: wininet.h
+Library: Wininet.lib
+DLL: Wininet.dll
+-----------------------
+InternetWriteFile: Writes data to an open Internet file.
+Header: wininet.h
+Library: Wininet.lib
+DLL: Wininet.dll
+-----------------------
+HTTPOpenRequest: Creates an HTTP request handle.
+Header: wininet.h
+Library: Wininet.lib
+DLL: Wininet.dll
+-----------------------
+HTTPSendRequest:Sends the specified request to the HTTP server, allowing callers to send extra data beyond what is normally passed to HttpSendRequestEx.
+Header: wininet.h
+Library: Wininet.lib
+DLL: Wininet.dll
+-----------------------
+HTTPQueryInfo: Retrieves header information associated with an HTTP request.
+Header: wininet.h
+Library: Wininet.lib
+DLL: Wininet.dll
+-----------------------
+URLDownloadToFile: Downloads bits from the Internet and saves them to a file.
+Header: Urlmon.h
+Library: Urlmon.lib
+DLL: Urlmon.dll
+
+==========Keyboard/Keylogger==========
+SetWindowsHook: Installs an application-defined hook procedure into a hook chain. You would install a hook procedure to monitor the system for certain types of events. These events are associated either with a specific thread or with all threads in the same desktop as the calling thread.
+Header: winuser.h (include Windows.h)
+Library: User32.lib
+DLL: User32.dll
+----------------------
+CallNextHook: Passes the hook information to the next hook procedure in the current hook chain. A hook procedure can call this function either before or after processing the hook information.
+Header: winuser.h (include Windows.h)
+Library: User32.lib
+DLL: User32.dll
+----------------------
+MapVirtualKey: Translates (maps) a virtual-key code into a scan code or character value, or translates a scan code into a virtual-key code. To specify a handle to the keyboard layout to use for translating the specified code, use the MapVirtualKeyEx function.
+Header: winuser.h (include Windows.h)
+Library: User32.lib
+DLL: User32.dll
+----------------------
+GetKeyState: Retrieves the status of the specified virtual key. The status specifies whether the key is up, down, or toggled (on, off—alternating each time the key is pressed).
+Header: winuser.h (include Windows.h)
+Library: User32.lib
+DLL: User32.dll
+----------------------
+GetAsyncKeyState: Determines whether a key is up or down at the time the function is called, and whether the key was pressed after a previous call to GetAsyncKeyState.
+Header: winuser.h (include Windows.h)
+Library: User32.lib
+DLL: User32.dll
+----------------------
+GetForegroundWindow: Retrieves a handle to the foreground window (the window with which the user is currently working). The system assigns a slightly higher priority to the thread that creates the foreground window than it does to other threads.
+Header: winuser.h (include Windows.h)
+Library: User32.lib
+DLL: User32.dll
+----------------------
+AttachThreadInput: Attaches or detaches the input processing mechanism of one thread to that of another thread.
+Header: winuser.h (include Windows.h)
+Library: User32.lib
+DLL: User32.dll
+
+==========PROCESS==========
+VirtualAlloc: Reserves, commits, or changes the state of a region of pages in the virtual address space of the calling process. Memory allocated by this function is automatically initialized to zero.
+Header: memoryapi.h (include Windows.h, Memoryapi.h)
+Library: Kernel32.lib
+DLL: Kernel32.dll
+----------------------
+VirtualProtect: Changes the protection on a region of committed pages in the virtual address space of the calling process.
+Header: memoryapi.h (include Windows.h, Memoryapi.h)
+Library: Kernel32.lib
+DLL: Kernel32.dll
+----------------------
+OpenProcess: Opens an existing local process object.
+Header: processthreadsapi.h (include Windows Server 2003, Windows Vista, Windows 7, Windows Server 2008 Windows Server 2008 R2, Windows.h)
+Library: Kernel32.lib
+DLL: Kernel32.dll
+----------------------
+EnumProcesses: Retrieves the process identifier for each process object in the system.
+Header: psapi.h
+Library: Kernel32.lib on Windows 7 and Windows Server 2008 R2; Psapi.lib (if PSAPI_VERSION=1) on Windows 7 and Windows Server 2008 R2; Psapi.lib on Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP
+DLL: Kernel32.dll on Windows 7 and Windows Server 2008 R2; Psapi.dll (if PSAPI_VERSION=1) on Windows 7 and Windows Server 2008 R2; Psapi.dll on Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP
+----------------------
+EnumProcessModules: Retrieves a handle for each module in the specified process. To control whether a 64-bit application enumerates 32-bit modules, 64-bit modules, or both types of modules, use the EnumProcessModulesEx function.
+Header: psapi.h
+Library: Kernel32.lib on Windows 7 and Windows Server 2008 R2; Psapi.lib (if PSAPI_VERSION=1) on Windows 7 and Windows Server 2008 R2; Psapi.lib on Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP
+DLL: Kernel32.dll on Windows 7 and Windows Server 2008 R2; Psapi.dll (if PSAPI_VERSION=1) on Windows 7 and Windows Server 2008 R2; Psapi.dll on Windows Server 2008, Windows Vista, Windows Server 2003 and Windows XP
+----------------------
+CreateRemoteThread: Creates a thread that runs in the virtual address space of another process. Use the CreateRemoteThreadEx function to create a thread that runs in the virtual address space of another process and optionally specify extended attributes.
+Header: processthreadsapi.h (include Windows Server 2003, Windows Vista, Windows 7, Windows Server 2008 Windows Server 2008 R2, Windows.h)
+Library: Kernel32.lib
+DLL: Kernel32.dll
+----------------------
+WriteProcessMemory: Writes data to an area of memory in a specified process. The entire area to be written to must be accessible or the operation fails.
+Header: memoryapi.h (include Windows.h, Memoryapi.h)
+Library: Kernel32.lib
+DLL: Kernel32.dll
+----------------------
+AdjustTokenPrivileges: The AdjustTokenPrivileges function enables or disables privileges in the specified access token. Enabling or disabling privileges in an access token requires TOKEN_ADJUST_PRIVILEGES access.
+Header: securitybaseapi.h (include Windows.h)
+Library: Advapi32.lib
+DLL: Advapi32.dll
+----------------------
+IsWow64Process: Determines whether the specified process is running under WOW64 or an Intel64 of x64 processor.
+Header: wow64apiset.h (include Windows Server 2003, Windows Vista, Windows 7, Windows Server 2008 Windows Server 2008 R2, Windows.h)
+Library: Kernel32.lib
+DLL: Kernel32.dll
+----------------------
+QueueUserAPC: Adds a user-mode asynchronous procedure call (APC) object to the APC queue of the specified thread.
+Header: processthreadsapi.h (include Windows Server 2003, Windows Vista, Windows 7, Windows Server 2008 Windows Server 2008 R2, Windows.h)
+Library: Kernel32.lib
+DLL: Kernel32.dll
+
+==========DLL==========
+LoadLibrary: Loads the specified module into the address space of the calling process. The specified module may cause other modules to be loaded.
+Header: libloaderapi.h (include Windows.h)
+Library: Kernel32.lib
+DLL: Kernel32.dll
+----------------------
+GetProcAddress: Retrieves the address of an exported function or variable from the specified dynamic-link library (DLL).
+Header: libloaderapi.h (include Windows.h)
+Library: Kernel32.lib
+DLL: Kernel32.dll
+----------------------
+LdrLoadDll: This is a low-level function to load a DLL into a process, just like LoadLibrary. Normal programs use LoadLibrary, and the presence of this import may indicate a program that is attempting to be stealthy.
+Library: ntdll.lib
+DLL: ntdll.dll
+
+==========Debugger Identifying==========
+IsDebuggerPresent: Determines whether the calling process is being debugged by a user-mode debugger.
+Header: debugapi.h (include Windows.h)
+Library: Kernel32.lib
+DLL: Kernel32.dll
+----------------------
+CheckRemoteDebuggerPresent: Determines whether the specified process is being debugged.
+Header: debugapi.h (include Windows.h)
+Library: Kernel32.lib
+DLL: Kernel32.dll
