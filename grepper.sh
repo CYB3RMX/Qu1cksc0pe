@@ -11,7 +11,7 @@ yellow='\e[93m'
 target=$1
 wordz=$2
 
-xxd $target | grep "${wordz}" &>/dev/null
+strings $target | grep "${wordz}" &>/dev/null
 if [ $? -eq 0 ];then
   echo -en "$red=>$default Found: ${green}$wordz$default\n"
 fi
