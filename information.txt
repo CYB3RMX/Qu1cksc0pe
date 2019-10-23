@@ -16,6 +16,16 @@ RegGetValue: Retrieves the type and data for the specified registry value.
 Header: winreg.h (include Windows.h)
 Library: Advapi32.lib
 DLL: Advapi32.lib
+-----------------------
+RtlWriteRegistryValue: This function is used to write a value to the registry from kernel-mode code.
+Header: wdm.h (include Wdm.h, Ntddk.h, Ntifs.h)
+Library: NtosKrnl.lib
+DLL: NtosKrnl.exe
+-----------------------
+RtlCreateRegistryKey: This function is used to create a registry from kernel-mode code.
+Header: wdm.h (include Wdm.h, Ntddk.h, Ntifs.h)
+Library: NtosKrnl.lib
+DLL: NtosKrnl.exe
 
 ==========FILE==========
 NtQueryDirectoryFile: The NtQueryDirectoryFile routine returns various kinds of information about files in the directory specified by a given file handle.
@@ -42,7 +52,8 @@ SetFileTime: Sets the date and time that the specified file or directory was cre
 Header: fileapi.h (include Windows.h)
 Library: Kernel32.lib
 DLL: Kernel32.dll
-
+-----------------------
+SfcTerminateWatcherThread: This function is used to disable Windows file protection and modify files that otherwise would be protected
 ==========NETWORK==========
 WSAStartup: This function initiates use of the Winsock DLL by a process.
 Header: winsock.h (include Winsock2.h)
@@ -135,6 +146,14 @@ AttachThreadInput: Attaches or detaches the input processing mechanism of one th
 Header: winuser.h (include Windows.h)
 Library: User32.lib
 DLL: User32.dll
+----------------------
+RegisterHotKey: This function is used to register a handler to be notified anytime a user enters a particular key combination (like CTRL-ALT-J), regardless of which window is active when the user presses the key combination. This function is sometimes used by spyware that remains hidden from the user until the key combination is pressed.
+Header: winuser.h (include Windows.h)
+Library: User32.lib
+DLL: User32.dll
+----------------------
+
+----------------------
 
 ==========PROCESS==========
 CreateProcess: Creates a new process and its primary thread. The new process runs in the security context of the calling process. If the calling process is impersonating another user, the new process uses the token for the calling process, not the impersonation token. To run the new process in the security context of the user represented by the impersonation token, use the CreateProcessAsUser or CreateProcessWithLogonW function.
