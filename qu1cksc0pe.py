@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os,sys
 
@@ -20,11 +20,11 @@ banner='''
 def scope():
    target_file = sys.argv[1]
    regdict={
-      "Registry": ["RegKeyOpen","RegSetValue","RegGetValue"],
-      "File": ["CreateFile","ReadFile","WriteFile","FindResource","LoadResource","FindFirstFile","FindNextFile","NtQueryDirectoryFile","CreateFileMapping","MapViewOfFile","GetTempPath","SetFileTime"],
+      "Registry": ["RegKeyOpen","RegSetValue","RegGetValue","RtlWriteRegistryValue","RtlCreateRegistryKey"],
+      "File": ["CreateFile","ReadFile","WriteFile","FindResource","LoadResource","FindFirstFile","FindNextFile","NtQueryDirectoryFile","CreateFileMapping","MapViewOfFile","GetTempPath","SetFileTime","SfcTerminateWatcherThread"],
       "Network": ["WSAStartup","WSAGetLastError","socket","recv","connect","getaddrinfo","accept","send","listen"],
       "Web": ["InternetOpen","InternetOpenURL","InternetConnect","InternetReadFile","InternetWriteFile","HTTPOpenRequest","HTTPSendRequest","HTTPQueryInfo","URLDownloadToFile"],
-      "Keyboard/Keylogger": ["SetWindowsHook","CallNextHook","MapVirtualKey","GetKeyState","GetAsyncKeyState","GetForegroundWindow","AttachThreadInput"],
+      "Keyboard/Keylogger": ["SetWindowsHook","CallNextHook","MapVirtualKey","GetKeyState","GetAsyncKeyState","GetForegroundWindow","AttachThreadInput","RegisterHotKey"],
       "Process": ["CreateProcess","VirtualAlloc","VirtualProtect","OpenProcess","EnumProcesses","EnumProcessModules","CreateRemoteThread","WriteProcessMemory","AdjustTokenPrivileges","IsWow64Process","QueueUserAPC","NtSetInformationProcess"],
       "Dll": ["LoadLibrary","GetProcAddress","LdrLoadDll"],
       "Debugger Identifying": ["IsDebuggerPresent","CheckRemoteDebuggerPresent","FindWindow","GetTickCount","NtQueryInformationProcess","OutputDebugString"],
@@ -36,7 +36,7 @@ def scope():
    for category in regdict:
        print("\n\u001b[96m[\u001b[91m+\u001b[96m]\u001b[0m Checking\u001b[92m {}\u001b[0m activites...\n".format(category))
        for word in regdict[category]:
-           command = "./grepper.sh {} {}".format(target_file,word)
+           command = "grepper.sh {} {}".format(target_file,word)
            os.system(command)
 if __name__ == '__main__':
     print(banner)
