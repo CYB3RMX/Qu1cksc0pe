@@ -1,24 +1,57 @@
 #!/usr/bin/env python3
 
-import os,sys
+import os,sys,argparse
+# Colors
+red = '\u001b[91m'
+cyan = '\u001b[96m'
+white = '\u001b[0m'
 
 banner='''
-  ____  _    _ __  _____ _  __ _____  _____ ___  _____  ______ 
+  ____  _    _ __  _____ _  __ _____  _____ ___  _____  ______
  / __ \| |  | /_ |/ ____| |/ // ____|/ ____/ _ \|  __ \|  ____|
-| |  | | |  | || | |    |   /| (___ | |   | | | | |__) | |__   
-| |  | | |  | || | |    |  <  \___ \| |   | | | |  ___/|  __|  
-| |__| | |__| || | |____| . \ ____) | |___| |_| | |    | |____ 
+| |  | | |  | || | |    |   /| (___ | |   | | | | |__) | |__
+| |  | | |  | || | |    |  <  \___ \| |   | | | |  ___/|  __|
+| |__| | |__| || | |____| . \ ____) | |___| |_| | |    | |____
  \___\_\_____/ |_|\_____|_|\_\_____/ \_____\___/|_|    |______|
 
   >>> Quick suspicious file analysis tool.
   ----------------------------------------
-  >>> By CYB3RMX_   | Version: 1.0
+  >>> By CYB3RMX_   | Version: 1.1
   ----------------------------------------
   >>> Remainder: Check "information.txt" to learn what are these keywords meanings.
+
+  >>> Available Categories: Registry, File, Network, Web, Keylogger, Process, Dll, Debugger,
+                            System Persistence, COM Object, Data Leakage, Other
+
+  >>> Positional args => Registry -> registry, File -> file, Web -> web, Keylogger -> keylogger,
+                         Process -> process, Dll -> dll, Debugger -> debugger, System Persistence -> persistence,
+                         COM Object -> comobject, Data Leakage -> dataleak, Other -> other,
+                         All categories -> all
 '''
 
 def scope():
-   target_file = sys.argv[1]
+   regs = []
+   fils = []
+   netw = []
+   web = [] 
+   keys = []
+   proc = []
+   dll = []
+   debg = []
+   sysp = []
+   como = []
+   leak = []
+   othe = []
+   parser = argparse.ArgumentParser()
+   parser.add_argument("-f", "--file",required=True,help="Select a suspicious file.")
+   parser.add_argument("-c", "--category",required=True,help="Scan for specified category.")
+   parser.add_argument("-i", "--install",required=False,help="Install Qu1cksc0pe.")
+   if "--install" in sys.argv:
+       command = "cp qu1cksc0pe.py qu1cksc0pe; chmod +x qu1cksc0pe; sudo mv qu1cksc0pe /usr/bin/"
+       os.system(command)
+       print("[+] Installed.")
+       sys.exit(0)
+   args = parser.parse_args()
    regdict={
       "Registry": ["RegKeyOpen","RegSetValue","RegGetValue","RtlWriteRegistryValue","RtlCreateRegistryKey"],
       "File": ["CreateFile","ReadFile","WriteFile","FindResource","LoadResource","FindFirstFile","FindNextFile","NtQueryDirectoryFile","CreateFileMapping","MapViewOfFile","GetTempPath","SetFileTime","SfcTerminateWatcherThread"],
@@ -27,20 +60,277 @@ def scope():
       "Keyboard/Keylogger": ["SetWindowsHook","CallNextHook","MapVirtualKey","GetKeyState","GetAsyncKeyState","GetForegroundWindow","AttachThreadInput","RegisterHotKey"],
       "Process": ["CreateProcess","VirtualAlloc","VirtualProtect","OpenProcess","EnumProcesses","EnumProcessModules","CreateRemoteThread","WriteProcessMemory","AdjustTokenPrivileges","IsWow64Process","QueueUserAPC","NtSetInformationProcess"],
       "Dll": ["LoadLibrary","GetProcAddress","LdrLoadDll"],
-      "Debugger Identifying": ["IsDebuggerPresent","CheckRemoteDebuggerPresent","FindWindow","GetTickCount","NtQueryInformationProcess","OutputDebugString"],
-      "System Persistence": ["CreateService","ControlService"],
-      "COM Object": ["OleInitialize","CoInitialize"],
-      "Data Leakage": ["LsaEnumerateLogonSessions","SamIConnect","SamIGetPrivateData","SamQueryInformationUse","NetShareEnum","ReadProcessMemory","Toolhelp32ReadProcessMemory"],
+      "DebuggerIdentifying": ["IsDebuggerPresent","CheckRemoteDebuggerPresent","FindWindow","GetTickCount","NtQueryInformationProcess","OutputDebugString"],
+      "SystemPersistence": ["CreateService","ControlService"],
+      "COMObject": ["OleInitialize","CoInitialize"],
+      "DataLeakage": ["LsaEnumerateLogonSessions","SamIConnect","SamIGetPrivateData","SamQueryInformationUse","NetShareEnum","ReadProcessMemory","Toolhelp32ReadProcessMemory"],
       "Other": ["CreateMutex","ShellExecute","WinExec","System","CryptAcquireContext","EnableExecuteProtectionSupport","GetSystemDefaultLangId","StartServiceCtrlDispatcher","IsNTAdmin","IsUserAnAdmin"]
    }
-   for category in regdict:
-       print("\n\u001b[96m[\u001b[91m+\u001b[96m]\u001b[0m Checking\u001b[92m {}\u001b[0m activites...\n".format(category))
-       for word in regdict[category]:
-           command = "grepper.sh {} {}".format(target_file,word)
-           os.system(command)
+   command = "strings {} > temp.txt".format(args.file)
+   os.system(command)
+   allStrings = open("temp.txt", "r").read().split('\n')
+   if args.category == 'Registry' or args.category == 'registry':
+       for categ in regdict['Registry']:
+           if categ in allStrings:
+               regs.append(categ)
+       if regs != []:
+           print("{}[{}+{}]{} Registry operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in regs:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       else:
+           print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
+   elif args.category == 'File' or args.category == 'file':
+       for categ in regdict['File']:
+           if categ in allStrings:
+               fils.append(categ)
+       if fils != []:
+           print("{}[{}+{}]{} File operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in fils:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       else:
+           print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
+   elif args.category == 'Network' or args.category == 'network':
+       for categ in regdict['Network']:
+           if categ in allStrings:
+               netw.append(categ)
+       if netw != []:
+           print("{}[{}+{}]{} Network operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in netw:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       else:
+           print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
+   elif args.category == 'Web' or args.category == 'web':
+       for categ in regdict['Web']:
+           if categ in allStrings:
+               web.append(categ)
+       if web != []:
+           print("{}[{}+{}]{} Web operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in web:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       else:
+           print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
+   elif args.category == 'Keylogger' or args.category == 'keylogger':
+       for categ in regdict['Keyboard/Keylogger']:
+           if categ in allStrings:
+               keys.append(categ)
+       if keys != []:
+           print("{}[{}+{}]{} Keyboard/Keylogger operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in keys:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       else:
+           print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
+   elif args.category == 'Process' or args.category == 'process':
+       for categ in regdict['Process']:
+           if categ in allStrings:
+               proc.append(categ)
+       if proc != []:
+           print("{}[{}+{}]{} Process operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in proc:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       else:
+           print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
+   elif args.category == 'Dll' or args.category == 'dll':
+       for categ in regdict['Dll']:
+           if categ in allStrings:
+               dll.append(categ)
+       if dll != []:
+           print("{}[{}+{}]{} DLL operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in dll:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       else:
+           print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
+   elif args.category == 'Debugger' or args.category == 'debugger':
+       for categ in regdict['DebuggerIdentifying']:
+           if categ in allStrings:
+               debg.append(categ)
+       if debg != []:
+           print("{}[{}+{}]{} Debugger Identifying operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in debg:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       else:
+           print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
+   elif args.category == 'Persistence' or args.category == 'persistence':
+       for categ in regdict['SystemPersistence']:
+           if categ in allStrings:
+               sysp.append(categ)
+       if sysp != []:
+           print("{}[{}+{}]{} System Persistence operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in regs:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       else:
+           print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
+   elif args.category == 'COMObject' or args.category == 'comobject':
+       for categ in regdict['COMObject']:
+           if categ in allStrings:
+               como.append(categ)
+       if como != []:
+           print("{}[{}+{}]{} COM Object operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in como:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       else:
+           print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
+   elif args.category == 'DataLeak' or args.category == 'dataleak':
+       for categ in regdict['DataLeakage']:
+           if categ in allStrings:
+               leak.append(categ)
+       if leak != []:
+           print("{}[{}+{}]{} Data Leakage operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in leak:
+              print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       else:
+           print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
+   elif args.category == 'Other' or args.category == 'other':
+       for categ in regdict['Other']:
+           if categ in allStrings:
+               othe.append(categ)
+       if othe != []:
+           print("{}[{}+{}]{} Other operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in othe:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       else:
+           print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
+   
+   elif args.category == 'All' or args.category == 'all':
+       for categ in regdict['Registry']:
+           if categ in allStrings:
+               regs.append(categ)
+       if regs != []:
+           print("\n{}[{}+{}]{} Registry operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in regs:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       for categ in regdict['File']:
+           if categ in allStrings:
+               fils.append(categ)
+       if fils != []:
+           print("\n{}[{}+{}]{} File operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in fils:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       for categ in regdict['Network']:
+           if categ in allStrings:
+               netw.append(categ)
+       if netw != []:
+           print("\n{}[{}+{}]{} Network operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in netw:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       for categ in regdict['Web']:
+           if categ in allStrings:
+               web.append(categ)
+       if web != []:
+           print("\n{}[{}+{}]{} Web operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in web:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       for categ in regdict['Keyboard/Keylogger']:
+           if categ in allStrings:
+               keys.append(categ)
+       if keys != []:
+           print("\n{}[{}+{}]{} Keyboard/Keylogger operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in keys:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       for categ in regdict['Process']:
+           if categ in allStrings:
+               proc.append(categ)
+       if proc != []:
+           print("\n{}[{}+{}]{} Process operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in proc:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       for categ in regdict['Dll']:
+           if categ in allStrings:
+               dll.append(categ)
+       if dll != []:
+           print("\n{}[{}+{}]{} DLL operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in dll:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       for categ in regdict['DebuggerIdentifying']:
+           if categ in allStrings:
+               debg.append(categ)
+       if debg != []:
+           print("\n{}[{}+{}]{} Debugger Identifying operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in debg:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       for categ in regdict['SystemPersistence']:
+           if categ in allStrings:
+               sysp.append(categ)
+       if sysp != []:
+           print("\n{}[{}+{}]{} System Persistence operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in regs:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       for categ in regdict['COMObject']:
+           if categ in allStrings:
+               como.append(categ)
+       if como != []:
+           print("\n{}[{}+{}]{} COM Object operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in como:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       for categ in regdict['DataLeakage']:
+           if categ in allStrings:
+               leak.append(categ)
+       if leak != []:
+           print("\n{}[{}+{}]{} Data Leakage operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in leak:
+              print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+       for categ in regdict['Other']:
+           if categ in allStrings:
+               othe.append(categ)
+       if othe != []:
+           print("\n{}[{}+{}]{} Other operations".format(cyan,red,cyan,white))
+           print("+","-"*20,"+")
+           for i in othe:
+               print("{}=> {}{}".format(red,white,i))
+           print("+","-"*20,"+")
+   else:
+       print("{}[{}!{}]{} Wrong category.".format(cyan,red,cyan,white))
+       sys.exit(1)
 if __name__ == '__main__':
+    os.system("clear")
     print(banner)
     try:
         scope()
+        os.system("rm -rf temp.txt")
     except:
-        print("Usage: python3 qu1cksc0pe.py [target file]")
+        pass
