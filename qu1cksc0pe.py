@@ -45,7 +45,7 @@ def scope():
    parser = argparse.ArgumentParser()
    parser.add_argument("-f", "--file",required=True,help="Select a suspicious file.")
    parser.add_argument("-c", "--category",required=True,help="Scan for specified category.")
-   parser.add_argument("-i", "--install",required=False,help="Install Qu1cksc0pe.")
+   parser.add_argument("--install",required=False,help="Install Qu1cksc0pe.")
    if "--install" in sys.argv:
        command = "cp qu1cksc0pe.py qu1cksc0pe; chmod +x qu1cksc0pe; sudo mv qu1cksc0pe /usr/bin/"
        os.system(command)
