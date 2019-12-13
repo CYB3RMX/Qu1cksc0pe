@@ -76,4 +76,4 @@ Quick suspicious file analysis tool.
 - ```qu1cksc0pe --file suspicious_file --metadata```
 
 <b>----DLL----</b>
-- ```qu1cksc0pe --file suspicious_file --dll``
+- ```qu1cksc0pe --file suspicious_file --dll```
