@@ -5,9 +5,11 @@ Quick suspicious file analysis tool.
 - Usage after install: ```qu1cksc0pe --file suspicious_file --category anything```
 
 <b>----Arguments----</b>
-- -f or --file: Select suspicious file
-- -c or --category: Scan specified category
-- --install: Install Qu1cksc0pe on your system
+- -f or --file: Select suspicious file.
+- -c or --category: Scan specified category.
+- --install: Install Qu1cksc0pe on your system.
+- --dll: Look for used DLL files.
+- --metadata: Get exif information.
 
 <b>----Categories----</b>
 - <i>Registry</i>
@@ -69,3 +71,9 @@ Quick suspicious file analysis tool.
 - <i>All Categories</i>
 - ```qu1cksc0pe --file suspicious_file --category all```
 - ```qu1cksc0pe --file suspicious_file --category All```
+
+<b>----Metadata----</b>
+- ```qu1cksc0pe --file suspicious_file --metadata```
+
+<b>----DLL----</b>
+- ```qu1cksc0pe --file suspicious_file --dll``
