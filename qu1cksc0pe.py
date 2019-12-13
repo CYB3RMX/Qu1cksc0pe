@@ -16,7 +16,7 @@ banner='''
 
   >>> Quick suspicious file analysis tool.
   ----------------------------------------
-  >>> By CYB3RMX_   | Version: 1.1
+  >>> By CYB3RMX_   | Version: 1.2
   ----------------------------------------
   >>> Remainder: Check "information.txt" to learn what are these keywords meanings.
 
@@ -28,7 +28,7 @@ banner='''
                          COM Object -> comobject, Data Leakage -> dataleak, Other -> other,
                          All categories -> all
 '''
-
+args = []
 def scope():
    regs = []
    fils = []
@@ -44,14 +44,38 @@ def scope():
    othe = []
    parser = argparse.ArgumentParser()
    parser.add_argument("-f", "--file",required=True,help="Select a suspicious file.")
-   parser.add_argument("-c", "--category",required=True,help="Scan for specified category.")
-   parser.add_argument("--install",required=False,help="Install Qu1cksc0pe.")
-   if "--install" in sys.argv:
+   parser.add_argument("-c", "--category",required=False,help="Scan for specified category.")
+   parser.add_argument("--install",required=False,help="Install Qu1cksc0pe.",action="store_true")
+   parser.add_argument("--metadata",required=False,help="Get exif information.",action="store_true")
+   parser.add_argument("--dll",required=False,help="Look for used DLL files.",action="store_true")
+   args = parser.parse_args()
+   command = "strings {} > temp.txt".format(args.file)
+   os.system(command)
+   allStrings = open("temp.txt", "r").read().split('\n')
+   if args.install:
        command = "cp qu1cksc0pe.py qu1cksc0pe; chmod +x qu1cksc0pe; sudo mv qu1cksc0pe /usr/bin/"
        os.system(command)
        print("[+] Installed.")
        sys.exit(0)
-   args = parser.parse_args()
+   if args.metadata:
+       print("{}[{}+{}]{} Exif/Metadata information".format(cyan,red,cyan,white))
+       command = "exiftool {} | tail -n 41".format(args.file)
+       print("+","-"*50,"+")
+       os.system(command)
+       print("+","-"*50,"+")
+   if args.dll:
+       dllArray = ["KERNEL32.DLL","ADVAPI32.dll","WSOCK32.dll","WS2_32.dll",
+                   "MSVCRT.dll","ntdll.dll","Advapi32.dll","shell32.dll",
+                   "msimsg.dll","ole32.dll","SHELL32.dll","WININET.dll",
+                   "USER32.dll","COMCTL32.dll","VERSION.dll","KERNEL32.dll",
+                   "OLEAUT32.dll","SHLWAPI.dll","GDI32.dll","WINTRUST.dll",
+                   "CRYPT32.dll","msi.dll"]
+       print("{}[{}+{}]{} Used DLL files".format(cyan,red,cyan,white))
+       print("+","-"*20,"+")
+       for dl in allStrings:
+           if dl in dllArray:
+               print("{}=> {}{}".format(red,white,dl))
+       print("+","-"*20,"+\n")
    regdict={
       "Registry": ["RegKeyOpen","RegSetValue","RegGetValue","RtlWriteRegistryValue","RtlCreateRegistryKey"],
       "File": ["CreateFile","ReadFile","WriteFile","FindResource","LoadResource","FindFirstFile","FindNextFile","NtQueryDirectoryFile","CreateFileMapping","MapViewOfFile","GetTempPath","SetFileTime","SfcTerminateWatcherThread"],
@@ -66,10 +90,7 @@ def scope():
       "DataLeakage": ["LsaEnumerateLogonSessions","SamIConnect","SamIGetPrivateData","SamQueryInformationUse","NetShareEnum","ReadProcessMemory","Toolhelp32ReadProcessMemory"],
       "Other": ["CreateMutex","ShellExecute","WinExec","System","CryptAcquireContext","EnableExecuteProtectionSupport","GetSystemDefaultLangId","StartServiceCtrlDispatcher","IsNTAdmin","IsUserAnAdmin"]
    }
-   command = "strings {} > temp.txt".format(args.file)
-   os.system(command)
-   allStrings = open("temp.txt", "r").read().split('\n')
-   if args.category == 'Registry' or args.category == 'registry':
+   if args.category.lower() == 'registry':
        for categ in regdict['Registry']:
            if categ in allStrings:
                regs.append(categ)
@@ -81,7 +102,7 @@ def scope():
            print("+","-"*20,"+")
        else:
            print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
-   elif args.category == 'File' or args.category == 'file':
+   elif args.category.lower() == 'file':
        for categ in regdict['File']:
            if categ in allStrings:
                fils.append(categ)
@@ -93,7 +114,7 @@ def scope():
            print("+","-"*20,"+")
        else:
            print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
-   elif args.category == 'Network' or args.category == 'network':
+   elif args.category.lower() == 'network':
        for categ in regdict['Network']:
            if categ in allStrings:
                netw.append(categ)
@@ -105,7 +126,7 @@ def scope():
            print("+","-"*20,"+")
        else:
            print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
-   elif args.category == 'Web' or args.category == 'web':
+   elif args.category.lower() == 'web':
        for categ in regdict['Web']:
            if categ in allStrings:
                web.append(categ)
@@ -117,7 +138,7 @@ def scope():
            print("+","-"*20,"+")
        else:
            print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
-   elif args.category == 'Keylogger' or args.category == 'keylogger':
+   elif args.category.lower() == 'keylogger':
        for categ in regdict['Keyboard/Keylogger']:
            if categ in allStrings:
                keys.append(categ)
@@ -129,7 +150,7 @@ def scope():
            print("+","-"*20,"+")
        else:
            print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
-   elif args.category == 'Process' or args.category == 'process':
+   elif args.category.lower() == 'process':
        for categ in regdict['Process']:
            if categ in allStrings:
                proc.append(categ)
@@ -141,7 +162,7 @@ def scope():
            print("+","-"*20,"+")
        else:
            print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
-   elif args.category == 'Dll' or args.category == 'dll':
+   elif args.category.lower() == 'dll':
        for categ in regdict['Dll']:
            if categ in allStrings:
                dll.append(categ)
@@ -153,7 +174,7 @@ def scope():
            print("+","-"*20,"+")
        else:
            print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
-   elif args.category == 'Debugger' or args.category == 'debugger':
+   elif args.category.lower() == 'debugger':
        for categ in regdict['DebuggerIdentifying']:
            if categ in allStrings:
                debg.append(categ)
@@ -165,7 +186,7 @@ def scope():
            print("+","-"*20,"+")
        else:
            print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
-   elif args.category == 'Persistence' or args.category == 'persistence':
+   elif args.category.lower() == 'persistence':
        for categ in regdict['SystemPersistence']:
            if categ in allStrings:
                sysp.append(categ)
@@ -177,7 +198,7 @@ def scope():
            print("+","-"*20,"+")
        else:
            print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
-   elif args.category == 'COMObject' or args.category == 'comobject':
+   elif args.category.lower() == 'comobject':
        for categ in regdict['COMObject']:
            if categ in allStrings:
                como.append(categ)
@@ -189,7 +210,7 @@ def scope():
            print("+","-"*20,"+")
        else:
            print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
-   elif args.category == 'DataLeak' or args.category == 'dataleak':
+   elif args.category.lower() == 'dataleak':
        for categ in regdict['DataLeakage']:
            if categ in allStrings:
                leak.append(categ)
@@ -201,7 +222,7 @@ def scope():
            print("+","-"*20,"+")
        else:
            print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
-   elif args.category == 'Other' or args.category == 'other':
+   elif args.category.lower() == 'other':
        for categ in regdict['Other']:
            if categ in allStrings:
                othe.append(categ)
@@ -214,7 +235,7 @@ def scope():
        else:
            print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
    
-   elif args.category == 'All' or args.category == 'all':
+   elif args.category.lower() == 'all':
        for categ in regdict['Registry']:
            if categ in allStrings:
                regs.append(categ)
@@ -324,10 +345,9 @@ def scope():
                print("{}=> {}{}".format(red,white,i))
            print("+","-"*20,"+")
    else:
-       print("{}[{}!{}]{} Wrong category.".format(cyan,red,cyan,white))
+       print("{}[{}!{}]{} Try -h to see available arguments.".format(cyan,red,cyan,white))
        sys.exit(1)
 if __name__ == '__main__':
-    os.system("clear")
     print(banner)
     try:
         scope()
