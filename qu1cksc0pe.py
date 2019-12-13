@@ -69,7 +69,7 @@ def scope():
                    "msimsg.dll","ole32.dll","SHELL32.dll","WININET.dll",
                    "USER32.dll","COMCTL32.dll","VERSION.dll","KERNEL32.dll",
                    "OLEAUT32.dll","SHLWAPI.dll","GDI32.dll","WINTRUST.dll",
-                   "CRYPT32.dll","msi.dll"]
+                   "CRYPT32.dll","msi.dll","user32.dll"]
        print("{}[{}+{}]{} Used DLL files".format(cyan,red,cyan,white))
        print("+","-"*20,"+")
        for dl in allStrings:
