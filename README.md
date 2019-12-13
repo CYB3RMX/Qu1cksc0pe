@@ -14,63 +14,48 @@ Quick suspicious file analysis tool.
 <b>----Categories----</b>
 - <i>Registry</i>
 - ```qu1cksc0pe --file suspicious_file --category registry```
-- ```qu1cksc0pe --file suspicious_file --category Registry```
 
 - <i>File</i>
 - ```qu1cksc0pe --file suspicious_file --category file```
-- ```qu1cksc0pe --file suspicious_file --category File```
 
 - <i>Registry</i>
 - ```qu1cksc0pe --file suspicious_file --category registry```
-- ```qu1cksc0pe --file suspicious_file --category Registry```
 
 - <i>Network</i>
 - ```qu1cksc0pe --file suspicious_file --category network```
-- ```qu1cksc0pe --file suspicious_file --category Network```
 
 - <i>Web</i>
 - ```qu1cksc0pe --file suspicious_file --category web```
-- ```qu1cksc0pe --file suspicious_file --category Web```
 
 - <i>Keyboard/Keylogger</i>
 - ```qu1cksc0pe --file suspicious_file --category keylogger```
-- ```qu1cksc0pe --file suspicious_file --category Keylogger```
 
 - <i>Process</i>
 - ```qu1cksc0pe --file suspicious_file --category process```
-- ```qu1cksc0pe --file suspicious_file --category Process```
 
 - <i>Dll</i>
 - ```qu1cksc0pe --file suspicious_file --category dll```
-- ```qu1cksc0pe --file suspicious_file --category Dll```
 
 - <i>Registry</i>
 - ```qu1cksc0pe --file suspicious_file --category registry```
-- ```qu1cksc0pe --file suspicious_file --category Registry```
 
 - <i>Debugger Indentifying</i>
 - ```qu1cksc0pe --file suspicious_file --category debugger```
-- ```qu1cksc0pe --file suspicious_file --category Debugger```
 
 - <i>System Persistence</i>
 - ```qu1cksc0pe --file suspicious_file --category persistence```
-- ```qu1cksc0pe --file suspicious_file --category Persistence```
 
 - <i>COM Object</i>
 - ```qu1cksc0pe --file suspicious_file --category comobject```
-- ```qu1cksc0pe --file suspicious_file --category COMObject```
 
 - <i>Data Leakage</i>
 - ```qu1cksc0pe --file suspicious_file --category dataleak```
-- ```qu1cksc0pe --file suspicious_file --category DataLeak```
 
 - <i>Other</i>
 - ```qu1cksc0pe --file suspicious_file --category other```
-- ```qu1cksc0pe --file suspicious_file --category Other```
 
 - <i>All Categories</i>
 - ```qu1cksc0pe --file suspicious_file --category all```
-- ```qu1cksc0pe --file suspicious_file --category All```
 
 <b>----Metadata----</b>
 - ```qu1cksc0pe --file suspicious_file --metadata```
