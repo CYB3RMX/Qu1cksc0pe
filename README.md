@@ -18,9 +18,6 @@ Quick suspicious file analysis tool.
 - <i>File</i>
 - ```qu1cksc0pe --file suspicious_file --category file```
 
-- <i>Registry</i>
-- ```qu1cksc0pe --file suspicious_file --category registry```
-
 - <i>Network</i>
 - ```qu1cksc0pe --file suspicious_file --category network```
 
@@ -35,9 +32,6 @@ Quick suspicious file analysis tool.
 
 - <i>Dll</i>
 - ```qu1cksc0pe --file suspicious_file --category dll```
-
-- <i>Registry</i>
-- ```qu1cksc0pe --file suspicious_file --category registry```
 
 - <i>Debugger Indentifying</i>
 - ```qu1cksc0pe --file suspicious_file --category debugger```
