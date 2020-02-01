@@ -91,14 +91,14 @@ def scope():
 
    # Keywords for categorized scanning    
    regdict={
-      "Registry": ["RegKeyOpen","RegSetValue","RegGetValue","RtlWriteRegistryValue","RtlCreateRegistryKey","RegQueryValueExW","RegCloseKey","RegCreateKeyExW","RegSetValueExW"],
-      "File": ["CreateFile","ReadFile","WriteFile","FindResource","LoadResource","FindFirstFile","FindNextFile","NtQueryDirectoryFile","CreateFileMapping","MapViewOfFile","GetTempPath","SetFileTime","SfcTerminateWatcherThread"],
+      "Registry": ["RegKeyOpen","RegOpenKeyExA","RegQueryValueExA","RegSetValue","RegGetValue","RtlWriteRegistryValue","RtlCreateRegistryKey","RegQueryValueExW","RegCloseKey","RegCreateKeyExW","RegSetValueExW"],
+      "File": ["CreateFile","ReadFile","WriteFile","FindResource","FindResourceW","LoadResource","FindFirstFile","FindNextFile","NtQueryDirectoryFile","CreateFileMapping","MapViewOfFile","GetTempPath","SetFileTime","SfcTerminateWatcherThread"],
       "Network": ["WSAStartup","WSAGetLastError","socket","recv","connect","getaddrinfo","accept","send","listen"],
       "Web": ["InternetOpen","InternetOpenURL","InternetConnect","InternetReadFile","InternetWriteFile","HTTPOpenRequest","HTTPSendRequest","HTTPQueryInfo","URLDownloadToFile"],
-      "Keyboard/Keylogger": ["SetWindowsHook","CallNextHook","MapVirtualKey","GetKeyState","GetAsyncKeyState","GetForegroundWindow","AttachThreadInput","RegisterHotKey"],
+      "Keyboard/Keylogger": ["GetKeyboardType","SetWindowsHook","CallNextHook","MapVirtualKey","GetKeyState","GetAsyncKeyState","GetForegroundWindow","AttachThreadInput","RegisterHotKey"],
       "Process": ["CreateProcess","VirtualAlloc","VirtualProtect","OpenProcess","EnumProcesses","EnumProcessModules","CreateRemoteThread","WriteProcessMemory","AdjustTokenPrivileges","IsWow64Process","QueueUserAPC","NtSetInformationProcess"],
-      "Dll": ["LoadLibrary","GetProcAddress","LdrLoadDll"],
-      "DebuggerIdentifying": ["IsDebuggerPresent","CheckRemoteDebuggerPresent","FindWindow","GetTickCount","NtQueryInformationProcess","OutputDebugString"],
+      "Dll": ["LoadLibrary","LoadLibraryExA","LoadLibraryA","GetProcAddress","LdrLoadDll"],
+      "DebuggerIdentifying": ["IsDebuggerPresent","CheckRemoteDebuggerPresent","FindWindow","GetTickCount","NtQueryInformationProcess","OutputDebugString","OutputDebugStringA"],
       "SystemPersistence": ["CreateService","ControlService"],
       "COMObject": ["OleInitialize","CoInitialize"],
       "DataLeakage": ["LsaEnumerateLogonSessions","SamIConnect","SamIGetPrivateData","SamQueryInformationUse","NetShareEnum","ReadProcessMemory","Toolhelp32ReadProcessMemory"],
