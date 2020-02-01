@@ -5,6 +5,7 @@ import os,sys,argparse
 red = '\u001b[91m'
 cyan = '\u001b[96m'
 white = '\u001b[0m'
+green = '\u001b[92m'
 
 banner='''
   ____  _    _ __  _____ _  __ _____  _____ ___  _____  ______
@@ -16,17 +17,9 @@ banner='''
 
   >>> Quick suspicious file analysis tool.
   ----------------------------------------
-  >>> By CYB3RMX_   | Version: 1.2
+  >>> By CYB3RMX_   | Version: 1.3
   ----------------------------------------
-  >>> Remainder: Check "information.txt" to learn what are these keywords meanings.
 
-  >>> Available Categories: Registry, File, Network, Web, Keylogger, Process, Dll, Debugger,
-                            System Persistence, COM Object, Data Leakage, Other
-
-  >>> Positional args => Registry -> registry, File -> file, Web -> web, Keylogger -> keylogger,
-                         Process -> process, Dll -> dll, Debugger -> debugger, System Persistence -> persistence,
-                         COM Object -> comobject, Data Leakage -> dataleak, Other -> other,
-                         All categories -> all
 '''
 args = []
 def scope():
@@ -47,6 +40,7 @@ def scope():
    parser.add_argument("-c", "--category",required=False,help="Scan for specified category.")
    parser.add_argument("--install",required=False,help="Install Qu1cksc0pe.",action="store_true")
    parser.add_argument("--metadata",required=False,help="Get exif information.",action="store_true")
+   parser.add_argument("--vtscan",required=False,help="Scan with VirusTotal api.",action="store_true")
    parser.add_argument("--dll",required=False,help="Look for used DLL files.",action="store_true")
    args = parser.parse_args()
    command = "strings {} > temp.txt".format(args.file)
@@ -63,6 +57,17 @@ def scope():
        print("+","-"*50,"+")
        os.system(command)
        print("+","-"*50,"+")
+   if args.vtscan:
+       apik = str(input("{}[{}+{}]{} Enter your VirusTotal api key: ".format(cyan,red,cyan,white)))
+       if apik == '' or apik == None:
+           print("{}[{}!{}]{} Please get your api key from -> {}https://www.virustotal.com/{}".format(cyan,red,cyan,white,green,white))
+           sys.exit(1)
+       else: 
+           print("\n{}[{}+{}]{} VirusTotal Scan".format(cyan,red,cyan,white))
+           print("+","-"*50,"+")
+           command = "python3 VTwrapper.py {} {}".format(apik, args.file)
+           os.system(command)
+           print("+","-"*50,"+")
    if args.dll:
        dllArray = ["KERNEL32.DLL","ADVAPI32.dll","WSOCK32.dll","WS2_32.dll",
                    "MSVCRT.dll","ntdll.dll","Advapi32.dll","shell32.dll",
