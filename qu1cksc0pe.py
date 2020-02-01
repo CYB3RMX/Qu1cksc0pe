@@ -8,13 +8,13 @@ white = '\u001b[0m'
 green = '\u001b[92m'
 
 banner='''
-  ____  _    _ __  _____ _  __ _____  _____ ___  _____  ______
- / __ \| |  | /_ |/ ____| |/ // ____|/ ____/ _ \|  __ \|  ____|
-| |  | | |  | || | |    |   /| (___ | |   | | | | |__) | |__
-| |  | | |  | || | |    |  <  \___ \| |   | | | |  ___/|  __|
-| |__| | |__| || | |____| . \ ____) | |___| |_| | |    | |____
- \___\_\_____/ |_|\_____|_|\_\_____/ \_____\___/|_|    |______|
-
+  ██████╗ ██╗   ██╗ ██╗ ██████╗██╗  ██╗███████╗ ██████╗ ██████╗ ██████╗ ███████╗
+ ██╔═══██╗██║   ██║███║██╔════╝██║ ██╔╝██╔════╝██╔════╝██╔═████╗██╔══██╗██╔════╝
+ ██║   ██║██║   ██║╚██║██║     █████╔╝ ███████╗██║     ██║██╔██║██████╔╝█████╗  
+ ██║▄▄ ██║██║   ██║ ██║██║     ██╔═██╗ ╚════██║██║     ████╔╝██║██╔═══╝ ██╔══╝  
+ ╚██████╔╝╚██████╔╝ ██║╚██████╗██║  ██╗███████║╚██████╗╚██████╔╝██║     ███████╗
+  ╚══▀▀═╝  ╚═════╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝     ╚══════╝
+                                                                               
   >>> Quick suspicious file analysis tool.
   ----------------------------------------
   >>> By CYB3RMX_   | Version: 1.3
@@ -23,6 +23,7 @@ banner='''
 '''
 args = []
 def scope():
+   # Category arrays 
    regs = []
    fils = []
    netw = []
@@ -35,6 +36,8 @@ def scope():
    como = []
    leak = []
    othe = []
+
+   # Argument crating and parsing
    parser = argparse.ArgumentParser()
    parser.add_argument("-f", "--file",required=True,help="Select a suspicious file.")
    parser.add_argument("-c", "--category",required=False,help="Scan for specified category.")
@@ -43,9 +46,13 @@ def scope():
    parser.add_argument("--vtscan",required=False,help="Scan with VirusTotal api.",action="store_true")
    parser.add_argument("--dll",required=False,help="Look for used DLL files.",action="store_true")
    args = parser.parse_args()
+
+   # Getting all strings from the file
    command = "strings {} > temp.txt".format(args.file)
    os.system(command)
    allStrings = open("temp.txt", "r").read().split('\n')
+
+   # Configuring the arguments
    if args.install:
        command = "cp qu1cksc0pe.py qu1cksc0pe; chmod +x qu1cksc0pe; sudo mv qu1cksc0pe /usr/bin/"
        os.system(command)
@@ -53,7 +60,7 @@ def scope():
        sys.exit(0)
    if args.metadata:
        print("{}[{}+{}]{} Exif/Metadata information".format(cyan,red,cyan,white))
-       command = "exiftool {} | tail -n 41".format(args.file)
+       command = "exiftool {}".format(args.file)
        print("+","-"*50,"+")
        os.system(command)
        print("+","-"*50,"+")
@@ -81,8 +88,10 @@ def scope():
            if dl in dllArray:
                print("{}=> {}{}".format(red,white,dl))
        print("+","-"*20,"+\n")
+
+   # Keywords for categorized scanning    
    regdict={
-      "Registry": ["RegKeyOpen","RegSetValue","RegGetValue","RtlWriteRegistryValue","RtlCreateRegistryKey"],
+      "Registry": ["RegKeyOpen","RegSetValue","RegGetValue","RtlWriteRegistryValue","RtlCreateRegistryKey","RegQueryValueExW","RegCloseKey","RegCreateKeyExW","RegSetValueExW"],
       "File": ["CreateFile","ReadFile","WriteFile","FindResource","LoadResource","FindFirstFile","FindNextFile","NtQueryDirectoryFile","CreateFileMapping","MapViewOfFile","GetTempPath","SetFileTime","SfcTerminateWatcherThread"],
       "Network": ["WSAStartup","WSAGetLastError","socket","recv","connect","getaddrinfo","accept","send","listen"],
       "Web": ["InternetOpen","InternetOpenURL","InternetConnect","InternetReadFile","InternetWriteFile","HTTPOpenRequest","HTTPSendRequest","HTTPQueryInfo","URLDownloadToFile"],
@@ -352,10 +361,12 @@ def scope():
    else:
        print("{}[{}!{}]{} Try -h to see available arguments.".format(cyan,red,cyan,white))
        sys.exit(1)
+
+# Exectuion area
 if __name__ == '__main__':
     print(banner)
     try:
         scope()
         os.system("rm -rf temp.txt")
     except:
-        pass
+        os.system("rm -rf temp.txt")
