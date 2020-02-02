@@ -4,13 +4,8 @@ Quick suspicious file analysis tool.
 - Usage before install: ```python3 qu1cksc0pe.py --file suspicious_file --category anything```
 - Usage after install: ```qu1cksc0pe --file suspicious_file --category anything```
 
-<b>----Arguments----</b>
-- -f or --file: Select suspicious file.
-- -c or --category: Scan specified category.
-- --install: Install Qu1cksc0pe on your system.
-- --dll: Look for used DLL files.
-- --metadata: Get exif information.
-- --vtscan: Scan with VirusTotal api.
+# Screenshot
+![Screen](Screenshot.png)
 
 <b>----Categories----</b>
 - <i>Registry</i>
