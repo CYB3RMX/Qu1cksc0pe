@@ -59,4 +59,4 @@ Quick suspicious file analysis tool.
 - ```qu1cksc0pe --file suspicious_file --dll```
 
 <b>----VirusTotal----</b>
-- ````qu1cksc0pe --file suspicious_file --vtscan```
+- ```qu1cksc0pe --file suspicious_file --vtscan```
