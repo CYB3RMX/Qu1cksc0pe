@@ -13,11 +13,15 @@ Quick suspicious file analysis tool.
      Data Leakage, Other, All</i>
 - Usage: ```qu1cksc0pe --file suspicious_file --category all```
 
+# Scan arguments
 <b>----Metadata----</b>
 - ```qu1cksc0pe --file suspicious_file --metadata```
 
 <b>----DLL----</b>
 - ```qu1cksc0pe --file suspicious_file --dll```
 
-<b>----VirusTotal----</b>
+<b>----VirusTotal----</b><br>
+<i>Attention this argument needs VirusTotal api key</i><br>
+<i>To get your api key go to the VT website</i>: <b>https://www.virustotal.com/</b>
+
 - ```qu1cksc0pe --file suspicious_file --vtscan```
