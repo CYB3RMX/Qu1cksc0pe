@@ -10,18 +10,18 @@ Quick suspicious file analysis tool.
 # Categories
 - <i>Registry, File, Network, Web, Keyboard/Keylogger, Process<br>
      Dll, Debugger Indentifying, System Persistence, COM Object<br>
-     Data Leakage, Other, All</i>
-- Usage: ```qu1cksc0pe --file suspicious_file --category all```
+     Data Leakage, Other, All</i><br>
+<b>Usage</b>: ```qu1cksc0pe --file suspicious_file --category all```
 
 # Scan arguments
 <b>----Metadata----</b>
-- ```qu1cksc0pe --file suspicious_file --metadata```
+<b>Usage</b>: ```qu1cksc0pe --file suspicious_file --metadata```<br><br>
 
 <b>----DLL----</b>
-- ```qu1cksc0pe --file suspicious_file --dll```
+<b>Usage</b>: ```qu1cksc0pe --file suspicious_file --dll```<br><br>
 
 <b>----VirusTotal----</b><br>
 <b>Attention!</b><i> this argument needs VirusTotal api key.</i><br>
 <i>To get your api key go to the VT website</i>: <b>https://www.virustotal.com/</b>
 
-- ```qu1cksc0pe --file suspicious_file --vtscan```
+<b>Usage</b>: ```qu1cksc0pe --file suspicious_file --vtscan```
