@@ -7,45 +7,11 @@ Quick suspicious file analysis tool.
 # Screenshot
 ![Screen](Screenshot.png)
 
-<b>----Categories----</b>
-- <i>Registry</i>
-- ```qu1cksc0pe --file suspicious_file --category registry```
-
-- <i>File</i>
-- ```qu1cksc0pe --file suspicious_file --category file```
-
-- <i>Network</i>
-- ```qu1cksc0pe --file suspicious_file --category network```
-
-- <i>Web</i>
-- ```qu1cksc0pe --file suspicious_file --category web```
-
-- <i>Keyboard/Keylogger</i>
-- ```qu1cksc0pe --file suspicious_file --category keylogger```
-
-- <i>Process</i>
-- ```qu1cksc0pe --file suspicious_file --category process```
-
-- <i>Dll</i>
-- ```qu1cksc0pe --file suspicious_file --category dll```
-
-- <i>Debugger Indentifying</i>
-- ```qu1cksc0pe --file suspicious_file --category debugger```
-
-- <i>System Persistence</i>
-- ```qu1cksc0pe --file suspicious_file --category persistence```
-
-- <i>COM Object</i>
-- ```qu1cksc0pe --file suspicious_file --category comobject```
-
-- <i>Data Leakage</i>
-- ```qu1cksc0pe --file suspicious_file --category dataleak```
-
-- <i>Other</i>
-- ```qu1cksc0pe --file suspicious_file --category other```
-
-- <i>All Categories</i>
-- ```qu1cksc0pe --file suspicious_file --category all```
+# Categories
+- <i>Registry, File, Network, Web, Keyboard/Keylogger, Process<br>
+     Dll, Debugger Indentifying, System Persistence, COM Object<br>
+     Data Leakage, Other, All</i>
+- Usage: ```qu1cksc0pe --file suspicious_file --category all```
 
 <b>----Metadata----</b>
 - ```qu1cksc0pe --file suspicious_file --metadata```
