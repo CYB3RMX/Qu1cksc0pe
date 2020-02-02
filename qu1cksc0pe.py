@@ -17,7 +17,7 @@ banner='''
                                                                                
   >>> Quick suspicious file analysis tool.
   ----------------------------------------
-  >>> By CYB3RMX_   | Version: 1.3
+  >>> By CYB3RMX_   | Version: 1.4
   ----------------------------------------
 
 '''
@@ -39,18 +39,20 @@ def scope():
 
    # Argument crating and parsing
    parser = argparse.ArgumentParser()
-   parser.add_argument("-f", "--file",required=True,help="Select a suspicious file.")
+   parser.add_argument("-f", "--file",required=False,help="Select a suspicious file.")
    parser.add_argument("-c", "--category",required=False,help="Scan for specified category.")
    parser.add_argument("--install",required=False,help="Install Qu1cksc0pe.",action="store_true")
    parser.add_argument("--metadata",required=False,help="Get exif information.",action="store_true")
    parser.add_argument("--vtscan",required=False,help="Scan with VirusTotal api.",action="store_true")
    parser.add_argument("--dll",required=False,help="Look for used DLL files.",action="store_true")
+   parser.add_argument("--key_init",required=False,help="Enter your VirusTotal api key.",action="store_true")
    args = parser.parse_args()
 
    # Getting all strings from the file
-   command = "strings {} > temp.txt".format(args.file)
-   os.system(command)
-   allStrings = open("temp.txt", "r").read().split('\n')
+   if args.file:
+       command = "strings {} > temp.txt".format(args.file)
+       os.system(command)
+       allStrings = open("temp.txt", "r").read().split('\n')
 
    # Configuring the arguments
    if args.install:
@@ -65,23 +67,33 @@ def scope():
        os.system(command)
        print("+","-"*50,"+")
    if args.vtscan:
-       apik = str(input("{}[{}+{}]{} Enter your VirusTotal api key: ".format(cyan,red,cyan,white)))
-       if apik == '' or apik == None:
+       try:
+           apik = open(".apikey.txt", "r").read().split("\n")
+       except:
+           print("{}[{}!{}]{} Use --key_init to enter your key.".format(cyan,red,cyan,white))
+           sys.exit(1)
+       if apik[0] == '' or apik[0] == None or len(apik[0]) != 64:
            print("{}[{}!{}]{} Please get your api key from -> {}https://www.virustotal.com/{}".format(cyan,red,cyan,white,green,white))
            sys.exit(1)
        else: 
            print("\n{}[{}+{}]{} VirusTotal Scan".format(cyan,red,cyan,white))
            print("+","-"*50,"+")
-           command = "python3 VTwrapper.py {} {}".format(apik, args.file)
+           command = "python3 VTwrapper.py {} {}".format(apik[0], args.file)
            os.system(command)
            print("+","-"*50,"+")
+   if args.key_init:
+       apikey = str(input("{}[{}+{}]{} Enter your VirusTotal api key: ".format(cyan,red,cyan,white)))
+       command = "echo '{}' > .apikey.txt".format(apikey)
+       os.system(command)
+       print("{}[{}+{}]{} Your VirusTotal api key saved.".format(cyan,red,cyan,white))
    if args.dll:
        dllArray = ["KERNEL32.DLL","ADVAPI32.dll","WSOCK32.dll","WS2_32.dll",
                    "MSVCRT.dll","ntdll.dll","Advapi32.dll","shell32.dll",
                    "msimsg.dll","ole32.dll","SHELL32.dll","WININET.dll",
                    "USER32.dll","COMCTL32.dll","VERSION.dll","KERNEL32.dll",
                    "OLEAUT32.dll","SHLWAPI.dll","GDI32.dll","WINTRUST.dll",
-                   "CRYPT32.dll","msi.dll","user32.dll"]
+                   "CRYPT32.dll","msi.dll","user32.dll","MSVBVM60.DLL","msvbvm60.dll",
+                   "VBA6.DLL", "vba6.dll"]
        print("{}[{}+{}]{} Used DLL files".format(cyan,red,cyan,white))
        print("+","-"*20,"+")
        for dl in allStrings:
@@ -96,8 +108,8 @@ def scope():
       "Network": ["WSAStartup","WSAGetLastError","socket","recv","connect","getaddrinfo","accept","send","listen"],
       "Web": ["InternetOpen","InternetOpenURL","InternetConnect","InternetReadFile","InternetWriteFile","HTTPOpenRequest","HTTPSendRequest","HTTPQueryInfo","URLDownloadToFile"],
       "Keyboard/Keylogger": ["GetKeyboardType","SetWindowsHook","CallNextHook","MapVirtualKey","GetKeyState","GetAsyncKeyState","GetForegroundWindow","AttachThreadInput","RegisterHotKey"],
-      "Process": ["CreateProcess","VirtualAlloc","VirtualProtect","OpenProcess","EnumProcesses","EnumProcessModules","CreateRemoteThread","WriteProcessMemory","AdjustTokenPrivileges","IsWow64Process","QueueUserAPC","NtSetInformationProcess"],
-      "Dll": ["LoadLibrary","LoadLibraryExA","LoadLibraryA","GetProcAddress","LdrLoadDll"],
+      "Process": ["CreateProcess","VirtualAlloc","VirtualProtect","OpenProcess","EnumProcesses","EnumProcessModules","CreateRemoteThread","WriteProcessMemory","AdjustTokenPrivileges","IsWow64Process","QueueUserAPC","NtSetInformationProcess","GetProcAddress","ExitProcess"],
+      "Dll": ["LoadLibrary","LoadLibraryExA","LoadLibraryA", "LdrLoadDll","DllFunctionCall"],
       "DebuggerIdentifying": ["IsDebuggerPresent","CheckRemoteDebuggerPresent","FindWindow","GetTickCount","NtQueryInformationProcess","OutputDebugString","OutputDebugStringA"],
       "SystemPersistence": ["CreateService","ControlService"],
       "COMObject": ["OleInitialize","CoInitialize"],
