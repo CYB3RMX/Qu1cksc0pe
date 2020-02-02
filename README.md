@@ -24,4 +24,4 @@ Quick suspicious file analysis tool.
 <b>Attention!</b><i> this argument needs VirusTotal api key.</i><br>
 <i>To get your api key go to the VT website</i>: <b>https://www.virustotal.com/</b>
 
-<br><b>Usage</b>: ```qu1cksc0pe --file suspicious_file --vtscan```
+<b>Usage</b>: ```qu1cksc0pe --file suspicious_file --vtscan```
