@@ -10,6 +10,7 @@ Quick suspicious file analysis tool.
 - --install: Install Qu1cksc0pe on your system.
 - --dll: Look for used DLL files.
 - --metadata: Get exif information.
+- --vtscan: Scan with VirusTotal api.
 
 <b>----Categories----</b>
 - <i>Registry</i>
