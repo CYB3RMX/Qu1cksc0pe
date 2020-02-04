@@ -35,7 +35,7 @@ clone that repository and install</i>: <b>https://github.com/iBotPeaches/Apktool
 
 <b>----ELF----</b><br>
 <b>Attention!</b><i> this argument needs binutils/readelf.</i><br>
-<i>To get binutils/readelf do this</i>: ```sudo apt-get install binutils``` </i>or<br>
+<i>To get binutils/readelf do this</i>: ```sudo apt-get install binutils``` </i><br>
 
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_elf_file --elf```<br>
 
