@@ -27,7 +27,8 @@ Quick suspicious file analysis tool.
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --vtscan```<br>
 
 <b>----APK----</b><br>
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_apk_file --apk```<br>
 <b>Attention!</b><i> this argument needs apktool.</i><br>
 <i>To get apktool do this</i>: ```sudo apt-get install apktool``` <i>or<br>
-clone that repository and install</i>: ```https://github.com/iBotPeaches/Apktool```
+clone that repository and install</i>: <b>https://github.com/iBotPeaches/Apktool</b>
+
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_apk_file --apk```<br>
