@@ -24,7 +24,10 @@ Quick suspicious file analysis tool.
 <b>Attention!</b><i> this argument needs VirusTotal api key.</i><br>
 <i>To get your api key go to the VT website</i>: <b>https://www.virustotal.com/</b>
 
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --vtscan```
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --vtscan```<br>
 
 <b>----APK----</b><br>
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_apk_file --apk```<br><br>
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_apk_file --apk```<br>
+<b>Attention!</b><i> this argument needs apktool.</i><br>
+<i>To get apktool do this</i>: ```sudo apt-get install apktool``` <i>or<br>
+clone that repository and install</i>: ```https://github.com/iBotPeaches/Apktool```
