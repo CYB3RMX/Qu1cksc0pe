@@ -17,7 +17,7 @@ banner='''
                                                                                
   >>> Quick suspicious file analysis tool.
   ----------------------------------------
-  >>> By CYB3RMX_   | Version: 1.4
+  >>> By CYB3RMX_   | Version: 1.5
   ----------------------------------------
 
 '''
@@ -45,6 +45,7 @@ def scope():
    parser.add_argument("--metadata",required=False,help="Get exif information.",action="store_true")
    parser.add_argument("--vtscan",required=False,help="Scan with VirusTotal api.",action="store_true")
    parser.add_argument("--dll",required=False,help="Look for used DLL files.",action="store_true")
+   parser.add_argument("--apk",required=False,help="Analyze apk files.",action="store_true")
    parser.add_argument("--key_init",required=False,help="Enter your VirusTotal api key.",action="store_true")
    args = parser.parse_args()
 
@@ -81,6 +82,9 @@ def scope():
            command = "python3 VTwrapper.py {} {}".format(apik[0], args.file)
            os.system(command)
            print("+","-"*50,"+")
+   if args.apk:
+       command = "bash apkAnalyzer.sh {}".format(args.file)
+       os.system(command) 
    if args.key_init:
        apikey = str(input("{}[{}+{}]{} Enter your VirusTotal api key: ".format(cyan,red,cyan,white)))
        command = "echo '{}' > .apikey.txt".format(apikey)
