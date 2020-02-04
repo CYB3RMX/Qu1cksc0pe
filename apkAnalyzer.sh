@@ -8,7 +8,7 @@ green='\e[92m'
 
 file=$1
 
-command -v apktool > /dev/null 2>&1 || { echo >&2 'Please install apktool to use this argument.'; exit 1; }
+command -v apktool > /dev/null 2>&1 || { echo >&2 '[!] Please install apktool to use this argument.'; exit 1; }
 
 echo -en "$cyan[$red*$cyan]$white Analyzing: $green$file\n"
 apktool d $file &>/dev/null
@@ -16,8 +16,8 @@ apktool d $file &>/dev/null
 name=$(echo -n "$file" | wc -c)
 limit=$(($name-4))
 temp=$(echo $file | cut -c 1-$limit)
-permission=$(cat permissions.txt)
-hpermission=$(cat hardware.txt)
+permission=$(cd keywords/; cat permissions.txt)
+hpermission=$(cd keywords/; cat hardware.txt)
 
 cd $temp/
 echo -en "$cyan[$red+$cyan]$white Permissions\n"
