@@ -42,10 +42,11 @@ def scope():
    parser.add_argument("-f", "--file",required=False,help="Select a suspicious file.")
    parser.add_argument("-c", "--category",required=False,help="Scan for specified category.")
    parser.add_argument("--install",required=False,help="Install Qu1cksc0pe.",action="store_true")
-   parser.add_argument("--metadata",required=False,help="Get exif information.",action="store_true")
+   parser.add_argument("--metadata",required=False,help="Get exif/metadata information.",action="store_true")
    parser.add_argument("--vtscan",required=False,help="Scan with VirusTotal api.",action="store_true")
-   parser.add_argument("--dll",required=False,help="Look for used DLL files.",action="store_true")
+   parser.add_argument("--dll",required=False,help="Look for used DLL files. (For .exe files.)",action="store_true")
    parser.add_argument("--apk",required=False,help="Analyze apk files.",action="store_true")
+   parser.add_argument("--elf",required=False,help="Analyze elf files.",action="store_true")
    parser.add_argument("--key_init",required=False,help="Enter your VirusTotal api key.",action="store_true")
    args = parser.parse_args()
 
@@ -84,7 +85,10 @@ def scope():
            print("+","-"*50,"+")
    if args.apk:
        command = "bash apkAnalyzer.sh {}".format(args.file)
-       os.system(command) 
+       os.system(command)
+   if args.elf:
+       command = "bash elfAnalyze.sh {}".format(args.file)
+       os.system(command)
    if args.key_init:
        apikey = str(input("{}[{}+{}]{} Enter your VirusTotal api key: ".format(cyan,red,cyan,white)))
        command = "echo '{}' > .apikey.txt".format(apikey)
