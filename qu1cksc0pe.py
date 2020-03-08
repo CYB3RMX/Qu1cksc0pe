@@ -119,7 +119,7 @@ def scope():
         command = "bash analyzer.sh --apk {}".format(args.file)
         os.system(command)
     if args.elf:
-        command = "bash analyze.sh --elf {}".format(args.file)
+        command = "bash analyzer.sh --elf {}".format(args.file)
         os.system(command)
     if args.key_init:
         apikey = str(input("{}[{}+{}]{} Enter your VirusTotal api key: ".format(cyan,red,cyan,white)))
