@@ -1,0 +1,14 @@
+CreateProcess
+VirtualAlloc
+VirtualProtect
+OpenProcess
+EnumProcesses
+EnumProcessModules
+CreateRemoteThread
+WriteProcessMemory
+AdjustTokenPrivileges
+IsWow64Process
+QueueUserAPC
+NtSetInformationProcess
+GetProcAddress
+ExitProcess

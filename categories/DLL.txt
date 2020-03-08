@@ -1,0 +1,9 @@
+LoadLibrary
+LoadLibraryExA
+LoadLibraryA
+LoadResource
+LoadLibraryA
+LoadLibraryW
+LoadLibraryExW
+LdrLoadDll
+DllFunctionCall

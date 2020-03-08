@@ -1,0 +1,9 @@
+WSAStartup
+WSAGetLastError
+socket
+recv
+connect
+getaddrinfo
+accept
+send
+listen

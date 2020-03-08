@@ -1,0 +1,9 @@
+InternetOpen
+InternetOpenURL
+InternetConnect
+InternetReadFile
+InternetWriteFile
+HTTPOpenRequest
+HTTPSendRequest
+HTTPQueryInfo
+URLDownloadToFile
