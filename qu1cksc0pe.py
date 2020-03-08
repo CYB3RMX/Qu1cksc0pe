@@ -45,7 +45,7 @@ def scope():
     parser.add_argument("-s", "--scan",required=False,help="Scan the file.",action="store_true")
     parser.add_argument("--metadata",required=False,help="Get exif/metadata information.",action="store_true")
     parser.add_argument("--vtscan",required=False,help="Scan with VirusTotal api.",action="store_true")
-    parser.add_argument("--dll",required=False,help="Look for used DLL files. (For .exe files.)",action="store_true")
+    parser.add_argument("--dll",required=False,help="Look for used DLL files.",action="store_true")
     parser.add_argument("--apk",required=False,help="Analyze apk files.",action="store_true")
     parser.add_argument("--elf",required=False,help="Analyze elf files.",action="store_true")
     parser.add_argument("--key_init",required=False,help="Enter your VirusTotal api key.",action="store_true")
