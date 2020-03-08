@@ -1,19 +1,15 @@
 # Qu1cksc0pe
 Quick suspicious file static-analysis tool.
 
-- Usage before install: ```python3 qu1cksc0pe.py --file suspicious_file --category anything```
-- Usage after install: ```qu1cksc0pe --file suspicious_file --category anything```
+- Usage: ```python3 qu1cksc0pe.py --file suspicious_file --scan```
 
 # Screenshot
 ![Screen](Screenshot.png)
 
-# Categories
-- <i>Registry, File, Network, Web, Keyboard/Keylogger, Process<br>
-     Dll, Debugger Indentifying, System Persistence, COM Object<br>
-     Data Leakage, Other, All</i><br>
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --category all```
-
 # Scan arguments
+<b>----Normal Scan----</b><br>
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --scan```<br><br>
+
 <b>----Metadata----</b><br>
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --metadata```<br><br>
 
@@ -38,4 +34,3 @@ clone that repository and install</i>: <b>https://github.com/iBotPeaches/Apktool
 <i>To get binutils/readelf do this</i>: ```sudo apt-get install binutils``` </i><br>
 
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_elf_file --elf```<br>
-
