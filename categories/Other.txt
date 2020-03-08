@@ -3,6 +3,13 @@ ShellExecute
 WinExec
 System
 CryptAcquireContext
+CryptReleaseContext
+CryptGenKey
+CryptDecrypt
+CryptEncrypt
+CryptDestroyKey
+CryptImportKey
+CryptAcquireContextA
 EnableExecuteProtectionSupport
 GetSystemDefaultLangId
 StartServiceCtrlDispatcher

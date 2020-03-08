@@ -64,6 +64,10 @@ def scope():
     comarr = open("categories/COMObject.txt", "r").read().split("\n")
     datarr = open("categories/DataLeak.txt", "r").read().split("\n")
     otharr = open("categories/Other.txt", "r").read().split("\n")
+    
+    # Keywords for dll scanning
+    dllArray = open("categories/DLLlist.txt", "r").read().split("\n")
+
     regdict={
         "Registry": regarr, "File": filearr, "Network": netarr, "Web": webarr, "Keyboard": keyarr,
         "Process": procarr, "Dll": dllarr, "DebuggerIdentifying": debugarr, "SystemPersistence": systarr,
@@ -127,18 +131,12 @@ def scope():
         os.system(command)
         print("{}[{}+{}]{} Your VirusTotal api key saved.".format(cyan,red,cyan,white))
     if args.dll:
-        dllArray = ["KERNEL32.DLL","ADVAPI32.dll","WSOCK32.dll","WS2_32.dll",
-                    "MSVCRT.dll","ntdll.dll","Advapi32.dll","shell32.dll",
-                    "msimsg.dll","ole32.dll","SHELL32.dll","WININET.dll",
-                    "USER32.dll","COMCTL32.dll","VERSION.dll","KERNEL32.dll",
-                    "OLEAUT32.dll","SHLWAPI.dll","GDI32.dll","WINTRUST.dll",
-                    "CRYPT32.dll","msi.dll","user32.dll","MSVBVM60.DLL","msvbvm60.dll",
-                    "VBA6.DLL", "vba6.dll"]
         print("{}[{}+{}]{} Used DLL files".format(cyan,red,cyan,white))
         print("+","-"*20,"+")
         for dl in allStrings:
             if dl in dllArray:
-                print("{}=> {}{}".format(red,white,dl))
+                if dl != "":
+                    print("{}=> {}{}".format(red,white,dl))
         print("+","-"*20,"+\n")
 # Exectuion area
 if __name__ == '__main__':
