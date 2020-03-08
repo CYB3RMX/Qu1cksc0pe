@@ -1,5 +1,7 @@
 CreateProcess
 VirtualAlloc
+GlobalAlloc
+HeapAlloc
 VirtualProtect
 OpenProcess
 EnumProcesses
@@ -12,3 +14,7 @@ QueueUserAPC
 NtSetInformationProcess
 GetProcAddress
 ExitProcess
+GetExitCodeProcess
+TerminateProcess
+CreateProcessA
+GetProcessHeap
