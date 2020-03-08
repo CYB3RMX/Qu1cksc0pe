@@ -1,0 +1,9 @@
+GetKeyboardType
+SetWindowsHook
+CallNextHook
+MapVirtualKey
+GetKeyState
+GetAsyncKeyState
+GetForegroundWindow
+AttachThreadInput
+RegisterHotKey

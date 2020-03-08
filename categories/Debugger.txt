@@ -1,0 +1,7 @@
+IsDebuggerPresent
+CheckRemoteDebuggerPresent
+FindWindow
+GetTickCount
+NtQueryInformationProcess
+OutputDebugString
+OutputDebugStringA

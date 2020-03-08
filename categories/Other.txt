@@ -1,0 +1,10 @@
+CreateMutex
+ShellExecute
+WinExec
+System
+CryptAcquireContext
+EnableExecuteProtectionSupport
+GetSystemDefaultLangId
+StartServiceCtrlDispatcher
+IsNTAdmin
+IsUserAnAdmin

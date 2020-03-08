@@ -1,0 +1,7 @@
+LsaEnumerateLogonSessions
+SamIConnect
+SamIGetPrivateData
+SamQueryInformationUse
+NetShareEnum
+ReadProcessMemory
+Toolhelp32ReadProcessMemory
