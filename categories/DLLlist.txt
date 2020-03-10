@@ -1,4 +1,4 @@
-KERNEL32.DLL
+KERNEL32.dll
 ADVAPI32.dll
 advapi32.dll
 kernel32.dll
@@ -28,3 +28,8 @@ MSVBVM60.DLL
 msvbvm60.dll
 VBA6.DLL
 vba6.dll
+MSVCR80.dll
+MSVCP80.dll
+MSXFS.dll
+msvcm80.dll
+mscoree.dll

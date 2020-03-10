@@ -5,3 +5,5 @@ GetTickCount
 NtQueryInformationProcess
 OutputDebugString
 OutputDebugStringA
+DebugInfoInPDBAttribute
+DebuggerStepThroughAttribute
