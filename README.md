@@ -2,6 +2,7 @@
 Quick suspicious file static-analysis tool.
 
 - Usage: ```python3 qu1cksc0pe.py --file suspicious_file --scan```
+- Tip: <i>You can also use path to file.</i>
 
 # Screenshot
 ![Screen](Screenshot.png)
