@@ -1,5 +1,6 @@
 CreateMutex
 ShellExecute
+ShellExecuteW
 WinExec
 System
 CryptAcquireContext

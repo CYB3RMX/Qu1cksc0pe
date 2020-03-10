@@ -1,5 +1,6 @@
 RegKeyOpen
 RegOpenKeyExA
+RegOpenKeyExw
 RegOpenKeyTransactedA
 RegQueryValueExA
 RegQueryValueEx
@@ -7,7 +8,6 @@ RegQueryInfoKeyW
 RegQueryInfoKeyA
 RegQueryValueExA
 RegSetValue
-RegSetValueExA
 RegGetValue
 RtlGetVersion
 RtlUnwind
@@ -24,6 +24,7 @@ RegDeleteKeyTransactedA
 RegDeleteKeyExA
 RegDeleteKeyA
 RegDeleteValueA
+RegDeleteValueW
 RegEnumValueA
 RegEnumKeyA
 RegEnumKeyExA

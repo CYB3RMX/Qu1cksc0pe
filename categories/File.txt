@@ -44,3 +44,4 @@ SetFileAttributesW
 GetFileAttributesA
 GetFileSize
 GetFileSizeEx
+DeleteStartupFolderFile
