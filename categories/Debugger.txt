@@ -7,3 +7,4 @@ OutputDebugString
 OutputDebugStringA
 DebugInfoInPDBAttribute
 DebuggerStepThroughAttribute
+SetProcessDEPPolicy

@@ -1,5 +1,6 @@
 GetKeyboardType
 SetWindowsHook
+SetWindowsHookExA
 CallNextHook
 MapVirtualKey
 GetKeyState
