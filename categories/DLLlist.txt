@@ -15,9 +15,12 @@ SHELL32.dll
 WININET.dll
 USER32.dll
 COMCTL32.dll
+COMCTL32.DLL
+comctl32.dll
 VERSION.dll
 KERNEL32.dll
 OLEAUT32.dll
+oleaut32.dll
 SHLWAPI.dll
 GDI32.dll
 WINTRUST.dll
@@ -33,3 +36,5 @@ MSVCP80.dll
 MSXFS.dll
 msvcm80.dll
 mscoree.dll
+comdlg32.dll
+oleacc.dll

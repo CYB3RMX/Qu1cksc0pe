@@ -17,7 +17,7 @@ def scope():
     Keyboard = []
     Process = []
     Dll = []
-    DebuggerIdentifying = []
+    Evasion_Bypassing = []
     SystemPersistence = []
     COMObject = []
     DataLeakage = []
@@ -32,7 +32,7 @@ def scope():
         "Keyboard": Keyboard,
         "Process": Process,
         "Dll": Dll,
-        "DebuggerIdentifying": DebuggerIdentifying,
+        "Evasion_Bypassing": Evasion_Bypassing,
         "SystemPersistence": SystemPersistence,
         "COMObject": COMObject,
         "DataLeakage": DataLeakage,
@@ -70,7 +70,7 @@ def scope():
 
     regdict={
         "Registry": regarr, "File": filearr, "Network": netarr, "Web": webarr, "Keyboard": keyarr,
-        "Process": procarr, "Dll": dllarr, "DebuggerIdentifying": debugarr, "SystemPersistence": systarr,
+        "Process": procarr, "Dll": dllarr, "Evasion_Bypassing": debugarr, "SystemPersistence": systarr,
         "COMObject": comarr, "DataLeakage": datarr, "Other": otharr
     }
     # Getting all strings from the file
@@ -87,7 +87,7 @@ def scope():
                         dictCateg[key].append(el)
         for key in dictCateg:
             if dictCateg[key] != []:
-                print("{}[{}+{}]{} {} operations".format(cyan,red,cyan,white,key))
+                print("{}[{}+{}]{} {} Functions".format(cyan,red,cyan,white,key))
                 print("+","-"*20,"+")
                 for i in dictCateg[key]:
                     if i == "":

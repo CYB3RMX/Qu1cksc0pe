@@ -16,7 +16,7 @@ banner()
   echo -en "  $cy\_/\_|\___/ \___/\____/\_| \_/\____/ \____/\___/\_|   \____/       ${gr}@ @ @ \n"                                            
   echo -en "                                                                       @ \n"
   echo -en "                                        ${ye}|            | \n"
-  echo -en "   ${wh}Suspicious file static-analysis tool.${ye}| ${wh}By CYB3RMX_${ye}| ${wh}Version: ${gr}1.5.1 \n"
+  echo -en "   ${wh}Suspicious file static-analysis tool.${ye}| ${wh}By CYB3RMX_${ye}| ${wh}Version: ${gr}1.5.2 \n"
   echo -en "   ${ye}-------------------------------------|            |${wh} \n\n"
 }
 banner

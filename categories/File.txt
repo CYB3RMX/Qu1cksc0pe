@@ -42,6 +42,9 @@ SetEndOfFile
 GetFileInformationByHandle
 SetFileAttributesW
 GetFileAttributesA
+GetFileAttributesW
 GetFileSize
 GetFileSizeEx
 DeleteStartupFolderFile
+FindFirstFileW
+SetSearchPathMode

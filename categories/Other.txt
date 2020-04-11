@@ -2,7 +2,6 @@ CreateMutex
 ShellExecute
 ShellExecuteW
 WinExec
-System
 CryptAcquireContext
 CryptReleaseContext
 CryptGenKey
@@ -16,3 +15,6 @@ GetSystemDefaultLangId
 StartServiceCtrlDispatcher
 IsNTAdmin
 IsUserAnAdmin
+GetActiveWindow
+GetLastActivePopup
+GetSysteminfo
