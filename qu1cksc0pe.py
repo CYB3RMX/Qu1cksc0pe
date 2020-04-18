@@ -20,7 +20,7 @@ def scope():
     Evasion_Bypassing = []
     SystemPersistence = []
     COMObject = []
-    DataLeakage = []
+    DataRecon_Info_Gathering = []
     Other = []
     
     # Dictionary of Categories
@@ -35,7 +35,7 @@ def scope():
         "Evasion_Bypassing": Evasion_Bypassing,
         "SystemPersistence": SystemPersistence,
         "COMObject": COMObject,
-        "DataLeakage": DataLeakage,
+        "DataRecon_Info_Gathering": DataRecon_Info_Gathering,
         "Other": Other
     }
 
@@ -71,7 +71,7 @@ def scope():
     regdict={
         "Registry": regarr, "File": filearr, "Network": netarr, "Web": webarr, "Keyboard": keyarr,
         "Process": procarr, "Dll": dllarr, "Evasion_Bypassing": debugarr, "SystemPersistence": systarr,
-        "COMObject": comarr, "DataLeakage": datarr, "Other": otharr
+        "COMObject": comarr, "DataRecon_Info_Gathering": datarr, "Other": otharr
     }
     # Getting all strings from the file
     if args.file:
