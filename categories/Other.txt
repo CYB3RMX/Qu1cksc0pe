@@ -18,3 +18,7 @@ IsUserAnAdmin
 GetActiveWindow
 GetLastActivePopup
 GetSysteminfo
+IsProcessorFeaturePresent
+SetProcessDpiAwarenessInternal
+SetProcessDpiAwareness
+SetProcessDPIAware

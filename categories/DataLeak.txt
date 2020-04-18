@@ -5,3 +5,11 @@ SamQueryInformationUse
 NetShareEnum
 ReadProcessMemory
 Toolhelp32ReadProcessMemory
+GetProcessMemoryInfo
+QueryFullProcessImageNameW
+ProcessIdToSessionId
+GetProcessTimes
+ReadProcessData
+GetNamedPipeClientProcessId
+GetCurrentProcessorNumber
+GetDriveTypeW
