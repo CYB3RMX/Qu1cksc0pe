@@ -7,3 +7,15 @@ HTTPOpenRequest
 HTTPSendRequest
 HTTPQueryInfo
 URLDownloadToFile
+WinHttpCloseHandle
+WinHttpOpen
+WinHttpSetTimeouts
+WinHttpCrackUrl
+WinHttpConnect
+WinHttpOpenRequest
+WinHttpAddRequestHeaders
+WinHttpSendRequest
+WinHttpWriteData
+WinHttpReceiveResponse
+WinHttpQueryHeaders
+WinHttpReadData

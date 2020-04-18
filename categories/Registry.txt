@@ -23,8 +23,12 @@ RegSetValueExA
 RegDeleteKeyTransactedA
 RegDeleteKeyExA
 RegDeleteKeyA
+RegDeleteKeyW
+RegDeleteKeyExW
 RegDeleteValueA
 RegDeleteValueW
 RegEnumValueA
 RegEnumKeyA
 RegEnumKeyExA
+RegEnumKeyW
+RegEnumKeyExW

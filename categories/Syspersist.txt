@@ -1,2 +1,3 @@
 CreateService
 ControlService
+CreateProcessAsUserW

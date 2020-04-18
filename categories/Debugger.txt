@@ -8,3 +8,5 @@ OutputDebugStringA
 DebugInfoInPDBAttribute
 DebuggerStepThroughAttribute
 SetProcessDEPPolicy
+SetProcessMitigationPolicy
+SetKernelObjectSecurity

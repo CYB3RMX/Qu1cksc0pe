@@ -38,3 +38,11 @@ msvcm80.dll
 mscoree.dll
 comdlg32.dll
 oleacc.dll
+dbghelp.dll
+POWRPROF.dll
+nw_elf.dll
+USP10.dll
+WINMM.dll
+WINHTTP.dll
+PSAPI.DLL
+PSAPI.dll
