@@ -29,6 +29,7 @@ GetVersionXmlFileURL
 GetFileType
 CheckFileIntegrity
 GetModuleFileName
+GetModuleFilename
 GetModuleFileNameW
 GetModuleFileNameA
 FileTimeToLocalFileTime
@@ -71,3 +72,5 @@ FlushViewOfFile
 GetMappedFileNameW
 GetWindowsDirectoryW
 GetWindowsDirectoryA
+GetWindowsDirectory
+FtpPutFile

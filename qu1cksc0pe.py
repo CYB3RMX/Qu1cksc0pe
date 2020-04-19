@@ -48,6 +48,7 @@ def scope():
     parser.add_argument("--dll",required=False,help="Look for used DLL files.",action="store_true")
     parser.add_argument("--apk",required=False,help="Analyze apk files.",action="store_true")
     parser.add_argument("--elf",required=False,help="Analyze elf files.",action="store_true")
+    parser.add_argument("--url",required=False,help="Extract URLs from file.",action="store_true")
     parser.add_argument("--key_init",required=False,help="Enter your VirusTotal api key.",action="store_true")
     args = parser.parse_args()
     
@@ -125,6 +126,9 @@ def scope():
     if args.elf:
         command = "bash analyzer.sh --elf {}".format(args.file)
         os.system(command)
+    if args.url:
+        command = "bash urlCatcher.sh {}".format(args.file)
+        os.system(command)
     if args.key_init:
         apikey = str(input("{}[{}+{}]{} Enter your VirusTotal api key: ".format(cyan,red,cyan,white)))
         command = "echo '{}' > .apikey.txt".format(apikey)
@@ -140,7 +144,7 @@ def scope():
         print("+","-"*20,"+\n")
 # Exectuion area
 if __name__ == '__main__':
-    os.system("bash banner.sh")
+    os.system("bash .banner.sh")
     try:
         scope()
         os.system("rm -rf temp.txt")

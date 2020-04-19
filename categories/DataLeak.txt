@@ -13,3 +13,11 @@ ReadProcessData
 GetNamedPipeClientProcessId
 GetCurrentProcessorNumber
 GetDriveTypeW
+BitBlt
+GetDC
+GetVersionEx
+GetThreadContext
+GetSystemDefaultLangId
+GetStartupInfo
+GetAdaptersInfo
+CreateToolhelp32Snapshot
