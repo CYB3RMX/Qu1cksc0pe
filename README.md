@@ -7,6 +7,9 @@ Quick suspicious file static-analysis tool.
 # Screenshot
 ![Screen](Screenshot.png)
 
+# Updates
+- <b>19/04/2020</b>: Added new functions.
+
 # Scan arguments
 <b>----Normal Scan----</b><br>
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --scan```<br><br>

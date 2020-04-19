@@ -1,5 +1,6 @@
 CreateProcess
 VirtualAlloc
+VirtualAllocEx
 GlobalAlloc
 HeapAlloc
 VirtualProtect
@@ -11,7 +12,6 @@ WriteProcessMemory
 AdjustTokenPrivileges
 IsWow64Process
 QueueUserAPC
-NtSetInformationProcess
 GetProcAddress
 ExitProcess
 GetExitCodeProcess
@@ -31,7 +31,6 @@ GetCurrentProcess
 SetProcessShutdownParameters
 GetProcessId
 IsSandboxedProcess
-NtQueryInformationProcess
 GetProcessBasicInformation
 NtSuspendProcess
 NtResumeProcess
@@ -42,3 +41,5 @@ NtOpenProcessTokenEx
 NtOpenProcessToken
 NtOpenProcess
 RecordProcessExit
+ResumeThread
+OpenMutex
