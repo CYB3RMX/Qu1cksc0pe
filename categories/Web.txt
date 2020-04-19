@@ -1,5 +1,6 @@
 InternetOpen
 InternetOpenURL
+InternetOpenUrl
 InternetConnect
 InternetReadFile
 InternetWriteFile

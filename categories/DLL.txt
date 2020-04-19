@@ -10,3 +10,5 @@ DllFunctionCall
 LoadStringW
 SetDllDirectoryW
 SafeDLLPath
+GetModuleHandle
+EnumProcessModules

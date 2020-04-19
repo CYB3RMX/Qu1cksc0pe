@@ -10,8 +10,6 @@ CryptEncrypt
 CryptDestroyKey
 CryptImportKey
 CryptAcquireContextA
-EnableExecuteProtectionSupport
-GetSystemDefaultLangId
 StartServiceCtrlDispatcher
 IsNTAdmin
 IsUserAnAdmin
@@ -23,3 +21,6 @@ SetProcessDpiAwarenessInternal
 SetProcessDpiAwareness
 SetProcessDPIAware
 WideCharToMultiByte
+StrStr
+StrStrA
+CertOpenSystemStore

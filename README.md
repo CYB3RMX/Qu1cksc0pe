@@ -9,6 +9,7 @@ Quick suspicious file static-analysis tool.
 
 # Updates
 - <b>19/04/2020</b>: Added new functions.
+- <b>19/04/2020</b>: Added new argument (--url)
 
 # Scan arguments
 <b>----Normal Scan----</b><br>
@@ -19,6 +20,9 @@ Quick suspicious file static-analysis tool.
 
 <b>----DLL----</b><br>
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --dll```<br><br>
+
+<b>----URL----</b><br>
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --url```<br><br>
 
 <b>----VirusTotal----</b><br>
 <b>Attention!</b><i> this argument needs VirusTotal api key.</i><br>
