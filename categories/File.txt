@@ -19,7 +19,6 @@ CreateFileMapping
 MapViewOfFile
 GetTempPath
 SetFileTime
-SfcTerminateWatcherThread
 FindFirstFileA
 FindNextFileA
 SetFilePointer

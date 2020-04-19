@@ -10,3 +10,7 @@ DebuggerStepThroughAttribute
 SetProcessDEPPolicy
 SetProcessMitigationPolicy
 SetKernelObjectSecurity
+VirtualProtectEx
+SfcTerminateWatcherThread
+SetThreadContext
+NtSetInformationProcess

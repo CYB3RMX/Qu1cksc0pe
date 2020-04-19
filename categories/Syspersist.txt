@@ -1,3 +1,4 @@
 CreateService
 ControlService
 CreateProcessAsUserW
+NetScheduleJobAdd
