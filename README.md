@@ -5,7 +5,7 @@ Quick suspicious file static-analysis tool.
 - Alternative usage: ```python3 qu1cksc0pe.py --file [PATH TO FILE] --scan```
 
 # Screenshot
-![Screen](Screenshot.png)
+![Screen](.Screenshot.png)
 
 # Updates
 - <b>19/04/2020</b>: Added new functions.
