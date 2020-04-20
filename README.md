@@ -8,8 +8,7 @@ Quick suspicious file static-analysis tool.
 ![Screen](.Screenshot.png)
 
 # Updates
-- <b>19/04/2020</b>: Added new functions.
-- <b>19/04/2020</b>: Added new argument (--url)
+- <b>20/04/2020</b>: Added simple update checker.
 
 # Scan arguments
 <b>----Normal Scan----</b><br>

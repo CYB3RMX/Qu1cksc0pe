@@ -144,7 +144,7 @@ def scope():
         print("+","-"*20,"+\n")
 # Exectuion area
 if __name__ == '__main__':
-    os.system("bash .banner.sh")
+    os.system("bash .startUp.sh")
     try:
         scope()
         os.system("rm -rf temp.txt")
