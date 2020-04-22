@@ -159,10 +159,9 @@ def scope():
                     print("{}=> {}{}".format(red,white,dl))
         print("+","-"*20,"+\n")
 # Exectuion area
-if __name__ == '__main__':
-    os.system("bash .startUp.sh")
-    try:
-        scope()
-        os.system("rm -rf temp.txt")
-    except:
-        os.system("rm -rf temp.txt")
+os.system("bash .startUp.sh")
+try:
+    scope()
+    os.system("rm -rf temp.txt")
+except:
+    os.system("rm -rf temp.txt")
