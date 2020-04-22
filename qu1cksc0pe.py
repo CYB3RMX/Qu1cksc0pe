@@ -44,7 +44,8 @@ def scope():
     parser.add_argument("-f", "--file",required=False,help="Select a suspicious file.")
     parser.add_argument("-s", "--scan",required=False,help="Scan the file.",action="store_true")
     parser.add_argument("--metadata",required=False,help="Get exif/metadata information.",action="store_true")
-    parser.add_argument("--vtscan",required=False,help="Scan with VirusTotal api.",action="store_true")
+    parser.add_argument("--vtFile",required=False,help="Scan your file with VirusTotal api.",action="store_true")
+    parser.add_argument("--vtUrl",required=False,help="Scan your URL with VirusTotal api.",action="store_true")
     parser.add_argument("--dll",required=False,help="Look for used DLL files.",action="store_true")
     parser.add_argument("--apk",required=False,help="Analyze apk files.",action="store_true")
     parser.add_argument("--elf",required=False,help="Analyze elf files.",action="store_true")
@@ -105,7 +106,7 @@ def scope():
         os.system(command)
         print("+","-"*50,"+")
 
-    if args.vtscan:
+    if args.vtFile:
         try:
             apik = open(".apikey.txt", "r").read().split("\n")
         except:
@@ -117,7 +118,22 @@ def scope():
         else: 
             print("\n{}[{}+{}]{} VirusTotal Scan".format(cyan,red,cyan,white))
             print("+","-"*50,"+")
-            command = "python3 VTwrapper.py {} {}".format(apik[0], args.file)
+            command = "python3 VTwrapper.py {} --vtFile {}".format(apik[0],args.file)
+            os.system(command)
+            print("+","-"*50,"+")
+    if args.vtUrl:
+        try:
+            apik = open(".apikey.txt", "r").read().split("\n")
+        except:
+            print("{}[{}!{}]{} Use --key_init to enter your key.".format(cyan,red,cyan,white))
+            sys.exit(1)
+        if apik[0] == '' or apik[0] == None or len(apik[0]) != 64:
+            print("{}[{}!{}]{} Please get your API key from -> {}https://www.virustotal.com/{}".format(cyan,red,cyan,white,green,white))
+            sys.exit(1)
+        else:
+            print("\n{}[{}+{}]{} VirusTotal Scan".format(cyan,red,cyan,white))
+            print("+","-"*50,"+")
+            command = "python3 VTwrapper.py {} --vtUrl".format(apik[0])
             os.system(command)
             print("+","-"*50,"+")
     if args.apk:
