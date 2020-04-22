@@ -49,6 +49,7 @@ phishArray = ["Botvrij.eu","Feodo Tracker", "CLEAN MX", "DNS8", "NotMining",
 
 # This array is for parsing the scan reports
 avState = ["detected", "version", "result", "update"]
+webState = ["detected", "result"]
 
 # File scan function
 def FileScan():
@@ -151,7 +152,8 @@ def UrlScan():
         for ww in detect:
             print("\n{}{}".format(green,ww))
             print("\u001b[93m#"*30)
-            print("{}DETECTED: {}{}".format(red, white, detect[ww]))
+            for webs in webState:
+                print("{}{}: {}{}".format(red,webs.upper(),white,detect[ww][webs]))
         print(" ")
 
 # Execution area
