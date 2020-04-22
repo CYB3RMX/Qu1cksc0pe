@@ -8,7 +8,7 @@ Quick suspicious file static-analysis tool.
 ![Screen](.Screenshot.png)
 
 # Updates
-- <b>20/04/2020</b>: Added simple update checker.
+- <b>22/04/2020</b>: Added suspicious url scanner (--vtUrl).
 
 # Scan arguments
 <b>----Normal Scan----</b><br>
@@ -27,7 +27,8 @@ Quick suspicious file static-analysis tool.
 <b>Attention!</b><i> this argument needs VirusTotal api key.</i><br>
 <i>To get your api key go to the VT website</i>: <b>https://www.virustotal.com/</b>
 
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --vtscan```<br>
+<b>Usage for --vtFile</b>: ```python3 qu1cksc0pe.py --file suspicious_file --vtFile```<br>
+<b>Usage for --vtUrl</b>: ```python3 qu1cksc0pe.py --vtUrl```<br>
 
 <b>----APK----</b><br>
 <b>Attention!</b><i> this argument needs apktool.</i><br>

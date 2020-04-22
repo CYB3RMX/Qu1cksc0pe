@@ -8,7 +8,7 @@ wh="\e[0m"
 ye="\e[93m"
 
 # Update checker variable
-version="20/04/2020"
+version="22/04/2020"
 
 banner()
 {
@@ -20,7 +20,7 @@ banner()
   echo -en "  $cy\_/\_|\___/ \___/\____/\_| \_/\____/ \____/\___/\_|   \____/       ${gr}@ @ @ \n"                                            
   echo -en "                                                                       @ \n"
   echo -en "                                        ${ye}|             | \n"
-  echo -en "   ${wh}Suspicious file static-analysis tool.${ye}| ${wh}By CYB3RMX_${ye} | ${wh}Version: ${gr}1.6.0 \n"
+  echo -en "   ${wh}Suspicious file static-analysis tool.${ye}| ${wh}By CYB3RMX_${ye} | ${wh}Version: ${gr}1.6.1 \n"
   echo -en "   ${ye}-------------------------------------|             |${wh} \n\n"
   updateChecker
 }
@@ -29,7 +29,7 @@ updateChecker()
    buffer=$(curl -sSL https://raw.githubusercontent.com/CYB3RMX/Qu1cksc0pe/master/README.md)
    echo $buffer | grep -o $version &>/dev/null
    if [ $? != 0 ];then
-      echo -en "$cy[$re!$cy]$wh Looks like you are using old version.\n\n"
+      echo -en "$cy[$re!$cy]$wh Looks like you need an update.\n\n"
    fi
 }
 # Execute functions
