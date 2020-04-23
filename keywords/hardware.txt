@@ -1,3 +1,0 @@
-camera
-camera.autofocus
-microphone

@@ -1,5 +1,7 @@
 # Qu1cksc0pe
-Quick suspicious file static-analysis tool.
+Quick suspicious file static-analysis tool. This tool allows to analyze windows and linux executables.<br>
+You can get used dll files, functions, sections, segments, urls and domains from your suspicious files.<br>
+Qu1cksc0pe aims to get even more information about suspicious files and helps to user realizing what that file capable of.
 
 - Usage: ```python3 qu1cksc0pe.py --file suspicious_file --scan```
 - Alternative usage: ```python3 qu1cksc0pe.py --file [PATH TO FILE] --scan```
@@ -8,7 +10,7 @@ Quick suspicious file static-analysis tool.
 ![Screen](.Screenshot.png)
 
 # Updates
-- <b>22/04/2020</b>: Added suspicious url scanner (--vtUrl).
+- <b>23/04/2020</b>: Bug fixes.
 
 # Scan arguments
 <b>----Normal Scan----</b><br>
@@ -29,13 +31,6 @@ Quick suspicious file static-analysis tool.
 
 <b>Usage for --vtFile</b>: ```python3 qu1cksc0pe.py --file suspicious_file --vtFile```<br>
 <b>Usage for --vtUrl</b>: ```python3 qu1cksc0pe.py --vtUrl```<br>
-
-<b>----APK----</b><br>
-<b>Attention!</b><i> this argument needs apktool.</i><br>
-<i>To get apktool do this</i>: ```sudo apt-get install apktool``` <i>or<br>
-clone that repository and install</i>: <b>https://github.com/iBotPeaches/Apktool</b>
-
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_apk_file --apk```<br>
 
 <b>----ELF----</b><br>
 <b>Attention!</b><i> this argument needs binutils/readelf.</i><br>
