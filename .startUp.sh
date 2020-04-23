@@ -26,10 +26,13 @@ banner()
 }
 updateChecker()
 {
+   echo -en "$cy[$re*$cy]$wh Checking updates...\n"
    buffer=$(curl -sSL https://raw.githubusercontent.com/CYB3RMX/Qu1cksc0pe/master/README.md)
    echo $buffer | grep -o $version &>/dev/null
    if [ $? != 0 ];then
-      echo -en "$cy[$re!$cy]$wh Looks like you need an update.\n\n"
+      echo -en "$cy[$re!$cy]$wh STATE: ${re}Outdated$wh.\n\n"
+   else
+      echo -en "$cy[$re*$cy]$wh STATE: ${gr}Up to date$wh.\n\n"
    fi
 }
 # Execute functions
