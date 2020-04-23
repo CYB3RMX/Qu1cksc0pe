@@ -1,5 +1,5 @@
 # Qu1cksc0pe
-Quick suspicious file static-analysis tool. This tool allows to analyze windows and linux executables.<br>
+This tool allows to analyze windows and linux executables.<br>
 You can get used dll files, functions, sections, segments, urls and domains from your suspicious files.<br>
 Qu1cksc0pe aims to get even more information about suspicious files and helps to user realizing what that file capable of.
 
