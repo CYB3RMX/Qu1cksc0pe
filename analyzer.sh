@@ -6,40 +6,8 @@ red='\e[91m'
 white='\e[0m'
 green='\e[92m'
 
-args=$1
-file=$2
+file=$1
 
-apklook()
-{
-  command -v apktool > /dev/null 2>&1 || { echo >&2 '[!] Please install apktool to use this argument.'; exit 1; }
-
-  echo -en "$cyan[$red*$cyan]$white Analyzing: $green$file\n\n"
-  apktool d $file &>/dev/null
-
-  name=$(echo -n "$file" | wc -c)
-  limit=$(($name-4))
-  temp=$(echo $file | cut -c 1-$limit)
-  permission=$(cd keywords/; cat permissions.txt)
-  hpermission=$(cd keywords/; cat hardware.txt)
-
-  cd $temp/
-  echo -en "$cyan[$red+$cyan]$white Permissions\n"
-  echo "+------------------------------+"
-  for perm in ${permission[@]}
-  do
-      cat AndroidManifest.xml | grep -o "$perm"
-  done
-  echo "+------------------------------+"
-  echo -en "\n$cyan[$red+$cyan]$white Hardware permissions\n"
-  echo "+------------------------------+"
-  for hperm in ${hpermission[@]}
-  do
-      cat AndroidManifest.xml | grep -o "android.hardware.$hperm"
-  done
-  echo "+------------------------------+"
-  cd ../
-  rm -rf $temp
-}
 elflook()
 {
   command -v readelf > /dev/null 2>&1 || { echo >&2 '[!] Please install binutils to use this argument.'; exit 1; }
@@ -48,9 +16,9 @@ elflook()
   if [ $? -eq 0 ];then
      echo -en "$cyan[$red*$cyan]$white Analyzing: $green$file\n\n"
 
-     symbols=$(cd keywords/; cat symbols.txt)
-     sections=$(cd keywords/; cat sections.txt)
-     segments=$(cd keywords/; cat segments.txt)
+     symbols=$(cd Systems/Linux/; cat symbols.txt)
+     sections=$(cd Systems/Linux/; cat sections.txt)
+     segments=$(cd Systems/Linux/; cat segments.txt)
      fileStrings=$(readelf -a $file)
 
      echo -en "$cyan[$red+$cyan]$white Symbols\n"
@@ -87,7 +55,4 @@ elflook()
      echo -en "$cyan[${red}!$cyan]$white Target file is not ELF file.\n"
   fi
 }
-case $args in
-  --apk) apklook ;;
-  --elf) elflook ;;
-esac
+elflook

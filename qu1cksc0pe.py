@@ -47,28 +47,27 @@ def scope():
     parser.add_argument("--vtFile",required=False,help="Scan your file with VirusTotal api.",action="store_true")
     parser.add_argument("--vtUrl",required=False,help="Scan your URL with VirusTotal api.",action="store_true")
     parser.add_argument("--dll",required=False,help="Look for used DLL files.",action="store_true")
-    parser.add_argument("--apk",required=False,help="Analyze apk files.",action="store_true")
     parser.add_argument("--elf",required=False,help="Analyze elf files.",action="store_true")
     parser.add_argument("--url",required=False,help="Extract URLs from file.",action="store_true")
     parser.add_argument("--key_init",required=False,help="Enter your VirusTotal api key.",action="store_true")
     args = parser.parse_args()
     
     # Keywords for categorized scanning
-    regarr = open("categories/Registry.txt", "r").read().split("\n")
-    filearr = open("categories/File.txt", "r").read().split("\n")
-    netarr = open("categories/Network.txt", "r").read().split("\n")
-    webarr = open("categories/Web.txt", "r").read().split("\n")
-    keyarr = open("categories/Keyboard.txt", "r").read().split("\n")
-    procarr = open("categories/Process.txt").read().split("\n")
-    dllarr = open("categories/DLL.txt", "r").read().split("\n")
-    debugarr = open("categories/Debugger.txt", "r").read().split("\n")
-    systarr = open("categories/Syspersist.txt", "r").read().split("\n")
-    comarr = open("categories/COMObject.txt", "r").read().split("\n")
-    datarr = open("categories/DataLeak.txt", "r").read().split("\n")
-    otharr = open("categories/Other.txt", "r").read().split("\n")
+    regarr = open("Systems/Windows/Registry.txt", "r").read().split("\n")
+    filearr = open("Systems/Windows/File.txt", "r").read().split("\n")
+    netarr = open("Systems/Windows/Network.txt", "r").read().split("\n")
+    webarr = open("Systems/Windows/Web.txt", "r").read().split("\n")
+    keyarr = open("Systems/Windows/Keyboard.txt", "r").read().split("\n")
+    procarr = open("Systems/Windows/Process.txt").read().split("\n")
+    dllarr = open("Systems/Windows/DLL.txt", "r").read().split("\n")
+    debugarr = open("Systems/Windows/Debugger.txt", "r").read().split("\n")
+    systarr = open("Systems/Windows/Syspersist.txt", "r").read().split("\n")
+    comarr = open("Systems/Windows/COMObject.txt", "r").read().split("\n")
+    datarr = open("Systems/Windows/DataLeak.txt", "r").read().split("\n")
+    otharr = open("Systems/Windows/Other.txt", "r").read().split("\n")
     
     # Keywords for dll scanning
-    dllArray = open("categories/DLLlist.txt", "r").read().split("\n")
+    dllArray = open("Systems/Windows/DLLlist.txt", "r").read().split("\n")
 
     regdict={
         "Registry": regarr, "File": filearr, "Network": netarr, "Web": webarr, "Keyboard": keyarr,
@@ -136,11 +135,8 @@ def scope():
             command = "python3 VTwrapper.py {} --vtUrl".format(apik[0])
             os.system(command)
             print("+","-"*50,"+")
-    if args.apk:
-        command = "bash analyzer.sh --apk {}".format(args.file)
-        os.system(command)
     if args.elf:
-        command = "bash analyzer.sh --elf {}".format(args.file)
+        command = "bash analyzer.sh {}".format(args.file)
         os.system(command)
     if args.url:
         command = "bash urlCatcher.sh {}".format(args.file)
