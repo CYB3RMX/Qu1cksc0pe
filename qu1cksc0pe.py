@@ -89,13 +89,13 @@ def scope():
         for key in dictCateg:
             if dictCateg[key] != []:
                 print("{}[{}+{}]{} {} Functions".format(cyan,red,cyan,white,key))
-                print("+","-"*20,"+")
+                print("+","-"*30,"+")
                 for i in dictCateg[key]:
                     if i == "":
                         pass
                     else:
                         print("{}=> {}{}".format(red,white,i))
-                print("+","-"*20,"+\n")
+                print("+","-"*30,"+\n")
 
     # Configuring the arguments
     if args.metadata:

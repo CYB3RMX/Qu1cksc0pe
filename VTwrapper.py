@@ -52,7 +52,9 @@ avState = ["detected", "version", "result", "update"]
 webState = ["detected", "result"]
 
 # File scan function
+score = 0
 def FileScan():
+    global score
     # Checking file
     try:
         targetFile = str(sys.argv[3])
@@ -87,6 +89,7 @@ def FileScan():
     for av in avArray:
         try:
             if str(report['scans'][av]["detected"]) == "True":
+                score +=1
                 detect.update({av: report['scans'][av]})
             else:
                 pass
@@ -97,6 +100,7 @@ def FileScan():
     if detect == {}:
         print("\n{}[{}!{}]{} Nothing found harmfull about that file.".format(yellow,red,yellow,white))
     else:
+        print("\n{}[{}*{}]{} Detection: {}{}{}/{}{}".format(yellow,green,yellow,white,green,score,white,green,len(avArray)))
         for aa in detect:
             print("\n{}{}".format(green,aa))
             print("\u001b[93m#"*30)
@@ -106,6 +110,7 @@ def FileScan():
 
 # URL scanner
 def UrlScan():
+    global score
     # Just handling errors
     try:
         targetUrl = str(input("{}=>{} Enter URL: ".format(green,white)))
@@ -139,6 +144,7 @@ def UrlScan():
     for web in phishArray:
         try:
             if str(report['scans'][web]["detected"]) == "True":
+                score +=1
                 detect.update({web: report['scans'][web]})
             else:
                 pass
@@ -149,6 +155,7 @@ def UrlScan():
     if detect == {}:
         print("\n{}[{}!{}]{} Nothing found harmfull about that URL.".format(yellow,red,yellow,white))
     else:
+        print("\n{}[{}*{}]{} Detection: {}{}{}/{}{}".format(yellow,green,yellow,white,green,score,white,green,len(phishArray)))
         for ww in detect:
             print("\n{}{}".format(green,ww))
             print("\u001b[93m#"*30)

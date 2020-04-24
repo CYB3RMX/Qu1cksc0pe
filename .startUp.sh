@@ -8,7 +8,7 @@ wh="\e[0m"
 ye="\e[93m"
 
 # Update checker variable
-version="23/04/2020"
+version="24/04/2020"
 
 banner()
 {
