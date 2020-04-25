@@ -53,3 +53,6 @@ flock
 msync
 fdatasync
 sendfile
+getcwd
+ioctl
+select

@@ -15,12 +15,14 @@ segmentz = open("Systems/Linux/segments.txt","r").read().split("\n")
 networkz = open("Systems/Linux/Networking.txt","r").read().split("\n")
 filez = open("Systems/Linux/Files.txt","r").read().split("\n")
 procesz = open("Systems/Linux/Processes.txt","r").read().split("\n")
+infogaz = open("Systems/Linux/Infoga.txt","r").read().split("\n")
 otherz = open("Systems/Linux/Others.txt","r").read().split("\n")
 
 # Categories
 Networking = []
 File = []
 Process = []
+Information_Gathering = []
 Other = []
 
 # Dictionary of categories
@@ -28,6 +30,7 @@ Categs = {
         "Networking": Networking,
         "File": File,
         "Process": Process,
+        "Information_Gathering": Information_Gathering,
         "Other": Other
         }
 
@@ -36,6 +39,7 @@ dictArr = {
         "Networking": networkz,
         "File": filez,
         "Process": procesz,
+        "Information_Gathering": infogaz,
         "Other": otherz
         }
 
