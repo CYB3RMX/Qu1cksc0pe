@@ -78,6 +78,8 @@ def scope():
     if args.file:
         command = "strings {} > temp.txt".format(args.file)
         os.system(command)
+        command = "readelf -a {} > elves.txt".format(args.file)
+        os.system(command)
         allStrings = open("temp.txt", "r").read().split('\n')
     
     if args.scan:
@@ -136,7 +138,7 @@ def scope():
             os.system(command)
             print("+","-"*50,"+")
     if args.elf:
-        command = "bash analyzer.sh {}".format(args.file)
+        command = "python3 elfAnalyzer.py"
         os.system(command)
     if args.url:
         command = "bash urlCatcher.sh {}".format(args.file)
@@ -158,6 +160,6 @@ def scope():
 os.system("bash .startUp.sh")
 try:
     scope()
-    os.system("rm -rf temp.txt")
+    os.system("rm -rf temp.txt elves.txt")
 except:
-    os.system("rm -rf temp.txt")
+    os.system("rm -rf temp.txt elves.txt")

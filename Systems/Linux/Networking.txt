@@ -1,0 +1,7 @@
+socket
+socketcall
+accept
+listen
+bind
+sethostname
+setdomainname
