@@ -5,3 +5,8 @@ listen
 bind
 sethostname
 setdomainname
+htons
+htonl
+ntohl
+ntohs
+bzero

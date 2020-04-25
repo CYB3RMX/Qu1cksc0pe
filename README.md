@@ -10,7 +10,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.Screenshot.png)
 
 # Updates
-- <b>25/04/2020</b>: Improved elf analyzer.
+- <b>26/04/2020</b>: Improved elf analyzer.
 
 # Scan arguments
 <b>####Normal Scan####</b><br>

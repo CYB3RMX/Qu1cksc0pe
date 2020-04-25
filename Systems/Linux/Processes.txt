@@ -26,3 +26,4 @@ prctl
 capget
 capset
 vfork
+sig_child
