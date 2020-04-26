@@ -78,8 +78,6 @@ def scope():
     if args.file:
         command = "strings {} > temp.txt".format(args.file)
         os.system(command)
-        command = "readelf -a {} > elves.txt".format(args.file)
-        os.system(command)
         allStrings = open("temp.txt", "r").read().split('\n')
     
     if args.scan:
@@ -138,6 +136,8 @@ def scope():
             os.system(command)
             print("+","-"*50,"+")
     if args.elf:
+        command = "readelf -a {} > elves.txt".format(args.file)
+        os.system(command)
         command = "python3 elfAnalyzer.py"
         os.system(command)
     if args.url:

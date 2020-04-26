@@ -16,6 +16,7 @@ networkz = open("Systems/Linux/Networking.txt","r").read().split("\n")
 filez = open("Systems/Linux/Files.txt","r").read().split("\n")
 procesz = open("Systems/Linux/Processes.txt","r").read().split("\n")
 infogaz = open("Systems/Linux/Infoga.txt","r").read().split("\n")
+persisz = open("Systems/Linux/Persistence.txt","r").read().split("\n")
 otherz = open("Systems/Linux/Others.txt","r").read().split("\n")
 
 # Categories
@@ -23,6 +24,7 @@ Networking = []
 File = []
 Process = []
 Information_Gathering = []
+System_Persistence = []
 Other = []
 
 # Dictionary of categories
@@ -30,7 +32,8 @@ Categs = {
         "Networking": Networking,
         "File": File,
         "Process": Process,
-        "Information_Gathering": Information_Gathering,
+        "Information Gathering": Information_Gathering,
+        "System/Persistence": System_Persistence,
         "Other": Other
         }
 
@@ -39,7 +42,8 @@ dictArr = {
         "Networking": networkz,
         "File": filez,
         "Process": procesz,
-        "Information_Gathering": infogaz,
+        "Information Gathering": infogaz,
+        "System/Persistence": persisz,
         "Other": otherz
         }
 

@@ -17,7 +17,6 @@ idle
 wait4
 clone
 getpgid
-personality
 sys_getsid
 mlockall
 munlockall
