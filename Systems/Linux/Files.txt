@@ -1,5 +1,16 @@
 open
+open64
+opendir
+readdir
+readdir64
+fopen
+fopen64
+fclose
+fread
+fseek
 close
+fgets
+fwrite
 write
 read
 chdir
@@ -15,6 +26,7 @@ umount
 fstat
 access
 rename
+remove
 mkdir
 rmdir
 umount2
@@ -34,6 +46,7 @@ old_readdir
 truncate
 ftruncate
 fchmod
+ftell
 fchown
 statfs
 fstatfs
@@ -56,3 +69,10 @@ sendfile
 getcwd
 ioctl
 select
+apr_file_open
+execl
+execlp
+dlsym
+dlclose
+dlopen
+umask

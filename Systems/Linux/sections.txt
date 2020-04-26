@@ -4,9 +4,12 @@
 .dynsym
 .dynstr
 .gnu.version
+.gnu.hash
 .gnu.version_r
 .rel.dyn
 .rel.plt
+.rela.dyn
+.rela.plt
 .init
 .plt
 .text
@@ -14,10 +17,14 @@
 .rodata
 .data
 .eh_frame
+.eh_frame_hdr
 .dynamic
 .ctors
 .dtors
+.jcr
+.data.rel.ro
 .got
+.got.plt
 .bss
 .stab
 .stabstr
