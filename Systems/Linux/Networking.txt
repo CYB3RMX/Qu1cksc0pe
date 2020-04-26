@@ -3,10 +3,17 @@ socketcall
 accept
 listen
 bind
+recv
+send
+connect
 sethostname
+setsockopt
+gethostname
+gethostbyname
 setdomainname
 htons
 htonl
 ntohl
 ntohs
 bzero
+inet_ntoa

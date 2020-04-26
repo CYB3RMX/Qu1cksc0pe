@@ -26,3 +26,8 @@ capget
 capset
 vfork
 sig_child
+pthread_create
+pthread_mutex_lock
+pthread_mutex_unlock
+usleep
+pipe

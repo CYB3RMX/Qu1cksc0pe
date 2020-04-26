@@ -25,3 +25,4 @@ nanosleep
 setresuid
 nfsservctl
 setresgid
+shutdown
