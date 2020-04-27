@@ -7,6 +7,7 @@ geteuid
 getegid
 getrlimit
 getrusage
+clock_gettime
 gettimeofday
 gmtime
 gmtime_r
@@ -15,6 +16,7 @@ getgroups
 getitimer
 getpwnam
 uname
+stat64
 __xstat
 __xstat64
 __lxstat64
@@ -32,3 +34,5 @@ getutxent
 sysconf
 sysinfo
 __errno_location
+mbedtls_padlock_has_support
+mbedtls_eckey_info

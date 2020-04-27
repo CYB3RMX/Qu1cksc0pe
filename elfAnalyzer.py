@@ -17,6 +17,7 @@ filez = open("Systems/Linux/Files.txt","r").read().split("\n")
 procesz = open("Systems/Linux/Processes.txt","r").read().split("\n")
 infogaz = open("Systems/Linux/Infoga.txt","r").read().split("\n")
 persisz = open("Systems/Linux/Persistence.txt","r").read().split("\n")
+cryptoz = open("Systems/Linux/Crypto.txt","r").read().split("\n")
 otherz = open("Systems/Linux/Others.txt","r").read().split("\n")
 
 # Categories
@@ -25,6 +26,7 @@ File = []
 Process = []
 Information_Gathering = []
 System_Persistence = []
+Cryptography = []
 Other = []
 
 # Dictionary of categories
@@ -34,6 +36,7 @@ Categs = {
         "Process": Process,
         "Information Gathering": Information_Gathering,
         "System/Persistence": System_Persistence,
+        "Cryptography": Cryptography,
         "Other": Other
         }
 
@@ -44,6 +47,7 @@ dictArr = {
         "Process": procesz,
         "Information Gathering": infogaz,
         "System/Persistence": persisz,
+        "Cryptography": cryptoz,
         "Other": otherz
         }
 

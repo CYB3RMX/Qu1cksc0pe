@@ -76,3 +76,5 @@ dlsym
 dlclose
 dlopen
 umask
+__ftello
+ftello64
