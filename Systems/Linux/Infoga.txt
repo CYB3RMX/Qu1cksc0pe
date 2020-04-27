@@ -6,12 +6,14 @@ getenv
 geteuid
 getegid
 getrlimit
+getnetconfig
 getrusage
 clock_gettime
 gettimeofday
 gmtime
 gmtime_r
 localtime
+asctime
 getgroups
 getitimer
 getpwnam
@@ -31,6 +33,8 @@ syslog
 endutxent
 setutxent
 getutxent
+setgrent
+getgrent
 sysconf
 sysinfo
 __errno_location

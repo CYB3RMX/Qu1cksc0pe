@@ -3,18 +3,18 @@ This tool allows to analyze windows and linux executables.<br>
 You can get used dll files, functions, sections, segments, urls and domains from your suspicious files.<br>
 Qu1cksc0pe aims to get even more information about suspicious files and helps to user realizing what that file capable of.
 
-- Usage: ```python3 qu1cksc0pe.py --file suspicious_file --scan```
-- Alternative usage: ```python3 qu1cksc0pe.py --file [PATH TO FILE] --scan```
+- Usage: ```python3 qu1cksc0pe.py --file suspicious_file --windows/--linux```
+- Alternative usage: ```python3 qu1cksc0pe.py --file [PATH TO FILE] --windows/--linux```
 
 # Screenshot
 ![Screen](.Screenshot.png)
 
 # Updates
-- <b>27/04/2020</b>: Some improvements and bug fixes.
+- <b>27/04/2020</b>: --scan and --elf argument renamed and added statistics.
 
 # Scan arguments
-<b>####Normal Scan####</b><br>
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --scan```<br><br>
+<b>####Windows Scan####</b><br>
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --windows```<br><br>
 
 <b>####Metadata####</b><br>
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --metadata```<br><br>
@@ -32,8 +32,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 <b>Usage for --vtFile</b>: ```python3 qu1cksc0pe.py --file suspicious_file --vtFile```<br>
 <b>Usage for --vtUrl</b>: ```python3 qu1cksc0pe.py --vtUrl```<br>
 
-<b>####ELF####</b><br>
+<b>####Linux Scan####</b><br>
 <b>Attention!</b><i> this argument needs binutils/readelf.</i><br>
 <i>To get binutils/readelf do this</i>: ```sudo apt-get install binutils``` </i><br>
 
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_elf_file --elf```<br>
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_elf_file --linux```<br>

@@ -10,8 +10,6 @@ green = '\u001b[92m'
 
 # Wordlists
 allStrings = open("temp.txt","r").read().split("\n")
-sectionz = open("Systems/Linux/sections.txt","r").read().split("\n")
-segmentz = open("Systems/Linux/segments.txt","r").read().split("\n")
 networkz = open("Systems/Linux/Networking.txt","r").read().split("\n")
 filez = open("Systems/Linux/Files.txt","r").read().split("\n")
 procesz = open("Systems/Linux/Processes.txt","r").read().split("\n")
@@ -53,12 +51,15 @@ dictArr = {
 
 # Defining function
 def Analyzer():
+    allFuncs = 0
     for key in dictArr:
         for elem in dictArr[key]:
             if elem in allStrings:
                 if elem != "":
                     Categs[key].append(elem)
+                    allFuncs +=1
     for key in Categs:
+        myFuncs = 0
         if Categs[key] != []:
             print("{}[{}+{}]{} Functions/Symbols about {}".format(cyan,red,cyan,white,key))
             print("+","-"*30,"+")
@@ -67,37 +68,9 @@ def Analyzer():
                     pass
                 else:
                     print("{}=> {}{}".format(red,white,i))
-            print("+","-"*30,"+\n")
-
-def LookForOthers():
-    tempArr = []
-    print("{}[{}+{}]{} Sections".format(cyan,red,cyan,white))
-    print("+","-"*30,"+")
-    for elem in sectionz:
-        if elem != "":
-            try:
-                com = "cat elves.txt | grep -o {} &>/dev/null".format(elem)
-                os.system(com)
-                com = 'if [ $? -eq 0 ];then echo -en "{}=> {}{}\n"; fi'.format(red,white,elem)
-                os.system(com)
-            except:
-                continue
-    print("+","-"*30,"+")
-
-    del tempArr[:]
-    print("\n{}[{}+{}]{} Segments".format(cyan,red,cyan,white))
-    print("+","-"*30,"+")
-    for elem in segmentz:
-        if elem != "":
-            try:
-                com = "cat elves.txt | grep -o {} &>/dev/null".format(elem)
-                os.system(com)
-                com = 'if [ $? -eq 0 ];then echo -en "{}=> {}{}\n"; fi'.format(red,white,elem)
-                os.system(com)
-            except:
-                continue
-    print("+","-"*30,"+")
+                    myFuncs +=1
+            print("+","-"*30,"+")
+            print("{}->{} Statistics for {}: {}{}/{}\n\n".format(green,white,key,green,myFuncs,allFuncs))
 
 # Execute
 Analyzer()
-LookForOthers()

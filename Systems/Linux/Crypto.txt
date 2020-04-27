@@ -18,3 +18,14 @@ mbedtls_pem_init
 mbedtls_aes_free
 mbedtls_ecdsa_sign
 mbedtls_ecp_keypair_free
+mbedtls_pkcs5_pbes2
+mbedtls_rsa_self_test
+mbedtls_ctr_drbg_write_seed_file
+mbedtls_des_crypt_cbc
+mbedtls_md_starts
+mbedtls_des_free
+mbedtls_pkcs12_derivation
+mbedtls_pem_read_buffer
+xdr_cryptkeyres
+xdr_des_mode
+__authdes_ops_lock

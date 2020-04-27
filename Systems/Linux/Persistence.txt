@@ -2,11 +2,14 @@ setuid
 alarm
 stime
 setgid
+setenv
+unsetenv
 setreuid
 setregid
 setrlimit
 settimeofday
 setgroups
+sysctl
 reboot
 setpriority
 ioperm
@@ -27,3 +30,5 @@ nfsservctl
 setresgid
 shutdown
 munmap
+__syscall
+__sysctl
