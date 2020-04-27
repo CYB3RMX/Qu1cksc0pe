@@ -20,7 +20,7 @@ def scope():
     Evasion_Bypassing = []
     SystemPersistence = []
     COMObject = []
-    DataRecon_Info_Gathering = []
+    Info_Gathering = []
     Other = []
     
     # Dictionary of Categories
@@ -32,22 +32,21 @@ def scope():
         "Keyboard": Keyboard,
         "Process": Process,
         "Dll": Dll,
-        "Evasion_Bypassing": Evasion_Bypassing,
-        "SystemPersistence": SystemPersistence,
+        "Evasion/Bypassing": Evasion_Bypassing,
+        "System Persistence": SystemPersistence,
         "COMObject": COMObject,
-        "DataRecon_Info_Gathering": DataRecon_Info_Gathering,
+        "Information Gathering": Info_Gathering,
         "Other": Other
     }
 
     # Argument crating and parsing
     parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--file",required=False,help="Select a suspicious file.")
-    parser.add_argument("-s", "--scan",required=False,help="Scan the file.",action="store_true")
-    parser.add_argument("--metadata",required=False,help="Get exif/metadata information.",action="store_true")
+    parser.add_argument("--file",required=False,help="Select a suspicious file.")
+    parser.add_argument("--windows",required=False,help="Analyze Windows files.",action="store_true")
+    parser.add_argument("--linux",required=False,help="Analyze Linux files.",action="store_true")
     parser.add_argument("--vtFile",required=False,help="Scan your file with VirusTotal api.",action="store_true")
     parser.add_argument("--vtUrl",required=False,help="Scan your URL with VirusTotal api.",action="store_true")
-    parser.add_argument("--dll",required=False,help="Look for used DLL files.",action="store_true")
-    parser.add_argument("--elf",required=False,help="Analyze elf files.",action="store_true")
+    parser.add_argument("--metadata",required=False,help="Get exif/metadata information.",action="store_true")
     parser.add_argument("--url",required=False,help="Extract URLs from file.",action="store_true")
     parser.add_argument("--key_init",required=False,help="Enter your VirusTotal api key.",action="store_true")
     args = parser.parse_args()
@@ -71,8 +70,8 @@ def scope():
 
     regdict={
         "Registry": regarr, "File": filearr, "Network": netarr, "Web": webarr, "Keyboard": keyarr,
-        "Process": procarr, "Dll": dllarr, "Evasion_Bypassing": debugarr, "SystemPersistence": systarr,
-        "COMObject": comarr, "DataRecon_Info_Gathering": datarr, "Other": otharr
+        "Process": procarr, "Dll": dllarr, "Evasion/Bypassing": debugarr, "System Persistence": systarr,
+        "COMObject": comarr, "Information Gathering": datarr, "Other": otharr
     }
     # Getting all strings from the file
     if args.file:
@@ -80,13 +79,16 @@ def scope():
         os.system(command)
         allStrings = open("temp.txt", "r").read().split('\n')
     
-    if args.scan:
+    if args.windows:
+        allFuncs = 0
         for key in regdict:
             for el in regdict[key]:
                 if el in allStrings:
                     if el != "":
                         dictCateg[key].append(el)
+                        allFuncs +=1
         for key in dictCateg:
+            myFuncs = 0
             if dictCateg[key] != []:
                 print("{}[{}+{}]{} {} Functions".format(cyan,red,cyan,white,key))
                 print("+","-"*30,"+")
@@ -95,7 +97,16 @@ def scope():
                         pass
                     else:
                         print("{}=> {}{}".format(red,white,i))
-                print("+","-"*30,"+\n")
+                        myFuncs +=1
+                print("+","-"*30,"+")
+                print("{}->{} Statistics for {}: {}{}/{}\n\n".format(green,white,key,green,myFuncs,allFuncs))
+        print("{}[{}+{}]{} Used DLL files".format(cyan,red,cyan,white))
+        print("+","-"*20,"+")
+        for dl in allStrings:
+            if dl in dllArray:
+                if dl != "":
+                    print("{}=> {}{}".format(red,white,dl))
+        print("+","-"*20,"+\n")
 
     # Configuring the arguments
     if args.metadata:
@@ -135,10 +146,12 @@ def scope():
             command = "python3 VTwrapper.py {} --vtUrl".format(apik[0])
             os.system(command)
             print("+","-"*50,"+")
-    if args.elf:
+    if args.linux:
         command = "readelf -a {} > elves.txt".format(args.file)
         os.system(command)
         command = "python3 elfAnalyzer.py"
+        os.system(command)
+        command = "bash elfAnalyz.sh"
         os.system(command)
     if args.url:
         command = "bash urlCatcher.sh {}".format(args.file)
@@ -148,14 +161,7 @@ def scope():
         command = "echo '{}' > .apikey.txt".format(apikey)
         os.system(command)
         print("{}[{}+{}]{} Your VirusTotal api key saved.".format(cyan,red,cyan,white))
-    if args.dll:
-        print("{}[{}+{}]{} Used DLL files".format(cyan,red,cyan,white))
-        print("+","-"*20,"+")
-        for dl in allStrings:
-            if dl in dllArray:
-                if dl != "":
-                    print("{}=> {}{}".format(red,white,dl))
-        print("+","-"*20,"+\n")
+
 # Exectuion area
 os.system("bash .startUp.sh")
 try:

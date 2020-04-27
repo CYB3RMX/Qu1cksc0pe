@@ -12,6 +12,8 @@ close
 fgets
 fwrite
 write
+pwrite
+pread
 read
 chdir
 link
@@ -78,3 +80,6 @@ dlopen
 umask
 __ftello
 ftello64
+_pread
+_pwrite
+_freebsd6_pwrite

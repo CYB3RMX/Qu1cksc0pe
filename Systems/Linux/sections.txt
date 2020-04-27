@@ -33,3 +33,15 @@
 .shstrtab
 .symtab
 .strtab
+.note.tag
+.tdata
+.tbss
+.init_array
+.fini_array
+.debug_aranges
+.debug_info
+.debug_abbrev
+.debug_line
+.debug_str
+.debug_loc
+.debug_ranges
