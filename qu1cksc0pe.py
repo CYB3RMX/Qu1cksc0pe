@@ -38,6 +38,22 @@ def scope():
         "Information Gathering": Info_Gathering,
         "Other": Other
     }
+    
+    # Scores
+    scoreDict = {
+            "Registry": 0,
+            "File": 0,
+            "Network": 0,
+            "Web": 0,
+            "Keyboard": 0,
+            "Process": 0,
+            "Dll": 0,
+            "Evasion/Bypassing": 0,
+            "System Persistence": 0,
+            "COMObject": 0,
+            "Information Gathering": 0,
+            "Other": 0
+            }
 
     # Argument crating and parsing
     parser = argparse.ArgumentParser()
@@ -88,7 +104,6 @@ def scope():
                         dictCateg[key].append(el)
                         allFuncs +=1
         for key in dictCateg:
-            myFuncs = 0
             if dictCateg[key] != []:
                 print("{}[{}+{}]{} {} Functions".format(cyan,red,cyan,white,key))
                 print("+","-"*30,"+")
@@ -97,16 +112,26 @@ def scope():
                         pass
                     else:
                         print("{}=> {}{}".format(red,white,i))
-                        myFuncs +=1
-                print("+","-"*30,"+")
-                print("{}->{} Statistics for {}: {}{}/{}\n\n".format(green,white,key,green,myFuncs,allFuncs))
+                        scoreDict[key] +=1
+                print("+","-"*30,"+\n")
         print("{}[{}+{}]{} Used DLL files".format(cyan,red,cyan,white))
         print("+","-"*20,"+")
         for dl in allStrings:
             if dl in dllArray:
                 if dl != "":
                     print("{}=> {}{}".format(red,white,dl))
-        print("+","-"*20,"+\n")
+        print("+","-"*20,"+")
+
+        # Statistics zone
+        print("\n{}->{} Statistics for: {}{}{}".format(green,white,green,args.file,white))
+        print("=","+"*30,"=")
+        print("{}()>{} All Functions: {}{}".format(red,white,green,allFuncs))
+        for key in scoreDict:
+            if scoreDict[key] == 0:
+                pass
+            else:
+                print("{}()> {}{}: {}{}{}".format(green,white,key,green,scoreDict[key],white))
+        print("=","+"*30,"=")
 
     # Configuring the arguments
     if args.metadata:
@@ -149,9 +174,7 @@ def scope():
     if args.linux:
         command = "readelf -a {} > elves.txt".format(args.file)
         os.system(command)
-        command = "python3 elfAnalyzer.py"
-        os.system(command)
-        command = "bash elfAnalyz.sh"
+        command = "python3 elfAnalyzer.py {}".format(args.file)
         os.system(command)
     if args.url:
         command = "bash urlCatcher.sh {}".format(args.file)

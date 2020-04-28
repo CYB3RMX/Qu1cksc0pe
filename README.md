@@ -10,7 +10,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.Screenshot.png)
 
 # Updates
-- <b>27/04/2020</b>: --scan and --elf argument renamed and added statistics.
+- <b>28/04/2020</b>: Statistics upgraded.
 
 # Scan arguments
 <b>####Windows Scan####</b><br>
