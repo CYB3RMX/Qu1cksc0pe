@@ -10,7 +10,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.Screenshot.png)
 
 # Updates
-- <b>28/04/2020</b>: Statistics upgraded.
+- <b>28/04/2020</b>: Statistics upgraded and added simple packer detector (--packer).
 
 # Scan arguments
 ## Windows Scan
@@ -36,4 +36,4 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 <b>Attention!</b><i> this argument needs binutils/readelf.</i><br>
 <i>To get binutils/readelf do this</i>: ```sudo apt-get install binutils``` </i><br>
 
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_elf_file --linux```<br>
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --linux```<br>
