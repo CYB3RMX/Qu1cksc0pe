@@ -64,6 +64,7 @@ def scope():
     parser.add_argument("--vtUrl",required=False,help="Scan your URL with VirusTotal api.",action="store_true")
     parser.add_argument("--metadata",required=False,help="Get exif/metadata information.",action="store_true")
     parser.add_argument("--url",required=False,help="Extract URLs from file.",action="store_true")
+    parser.add_argument("--packer",required=False,help="Check if your file is packed with common packers.",action="store_true")
     parser.add_argument("--key_init",required=False,help="Enter your VirusTotal api key.",action="store_true")
     args = parser.parse_args()
     
@@ -171,6 +172,9 @@ def scope():
             command = "python3 VTwrapper.py {} --vtUrl".format(apik[0])
             os.system(command)
             print("+","-"*50,"+")
+    if args.packer:
+        command = "bash packerDetect.sh {}".format(args.file)
+        os.system(command)
     if args.linux:
         command = "readelf -a {} > elves.txt".format(args.file)
         os.system(command)
