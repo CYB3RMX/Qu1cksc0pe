@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
-import os
+import os,sys
+
+# Getting name of the file for statistics
+fileName = str(sys.argv[1])
 
 # Colors
 red = '\u001b[91m'
@@ -26,6 +29,17 @@ Information_Gathering = []
 System_Persistence = []
 Cryptography = []
 Other = []
+
+# Scores
+scoreDict = {
+        "Networking": 0,
+        "File": 0,
+        "Process": 0,
+        "Information Gathering":0,
+        "System/Persistence":0,
+        "Cryptography":0,
+        "Other":0
+        }
 
 # Dictionary of categories
 Categs = {
@@ -59,7 +73,6 @@ def Analyzer():
                     Categs[key].append(elem)
                     allFuncs +=1
     for key in Categs:
-        myFuncs = 0
         if Categs[key] != []:
             print("{}[{}+{}]{} Functions/Symbols about {}".format(cyan,red,cyan,white,key))
             print("+","-"*30,"+")
@@ -68,9 +81,22 @@ def Analyzer():
                     pass
                 else:
                     print("{}=> {}{}".format(red,white,i))
-                    myFuncs +=1
-            print("+","-"*30,"+")
-            print("{}->{} Statistics for {}: {}{}/{}\n\n".format(green,white,key,green,myFuncs,allFuncs))
+                    scoreDict[key] +=1
+            print("+","-"*30,"+\n")
+    # Part 2
+    command = "bash elfAnalyz.sh"
+    os.system(command)
+    
+    # Statistics zone
+    print("{}->{} Statistics for: {}{}{}".format(green,white,green,fileName,white))
+    print("=","+"*30,"=")
+    print("{}()>{} All Functions: {}{}".format(red,white,green,allFuncs))
+    for key in scoreDict:
+        if scoreDict[key] == 0:
+            pass
+        else:
+            print("{}()> {}{}: {}{}{}".format(green,white,key,green,scoreDict[key],white))
+    print("=","+"*30,"=")
 
 # Execute
 Analyzer()
