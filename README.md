@@ -36,6 +36,3 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ## URL
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --url```<br><br>
 ![animation](.animations/url.gif)
-
-## Metadata
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --metadata```<br><br>
