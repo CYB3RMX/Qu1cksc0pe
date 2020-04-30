@@ -14,6 +14,7 @@ ole32.dll
 SHELL32.dll
 WININET.dll
 USER32.dll
+USER32.DLL
 COMCTL32.dll
 COMCTL32.DLL
 comctl32.dll
@@ -46,3 +47,5 @@ WINMM.dll
 WINHTTP.dll
 PSAPI.DLL
 PSAPI.dll
+urlmon.dll
+URLMON.dll

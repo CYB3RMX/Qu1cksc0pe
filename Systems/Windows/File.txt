@@ -1,3 +1,15 @@
+DecryptFile
+EncryptFile
+FileMode
+FileStream
+FileMode
+FileAccess
+CompileAssemblyFromFile
+CompressFileLZMA
+DecompressFileLZMA
+AssemblyFileVersionAttribute
+GetFiles
+SaveStreamToFile
 CreateFile
 CreateFileA
 CreateFileW
@@ -74,3 +86,5 @@ GetWindowsDirectoryW
 GetWindowsDirectoryA
 GetWindowsDirectory
 FtpPutFile
+CryptoStreamMode
+CryptoStream

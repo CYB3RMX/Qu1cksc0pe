@@ -21,3 +21,4 @@ GetSystemDefaultLangId
 GetStartupInfo
 GetAdaptersInfo
 CreateToolhelp32Snapshot
+FileSystemInfo

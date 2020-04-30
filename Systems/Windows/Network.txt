@@ -17,3 +17,7 @@ bind
 Bind
 PeekNamedPipe
 ConnectNamedPipe
+CreatePipe
+CreateNamedPipeA
+DisconnectNamedPipe
+GetNamedPipeInfo

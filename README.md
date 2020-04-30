@@ -1,26 +1,25 @@
 # Qu1cksc0pe
+[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 This tool allows to analyze windows and linux executables.<br>
 You can get used dll files, functions, sections, segments, urls and domains from your suspicious files.<br>
 Qu1cksc0pe aims to get even more information about suspicious files and helps to user realizing what that file capable of.
 
-- Usage: ```python3 qu1cksc0pe.py --file suspicious_file --windows/--linux```
-- Alternative usage: ```python3 qu1cksc0pe.py --file [PATH TO FILE] --windows/--linux```
+- [x] Usage: ```python3 qu1cksc0pe.py --file suspicious_file --windows/--linux```
+- [x] Alternative usage: ```python3 qu1cksc0pe.py --file [PATH TO FILE] --windows/--linux```
 
 # Screenshot
-![Screen](.Screenshot.png)
+![Screen](.animations/.Screenshot.png)
 
 # Updates
-- <b>28/04/2020</b>: Statistics upgraded and added simple packer detector (--packer).
+- [x] <b>01/05/2020</b>: Bug fixes and added more functions.
 
 # Scan arguments
 ## Windows Scan
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --windows```<br><br>
+![animation](.animations/windows.gif)
 
 ## Metadata
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --metadata```<br><br>
-
-## DLL
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --dll```<br><br>
 
 ## URL
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --url```<br><br>
