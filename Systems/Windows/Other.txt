@@ -24,3 +24,8 @@ WideCharToMultiByte
 StrStr
 StrStrA
 CertOpenSystemStore
+CryptoStreamMode
+CryptoStream
+DebuggerNonUserCodeAttribute
+DebuggableAttribute
+DebuggingModes
