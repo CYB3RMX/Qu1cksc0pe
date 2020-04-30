@@ -184,10 +184,10 @@ def scope():
         command = "bash urlCatcher.sh {}".format(args.file)
         os.system(command)
     if args.key_init:
-        apikey = str(input("{}[{}+{}]{} Enter your VirusTotal api key: ".format(cyan,red,cyan,white)))
+        apikey = str(input("{}[{}+{}]{} Enter your VirusTotal API key: ".format(cyan,red,cyan,white)))
         command = "echo '{}' > .apikey.txt".format(apikey)
         os.system(command)
-        print("{}[{}+{}]{} Your VirusTotal api key saved.".format(cyan,red,cyan,white))
+        print("{}[{}+{}]{} Your VirusTotal API key saved.".format(cyan,red,cyan,white))
 
 # Exectuion area
 os.system("bash .startUp.sh")
