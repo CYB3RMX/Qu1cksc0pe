@@ -1,3 +1,5 @@
 OleInitialize
 CoInitialize
+CoInitializeEx
+CoCreateInstance
 CreateStreamOnHGlobal

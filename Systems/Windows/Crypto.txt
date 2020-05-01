@@ -1,0 +1,16 @@
+CryptoStreamMode
+CryptoStream
+CryptAcquireContext
+CryptReleaseContext
+CryptGenKey
+CryptDecrypt
+CryptEncrypt
+CryptDestroyKey
+CryptImportKey
+CryptAcquireContextA
+CryptoStreamMode
+CryptoStream
+EncodePointer
+EncryptFile
+DecodePointer
+DecryptFile

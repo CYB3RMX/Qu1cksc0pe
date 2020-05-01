@@ -4,3 +4,8 @@ CreateProcessAsUserW
 NetScheduleJobAdd
 GetSystemMenu
 CreateToolbarEx
+OpenSCManager
+ShellExecute
+ShellExecuteW
+ShellExecuteExW
+ShellExecuteA

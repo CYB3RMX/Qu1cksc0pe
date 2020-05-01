@@ -1,6 +1,6 @@
 RegKeyOpen
 RegOpenKeyExA
-RegOpenKeyExw
+RegOpenKeyExW
 RegOpenKeyTransactedA
 RegQueryValueExA
 RegQueryValueEx

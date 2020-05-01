@@ -2,6 +2,7 @@
 ![os](https://img.shields.io/badge/Os-Linux-yellow?logo=linux)
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 ![Bash](https://img.shields.io/badge/Bash-v4.4%5E-green?logo=GNU%20bash)
+[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
 <br>This tool allows to analyze windows and linux executables.<br>
 You can get used dll files, functions, sections, segments, urls and domains from your suspicious files.<br>
 Qu1cksc0pe aims to get even more information about suspicious files and helps to user realizing what that file capable of.
@@ -13,7 +14,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/.Screenshot.png)
 
 # Updates
-- [x] <b>01/05/2020</b>: Bug fixes and added more functions.
+- [x] <b>02/05/2020</b>: Added new category to windows scan.
 
 # Scan arguments
 ## Windows Scan

@@ -44,4 +44,7 @@ NtOpenProcess
 RecordProcessExit
 ResumeThread
 OpenMutex
+InitializeCriticalSection
 InitializeCriticalSectionAndSpinCount
+EnterCriticalSection
+SetUnhandledExceptionFilter

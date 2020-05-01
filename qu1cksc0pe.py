@@ -13,13 +13,13 @@ def scope():
     Registry = []
     File = []
     Network = []
-    Web = [] 
     Keyboard = []
     Process = []
     Dll = []
     Evasion_Bypassing = []
     SystemPersistence = []
     COMObject = []
+    Cryptography = []
     Info_Gathering = []
     Other = []
     
@@ -27,14 +27,14 @@ def scope():
     dictCateg = {
         "Registry": Registry,
         "File": File,
-        "Network": Network,
-        "Web": Web,
+        "Networking/Web": Network,
         "Keyboard": Keyboard,
         "Process": Process,
         "Dll": Dll,
         "Evasion/Bypassing": Evasion_Bypassing,
-        "System Persistence": SystemPersistence,
+        "System/Persistence": SystemPersistence,
         "COMObject": COMObject,
+        "Cryptography": Cryptography,
         "Information Gathering": Info_Gathering,
         "Other": Other
     }
@@ -43,14 +43,14 @@ def scope():
     scoreDict = {
             "Registry": 0,
             "File": 0,
-            "Network": 0,
-            "Web": 0,
+            "Networking/Web": 0,
             "Keyboard": 0,
             "Process": 0,
             "Dll": 0,
             "Evasion/Bypassing": 0,
-            "System Persistence": 0,
+            "System/Persistence": 0,
             "COMObject": 0,
+            "Cryptography": 0,
             "Information Gathering": 0,
             "Other": 0
             }
@@ -72,23 +72,21 @@ def scope():
     regarr = open("Systems/Windows/Registry.txt", "r").read().split("\n")
     filearr = open("Systems/Windows/File.txt", "r").read().split("\n")
     netarr = open("Systems/Windows/Network.txt", "r").read().split("\n")
-    webarr = open("Systems/Windows/Web.txt", "r").read().split("\n")
     keyarr = open("Systems/Windows/Keyboard.txt", "r").read().split("\n")
     procarr = open("Systems/Windows/Process.txt").read().split("\n")
     dllarr = open("Systems/Windows/DLL.txt", "r").read().split("\n")
     debugarr = open("Systems/Windows/Debugger.txt", "r").read().split("\n")
     systarr = open("Systems/Windows/Syspersist.txt", "r").read().split("\n")
     comarr = open("Systems/Windows/COMObject.txt", "r").read().split("\n")
+    cryptarr = open("Systems/Windows/Crypto.txt","r").read().split("\n")
     datarr = open("Systems/Windows/DataLeak.txt", "r").read().split("\n")
     otharr = open("Systems/Windows/Other.txt", "r").read().split("\n")
-    
-    # Keywords for dll scanning
     dllArray = open("Systems/Windows/DLLlist.txt", "r").read().split("\n")
 
     regdict={
-        "Registry": regarr, "File": filearr, "Network": netarr, "Web": webarr, "Keyboard": keyarr,
-        "Process": procarr, "Dll": dllarr, "Evasion/Bypassing": debugarr, "System Persistence": systarr,
-        "COMObject": comarr, "Information Gathering": datarr, "Other": otharr
+        "Registry": regarr, "File": filearr, "Networking/Web": netarr, "Keyboard": keyarr,
+        "Process": procarr, "Dll": dllarr, "Evasion/Bypassing": debugarr, "System/Persistence": systarr,
+        "COMObject": comarr, "Cryptography": cryptarr,"Information Gathering": datarr, "Other": otharr
     }
     # Getting all strings from the file
     if args.file:
