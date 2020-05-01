@@ -44,3 +44,4 @@ NtOpenProcess
 RecordProcessExit
 ResumeThread
 OpenMutex
+InitializeCriticalSectionAndSpinCount

@@ -19,17 +19,17 @@ look()
    echo -en "$cyan[$red*$cyan]$default Looking for URLs...\n\n"
    strings $targetFile | grep -o "http://" &>/dev/null
    if [ $? -eq 0 ];then
-      echo -en "$cyan[$red+$cyan]$default Found some URLs with Port: 80(tcp/http)\n"
+      echo -en "$cyan[$red+$cyan]$default Found some HTTP URLs\n"
       urlFindHTTP
    else
-      echo -en "$cyan[$red!$cyan]$default Nothing found about http\n\n"
+      echo -en "$cyan[$red!$cyan]$default Nothing found about HTTP\n\n"
    fi
    strings $targetFile | grep -o "https://" &>/dev/null
    if [ $? -eq 0 ];then
-      echo -en "$cyan[$red+$cyan]$default Found some URLs with Port: 443(tcp/https)\n"
+      echo -en "$cyan[$red+$cyan]$default Found some HTTPS URLs\n"
       urlFindHTTPS
    else
-      echo -en "$cyan[$red!$cyan]$default Nothing found about https\n"
+      echo -en "$cyan[$red!$cyan]$default Nothing found about HTTPS\n"
       exit 1
    fi
 }

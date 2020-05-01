@@ -2,3 +2,5 @@ CreateService
 ControlService
 CreateProcessAsUserW
 NetScheduleJobAdd
+GetSystemMenu
+CreateToolbarEx

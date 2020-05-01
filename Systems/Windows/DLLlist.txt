@@ -38,6 +38,7 @@ MSXFS.dll
 msvcm80.dll
 mscoree.dll
 comdlg32.dll
+COMDLG32.dll
 oleacc.dll
 dbghelp.dll
 POWRPROF.dll

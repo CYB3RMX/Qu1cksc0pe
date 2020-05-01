@@ -11,4 +11,6 @@ LoadStringW
 SetDllDirectoryW
 SafeDLLPath
 GetModuleHandle
+GetModuleHandleW
 EnumProcessModules
+InitCommonControlsEx
