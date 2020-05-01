@@ -6,12 +6,15 @@ MSVCP60.dll
 WSOCK32.dll
 WS2_32.dll
 MSVCRT.dll
+msvcrt.dll
 ntdll.dll
 Advapi32.dll
 shell32.dll
 msimsg.dll
 ole32.dll
+OLE32.dll
 SHELL32.dll
+SHELL32.DLL
 WININET.dll
 USER32.dll
 USER32.DLL
@@ -50,3 +53,5 @@ PSAPI.DLL
 PSAPI.dll
 urlmon.dll
 URLMON.dll
+libgcc_s_dw2-1.dll
+libgcj-13.dll

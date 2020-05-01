@@ -50,3 +50,10 @@ GetLocaleInfoA
 GetStringTypeA
 GetStringTypeW
 LookupPrivilegeValueA
+VirtualQuery
+VirtualQueryEx
+GetProcessImageFileNameW
+GetProcessImageFileName
+GetTokenInformation
+CheckTokenMembership
+CheckTokenMembershipEx

@@ -1,5 +1,3 @@
-DecryptFile
-EncryptFile
 FileMode
 FileStream
 FileMode
@@ -23,9 +21,15 @@ FindResource
 FindResourceW
 LoadResource
 FindFirstFile
+FindFirstFileEx
 FindFirstFileExW
 FindNextFile
 FindNextFileW
+FindFirstFileNameW
+FindFirstFileNameTransactedW
+FindFirstFileTransacted
+FindFirstStreamTransactedW
+FindFirstStreamW
 NtQueryDirectoryFile
 CreateFileMapping
 MapViewOfFile
@@ -86,10 +90,13 @@ GetWindowsDirectoryW
 GetWindowsDirectoryA
 GetWindowsDirectory
 FtpPutFile
-CryptoStreamMode
-CryptoStream
 GetSaveFileNameA
 GetOpenFileNameA
 ImageRvaToVa
 ImageRvaToSection
 ImageNtHeader
+SHGetFolderPathA
+SHGetFolderPathW
+FindClose
+PathFindFileName
+PathFindFileNameW
