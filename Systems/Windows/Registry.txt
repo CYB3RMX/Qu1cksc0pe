@@ -32,3 +32,5 @@ RegEnumKeyA
 RegEnumKeyExA
 RegEnumKeyW
 RegEnumKeyExW
+RegSetValueA
+RegCreateKeyA

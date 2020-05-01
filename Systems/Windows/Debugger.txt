@@ -15,3 +15,5 @@ SfcTerminateWatcherThread
 SetThreadContext
 NtSetInformationProcess
 EnableExecuteProtectionSupport
+EncodePointer
+DecodePointer

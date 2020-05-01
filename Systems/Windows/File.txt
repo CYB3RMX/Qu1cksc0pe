@@ -88,3 +88,8 @@ GetWindowsDirectory
 FtpPutFile
 CryptoStreamMode
 CryptoStream
+GetSaveFileNameA
+GetOpenFileNameA
+ImageRvaToVa
+ImageRvaToSection
+ImageNtHeader
