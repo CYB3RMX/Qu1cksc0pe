@@ -14,7 +14,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/.Screenshot.png)
 
 # Updates
-- [x] <b>02/05/2020</b>: Added new category to windows scan.
+- [x] <b>15/05/2020</b>: Added simple threat scoring and guessing system.
 
 # Scan arguments
 ## Windows Scan

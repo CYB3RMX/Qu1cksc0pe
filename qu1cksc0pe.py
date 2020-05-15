@@ -6,6 +6,7 @@ red = '\u001b[91m'
 cyan = '\u001b[96m'
 white = '\u001b[0m'
 green = '\u001b[92m'
+yellow = '\u001b[93m'
 
 args = []
 def scope():
@@ -95,6 +96,7 @@ def scope():
         allStrings = open("temp.txt", "r").read().split('\n')
     
     if args.windows:
+        threatScore = 0
         allFuncs = 0
         for key in regdict:
             for el in regdict[key]:
@@ -104,6 +106,8 @@ def scope():
                         allFuncs +=1
         for key in dictCateg:
             if dictCateg[key] != []:
+                if key == "Keyboard" or key == "Evasion/Bypassing" or key == "System/Persistence" or key == "Cryptography" or key == "Information Gathering":
+                    print("\n{}[{}!{}]__WARNING__[{}!{}]".format(yellow,red,yellow,red,yellow))
                 print("{}[{}+{}]{} {} Functions".format(cyan,red,cyan,white,key))
                 print("+","-"*30,"+")
                 for i in dictCateg[key]:
@@ -111,7 +115,45 @@ def scope():
                         pass
                     else:
                         print("{}=> {}{}".format(red,white,i))
-                        scoreDict[key] +=1
+                        # Threat score
+                        if key == "Registry":
+                            threatScore +=10
+                            scoreDict[key] +=1
+                        elif key == "File":
+                            threatScore += 10
+                            scoreDict[key] +=1
+                        elif key == "Networking/Web":
+                            threatScore += 15
+                            scoreDict[key] +=1
+                        elif key == "Keyboard":
+                            threatScore += 20
+                            scoreDict[key] +=1
+                        elif key == "Process":
+                            threatScore += 15
+                            scoreDict[key] +=1
+                        elif key == "Dll":
+                            threatScore += 15
+                            scoreDict[key] +=1
+                        elif key == "Evasion/Bypassing":
+                            threatScore += 25
+                            scoreDict[key] +=1
+                        elif key == "System/Persistence":
+                            threatScore += 20
+                            scoreDict[key] +=1
+                        elif key == "COMObject":
+                            threatScore += 10
+                            scoreDict[key] +=1
+                        elif key == "Cryptography":
+                            threatScore += 25
+                            scoreDict[key] +=1
+                        elif key == "Information Gathering":
+                            threatScore += 20
+                            scoreDict[key] +=1
+                        elif key == "Other":
+                            threatScore += 5
+                            scoreDict[key] +=1
+                        else:
+                            pass
                 print("+","-"*30,"+\n")
         print("{}[{}+{}]{} Used DLL files".format(cyan,red,cyan,white))
         print("+","-"*20,"+")
@@ -131,6 +173,12 @@ def scope():
             else:
                 print("{}()> {}{}: {}{}{}".format(green,white,key,green,scoreDict[key],white))
         print("=","+"*30,"=")
+        if threatScore < 100:
+            print("\n{}[{}Threat Score{}]{}: {} {}<-{}state{}-> clean{}\n".format(cyan,red,cyan,white,threatScore,green,red,green,white))
+        elif threatScore <= 500 and threatScore > 100:
+            print("\n{}[{}Threat Score{}]{}: {} {}<-{}state{}-> {}suspicious{}\n".format(cyan,red,cyan,white,threatScore,green,red,green,yellow,white))
+        else:
+            print("\n{}[{}Threat Score{}]{}: {} {}<-{}state{}-> {}malicious{}\n".format(cyan,red,cyan,white,threatScore,green,red,green,red,white))
 
     # Configuring the arguments
     if args.metadata:
