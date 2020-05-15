@@ -1,4 +1,5 @@
 CreateProcess
+GetProcessVersion
 LocalAlloc
 LocalFree
 VirtualAlloc

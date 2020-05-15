@@ -1,3 +1,5 @@
+GetComputerNameA
+GetSystemInfo
 LsaEnumerateLogonSessions
 SamIConnect
 SamIGetPrivateData
@@ -15,16 +17,20 @@ GetCurrentProcessorNumber
 GetDriveTypeW
 BitBlt
 GetDC
+GetCurrentDirectoryA
 GetVersion
 GetVersionEx
 GetThreadContext
 GetSystemDefaultLangId
+RtlGetCompressionWorkSpaceSize
 GetStartupInfo
 GetAdaptersInfo
+GetLastInputInfo
 CreateToolhelp32Snapshot
 FileSystemInfo
 FlsGetValue
 GetUserObjectInformationA
+GetNativeSystemInfo
 GetCursorPos
 GetClassInfoA
 GetClipboardData

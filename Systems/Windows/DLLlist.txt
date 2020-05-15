@@ -5,6 +5,10 @@ kernel32.dll
 MSVCP60.dll
 WSOCK32.dll
 WS2_32.dll
+ws2_32.dll
+rpcrt4.dll
+RPCRT4.dll
+gdi32.dll
 MSVCRT.dll
 msvcrt.dll
 ntdll.dll
@@ -15,6 +19,7 @@ ole32.dll
 OLE32.dll
 SHELL32.dll
 SHELL32.DLL
+wininet.dll
 WININET.dll
 USER32.dll
 USER32.DLL
@@ -55,3 +60,4 @@ urlmon.dll
 URLMON.dll
 libgcc_s_dw2-1.dll
 libgcj-13.dll
+SecureDll.dll
