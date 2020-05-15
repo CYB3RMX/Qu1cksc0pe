@@ -117,40 +117,40 @@ def scope():
                         print("{}=> {}{}".format(red,white,i))
                         # Threat score
                         if key == "Registry":
-                            threatScore +=10
+                            threatScore += 4
                             scoreDict[key] +=1
                         elif key == "File":
-                            threatScore += 10
+                            threatScore += 4
                             scoreDict[key] +=1
                         elif key == "Networking/Web":
-                            threatScore += 15
+                            threatScore += 5
                             scoreDict[key] +=1
                         elif key == "Keyboard":
-                            threatScore += 20
+                            threatScore += 6
                             scoreDict[key] +=1
                         elif key == "Process":
-                            threatScore += 15
+                            threatScore += 5
                             scoreDict[key] +=1
                         elif key == "Dll":
-                            threatScore += 15
+                            threatScore += 5
                             scoreDict[key] +=1
                         elif key == "Evasion/Bypassing":
-                            threatScore += 25
+                            threatScore += 8
                             scoreDict[key] +=1
                         elif key == "System/Persistence":
-                            threatScore += 20
+                            threatScore += 8
                             scoreDict[key] +=1
                         elif key == "COMObject":
-                            threatScore += 10
+                            threatScore += 4
                             scoreDict[key] +=1
                         elif key == "Cryptography":
-                            threatScore += 25
+                            threatScore += 8
                             scoreDict[key] +=1
                         elif key == "Information Gathering":
-                            threatScore += 20
+                            threatScore += 7
                             scoreDict[key] +=1
                         elif key == "Other":
-                            threatScore += 5
+                            threatScore += 3
                             scoreDict[key] +=1
                         else:
                             pass
@@ -167,18 +167,34 @@ def scope():
         print("\n{}->{} Statistics for: {}{}{}".format(green,white,green,args.file,white))
         print("=","+"*30,"=")
         print("{}()>{} All Functions: {}{}".format(red,white,green,allFuncs))
+        if allFuncs == 0:
+            print("\n{}[{}!{}]{} This file might be obfuscated or encrypted.\n".format(cyan,red,cyan,white))
+            sys.exit(0)
+
         for key in scoreDict:
             if scoreDict[key] == 0:
                 pass
             else:
                 print("{}()> {}{}: {}{}{}".format(green,white,key,green,scoreDict[key],white))
         print("=","+"*30,"=")
-        if threatScore < 100:
-            print("\n{}[{}Threat Score{}]{}: {} {}<-{}state{}-> clean{}\n".format(cyan,red,cyan,white,threatScore,green,red,green,white))
-        elif threatScore <= 500 and threatScore > 100:
-            print("\n{}[{}Threat Score{}]{}: {} {}<-{}state{}-> {}suspicious{}\n".format(cyan,red,cyan,white,threatScore,green,red,green,yellow,white))
+
+        # score table
+        print("\n+-------------------------+")
+        print("|    Threat Score Table   |")
+        print("|-------------------------|")
+        print("| Point    |  State       |")
+        print("|-------------------------|")
+        print("| 0-30     | {}Clean{}        |".format(green,white))
+        print("| 30-200   | {}Suspicious{}   |".format(yellow,white))
+        print("| 200+     | {}Malicious{}    |".format(red,white))
+        print("+-------------------------+")
+
+        if threatScore < 30:
+            print("{}[{}Threat Score{}]{}: {}{}\n".format(cyan,red,cyan,white,green,threatScore))
+        elif threatScore >= 30 and threatScore <= 200:
+            print("{}[{}Threat Score{}]{}: {}{}\n".format(cyan,red,cyan,white,yellow,threatScore))
         else:
-            print("\n{}[{}Threat Score{}]{}: {} {}<-{}state{}-> {}malicious{}\n".format(cyan,red,cyan,white,threatScore,green,red,green,red,white))
+            print("{}[{}Threat Score{}]{}: {}{}\n".format(cyan,red,cyan,white,red,threatScore))
 
     # Configuring the arguments
     if args.metadata:

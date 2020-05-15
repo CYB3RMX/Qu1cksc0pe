@@ -124,12 +124,24 @@ def Analyzer():
         else:
             print("{}()> {}{}: {}{}{}".format(green,white,key,green,scoreDict[key],white))
     print("=","+"*30,"=")
-    if threatScore <= 100:
-        print("\n{}[{}Threat Score{}]{}: {} {}<-{}state{}-> clean{}\n".format(cyan,red,cyan,white,threatScore,green,red,green,white))
-    elif threatScore <= 200 and threatScore > 100:
-        print("\n{}[{}Threat Score{}]{}: {} {}<-{}state{}-> {}suspicious{}\n".format(cyan,red,cyan,white,threatScore,green,red,green,yellow,white))
+    
+    # score table
+    print("\n+-------------------------+")
+    print("|    Threat Score Table   |")
+    print("|-------------------------|")
+    print("| Point    |  State       |")
+    print("|-------------------------|")
+    print("| 0-100    | {}Clean{}        |".format(green,white))
+    print("| 100-300  | {}Suspicious{}   |".format(yellow,white))
+    print("| 300+     | {}Malicious{}    |".format(red,white))
+    print("+-------------------------+")
+
+    if threatScore < 100:
+        print("{}[{}Threat Score{}]{}: {}{}\n".format(cyan,red,cyan,white,green,threatScore))
+    elif threatScore >= 100 and threatScore <= 300:
+        print("{}[{}Threat Score{}]{}: {}{}\n".format(cyan,red,cyan,white,yellow,threatScore))
     else:
-        print("\n{}[{}Threat Score{}]{}: {} {}<-{}state{}-> {}malicious{}\n".format(cyan,red,cyan,white,threatScore,green,red,green,red,white))
+        print("{}[{}Threat Score{}]{}: {}{}\n".format(cyan,red,cyan,white,red,threatScore))
 
 # Execute
 Analyzer()
