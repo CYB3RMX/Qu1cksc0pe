@@ -12,6 +12,7 @@ gdi32.dll
 MSVCRT.dll
 msvcrt.dll
 ntdll.dll
+NTDLL.DLL
 Advapi32.dll
 shell32.dll
 msimsg.dll
@@ -27,11 +28,12 @@ COMCTL32.dll
 COMCTL32.DLL
 comctl32.dll
 VERSION.dll
-KERNEL32.dll
+KERNEL32.DLL
 OLEAUT32.dll
 oleaut32.dll
 SHLWAPI.dll
 GDI32.dll
+GDI32.DLL
 WINTRUST.dll
 CRYPT32.dll
 msi.dll
@@ -47,7 +49,10 @@ msvcm80.dll
 mscoree.dll
 comdlg32.dll
 COMDLG32.dll
+oledlg.dll
 oleacc.dll
+OLEACC.dll
+MSIMG32.dll
 dbghelp.dll
 POWRPROF.dll
 nw_elf.dll

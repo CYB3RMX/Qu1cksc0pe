@@ -10,6 +10,7 @@ VirtualProtect
 OpenProcess
 EnumProcesses
 CreateRemoteThread
+GetCurrentThread
 WriteProcessMemory
 AdjustTokenPrivileges
 IsWow64Process
@@ -49,3 +50,6 @@ InitializeCriticalSection
 InitializeCriticalSectionAndSpinCount
 EnterCriticalSection
 SetUnhandledExceptionFilter
+CWinThread
+SetThreadStackGuarantee
+WinExec
