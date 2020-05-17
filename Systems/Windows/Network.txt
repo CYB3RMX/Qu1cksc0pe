@@ -1,5 +1,7 @@
 WSAStartup
 WSAGetLastError
+WSAEventSelect
+WSAEnumNetworkEvents
 socket
 Socket
 recv

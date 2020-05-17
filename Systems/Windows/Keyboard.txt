@@ -2,6 +2,9 @@ GetKeyboardType
 SetWindowsHook
 SetWindowsHookEx
 SetWindowsHookExA
+SetWindowsHookExW
+UnhookWindowsHookEx
+CallNextHookEx
 CallNextHook
 MapVirtualKey
 GetKeyState
@@ -9,3 +12,5 @@ GetAsyncKeyState
 GetForegroundWindow
 AttachThreadInput
 RegisterHotKey
+VkKeyScanA
+VkKeyScanExA

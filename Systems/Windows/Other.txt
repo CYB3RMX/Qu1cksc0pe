@@ -1,8 +1,13 @@
 CreateMutex
-WinExec
 StartServiceCtrlDispatcher
 IsNTAdmin
 IsUserAnAdmin
+CMemoryException
+CWinApp
+DeactivateActCtx
+ActivateActCtx
+ReleaseActCtx
+CreateActCtxW
 GetActiveWindow
 GetLastActivePopup
 GetSysteminfo
@@ -47,3 +52,7 @@ TranslateMessage
 ShowWindow
 UpdateWindow
 GradientFill
+GetClipboardOwner
+GetPrivateProfileIntW
+GetPrivateProfileInt
+SetLastErrorEx

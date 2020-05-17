@@ -9,3 +9,4 @@ ShellExecute
 ShellExecuteW
 ShellExecuteExW
 ShellExecuteA
+NotifyWinEvent

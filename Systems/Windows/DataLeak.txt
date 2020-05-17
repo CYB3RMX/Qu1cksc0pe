@@ -14,6 +14,7 @@ GetProcessTimes
 ReadProcessData
 GetNamedPipeClientProcessId
 GetCurrentProcessorNumber
+GetWindowThreadProcessId
 GetDriveTypeW
 BitBlt
 GetDC
@@ -63,3 +64,16 @@ GetProcessImageFileName
 GetTokenInformation
 CheckTokenMembership
 CheckTokenMembershipEx
+GetSystemDefaultUILanguage
+GetUserDefaultUILanguage
+GetMonitorInfoA
+GetMonitorInfoW
+EnumDisplayDevicesW
+EnumDisplayMonitors
+GAIsProcessorFeaturePresent
+IsProcessorFeaturePresent
+GetDriveTypeA
+GetLogicalDrives
+GetSystemDefaultLCID
+GetCapture
+EnumClipboardFormats

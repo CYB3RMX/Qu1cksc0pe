@@ -1,5 +1,8 @@
+COleException
 OleInitialize
+CInvalidArgException
 CoInitialize
 CoInitializeEx
 CoCreateInstance
 CreateStreamOnHGlobal
+CException
