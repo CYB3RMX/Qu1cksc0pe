@@ -39,3 +39,6 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ## URL
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --url```<br><br>
 ![animation](.animations/url.gif)
+
+# Can you buy me a coffee m8 :) ?
+<b>My btc address</b>: <i>3CURiEGSTUyQPrQuVG2v4Uo6vVjaQBp24v</i>
