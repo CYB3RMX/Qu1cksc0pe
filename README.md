@@ -41,4 +41,4 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![animation](.animations/url.gif)
 
 # Can you buy me a coffee m8 :) ?
-<b>My btc address</b>: <i>3CURiEGSTUyQPrQuVG2v4Uo6vVjaQBp24v</i>
+<b>My BTC address</b>: <i>3CURiEGSTUyQPrQuVG2v4Uo6vVjaQBp24v</i>
