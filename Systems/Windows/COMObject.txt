@@ -6,3 +6,6 @@ CoInitializeEx
 CoCreateInstance
 CreateStreamOnHGlobal
 CException
+CoCreateGuid
+CoGetObject
+CoUninitialize

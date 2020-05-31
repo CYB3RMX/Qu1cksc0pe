@@ -1,4 +1,8 @@
 FileMode
+CreateDirectoryA
+CreateDirectory
+SHGetSpecialFolderPathA
+SHGetSpecialFolderPath
 FileStream
 FileMode
 FileAccess
@@ -10,6 +14,8 @@ GetFiles
 SaveStreamToFile
 CreateFile
 CreateFileA
+RemoveDirectoryA
+RemoveDirectory
 CreateFileW
 CopyFileA
 ReadFile
@@ -116,3 +122,4 @@ PathAddExtensionW
 PathRelativePathToW
 PathIsRootW
 PathCombineW
+SetCurrentDirectoryA

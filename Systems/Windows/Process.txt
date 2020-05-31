@@ -1,11 +1,14 @@
+CreateMutex
 CreateProcess
 GetProcessVersion
 LocalAlloc
 LocalFree
 VirtualAlloc
+CreateThread
 VirtualAllocEx
 GlobalAlloc
 HeapAlloc
+HeapFree
 VirtualProtect
 OpenProcess
 EnumProcesses

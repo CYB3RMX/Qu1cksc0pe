@@ -5,6 +5,7 @@ ASProtect
 BeRoEXEPacker
 CExe
 CEXE
+ConfuserEx
 Exe32pack
 EXECryptor
 eXPressor

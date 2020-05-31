@@ -21,7 +21,7 @@ lookPacker()
    echo -en "$cyan[$red*$cyan]$white Looking for packers...\n\n"
    for packs in ${packers[@]}
    do
-      strings $targetFile | grep $packs &>/dev/null
+      strings -a $targetFile | grep $packs &>/dev/null
       if [ $? -eq 0 ];then
 	echo -en "$red=>$white This file migth be packed with $yellow$packs$white\n"
 	checker=$((checker+1))
