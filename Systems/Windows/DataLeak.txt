@@ -1,7 +1,10 @@
 GetComputerNameA
+GetLocalTime
+GetComputerNameW
 GetSystemInfo
 LsaEnumerateLogonSessions
 SamIConnect
+GetTimeZoneInformation
 SamIGetPrivateData
 SamQueryInformationUse
 NetShareEnum
@@ -21,6 +24,7 @@ GetDC
 GetCurrentDirectoryA
 GetVersion
 GetVersionEx
+GetVersionExA
 GetThreadContext
 GetSystemDefaultLangId
 RtlGetCompressionWorkSpaceSize
@@ -77,3 +81,5 @@ GetLogicalDrives
 GetSystemDefaultLCID
 GetCapture
 EnumClipboardFormats
+GetSystemTime
+GetConsoleScreenBufferInfo

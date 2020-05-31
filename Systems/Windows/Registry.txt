@@ -34,3 +34,4 @@ RegEnumKeyW
 RegEnumKeyExW
 RegSetValueA
 RegCreateKeyA
+CLSIDFromProgID

@@ -17,14 +17,14 @@ targetFile=$1
 look()
 {
    echo -en "$cyan[$red*$cyan]$default Looking for URLs...\n\n"
-   strings $targetFile | grep -o "http://" &>/dev/null
+   strings -a $targetFile | grep -o "http://" &>/dev/null
    if [ $? -eq 0 ];then
       echo -en "$cyan[$red+$cyan]$default Found some HTTP URLs\n"
       urlFindHTTP
    else
       echo -en "$cyan[$red!$cyan]$default Nothing found about HTTP\n\n"
    fi
-   strings $targetFile | grep -o "https://" &>/dev/null
+   strings -a $targetFile | grep -o "https://" &>/dev/null
    if [ $? -eq 0 ];then
       echo -en "$cyan[$red+$cyan]$default Found some HTTPS URLs\n"
       urlFindHTTPS

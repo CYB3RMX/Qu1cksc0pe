@@ -9,6 +9,7 @@ ws2_32.dll
 rpcrt4.dll
 RPCRT4.dll
 gdi32.dll
+gdiplus.dll
 MSVCRT.dll
 msvcrt.dll
 ntdll.dll

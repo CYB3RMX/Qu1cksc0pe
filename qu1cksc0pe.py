@@ -40,7 +40,7 @@ def scope():
         "Networking/Web": Network,
         "Keyboard": Keyboard,
         "Process": Process,
-        "Dll": Dll,
+        "Dll/Resource Handling": Dll,
         "Evasion/Bypassing": Evasion_Bypassing,
         "System/Persistence": SystemPersistence,
         "COMObject": COMObject,
@@ -56,7 +56,7 @@ def scope():
             "Networking/Web": 0,
             "Keyboard": 0,
             "Process": 0,
-            "Dll": 0,
+            "Dll/Resource Handling": 0,
             "Evasion/Bypassing": 0,
             "System/Persistence": 0,
             "COMObject": 0,
@@ -96,13 +96,13 @@ def scope():
     # Accessing categories
     regdict={
         "Registry": regarr, "File": filearr, "Networking/Web": netarr, "Keyboard": keyarr,
-        "Process": procarr, "Dll": dllarr, "Evasion/Bypassing": debugarr, "System/Persistence": systarr,
+        "Process": procarr, "Dll/Resource Handling": dllarr, "Evasion/Bypassing": debugarr, "System/Persistence": systarr,
         "COMObject": comarr, "Cryptography": cryptarr,"Information Gathering": datarr, "Other": otharr
     }
 
     # Getting all strings from the file
     if args.file:
-        command = "strings {} > temp.txt".format(args.file)
+        command = "strings -a {} > temp.txt".format(args.file)
         os.system(command)
         allStrings = open("temp.txt", "r").read().split('\n')
     
@@ -148,7 +148,7 @@ def scope():
                         elif key == "Process":
                             threatScore += 5
                             scoreDict[key] +=1
-                        elif key == "Dll":
+                        elif key == "Dll/Resource Handling":
                             threatScore += 5
                             scoreDict[key] +=1
                         elif key == "Evasion/Bypassing":
@@ -186,7 +186,7 @@ def scope():
         print("\n{}->{} Statistics for: {}{}{}".format(green,white,green,args.file,white))
         print("=","+"*30,"=")
         print("{}()>{} All Functions: {}{}".format(red,white,green,allFuncs))
-        if allFuncs == 0:
+        if allFuncs < 10:
             print("\n{}[{}!{}]{} This file might be obfuscated or encrypted.\n".format(cyan,red,cyan,white))
             sys.exit(0)
 
