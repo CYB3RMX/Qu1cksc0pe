@@ -14,7 +14,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/.Screenshot.png)
 
 # Updates
-- [x] <b>23/06/2020</b>: Bug fixes.
+- [x] <b>21/07/2020</b>: Packer analyzer is upgraded and fixed bugs.
 
 # Scan arguments
 ## Windows Scan
