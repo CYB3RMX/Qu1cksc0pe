@@ -6,6 +6,11 @@ try:
 except:
     print("Missing modules detected!")
     sys.exit(1)
+try:
+    import puremagic as pr
+except:
+    print("Error: >puremagic< module not found.")
+    sys.exit(1)
 
 # Colors
 red = '\u001b[91m'
@@ -38,15 +43,25 @@ def scope():
             
     # windows scan
     if args.windows:
-        command = "python3 winAnalyzer.py {}".format(args.file)
-        os.system(command)
+        fileType = str(pr.magic_file(args.file))
+        if "Windows" in fileType:
+            command = "python3 winAnalyzer.py {}".format(args.file)
+            os.system(command)
+        else:
+            print("{}[{}!{}]{} Please enter Windows files.".format(cyan,red,cyan,white))
+            sys.exit(1)
         
     # linux scan
     if args.linux:
-        command = "readelf -a {} > elves.txt".format(args.file)
-        os.system(command)
-        command = "python3 elfAnalyzer.py {}".format(args.file)
-        os.system(command)
+        fileType = str(pr.magic_file(args.file))
+        if "ELF" in fileType:
+            command = "readelf -a {} > elves.txt".format(args.file)
+            os.system(command)
+            command = "python3 elfAnalyzer.py {}".format(args.file)
+            os.system(command)
+        else:
+            print("{}[{}!{}]{} Please enter ELF executable files.".format(cyan,red,cyan,white))
+            sys.exit(1)
         
     # metadata
     if args.metadata:
@@ -104,7 +119,7 @@ def scope():
 
     # packer detection
     if args.packer:
-        command = "bash packerDetect.sh {}".format(args.file)
+        command = "python3 packerAnalyzer.py {}".format(args.file)
         os.system(command)
         
     # url extraction
