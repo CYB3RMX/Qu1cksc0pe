@@ -15,7 +15,7 @@ try:
     apik = str(sys.argv[1])
     argument = str(sys.argv[2])
 except:
-    print("{}[{}!{}]{} Please get your api key from -> {}https://www.virustotal.com/{}".format(cyan,red,cyan,white,green,white))
+    print("{}[{}!{}]{} Please get your API key from -> {}https://www.virustotal.com/{}".format(cyan,red,cyan,white,green,white))
     sys.exit(1)
     
 # A simple AV database for querying
@@ -67,7 +67,7 @@ def FileScan():
         url = "https://www.virustotal.com/vtapi/v2/file/scan"
         params = {'apikey': apik}
         filee = {'file': (targetFile, open(targetFile, 'rb'))}
-        print("\n{}[{}+{}]{} Sending query to VirusTotal api...".format(yellow,green,yellow,white))
+        print("\n{}[{}+{}]{} Sending query to VirusTotal API...".format(yellow,green,yellow,white))
         scanRequest = requests.post(url, files=filee, params=params)
         print("{}[{}+{}]{} Query sent. Just wait a couple of seconds...".format(yellow,green,yellow,white))
         os.system("sleep 5")
@@ -122,7 +122,7 @@ def UrlScan():
     try:
         url = "https://www.virustotal.com/vtapi/v2/url/scan"
         myParams = {'apikey':apik, 'url':targetUrl}
-        print("\n{}[{}+{}]{} Sending query to VirusTotal api...".format(yellow,green,yellow,white))
+        print("\n{}[{}+{}]{} Sending query to VirusTotal API...".format(yellow,green,yellow,white))
         urlReq = requests.post(url, data=myParams)
         print("{}[{}+{}]{} Query sent. Just wait a couple of seconds...".format(yellow,green,yellow,white))
         os.system("sleep 5")

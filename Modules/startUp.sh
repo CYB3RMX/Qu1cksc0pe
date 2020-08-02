@@ -8,7 +8,7 @@ wh="\e[0m"
 ye="\e[93m"
 
 # Update checker variable
-version="21/07/2020"
+version="02/08/2020"
 
 banner()
 {
@@ -20,7 +20,7 @@ banner()
   echo -en "  $cy\_/\_|\___/ \___/\____/\_| \_/\____/ \____/\___/\_|   \____/       ${gr}@ @ @ \n"                                            
   echo -en "                                                                       @ \n"
   echo -en "                                        ${ye}|             | \n"
-  echo -en "   ${wh}Suspicious file static-analysis tool.${ye}| ${wh}By CYB3RMX_${ye} | ${wh}Version: ${gr}1.6.4 \n"
+  echo -en "   ${wh}Suspicious file static-analysis tool.${ye}| ${wh}By CYB3RMX_${ye} | ${wh}Version: ${gr}1.6.5 \n"
   echo -en "   ${ye}-------------------------------------|             |${wh} \n\n"
   updateChecker
 }

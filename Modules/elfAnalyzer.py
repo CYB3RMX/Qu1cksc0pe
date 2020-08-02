@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import os,sys
 
@@ -111,7 +111,7 @@ def Analyzer():
                         pass
             print("+","-"*30,"+\n")
     # Part 2
-    command = "bash elfAnalyz.sh"
+    command = "./Modules/elfAnalyz.sh"
     os.system(command)
     
     # Statistics zone

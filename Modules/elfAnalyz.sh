@@ -16,7 +16,7 @@ lookFor()
    echo -en "+------------------------------+\n"
    for sec in ${sectionz[@]}
    do
-       cat elves.txt | grep -o "$sec" &>/dev/null
+       cat Modules/elves.txt | grep -o "$sec" &>/dev/null
        if [ $? -eq 0 ];then
 	  echo -en "$red=>$white $sec\n"
        fi
@@ -27,7 +27,7 @@ lookFor()
    echo -en "+------------------------------+\n"
    for seg in ${segmentz[@]}
    do
-       cat elves.txt | grep -o "$seg" &>/dev/null
+       cat Modules/elves.txt | grep -o "$seg" &>/dev/null
        if [ $? -eq 0 ];then
 	  echo -en "$red=>$white $seg\n"
        fi
@@ -37,3 +37,4 @@ lookFor()
 
 # Executing
 lookFor
+rm -rf Modules/elves.txt
