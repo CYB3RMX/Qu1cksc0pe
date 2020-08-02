@@ -1,0 +1,152 @@
+[
+    {
+        "permission":"ACCEPT_HANDOVER",
+        "description":"Allows a calling app to continue a call which was started in another app. An example is a video calling app that wants to continue a voice call on the user's mobile network.",
+        "constant-value":"android.permission.ACCEPT_HANDOVER"
+    },
+    {
+        "permission":"ACCESS_BACKGROUND_LOCATION",
+        "description":"Allows an app to access location in the background. If you're requesting this permission, you must also request either ACCESS_COARSE_LOCATION or ACCESS_FINE_LOCATION. Requesting this permission by itself doesn't give you location access",
+        "constant-value": "android.permission.ACCESS_BACKGROUND_LOCATION"
+    },
+    {   
+        "permission":"ACCESS_COARSE_LOCATION",
+        "description":"Allows an app to access approximate location. Alternatively, you might want ACCESS_FINE_LOCATION.",
+        "constant-value":"android.permission.ACCESS_COARSE_LOCATION"
+    },
+    {
+        "permission":"ACCESS_FINE_LOCATION", 
+        "description":"Allows an app to access precise location. Alternatively, you might want ACCESS_COARSE_LOCATION.",
+        "constant-value":"android.permission.ACCESS_FINE_LOCATION"
+    },
+    {  
+        "permission":"ACCESS_MEDIA_LOCATION",
+        "description":"Allows an application to access any geographic locations persisted in the user's shared collection.",
+        "constant-value":"android.permission.ACCESS_MEDIA_LOCATION"
+    },
+    {
+        "permission":"ACTIVITY_RECOGNITION", 
+        "description":"Allows an application to recognize physical activity.",
+        "constant-value":"android.permission.ACTIVITY_RECOGNITION"
+    },
+    {   
+        "permission":"ADD_VOICEMAIL",
+        "description":"Allows an application to add voicemails into the system.",
+        "constant-value":"com.android.voicemail.permission.ADD_VOICEMAIL"
+    },
+    {   
+        "permission":"ANSWER_PHONE_CALLS",
+        "description":"Allows the app to answer an incoming phone call.",
+        "constant-value":"android.permission.ANSWER_PHONE_CALLS"
+    },
+    {
+        "permission":"BODY_SENSORS",
+        "description":"Allows an application to access data from sensors that the user uses to measure what is happening inside his/her body, such as heart rate.",
+        "constant-value":"android.permission.BODY_SENSORS"
+    },
+    {
+        "permission":"CALL_PHONE",
+        "description":"Allows an application to initiate a phone call without going through the Dialer user interface for the user to confirm the call.",
+        "constant-value":"android.permission.CALL_PHONE"
+    },
+    {
+        "permission":"CAMERA",
+        "description":"Required to be able to access the camera device.",
+        "constant-value":"android.permission.CAMERA"
+    },
+    {
+        "permission":"GET_ACCOUNTS",
+        "description":"Allows access to the list of accounts in the Accounts Service.",
+        "constant-value":"android.permission.GET_ACCOUNTS"
+    },
+    {  
+        "permission":"PROCESS_OUTGOING_CALLS",
+        "description":"Allows an application to see the number being dialed during an outgoing call with the option to redirect the call to a different number or abort the call altogether.",
+        "constant-value":"android.permission.PROCESS_OUTGOING_CALLS"
+    },
+    {
+        "permission":"READ_CALENDAR",    
+        "description":"Allows an application to read the user's calendar data.",
+        "constant-value":"android.permission.READ_CALENDAR"
+    },
+    {
+        "permission":"READ_CALL_LOG",
+        "description":"Allows an application to read the user's call log.",
+        "constant-value":"android.permission.READ_CALL_LOG"
+    },
+    {
+        "permission":"READ_CONTACTS",
+        "description":"Allows an application to read the user's contacts data.",
+        "constant-value":"android.permission.READ_CONTACTS"
+    },
+    {
+        "permission":"READ_EXTERNAL_STORAGE",
+        "description":"Allows an application to read from external storage.",
+        "constant-value":"android.permission.READ_EXTERNAL_STORAGE"
+    },
+    {
+        "permission":"READ_PHONE_NUMBERS",
+        "description":"Allows read access to the device's phone number(s).",
+        "constant-value":"android.permission.READ_PHONE_NUMBERS"
+    },
+    {
+        "permission":"READ_PHONE_STATE",
+        "description":"Allows read only access to phone state, including the current cellular network information, the status of any ongoing calls, and a list of any PhoneAccounts registered on the device.",
+        "constant-value":"android.permission.READ_PHONE_STATE"
+    },
+    {
+        "permission":"READ_SMS",
+        "description":"Allows an application to read SMS messages.",
+        "constant-value":"android.permission.READ_SMS"
+    },
+    {
+        "permission":"RECEIVE_MMS",
+        "description":"Allows an application to monitor incoming MMS messages.",
+        "constant-value":"android.permission.RECEIVE_MMS"
+    },
+    {
+        "permission":"RECEIVE_SMS",
+        "description":"Allows an application to receive SMS messages.",
+        "constant-value":"android.permission.RECEIVE_SMS"
+    },
+    {
+        "permission":"RECEIVE_WAP_PUSH",
+        "description":"Allows an application to receive WAP push messages.",
+        "constant-value":"android.permission.RECEIVE_WAP_PUSH"
+    },
+    {
+        "permission":"RECORD_AUDIO",
+        "description":"Allows an application to record audio.",
+        "constant-value":"android.permission.RECORD_AUDIO"
+    },
+    {
+        "permission":"SEND_SMS",
+        "description":"Allows an application to send SMS messages.",
+        "constant-value":"android.permission.SEND_SMS"
+    },
+    {
+        "permission":"USE_SIP",
+        "description":"Allows an application to use SIP service.",
+        "constant-value":"android.permission.USE_SIP"
+    },
+    {
+        "permission":"WRITE_CALENDAR",
+        "description":"Allows an application to write the user's calendar data.",
+        "constant-value":"android.permission.WRITE_CALENDAR"
+    },
+    {
+        "permission":"WRITE_CALL_LOG",
+        "description":"Allows an application to write (but not read) the user's call log data.",
+        "constant-value":"android.permission.WRITE_CALL_LOG"
+    },
+    {
+        "permission":"WRITE_CONTACTS",
+        "description":"Allows an application to write the user's contacts data.",
+        "constant-value":"android.permission.WRITE_CONTACTS"
+    },
+    {
+        "permission":"WRITE_EXTERNAL_STORAGE",
+        "description":"Allows an application to write to external storage.",
+        "constant-value":"android.permission.WRITE_EXTERNAL_STORAGE"
+    }
+]

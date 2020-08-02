@@ -2,7 +2,7 @@
 
 # module checking
 try:
-    import os,sys,argparse,getpass
+    import os,sys,argparse
 except:
     print("Missing modules detected!")
     sys.exit(1)
@@ -28,12 +28,13 @@ def scope():
     parser.add_argument("--file",required=False,help="Select a suspicious file.")
     parser.add_argument("--windows",required=False,help="Analyze Windows files.",action="store_true")
     parser.add_argument("--linux",required=False,help="Analyze Linux files.",action="store_true")
-    parser.add_argument("--vtFile",required=False,help="Scan your file with VirusTotal api.",action="store_true")
-    parser.add_argument("--vtUrl",required=False,help="Scan your URL with VirusTotal api.",action="store_true")
+    parser.add_argument("--android",required=False,help="Analyze APK files.",action="store_true")
+    parser.add_argument("--vtFile",required=False,help="Scan your file with VirusTotal API.",action="store_true")
+    parser.add_argument("--vtUrl",required=False,help="Scan your URL with VirusTotal API.",action="store_true")
     parser.add_argument("--metadata",required=False,help="Get exif/metadata information.",action="store_true")
     parser.add_argument("--url",required=False,help="Extract URLs from file.",action="store_true")
     parser.add_argument("--packer",required=False,help="Check if your file is packed with common packers.",action="store_true")
-    parser.add_argument("--key_init",required=False,help="Enter your VirusTotal api key.",action="store_true")
+    parser.add_argument("--key_init",required=False,help="Enter your VirusTotal API key.",action="store_true")
     args = parser.parse_args()
 
     # Getting all strings from the file
@@ -45,7 +46,8 @@ def scope():
     if args.windows:
         fileType = str(pr.magic_file(args.file))
         if "Windows" in fileType:
-            command = "python3 winAnalyzer.py {}".format(args.file)
+            print("{}[{}*{}]{} Analyzing: {}{}{}\n".format(cyan,red,cyan,white,green,args.file,white))
+            command = "./Modules/winAnalyzer.py {}".format(args.file)
             os.system(command)
         else:
             print("{}[{}!{}]{} Please enter Windows files.".format(cyan,red,cyan,white))
@@ -55,13 +57,24 @@ def scope():
     if args.linux:
         fileType = str(pr.magic_file(args.file))
         if "ELF" in fileType:
-            command = "readelf -a {} > elves.txt".format(args.file)
+            print("{}[{}*{}]{} Analyzing: {}{}{}\n".format(cyan,red,cyan,white,green,args.file,white))
+            command = "readelf -a {} > Modules/elves.txt".format(args.file)
             os.system(command)
-            command = "python3 elfAnalyzer.py {}".format(args.file)
+            command = "./Modules/elfAnalyzer.py {}".format(args.file)
             os.system(command)
         else:
             print("{}[{}!{}]{} Please enter ELF executable files.".format(cyan,red,cyan,white))
             sys.exit(1)
+
+    # Android scan
+    if args.android:
+        fileType = str(pr.magic_file(args.file))
+        if "PK" in fileType:
+            command = "./Modules/apkAnalyzer.py {}".format(args.file)
+            print("{}[{}*{}]{} Analyzing: {}{}{}".format(cyan,red,cyan,white,green,args.file,white))
+            os.system(command)
+        else:
+            print("{}[{}!{}]{} Please enter APK files.".format(cyan,red,cyan,white))
         
     # metadata
     if args.metadata:
@@ -76,8 +89,7 @@ def scope():
 
         # if there is no key quit
         try:
-            user = getpass.getuser()
-            directory = "/home/{}/.apikey.txt".format(user)
+            directory = "Modules/.apikey.txt"
             apik = open(directory, "r").read().split("\n")
         except:
             print("{}[{}!{}]{} Use --key_init to enter your key.".format(cyan,red,cyan,white))
@@ -90,7 +102,7 @@ def scope():
         else: 
             print("\n{}[{}+{}]{} VirusTotal Scan".format(cyan,red,cyan,white))
             print("+","-"*50,"+")
-            command = "python3 VTwrapper.py {} --vtFile {}".format(apik[0],args.file)
+            command = "./Modules/VTwrapper.py {} --vtFile {}".format(apik[0],args.file)
             os.system(command)
             print("+","-"*50,"+")
 
@@ -99,8 +111,7 @@ def scope():
 
         # if there is no key quit
         try:
-            user = getpass.getuser()
-            directory = "/home/{}/.apikey.txt".format(user)
+            directory = "Modules/.apikey.txt"
             apik = open(directory, "r").read().split("\n")
         except:
             print("{}[{}!{}]{} Use --key_init to enter your key.".format(cyan,red,cyan,white))
@@ -113,32 +124,31 @@ def scope():
         else:
             print("\n{}[{}+{}]{} VirusTotal Scan".format(cyan,red,cyan,white))
             print("+","-"*50,"+")
-            command = "python3 VTwrapper.py {} --vtUrl".format(apik[0])
+            command = "./Modules/VTwrapper.py {} --vtUrl".format(apik[0])
             os.system(command)
             print("+","-"*50,"+")
 
     # packer detection
     if args.packer:
-        command = "python3 packerAnalyzer.py {}".format(args.file)
+        command = "./Modules/packerAnalyzer.py {}".format(args.file)
         os.system(command)
         
     # url extraction
     if args.url:
-        command = "bash urlCatcher.sh {}".format(args.file)
+        command = "./Modules/urlCatcher.sh {}".format(args.file)
         os.system(command)
 
     # entering VT API key
     if args.key_init:
         apikey = str(input("{}[{}+{}]{} Enter your VirusTotal API key: ".format(cyan,red,cyan,white)))
-        user = getpass.getuser()
-        command = "echo '{}' > /home/{}/.apikey.txt".format(apikey,user)
+        command = "echo '{}' > Modules/.apikey.txt".format(apikey)
         os.system(command)
         print("{}[{}+{}]{} Your VirusTotal API key saved.".format(cyan,red,cyan,white))
 
 # Exectuion area
-os.system("bash .startUp.sh")
+os.system("./Modules/startUp.sh")
 try:
     scope()
-    os.system("rm -rf temp.txt elves.txt")
+    os.system("rm -rf temp.txt")
 except:
-    os.system("rm -rf temp.txt elves.txt")
+    os.system("rm -rf temp.txt")
