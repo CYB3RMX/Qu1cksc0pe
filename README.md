@@ -14,7 +14,9 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/.Screenshot.png)
 
 # Updates
-- [x] <b>02/08/2020</b>: Added ```--android``` argument. Now you can analyze APK files.
+<b>02/08/2020</b>
+- [x] Added ```--android``` argument. Now you can analyze APK files.
+- [X] Added new banners!!
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic``` and ```androguard```<br>
