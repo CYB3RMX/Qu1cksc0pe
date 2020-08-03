@@ -35,6 +35,7 @@ def scope():
     parser.add_argument("--url",required=False,help="Extract URLs from file.",action="store_true")
     parser.add_argument("--packer",required=False,help="Check if your file is packed with common packers.",action="store_true")
     parser.add_argument("--key_init",required=False,help="Enter your VirusTotal API key.",action="store_true")
+    parser.add_argument("--update",required=False,help="Check for updates.",action="store_true")
     args = parser.parse_args()
 
     # Getting all strings from the file
@@ -145,8 +146,13 @@ def scope():
         os.system(command)
         print("{}[{}+{}]{} Your VirusTotal API key saved.".format(cyan,red,cyan,white))
 
+    # Update checking
+    if args.update:
+        command = "./Modules/updateCheck.sh"
+        os.system(command)
+
 # Exectuion area
-os.system("./Modules/startUp.sh")
+os.system("./Modules/banners.sh")
 try:
     scope()
     os.system("rm -rf temp.txt")

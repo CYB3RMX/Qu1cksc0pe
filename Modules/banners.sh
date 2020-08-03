@@ -8,9 +8,6 @@ wh="\e[0m"
 ye="\e[93m"
 ma="\e[95m"
 
-# Update checker variable
-version="02/08/2020"
-
 banner()
 {
   echo -en " $cy _____ _   _  __  _____  _   __ _____ _____ ___________ _____         ${gr}@ \n"
@@ -21,9 +18,8 @@ banner()
   echo -en "  $cy\_/\_|\___/ \___/\____/\_| \_/\____/ \____/\___/\_|   \____/       ${gr}@ @ @ \n"                                            
   echo -en "                                                                       @ \n"
   echo -en "                                        ${ye}|             | \n"
-  echo -en "   ${wh}Suspicious file static-analysis tool.${ye}| ${wh}By CYB3RMX_${ye} | ${wh}Version: ${gr}1.6.5 \n"
+  echo -en "   ${wh}Suspicious file static-analysis tool.${ye}| ${wh}By CYB3RMX_${ye} | ${wh}Version: ${gr}1.6.6 \n"
   echo -en "   ${ye}-------------------------------------|             |${wh} \n\n"
-  updateChecker
 }
 banner1()
 {
@@ -35,11 +31,10 @@ banner1()
   echo -en "$ma  dmmMMMMMMNmmNMMMMMMMMNmmNMMMMMMmmm   $wh|                              |\n"
   echo -en "$ma  NMMyoodMMMMMMMMMMMMMMMMMMMMdoosMMM   $wh| ${gr}Malware static analysis tool.$wh|\n"
   echo -en "$ma  NMM-  sMMMNNNNNNNNNNNNNNNMMy  .MMM   $wh|                              |\n"
-  echo -en "$ma  NMM-  sMMyvvvvvvvvvvvvvvsMMy  .MMM   $wh|       ${gr}Version$wh:$ye 1.6.5         $wh|\n"
+  echo -en "$ma  NMM-  sMMyvvvvvvvvvvvvvvsMMy  .MMM   $wh|       ${gr}Version$wh:$ye 1.6.6         $wh|\n"
   echo -en "$ma  ooo.  :ooooooo+    +ooooooo/   ooo   $wh+------------|||||||-----------+\n"
   echo -en "$ma           /MMMMN    mMMMM+                        $wh |||||||            \n"
   echo -en "                                                    |||||||            \n\n"
-  updateChecker
 }
 banner2()
 {
@@ -49,7 +44,7 @@ banner2()
   echo -en "      /                \ \n"
   echo -en "     ;   Qu1cksc0pe    ;; \n"
   echo -en "     |                 |;  \n"
-  echo -en "     ;     v1.6.5      ;| \n"
+  echo -en "     ;     v1.6.6      ;| \n"
   echo -en "     ;\               / ; \n"
   echo -en "      \ .           .  / \n"
   echo -en "        . -._____.-  . \n"
@@ -64,7 +59,6 @@ banner2()
   echo -en " / / / \n"
   echo -en "/ / / \n"
   echo -en "\/_/ \n\n"
-  updateChecker
 }
 banner3()
 {
@@ -79,19 +73,8 @@ banner3()
   echo -en "  |_|_|_| |__| |_|_|_| \n"
   echo -en "    |_|_        _|_|   $wh<- Mr. Virus\n"
   echo -en "$gr      |_|      |_| \n\n"
-  updateChecker
 }
-updateChecker()
-{
-   echo -en "$cy[$re*$cy]$wh Checking updates...\n"
-   buffer=$(curl -sSL https://raw.githubusercontent.com/CYB3RMX/Qu1cksc0pe/master/README.md)
-   echo $buffer | grep -o $version &>/dev/null
-   if [ $? != 0 ];then
-      echo -en "$cy[$re!$cy]$wh STATE: ${re}Outdated$wh.\n\n"
-   else
-      echo -en "$cy[$re*$cy]$wh STATE: ${gr}Up to date$wh.\n\n"
-   fi
-}
+
 # Execute functions
 randomStart=$(( RANDOM % 4 ))
 case $randomStart in
