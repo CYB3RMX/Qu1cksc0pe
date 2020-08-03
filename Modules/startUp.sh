@@ -66,6 +66,21 @@ banner2()
   echo -en "\/_/ \n\n"
   updateChecker
 }
+banner3()
+{
+  echo -en "                   <------------------------------------------>\n"
+  echo -en "                   <  This tool is very dangerous. Be careful >\n"
+  echo -en "$gr           __      $wh<   while using it!!                       >\n"
+  echo -en "$gr         _|  |_    $wh<------------------------------------------>\n"
+  echo -en "$gr       _|      |_  $wh /\n"
+  echo -en "$gr      |  _    _  | $wh/\n"
+  echo -en "$gr      | |_|  |_| | \n"
+  echo -en "   _  |  _    _  |  _ \n"
+  echo -en "  |_|_|_| |__| |_|_|_| \n"
+  echo -en "    |_|_        _|_|   $wh<- Mr. Virus\n"
+  echo -en "$gr      |_|      |_| \n\n"
+  updateChecker
+}
 updateChecker()
 {
    echo -en "$cy[$re*$cy]$wh Checking updates...\n"
@@ -78,9 +93,10 @@ updateChecker()
    fi
 }
 # Execute functions
-randomStart=$(( RANDOM % 3 ))
+randomStart=$(( RANDOM % 4 ))
 case $randomStart in
 	0) banner ;;
 	1) banner1 ;;
 	2) banner2 ;;
+	3) banner3 ;;
 esac
