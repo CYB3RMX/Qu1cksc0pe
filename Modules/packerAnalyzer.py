@@ -20,12 +20,15 @@ os.system(command)
 
 # Simple analyzer function
 def Analyzer():
+    packed = 0
     allHex = open("hexcodes.txt", "r").read()
 
-    print("{}[{}*{}]{} Looking for packers...".format(cyan,red,cyan,white))
     for pack in file_sigs:
         if file_sigs[pack] in allHex:
+            packed += 1
             print("{}[{}+{}]{} This file might be packed with {}{}".format(cyan,red,cyan,white,green,pack))
+    if packed == 0:
+        print("{}[{}!{}]{} Nothing found.".format(cyan,red,cyan,white))
 
 # Execute and clean up
 Analyzer()

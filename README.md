@@ -14,8 +14,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/.Screenshot.png)
 
 # Updates
-<b>04/08/2020</b>
-- [x] Removed ```--windows```, ```--linux``` and ```--android```. Now Qu1cksc0pe will identify target OS itself.
+<b>05/08/2020</b>
+- [x] Bug fixes.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic``` and ```androguard```<br>

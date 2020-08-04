@@ -117,6 +117,7 @@ def scope():
 
     # packer detection
     if args.packer:
+        print("{}[{}*{}]{} Looking for packers...".format(cyan,red,cyan,white))
         command = "./Modules/packerAnalyzer.py {}".format(args.file)
         os.system(command)
         
