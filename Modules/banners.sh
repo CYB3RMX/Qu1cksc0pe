@@ -18,7 +18,7 @@ banner()
   echo -en "  $cy\_/\_|\___/ \___/\____/\_| \_/\____/ \____/\___/\_|   \____/       ${gr}@ @ @ \n"                                            
   echo -en "                                                                       @ \n"
   echo -en "                                        ${ye}|             | \n"
-  echo -en "   ${wh}Suspicious file static-analysis tool.${ye}| ${wh}By CYB3RMX_${ye} | ${wh}Version: ${gr}1.6.6 \n"
+  echo -en "   ${wh}Suspicious file static-analysis tool.${ye}| ${wh}By CYB3RMX_${ye} | ${wh}Version: ${gr}1.6.7 \n"
   echo -en "   ${ye}-------------------------------------|             |${wh} \n\n"
 }
 banner1()
@@ -31,7 +31,7 @@ banner1()
   echo -en "$ma  dmmMMMMMMNmmNMMMMMMMMNmmNMMMMMMmmm   $wh|                              |\n"
   echo -en "$ma  NMMyoodMMMMMMMMMMMMMMMMMMMMdoosMMM   $wh| ${gr}Malware static analysis tool.$wh|\n"
   echo -en "$ma  NMM-  sMMMNNNNNNNNNNNNNNNMMy  .MMM   $wh|                              |\n"
-  echo -en "$ma  NMM-  sMMyvvvvvvvvvvvvvvsMMy  .MMM   $wh|       ${gr}Version$wh:$ye 1.6.6         $wh|\n"
+  echo -en "$ma  NMM-  sMMyvvvvvvvvvvvvvvsMMy  .MMM   $wh|       ${gr}Version$wh:$ye 1.6.7         $wh|\n"
   echo -en "$ma  ooo.  :ooooooo+    +ooooooo/   ooo   $wh+------------|||||||-----------+\n"
   echo -en "$ma           /MMMMN    mMMMM+                        $wh |||||||            \n"
   echo -en "                                                    |||||||            \n\n"
@@ -44,7 +44,7 @@ banner2()
   echo -en "      /                \ \n"
   echo -en "     ;   Qu1cksc0pe    ;; \n"
   echo -en "     |                 |;  \n"
-  echo -en "     ;     v1.6.6      ;| \n"
+  echo -en "     ;     v1.6.7      ;| \n"
   echo -en "     ;\               / ; \n"
   echo -en "      \ .           .  / \n"
   echo -en "        . -._____.-  . \n"

@@ -26,9 +26,7 @@ def scope():
     # Argument crating and parsing
     parser = argparse.ArgumentParser()
     parser.add_argument("--file",required=False,help="Select a suspicious file.")
-    parser.add_argument("--windows",required=False,help="Analyze Windows files.",action="store_true")
-    parser.add_argument("--linux",required=False,help="Analyze Linux files.",action="store_true")
-    parser.add_argument("--android",required=False,help="Analyze APK files.",action="store_true")
+    parser.add_argument("--analyze",required=False,help="Analyze target file.",action="store_true")
     parser.add_argument("--vtFile",required=False,help="Scan your file with VirusTotal API.",action="store_true")
     parser.add_argument("--vtUrl",required=False,help="Scan your URL with VirusTotal API.",action="store_true")
     parser.add_argument("--metadata",required=False,help="Get exif/metadata information.",action="store_true")
@@ -42,41 +40,29 @@ def scope():
     if args.file:
         command = "strings -a {} > temp.txt".format(args.file)
         os.system(command)
-            
-    # windows scan
-    if args.windows:
+    
+    # Analyze the target file
+    if args.analyze:
+        print("{}[{}*{}]{} Analyzing: {}{}{}".format(cyan,red,cyan,white,green,args.file,white))
         fileType = str(pr.magic_file(args.file))
-        if "Windows" in fileType:
-            print("{}[{}*{}]{} Analyzing: {}{}{}\n".format(cyan,red,cyan,white,green,args.file,white))
+        if "Windows Executable" in fileType:
+            print("{}[{}*{}]{} Target OS: {}Windows{}\n".format(cyan,red,cyan,white,green,white))
             command = "./Modules/winAnalyzer.py {}".format(args.file)
             os.system(command)
-        else:
-            print("{}[{}!{}]{} Please enter Windows files.".format(cyan,red,cyan,white))
-            sys.exit(1)
-        
-    # linux scan
-    if args.linux:
-        fileType = str(pr.magic_file(args.file))
-        if "ELF" in fileType:
-            print("{}[{}*{}]{} Analyzing: {}{}{}\n".format(cyan,red,cyan,white,green,args.file,white))
+        elif "ELF" in fileType:
+            print("{}[{}*{}]{} Target OS: {}Linux\n{}".format(cyan,red,cyan,white,green,white))
             command = "readelf -a {} > Modules/elves.txt".format(args.file)
             os.system(command)
             command = "./Modules/elfAnalyzer.py {}".format(args.file)
             os.system(command)
-        else:
-            print("{}[{}!{}]{} Please enter ELF executable files.".format(cyan,red,cyan,white))
-            sys.exit(1)
-
-    # Android scan
-    if args.android:
-        fileType = str(pr.magic_file(args.file))
-        if "PK" in fileType:
+        elif "PK" in fileType:
+            print("{}[{}*{}]{} Target OS: {}Android\n{}".format(cyan,red,cyan,white,green,white))
             command = "./Modules/apkAnalyzer.py {}".format(args.file)
-            print("{}[{}*{}]{} Analyzing: {}{}{}".format(cyan,red,cyan,white,green,args.file,white))
             os.system(command)
         else:
-            print("{}[{}!{}]{} Please enter APK files.".format(cyan,red,cyan,white))
-        
+            print("{}[{}!{}]{} Target OS could not detected. Make sure your file extension is Windows(exe),Linux(ELF) or Android(APK)".format(cyan,red,cyan,white))
+            sys.exit(1)
+
     # metadata
     if args.metadata:
         print("{}[{}+{}]{} Exif/Metadata information".format(cyan,red,cyan,white))
