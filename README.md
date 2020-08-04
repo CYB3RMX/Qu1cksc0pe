@@ -7,15 +7,15 @@
 You can get used dll files, functions, sections, segments, urls, domains and permissions from your suspicious files.<br>
 Qu1cksc0pe aims to get even more information about suspicious files and helps to user realizing what that file capable of.
 
-- [x] Usage: ```python3 qu1cksc0pe.py --file suspicious_file --windows/--linux/--android```
-- [x] Alternative usage: ```python3 qu1cksc0pe.py --file [PATH TO FILE] --windows/--linux/--android```
+- [x] Usage: ```python3 qu1cksc0pe.py --file suspicious_file --analyze```
+- [x] Alternative usage: ```python3 qu1cksc0pe.py --file [PATH TO FILE] --analyze```
 
 # Screenshot
 ![Screen](.animations/.Screenshot.png)
 
 # Updates
-<b>03/08/2020</b>
-- [x] Added ```--update``` argument.
+<b>04/08/2020</b>
+- [x] Removed ```--windows```, ```--linux``` and ```--android```. Now Qu1cksc0pe will detect target OS itself.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic``` and ```androguard```<br>
