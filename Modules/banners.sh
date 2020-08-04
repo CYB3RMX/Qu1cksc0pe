@@ -72,7 +72,7 @@ banner3()
   echo -en "   _  |  _    _  |  _ \n"
   echo -en "  |_|_|_| |__| |_|_|_| \n"
   echo -en "    |_|_        _|_|   $wh<- Mr. Virus\n"
-  echo -en "$gr      |_|      |_| \n\n"
+  echo -en "$gr      |_|      |_|$wh \n\n"
 }
 
 # Execute functions
