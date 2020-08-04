@@ -15,7 +15,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 
 # Updates
 <b>04/08/2020</b>
-- [x] Removed ```--windows```, ```--linux``` and ```--android```. Now Qu1cksc0pe will detect target OS itself.
+- [x] Removed ```--windows```, ```--linux``` and ```--android```. Now Qu1cksc0pe will identify target OS itself.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic``` and ```androguard```<br>
@@ -26,17 +26,9 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - <i>Binutils</i>: ```sudo apt-get install binutils```
 
 # Scan arguments
-## Windows Scan
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious.exe --windows```<br>
-![animation](.animations/windows.gif)
-
-## Linux Scan
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --linux```<br>
-![animation](.animations/linux.gif)
-
-## Android Scan
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious.apk --android```<br>
-![animation](.animations/android.gif)
+## Normal analysis
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --analyze```<br>
+![animation](.animations/analyze.gif)
 
 ## VirusTotal
 <b>Usage for --vtFile</b>: ```python3 qu1cksc0pe.py --file suspicious_file --vtFile```<br>
