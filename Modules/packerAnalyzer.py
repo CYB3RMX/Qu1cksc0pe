@@ -29,4 +29,4 @@ def Analyzer():
 
 # Execute and clean up
 Analyzer()
-os.system("rm -rf hexcodes.txt")
+os.system("rm hexcodes.txt")
