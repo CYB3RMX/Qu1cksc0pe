@@ -37,4 +37,4 @@ lookFor()
 
 # Executing
 lookFor
-rm -rf Modules/elves.txt
+rm Modules/elves.txt
