@@ -56,3 +56,12 @@ SetUnhandledExceptionFilter
 CWinThread
 SetThreadStackGuarantee
 WinExec
+TlsAlloc
+HeapSize
+HeapReAlloc
+TlsFree
+FreeConsole
+CloseHandle
+HeapCreate
+VirtualFree
+HeapDestroy

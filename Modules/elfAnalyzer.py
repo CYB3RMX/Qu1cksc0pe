@@ -126,7 +126,8 @@ def Analyzer():
     print("=","+"*30,"=")
     
     # score table
-    print("\n+-------------------------+")
+    print("\n{}[{}!{}]{} ATTENTION: There might be false positives in scores.".format(cyan,red,cyan,white))
+    print("+-------------------------+")
     print("|    Threat Score Table   |")
     print("|-------------------------|")
     print("| Point    |  State       |")

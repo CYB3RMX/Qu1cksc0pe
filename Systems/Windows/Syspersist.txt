@@ -10,3 +10,7 @@ ShellExecuteW
 ShellExecuteExW
 ShellExecuteA
 NotifyWinEvent
+RegisterServiceCtrlHandlerW
+RegisterServiceCtrlHandlerA
+RegisterServiceCtrlHandlerEx
+SetServiceStatus

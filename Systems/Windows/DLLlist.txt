@@ -67,3 +67,5 @@ URLMON.dll
 libgcc_s_dw2-1.dll
 libgcj-13.dll
 SecureDll.dll
+svchost.dll
+MemoryLoad.dll

@@ -123,3 +123,4 @@ PathRelativePathToW
 PathIsRootW
 PathCombineW
 SetCurrentDirectoryA
+SetHandleCount

@@ -83,3 +83,4 @@ GetCapture
 EnumClipboardFormats
 GetSystemTime
 GetConsoleScreenBufferInfo
+QueryPerformanceCounter

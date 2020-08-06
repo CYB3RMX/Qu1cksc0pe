@@ -153,7 +153,7 @@ def Analyzer():
             print("+","-"*35,"+\n")
 
     # printing extracted dll files
-    print("{}[{}+{}]{} Used DLL files".format(cyan,red,cyan,white))
+    print("{}[{}+{}]{} Extracted DLL Strings".format(cyan,red,cyan,white))
     print("+","-"*20,"+")
     for dl in allStrings:
         if dl in dllArray:
@@ -178,7 +178,8 @@ def Analyzer():
     print("=","+"*30,"=")
 
     # score table
-    print("\n+-------------------------+")
+    print("\n{}[{}!{}]{} ATTENTION: There might be false positives in scores.".format(cyan,red,cyan,white))
+    print("+-------------------------+")
     print("|    Threat Score Table   |")
     print("|-------------------------|")
     print("| Point    |  State       |")
