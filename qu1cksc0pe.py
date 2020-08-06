@@ -142,6 +142,6 @@ def scope():
 os.system("./Modules/banners.sh")
 try:
     scope()
-    os.system("rm temp.txt")
+    os.system("if [ -e temp.txt ];then rm -f temp.txt; fi")
 except:
-    os.system("rm temp.txt")
+    os.system("if [ -e temp.txt ];then rm -f temp.txt; fi")
