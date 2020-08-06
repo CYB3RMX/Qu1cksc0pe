@@ -60,3 +60,6 @@ SetLastErrorEx
 SafeArrayAccessData
 VariantTimeToSystemTime
 ReadConsoleInputA
+InterlockedIncrement
+InterlockedDecrement
+LCMapStringW

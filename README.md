@@ -14,7 +14,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/.Screenshot.png)
 
 # Updates
-<b>06/08/2020</b>
+<b>07/08/2020</b>
+- [X] Added more Windows API/Functions.
 - [x] Bug fixes.
 
 # Setup

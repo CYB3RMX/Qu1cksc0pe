@@ -16,3 +16,5 @@ GetModuleHandleW
 EnumProcessModules
 InitCommonControlsEx
 LoadTypeLib
+FreeLibrary
+DisableThreadLibraryCalls
