@@ -45,7 +45,7 @@ def scope():
     if args.analyze:
         print("{}[{}*{}]{} Analyzing: {}{}{}".format(cyan,red,cyan,white,green,args.file,white))
         fileType = str(pr.magic_file(args.file))
-        if "Windows Executable" in fileType:
+        if "Windows Executable" in fileType or ".msi" in fileType or ".dll" in fileType or ".exe" in fileType:
             print("{}[{}*{}]{} Target OS: {}Windows{}\n".format(cyan,red,cyan,white,green,white))
             command = "./Modules/winAnalyzer.py {}".format(args.file)
             os.system(command)
@@ -60,7 +60,7 @@ def scope():
             command = "./Modules/apkAnalyzer.py {}".format(args.file)
             os.system(command)
         else:
-            print("{}[{}!{}]{} Target OS could not detected. Make sure your file extension is Windows(exe),Linux(ELF) or Android(APK)".format(cyan,red,cyan,white))
+            print("{}[{}!{}]{} Target OS could not identified. Make sure your file extension is Windows(exe,dll,msi),Linux(ELF) or Android(APK)".format(cyan,red,cyan,white))
             sys.exit(1)
 
     # metadata

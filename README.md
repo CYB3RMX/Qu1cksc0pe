@@ -14,9 +14,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/.Screenshot.png)
 
 # Updates
-<b>07/08/2020</b>
-- [X] Added more Windows API/Functions.
-- [x] Bug fixes.
+<b>11/08/2020</b>
+- [X] Added some improvements for OS identifying.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic``` and ```androguard```<br>
