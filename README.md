@@ -24,6 +24,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 <b>Gathering other dependencies<b>
 - <i>VirusTotal</i>: ```https://virustotal.com```
 - <i>Binutils</i>: ```sudo apt-get install binutils```
+- <i>ExifTool</i>: ```sudo apt-get install exiftool```
 
 # Scan arguments
 ## Normal analysis
