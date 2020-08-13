@@ -6,11 +6,11 @@ import os,sys
 fileName = str(sys.argv[1])
 
 # Colors
-red = '\u001b[91m'
-cyan = '\u001b[96m'
+red = '\u001b[1;91m'
+cyan = '\u001b[1;96m'
 white = '\u001b[0m'
-green = '\u001b[92m'
-yellow = '\u001b[93m'
+green = '\u001b[1;92m'
+yellow = '\u001b[1;93m'
 
 # Keywords for categorized scanning
 allStrings = open("temp.txt", "r").read().split('\n')
@@ -100,16 +100,16 @@ def Analyzer():
             
             # More important categories
             if key == "Keyboard" or key == "Evasion/Bypassing" or key == "System/Persistence" or key == "Cryptography" or key == "Information Gathering":
-                print("\n{}[{}!{}]__WARNING__[{}!{}]".format(yellow,red,yellow,red,yellow))
+                print(f"\n{yellow}[{red}!{yellow}]__WARNING__[{red}!{yellow}]")
             
             # Printing zone
-            print("{}[{}+{}]{} Functions/Strings about {}".format(cyan,red,cyan,white,key))
+            print(f"{cyan}[{red}+{cyan}]{white} Extracted Functions/Strings about {key}")
             print("+","-"*35,"+")
             for i in dictCateg[key]:
                 if i == "":
                     pass
                 else:
-                    print("{}=> {}{}".format(red,white,i))
+                    print(f"{red}=> {white}{i}")
 
                     # Calculating threat score
                     if key == "Registry":
@@ -153,20 +153,20 @@ def Analyzer():
             print("+","-"*35,"+\n")
 
     # printing extracted dll files
-    print("{}[{}+{}]{} Extracted DLL Strings".format(cyan,red,cyan,white))
+    print(f"{cyan}[{red}+{cyan}]{white} Extracted DLL Strings")
     print("+","-"*20,"+")
     for dl in allStrings:
         if dl in dllArray:
             if dl != "":
-                print("{}=> {}{}".format(red,white,dl))
+                print(f"{red}=> {white}{dl}")
     print("+","-"*20,"+")
 
     # Statistics zone
-    print("\n{}->{} Statistics for: {}{}{}".format(green,white,green,fileName,white))
+    print(f"\n{green}->{white} Statistics for: {green}{fileName}{white}")
     print("=","+"*30,"=")
-    print("{}()>{} All Functions: {}{}".format(red,white,green,allFuncs))
+    print(f"{red}()>{white} All Functions: {green}{allFuncs}")
     if allFuncs < 10:
-        print("\n{}[{}!{}]{} This file might be obfuscated or encrypted.\n".format(cyan,red,cyan,white))
+        print(f"\n{cyan}[{red}!{cyan}]{white} This file might be obfuscated or encrypted.\n")
         sys.exit(0)
 
     # printing all function statistics
@@ -174,29 +174,29 @@ def Analyzer():
         if scoreDict[key] == 0:
             pass
         else:
-            print("{}()> {}{}: {}{}{}".format(green,white,key,green,scoreDict[key],white))
+            print(f"{green}()> {white}{key}: {green}{scoreDict[key]}{white}")
     print("=","+"*30,"=")
 
     # score table
-    print("\n{}[{}!{}]{} ATTENTION: There might be false positives in scores.".format(cyan,red,cyan,white))
+    print(f"\n{cyan}[{red}!{cyan}]{white} ATTENTION: There might be false positives in scores.")
     print("+-------------------------+")
     print("|    Threat Score Table   |")
     print("|-------------------------|")
     print("| Point    |  State       |")
     print("|-------------------------|")
-    print("| 0-30     | {}Clean{}        |".format(green,white))
-    print("| 30-200   | {}Suspicious{}   |".format(yellow,white))
-    print("| 200+     | {}Malicious{}    |".format(red,white))
+    print(f"| 0-30     | {green}Clean{white}        |")
+    print(f"| 30-200   | {yellow}Suspicious{white}   |")
+    print(f"| 200+     | {red}Malicious{white}    |")
     print("+-------------------------+")
 
     # score conditions
     if threatScore < 30:
-        print("{}[{}Threat Score{}]{}: {}{}\n".format(cyan,red,cyan,white,green,threatScore))
+        print(f"{cyan}[{red}Threat Score{cyan}]{white}: {green}{threatScore}\n")
     elif threatScore >= 30 and threatScore <= 200:
-        print("{}[{}!{}]{} Attention{}: Use {}--vtFile{} argument to scan that file with VirusTotal. Do not trust that file.".format(cyan,red,cyan,red,white,green,white))
-        print("{}[{}Threat Score{}]{}: {}{}\n".format(cyan,red,cyan,white,yellow,threatScore))
+        print(f"{cyan}[{red}!{cyan}]{white} Attention: Use {green}--vtFile{white} argument to scan that file with VirusTotal. Do not trust that file.")
+        print(f"{cyan}[{red}Threat Score{cyan}]{white}: {yellow}{threatScore}\n")
     else:
-        print("{}[{}Threat Score{}]{}: {}{}\n".format(cyan,red,cyan,white,red,threatScore))
+        print(f"{cyan}[{red}Threat Score{cyan}]{white}: {red}{threatScore}\n")
 
 # Execute
 Analyzer()

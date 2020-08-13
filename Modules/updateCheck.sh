@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # colors
-cy="\e[96m"                                                                 re="\e[91m"
-gr="\e[92m"                                                                 wh="\e[0m"
+cy="\e[1;96m"                                                               re="\e[1;91m"
+gr="\e[1;92m"                                                               wh="\e[0m"
 
 # Update checker variable
-version="11/08/2020"
+version="14/08/2020"
 
 updateChecker()                                                             {                                                                              echo -en "$cy[$re*$cy]$wh Checking updates...\n"
    buffer=$(curl -sSL https://raw.githubusercontent.com/CYB3RMX/Qu1cksc0pe/master/README.md)

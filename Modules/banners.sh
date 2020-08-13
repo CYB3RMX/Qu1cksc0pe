@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # colors
-cy="\e[96m"
-re="\e[91m"
-gr="\e[92m"
+cy="\e[1;96m"
+re="\e[1;91m"
+gr="\e[1;92m"
 wh="\e[0m"
-ye="\e[93m"
-ma="\e[95m"
+ye="\e[1;93m"
+ma="\e[1;95m"
 
 banner()
 {

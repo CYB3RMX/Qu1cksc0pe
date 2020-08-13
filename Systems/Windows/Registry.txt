@@ -35,3 +35,9 @@ RegEnumKeyExW
 RegSetValueA
 RegCreateKeyA
 CLSIDFromProgID
+NtOpenKey
+ZwOpenKey
+NtCreateKey
+ZwCreateKey
+NtSetValueKey
+ZwSetValueKey

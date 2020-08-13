@@ -63,3 +63,4 @@ ReadConsoleInputA
 InterlockedIncrement
 InterlockedDecrement
 LCMapStringW
+CreateWindowExA

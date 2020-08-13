@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Colors
-cyan="\e[96m"
-red="\e[91m"
-green="\e[92m"
+cyan="\e[1;96m"
+red="\e[1;91m"
+green="\e[1;92m"
 default="\e[0m"
 
 # This is for regex
