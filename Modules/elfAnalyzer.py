@@ -6,11 +6,11 @@ import os,sys
 fileName = str(sys.argv[1])
 
 # Colors
-red = '\u001b[91m'
-cyan = '\u001b[96m'
+red = '\u001b[1;91m'
+cyan = '\u001b[1;96m'
 white = '\u001b[0m'
-green = '\u001b[92m'
-yellow = '\u001b[93m'
+green = '\u001b[1;92m'
+yellow = '\u001b[1;93m'
 
 # Wordlists
 allStrings = open("temp.txt","r").read().split("\n")
@@ -77,14 +77,14 @@ def Analyzer():
     for key in Categs:
         if Categs[key] != []:
             if key == "Information Gathering" or key == "System/Persistence" or key == "Cryptography":
-                print("\n{}[{}!{}]__WARNING__[{}!{}]".format(yellow,red,yellow,red,yellow))
-            print("{}[{}+{}]{} Functions/Symbols about {}".format(cyan,red,cyan,white,key))
+                print(f"\n{yellow}[{red}!{yellow}]__WARNING__[{red}!{yellow}]")
+            print(f"{cyan}[{red}+{cyan}]{white} Extracted Functions/Symbols about {key}")
             print("+","-"*30,"+")
             for i in Categs[key]:
                 if i == "":
                     pass
                 else:
-                    print("{}=> {}{}".format(red,white,i))
+                    print(f"{red}=> {white}{i}")
                     # Threat score
                     if key == "Networking":
                         threatScore +=10
@@ -115,34 +115,34 @@ def Analyzer():
     os.system(command)
     
     # Statistics zone
-    print("{}->{} Statistics for: {}{}{}".format(green,white,green,fileName,white))
+    print(f"{green}->{white} Statistics for: {green}{fileName}{white}")
     print("=","+"*30,"=")
-    print("{}()>{} All Functions: {}{}".format(red,white,green,allFuncs))
+    print(f"{red}()>{white} All Functions: {green}{allFuncs}")
     for key in scoreDict:
         if scoreDict[key] == 0:
             pass
         else:
-            print("{}()> {}{}: {}{}{}".format(green,white,key,green,scoreDict[key],white))
+            print(f"{green}()> {white}{key}: {green}{scoreDict[key]}{white}")
     print("=","+"*30,"=")
     
     # score table
-    print("\n{}[{}!{}]{} ATTENTION: There might be false positives in scores.".format(cyan,red,cyan,white))
+    print(f"\n{cyan}[{red}!{cyan}]{white} ATTENTION: There might be false positives in scores.")
     print("+-------------------------+")
     print("|    Threat Score Table   |")
     print("|-------------------------|")
     print("| Point    |  State       |")
     print("|-------------------------|")
-    print("| 0-100    | {}Clean{}        |".format(green,white))
-    print("| 100-300  | {}Suspicious{}   |".format(yellow,white))
-    print("| 300+     | {}Malicious{}    |".format(red,white))
+    print(f"| 0-100    | {green}Clean{white}        |")
+    print(f"| 100-300  | {yellow}Suspicious{white}   |")
+    print(f"| 300+     | {red}Malicious{white}    |")
     print("+-------------------------+")
 
     if threatScore < 100:
-        print("{}[{}Threat Score{}]{}: {}{}\n".format(cyan,red,cyan,white,green,threatScore))
+        print(f"{cyan}[{red}Threat Score{cyan}]{white}: {green}{threatScore}\n")
     elif threatScore >= 100 and threatScore <= 300:
-        print("{}[{}Threat Score{}]{}: {}{}\n".format(cyan,red,cyan,white,yellow,threatScore))
+        print(f"{cyan}[{red}Threat Score{cyan}]{white}: {Yellow}{threatScore}\n")
     else:
-        print("{}[{}Threat Score{}]{}: {}{}\n".format(cyan,red,cyan,white,red,threatScore))
+        print(f"{cyan}[{red}Threat Score{cyan}]{white}: {red}{threatScore}\n")
 
 # Execute
 Analyzer()

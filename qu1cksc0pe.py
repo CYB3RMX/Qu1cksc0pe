@@ -13,11 +13,11 @@ except:
     sys.exit(1)
 
 # Colors
-red = '\u001b[91m'
-cyan = '\u001b[96m'
+red = '\u001b[1;91m'
+cyan = '\u001b[1;96m'
 white = '\u001b[0m'
-green = '\u001b[92m'
-yellow = '\u001b[93m'
+green = '\u001b[1;92m'
+yellow = '\u001b[1;93m'
 
 # handling arguments
 args = []
@@ -43,29 +43,29 @@ def scope():
     
     # Analyze the target file
     if args.analyze:
-        print("{}[{}*{}]{} Analyzing: {}{}{}".format(cyan,red,cyan,white,green,args.file,white))
+        print(f"{cyan}[{red}*{cyan}]{white} Analyzing: {green}{args.file}{white}")
         fileType = str(pr.magic_file(args.file))
         if "Windows Executable" in fileType or ".msi" in fileType or ".dll" in fileType or ".exe" in fileType:
-            print("{}[{}*{}]{} Target OS: {}Windows{}\n".format(cyan,red,cyan,white,green,white))
+            print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}Windows{white}\n")
             command = "./Modules/winAnalyzer.py {}".format(args.file)
             os.system(command)
         elif "ELF" in fileType:
-            print("{}[{}*{}]{} Target OS: {}Linux\n{}".format(cyan,red,cyan,white,green,white))
+            print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}Linux\n{white}")
             command = "readelf -a {} > Modules/elves.txt".format(args.file)
             os.system(command)
             command = "./Modules/elfAnalyzer.py {}".format(args.file)
             os.system(command)
         elif "PK" in fileType:
-            print("{}[{}*{}]{} Target OS: {}Android\n{}".format(cyan,red,cyan,white,green,white))
+            print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}Android\n{white}")
             command = "./Modules/apkAnalyzer.py {}".format(args.file)
             os.system(command)
         else:
-            print("{}[{}!{}]{} Target OS could not identified. Make sure your file extension is Windows(exe,dll,msi),Linux(ELF) or Android(APK)".format(cyan,red,cyan,white))
+            print(f"{cyan}[{red}!{cyan}]{white} Target OS could not identified. Make sure your file extension is Windows(exe,dll,msi),Linux(ELF) or Android(APK)")
             sys.exit(1)
 
     # metadata
     if args.metadata:
-        print("{}[{}+{}]{} Exif/Metadata information".format(cyan,red,cyan,white))
+        print(f"{cyan}[{red}+{cyan}]{white} Exif/Metadata information")
         command = "exiftool {}".format(args.file)
         print("+","-"*50,"+")
         os.system(command)
@@ -79,15 +79,15 @@ def scope():
             directory = "Modules/.apikey.txt"
             apik = open(directory, "r").read().split("\n")
         except:
-            print("{}[{}!{}]{} Use --key_init to enter your key.".format(cyan,red,cyan,white))
+            print(f"{cyan}[{red}!{cyan}]{white} Use --key_init to enter your key.")
             sys.exit(1)
 
         # if key is not valid quit
         if apik[0] == '' or apik[0] == None or len(apik[0]) != 64:
-            print("{}[{}!{}]{} Please get your API key from -> {}https://www.virustotal.com/{}".format(cyan,red,cyan,white,green,white))
+            print(f"{cyan}[{red}!{cyan}]{white} Please get your API key from -> {green}https://www.virustotal.com/{white}")
             sys.exit(1)
         else: 
-            print("\n{}[{}+{}]{} VirusTotal Scan".format(cyan,red,cyan,white))
+            print(f"\n{cyan}[{red}+{cyan}]{white} VirusTotal Scan")
             print("+","-"*50,"+")
             command = "./Modules/VTwrapper.py {} --vtFile {}".format(apik[0],args.file)
             os.system(command)
@@ -101,15 +101,15 @@ def scope():
             directory = "Modules/.apikey.txt"
             apik = open(directory, "r").read().split("\n")
         except:
-            print("{}[{}!{}]{} Use --key_init to enter your key.".format(cyan,red,cyan,white))
+            print(f"{cyan}[{red}!{cyan}]{white} Use --key_init to enter your key.")
             sys.exit(1)
 
         # if key is not valid quit
         if apik[0] == '' or apik[0] == None or len(apik[0]) != 64:
-            print("{}[{}!{}]{} Please get your API key from -> {}https://www.virustotal.com/{}".format(cyan,red,cyan,white,green,white))
+            print(f"{cyan}[{red}!{cyan}]{white} Please get your API key from -> {green}https://www.virustotal.com/{white}")
             sys.exit(1)
         else:
-            print("\n{}[{}+{}]{} VirusTotal Scan".format(cyan,red,cyan,white))
+            print(f"\n{cyan}[{red}+{cyan}]{white} VirusTotal Scan")
             print("+","-"*50,"+")
             command = "./Modules/VTwrapper.py {} --vtUrl".format(apik[0])
             os.system(command)
@@ -117,7 +117,7 @@ def scope():
 
     # packer detection
     if args.packer:
-        print("{}[{}*{}]{} Looking for packers...".format(cyan,red,cyan,white))
+        print(f"{cyan}[{red}*{cyan}]{white} Looking for packers...")
         command = "./Modules/packerAnalyzer.py {}".format(args.file)
         os.system(command)
         
@@ -128,10 +128,10 @@ def scope():
 
     # entering VT API key
     if args.key_init:
-        apikey = str(input("{}[{}+{}]{} Enter your VirusTotal API key: ".format(cyan,red,cyan,white)))
+        apikey = str(input(f"{cyan}[{red}+{cyan}]{white} Enter your VirusTotal API key: "))
         command = "echo '{}' > Modules/.apikey.txt".format(apikey)
         os.system(command)
-        print("{}[{}+{}]{} Your VirusTotal API key saved.".format(cyan,red,cyan,white))
+        print(f"{cyan}[{red}+{cyan}]{white} Your VirusTotal API key saved.")
 
     # Update checking
     if args.update:

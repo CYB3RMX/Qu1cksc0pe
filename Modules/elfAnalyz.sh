@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Colors
-cyan="\e[96m"
-red="\e[91m"
+cyan="\e[1;96m"
+red="\e[1;91m"
 white="\e[0m"
 
 # Wordlists

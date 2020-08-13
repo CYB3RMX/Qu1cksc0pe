@@ -65,3 +65,7 @@ CloseHandle
 HeapCreate
 VirtualFree
 HeapDestroy
+RtlNormalizeProcessParams
+NtClose
+NtTerminateProcess
+PostThreadMessageA

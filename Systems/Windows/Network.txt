@@ -57,3 +57,7 @@ WinHttpReceiveResponse
 WinHttpQueryHeaders
 WinHttpReadData
 InternetSetCookieW
+InternetQueryDataAvailable
+HttpQueryInfoA
+HttpAddRequestHeadersA
+InternetSetOptionA

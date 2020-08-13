@@ -8,11 +8,11 @@ except:
 import json,sys
 
 # Colors
-red = '\u001b[91m'
-cyan = '\u001b[96m'
+red = '\u001b[1;91m'
+cyan = '\u001b[1;96m'
 white = '\u001b[0m'
-green = '\u001b[92m'
-yellow = '\u001b[93m'
+green = '\u001b[1;92m'
+yellow = '\u001b[1;93m'
 
 def Analyzer(parsed):
     danger = 0
@@ -28,23 +28,23 @@ def Analyzer(parsed):
 
     for pp in apkPerms:
         if pp.split(".")[-1] in permArr:
-            print("{}({}DANGEROUS{})-> {}{}".format(cyan,red,cyan,white,pp))
+            print(f"{cyan}({red}DANGEROUS{cyan})-> {white}{pp}")
             danger += 1
         else:
-            print("{}({}INFO{})-> {}{}".format(cyan,yellow,cyan,white,pp))
+            print(f"{cyan}({yellow}INFO{cyan})-> {white}{pp}")
             normal += 1
 
     print("+","-"*40,"+")
     print("\n+----- STATISTICS -----+")
     print("Permissions: {}".format(danger+normal))
-    print("Dangerous: {}".format(danger))
-    print("Normal: {}".format(normal))
+    print(f"Dangerous: {danger}")
+    print(f"Normal: {normal}")
     if danger > normal:
-        print("State: {}Malicious{}".format(red,white))
+        print(f"State: {red}Malicious{white}")
     elif danger == normal:
-        print("State: {}Suspicious{}".format(yellow,white))
+        print(f"State: {yellow}Suspicious{white}")
     else:
-        print("State: {}Clean{}".format(green,white))
+        print(f"State: {green}Clean{white}")
     print("+----------------------+\n")
 
 if __name__ == '__main__':
