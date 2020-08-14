@@ -74,12 +74,26 @@ banner3()
   echo -en "    |_|_        _|_|   $wh<- Mr. Virus\n"
   echo -en "$gr      |_|      |_|$wh \n\n"
 }
+banner4()
+{
+  echo -en "\n$ye+ ------------------------------ + \n"
+  echo -en "I                                I \n"
+  echo -en "I      ${wh}*********************     ${ye}I\n"
+  echo -en "I      ${wh}*  ${re}MALWARE ALERT!!  ${wh}*     ${ye}I\n"
+  echo -en "I      ${wh}*********************     ${ye}I\n"
+  echo -en "I                                I \n"
+  echo -en "+ --------------I I------------- + \n"
+  echo -en "                I I                 ${gr}___QU1CKSC0PE___\n"
+  echo -en "                ${ye}I I \n"
+  echo -en "             ____V_____              ${gr}Version:$re 1.6.7\n\n\n"
+}
 
 # Execute functions
-randomStart=$(( RANDOM % 4 ))
+randomStart=$(( RANDOM % 5 ))
 case $randomStart in
 	0) banner ;;
 	1) banner1 ;;
 	2) banner2 ;;
 	3) banner3 ;;
+	4) banner4 ;;
 esac

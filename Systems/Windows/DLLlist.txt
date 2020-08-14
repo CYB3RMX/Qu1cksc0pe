@@ -69,3 +69,4 @@ libgcj-13.dll
 SecureDll.dll
 svchost.dll
 MemoryLoad.dll
+HAL.dll

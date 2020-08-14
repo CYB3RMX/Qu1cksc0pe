@@ -14,3 +14,7 @@ RegisterServiceCtrlHandlerW
 RegisterServiceCtrlHandlerA
 RegisterServiceCtrlHandlerEx
 SetServiceStatus
+OpenServiceW
+OpenServiceA
+StartServiceW
+OpenSCManagerW

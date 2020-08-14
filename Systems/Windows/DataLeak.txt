@@ -85,3 +85,4 @@ GetSystemTime
 GetConsoleScreenBufferInfo
 QueryPerformanceCounter
 NtQuerySystemInformation
+QueryServiceStatusEx

@@ -19,14 +19,12 @@ look()
    echo -en "$cyan[$red*$cyan]$default Looking for URLs...\n\n"
    strings -a $targetFile | grep -o "http://" &>/dev/null
    if [ $? -eq 0 ];then
-      echo -en "$cyan[$red+$cyan]$default Found some HTTP URLs\n"
       urlFindHTTP
    else
       echo -en "$cyan[$red!$cyan]$default Nothing found about HTTP\n\n"
    fi
    strings -a $targetFile | grep -o "https://" &>/dev/null
    if [ $? -eq 0 ];then
-      echo -en "$cyan[$red+$cyan]$default Found some HTTPS URLs\n"
       urlFindHTTPS
    else
       echo -en "$cyan[$red!$cyan]$default Nothing found about HTTPS\n"
@@ -37,7 +35,7 @@ look()
 urlFindHTTP()
 {
    # HTTP side
-   echo -en "$red=>$green HTTP$default URls\n"
+   echo -en "$red=>$green HTTP$default URLs\n"
    echo -en "+------------------------------+\n"
    strings $targetFile | grep -o $regex_http
    echo -en "+------------------------------+\n\n"
