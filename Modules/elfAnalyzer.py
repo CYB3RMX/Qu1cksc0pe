@@ -126,23 +126,15 @@ def Analyzer():
     print("=","+"*30,"=")
     
     # score table
-    print(f"\n{cyan}[{red}!{cyan}]{white} ATTENTION: There might be false positives in scores.")
-    print("+-------------------------+")
-    print("|    Threat Score Table   |")
-    print("|-------------------------|")
-    print("| Point    |  State       |")
-    print("|-------------------------|")
-    print(f"| 0-100    | {green}Clean{white}        |")
-    print(f"| 100-300  | {yellow}Suspicious{white}   |")
-    print(f"| 300+     | {red}Malicious{white}    |")
-    print("+-------------------------+")
+    print(f"\n{cyan}[{red}!{cyan}]{white} ATTENTION: There might be false positives in threat scaling system.")
 
     if threatScore < 100:
-        print(f"{cyan}[{red}Threat Score{cyan}]{white}: {green}{threatScore}\n")
+        print(f"{cyan}[{red}Threat Level{cyan}]{white}: {green}Clean{white}.\n")
     elif threatScore >= 100 and threatScore <= 300:
-        print(f"{cyan}[{red}Threat Score{cyan}]{white}: {Yellow}{threatScore}\n")
+        print(f"{cyan}[{red}!{cyan}]{white} Attention: Use {green}--vtFile{white} argument to scan that file with VirusTotal. Do not trust that file.")
+        print(f"{cyan}[{red}Threat Level{cyan}]{white}: {yellow}Suspicious{white}.\n")
     else:
-        print(f"{cyan}[{red}Threat Score{cyan}]{white}: {red}{threatScore}\n")
+        print(f"{cyan}[{red}Threat Level{cyan}]{white}: {red}Potentially Malicious{white}.\n")
 
 # Execute
 Analyzer()
