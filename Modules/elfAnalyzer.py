@@ -118,6 +118,11 @@ def Analyzer():
     print(f"{green}->{white} Statistics for: {green}{fileName}{white}")
     print("=","+"*30,"=")
     print(f"{red}()>{white} All Functions: {green}{allFuncs}")
+    if allFuncs < 10:
+        print(f"\n{cyan}[{red}!{cyan}]{white} This file might be obfuscated or encrypted.\n")
+        sys.exit(0)
+
+    # Printing zone
     for key in scoreDict:
         if scoreDict[key] == 0:
             pass
