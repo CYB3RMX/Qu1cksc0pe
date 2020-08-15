@@ -11,13 +11,14 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - [x] Alternative usage: ```python3 qu1cksc0pe.py --file [PATH TO FILE] --analyze```
 
 # Screenshot
-![Screen](.animations/.Screenshot.png)
+![Screen](.animations/.Screenshot.jpg)
 
 # Updates
 <b>15/08/2020</b>
 - [X] Added more Windows Functions/API's.
 - [X] Removed threat score table.
 - [X] Fixed minor bugs.
+- [X] ```--url``` argument renamed to ```--domain```. Now you can be able to extract IP addresses from files.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic``` and ```androguard```<br>
@@ -38,6 +39,6 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 <b>Usage for --vtUrl</b>: ```python3 qu1cksc0pe.py --vtUrl```<br>
 ![animation](.animations/total.gif)
 
-## URL
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --url```<br><br>
+## Domain
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --domain```<br><br>
 ![animation](.animations/url.gif)
