@@ -30,7 +30,7 @@ def scope():
     parser.add_argument("--vtFile",required=False,help="Scan your file with VirusTotal API.",action="store_true")
     parser.add_argument("--vtUrl",required=False,help="Scan your URL with VirusTotal API.",action="store_true")
     parser.add_argument("--metadata",required=False,help="Get exif/metadata information.",action="store_true")
-    parser.add_argument("--url",required=False,help="Extract URLs from file.",action="store_true")
+    parser.add_argument("--domain",required=False,help="Extract URLs and IP addresses from file.",action="store_true")
     parser.add_argument("--packer",required=False,help="Check if your file is packed with common packers.",action="store_true")
     parser.add_argument("--key_init",required=False,help="Enter your VirusTotal API key.",action="store_true")
     parser.add_argument("--update",required=False,help="Check for updates.",action="store_true")
@@ -122,8 +122,8 @@ def scope():
         os.system(command)
         
     # url extraction
-    if args.url:
-        command = "./Modules/urlCatcher.sh {}".format(args.file)
+    if args.domain:
+        command = "./Modules/domainCatcher.sh {}".format(args.file)
         os.system(command)
 
     # entering VT API key
