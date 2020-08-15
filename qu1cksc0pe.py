@@ -121,7 +121,7 @@ def scope():
         command = "./Modules/packerAnalyzer.py {}".format(args.file)
         os.system(command)
         
-    # url extraction
+    # domain extraction
     if args.domain:
         command = "./Modules/domainCatcher.sh {}".format(args.file)
         os.system(command)
