@@ -85,7 +85,7 @@ banner4()
   echo -en "+ --------------I I------------- + \n"
   echo -en "                I I                 ${gr}___QU1CKSC0PE___\n"
   echo -en "                ${ye}I I \n"
-  echo -en "             ____V_____              ${gr}Version:$re 1.6.7\n\n\n"
+  echo -en "             ____V_____              ${gr}Version:$re 1.6.7$wh\n\n\n"
 }
 
 # Execute functions
