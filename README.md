@@ -1,9 +1,9 @@
 # Qu1cksc0pe
 <img src="https://img.shields.io/badge/-Linux-black?style=for-the-badge&logo=Linux&logoColor=white">
 <img src="https://img.shields.io/badge/-Python-3776AB?style=for-the-badge&logo=python&logoColor=white">
-![Bash](https://img.shields.io/badge/Bash-v4.4%5E-green?logo=GNU%20bash)
+<img src="https://img.shields.io/badge/Bash-v4.4%5E-green?logo=GNU%20bash">
 <img src="https://img.shields.io/badge/-Terminal-black?style=for-the-badge&logo=GNU%20Bash&logoColor=white">
-[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](https://opensource.org/licenses/Apache-2.0)
+<img src="https://img.shields.io/badge/License-Apache%202.0-green.svg">
 <br>This tool allows to analyze windows, linux executables and also APK files.<br>
 You can get used dll files, functions, sections, segments, urls, domains and permissions from your suspicious files.<br>
 Qu1cksc0pe aims to get even more information about suspicious files and helps to user realizing what that file capable of.
