@@ -5,7 +5,7 @@ try:
 except:
     print("Error: >androguard< module not found.")
 
-import json,sys
+import json,sys,os
 
 # Colors
 red = '\u001b[1;91m'
@@ -14,9 +14,11 @@ white = '\u001b[0m'
 green = '\u001b[1;92m'
 yellow = '\u001b[1;93m'
 
+danger = 0
+normal = 0
 def Analyzer(parsed):
-    danger = 0
-    normal = 0
+    global danger
+    global normal
     with open("Systems/Android/perms.json", "r") as f:
         permissions = json.load(f)
 
@@ -35,6 +37,30 @@ def Analyzer(parsed):
             normal += 1
 
     print("+","-"*40,"+")
+
+def Detailed(targetAPK):
+    # Extracting all strings to better analysis
+    print(f"\n{cyan}[{red}*{cyan}]{white} Extracting strings from file...")
+    print("+","-"*40,"+")
+    try:
+        command = 'aapt dump strings {} | cut -f2 -d ":" > apkStr.txt'.format(targetAPK)
+        os.system(command)
+        command = './Modules/apkStranalyzer.sh'
+        os.system(command)
+        print("+","-"*40,"+")
+    except:
+        print(f"{cyan}[{red}!{cyan}]{white} Error: aapt tool not found.")
+        sys.exit(1)
+
+# Execution
+if __name__ == '__main__':
+    targetAPK = str(sys.argv[1])
+    parsed = APK(targetAPK)
+    print("+","-"*40,"+")
+    Analyzer(parsed)
+    Detailed(targetAPK)
+
+    # Statistics zone
     print("\n+----- STATISTICS -----+")
     print("Permissions: {}".format(danger+normal))
     print(f"Dangerous: {danger}")
@@ -46,9 +72,3 @@ def Analyzer(parsed):
     else:
         print(f"State: {green}Clean{white}")
     print("+----------------------+\n")
-
-if __name__ == '__main__':
-    targetAPK = str(sys.argv[1])
-    parsed = APK(targetAPK)
-    print("+","-"*40,"+")
-    Analyzer(parsed)
