@@ -11,11 +11,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/.Screenshot.jpg)
 
 # Updates
-<b>15/08/2020</b>
-- [X] Added more Windows Functions/API's.
-- [X] Removed threat score table.
+<b>16/08/2020</b>
 - [X] Fixed minor bugs.
-- [X] ```--url``` argument renamed to ```--domain```. Now you can be able to extract IP addresses from files.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic``` and ```androguard```<br>
