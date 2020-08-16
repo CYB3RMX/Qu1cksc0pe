@@ -166,7 +166,7 @@ def Analyzer():
     print("=","+"*30,"=")
     print(f"{red}()>{white} All Functions: {green}{allFuncs}")
     if allFuncs < 10:
-        print(f"\n{cyan}[{red}!{cyan}]{white} This file might be obfuscated or encrypted.\n")
+        print(f"\n{cyan}[{red}!{cyan}]{white} This file might be obfuscated or encrypted. Try {green}--packer{white} to scan this file for packers.\n")
         sys.exit(0)
 
     # printing all function statistics
