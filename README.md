@@ -1,7 +1,13 @@
 # Qu1cksc0pe
 <img src="https://img.shields.io/badge/-Linux-black?style=for-the-badge&logo=Linux&logoColor=white"> <img src="https://img.shields.io/badge/-Python-black?style=for-the-badge&logo=python&logoColor=white"> <img src="https://img.shields.io/badge/-Terminal-black?style=for-the-badge&logo=GNU%20Bash&logoColor=white"> <img src="https://img.shields.io/badge/-Bash-black?style=for-the-badge&logo=GNU%20Bash&logoColor=white"> <img src="https://img.shields.io/badge/-Apache%202.0-black?style=for-the-badge&Color=white">
-<br>This tool allows to analyze windows, linux executables and also APK files.<br>
-You can get used dll files, functions, sections, segments, urls, domains and permissions from your suspicious files.<br>
+<br>This tool allows to statically analyze windows, linux executables and also APK files.<br>
+<i>You can get</i>: 
+- What DLL files are used.
+- Functions and API's.
+- Sections and segments.
+- URL's, IP addresses and emails.
+- Android permissions.
+
 Qu1cksc0pe aims to get even more information about suspicious files and helps to user realizing what that file capable of.
 
 - [x] Usage: ```python3 qu1cksc0pe.py --file suspicious_file --analyze```
@@ -11,17 +17,18 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/.Screenshot.jpg)
 
 # Updates
-<b>16/08/2020</b>
-- [X] Fixed minor bugs.
+<b>17/08/2020</b>
+- [X] Added APK string analyzer. Now you can analyze APK files better.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic``` and ```androguard```<br>
-<b>Installation of python modules</b>: ```pip install -r requirements.txt```<br>
-<b>Other dependencies</b>: ```VirusTotal API key```, ```binutils``` and ```exiftool```<br>
+<b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
+<b>Other dependencies</b>: ```VirusTotal API key```, ```binutils```, ```exiftool``` and ```aapt```.<br>
 <b>Gathering other dependencies<b>
 - <i>VirusTotal</i>: ```https://virustotal.com```
 - <i>Binutils</i>: ```sudo apt-get install binutils```
 - <i>ExifTool</i>: ```sudo apt-get install exiftool```
+- <i>AAPT</i>: ```sudo apt-get install aapt```
 
 # Scan arguments
 ## Normal analysis
