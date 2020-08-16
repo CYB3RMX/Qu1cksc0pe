@@ -7,7 +7,8 @@ white="\e[0m"
 
 # Regex zone
 regex_emails='[[:alnum:]]\+@[[:alnum:]]\+.[[:alnum:]]\+'
-regex_http='http://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'   regex_https='https://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]' 
+regex_http='http://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'   
+regex_https='https://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]' 
 
 # Wordlists
 interesting=$(cd Systems/Android/; cat suspicious.txt)
