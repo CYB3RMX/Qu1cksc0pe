@@ -19,6 +19,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 # Updates
 <b>17/08/2020</b>
 - [X] Added APK string analyzer. Now you can analyze APK files better.
+- [X] ```DANGEROUS``` permissions renamed to ```RISKY```
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic``` and ```androguard```<br>
