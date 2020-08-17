@@ -15,8 +15,11 @@ file_sigs = {'UPX': '55 50 58 21', 'Armadillo': '55 8B EC 6A',
              'ASPack 1.05b by': '75 00 E9', 'ASPAck 1.061b': '90 90 75 00', 'ASPack 1.08': '90 90 90 75'}
 
 # Getting file's hexcodes to analyze
-command = "hexdump -C {} > hexcodes.txt".format(sys.argv[1])
-os.system(command)
+try:
+    command = "hexdump -C {} > hexcodes.txt".format(sys.argv[1])
+    os.system(command)
+except:
+    os.system("if [ -e hexcodes.txt ];then rm -f hexcodes.txt; fi")
 
 # Simple analyzer function
 def Analyzer():
@@ -31,5 +34,9 @@ def Analyzer():
         print(f"{cyan}[{red}!{cyan}]{white} Nothing found.")
 
 # Execute and clean up
-Analyzer()
-os.system("rm hexcodes.txt")
+try:
+    Analyzer()
+    os.system("rm hexcodes.txt")
+except:
+    print(f"{cyan}[{red}!{cyan}]{white} Program terminated.")
+    os.system("if [ -e hexcodes.txt ];then rm -f hexcodes.txt; fi")

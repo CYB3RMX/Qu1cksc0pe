@@ -36,7 +36,7 @@ def Analyzer(parsed):
             print(f"{cyan}({yellow}INFO{cyan})-> {white}{pp}")
             normal += 1
 
-    print("+","-"*40,"+")
+    print(f"{yellow}+","-"*53,f"+{white}")
 
 def Detailed(targetAPK):
     # Extracting all strings to better analysis
@@ -56,12 +56,12 @@ def Detailed(targetAPK):
 if __name__ == '__main__':
     targetAPK = str(sys.argv[1])
     parsed = APK(targetAPK)
-    print("+","-"*40,"+")
+    print(f"{yellow}+","-"*20,f"{green}PERMISSIONS{yellow}","-"*20,"+")
     Analyzer(parsed)
     Detailed(targetAPK)
 
     # Statistics zone
-    print("\n+----- STATISTICS -----+")
+    print(f"\n{yellow}+----- {green}STATISTICS{yellow} -----+{white}")
     print("Permissions: {}".format(danger+normal))
     print(f"Dangerous: {danger}")
     print(f"Normal: {normal}")
@@ -71,4 +71,4 @@ if __name__ == '__main__':
         print(f"State: {yellow}Suspicious{white}")
     else:
         print(f"State: {green}Clean{white}")
-    print("+----------------------+\n")
+    print(f"{yellow}+----------------------+{white}\n")
