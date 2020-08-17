@@ -30,7 +30,7 @@ def Analyzer(parsed):
 
     for pp in apkPerms:
         if pp.split(".")[-1] in permArr:
-            print(f"{cyan}({red}DANGEROUS{cyan})-> {white}{pp}")
+            print(f"{cyan}({red}RISKY{cyan})-> {white}{pp}")
             danger += 1
         else:
             print(f"{cyan}({yellow}INFO{cyan})-> {white}{pp}")
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     # Statistics zone
     print(f"\n{yellow}+----- {green}STATISTICS{yellow} -----+{white}")
     print("Permissions: {}".format(danger+normal))
-    print(f"Dangerous: {danger}")
+    print(f"RISKY: {danger}")
     print(f"Normal: {normal}")
     if danger > normal:
         print(f"State: {red}Malicious{white}")
