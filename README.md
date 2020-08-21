@@ -17,9 +17,9 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/.Screenshot.jpg)
 
 # Updates
-<b>17/08/2020</b>
-- [X] Added APK string analyzer. Now you can analyze APK files better.
-- [X] ```DANGEROUS``` permissions renamed to ```RISKY```
+<b>21/08/2020</b>
+- [X] Added new Windows API's/Functions.
+- [X] Added new banner.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic``` and ```androguard```<br>

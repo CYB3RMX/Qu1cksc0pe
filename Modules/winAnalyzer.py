@@ -103,7 +103,7 @@ def Analyzer():
                 print(f"\n{yellow}[{red}!{yellow}]__WARNING__[{red}!{yellow}]")
             
             # Printing zone
-            print(f"{cyan}[{red}+{cyan}]{white} Extracted Functions/Strings about {key}")
+            print(f"{cyan}[{red}+{cyan}]{white} Extracted Functions/Strings about {green}{key}{white}")
             print("+","-"*35,"+")
             for i in dictCateg[key]:
                 if i == "":

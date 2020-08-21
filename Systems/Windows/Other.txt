@@ -64,3 +64,4 @@ InterlockedIncrement
 InterlockedDecrement
 LCMapStringW
 CreateWindowExA
+SetEvent
