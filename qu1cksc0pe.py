@@ -53,14 +53,14 @@ def scope():
             print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}Linux\n{white}")
             command = "readelf -a {} > Modules/elves.txt".format(args.file)
             os.system(command)
-            command = "./Modules/elfAnalyzer.py {}".format(args.file)
+            command = "./Modules/linAnalyzer.py {}".format(args.file)
             os.system(command)
         elif "PK" in fileType:
             print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}Android\n{white}")
             command = "./Modules/apkAnalyzer.py {}".format(args.file)
             os.system(command)
         else:
-            print(f"{cyan}[{red}!{cyan}]{white} Target OS could not identified. Make sure your file extension is Windows(exe,dll,msi),Linux(ELF) or Android(APK)")
+            print(f"{cyan}[{red}!{cyan}]{white} Target OS could not identified. Make sure your file is an correct executable.")
             sys.exit(1)
 
     # metadata

@@ -2,6 +2,8 @@ WSAStartup
 WSAGetLastError
 WSAEventSelect
 WSAEnumNetworkEvents
+WSARecv
+WSASend
 socket
 Socket
 recv
@@ -11,6 +13,7 @@ inet_ntoa
 gethostname
 connect
 Connect
+closesocket
 getaddrinfo
 accept
 Accept
@@ -61,3 +64,8 @@ InternetQueryDataAvailable
 HttpQueryInfoA
 HttpAddRequestHeadersA
 InternetSetOptionA
+setsockopt
+getsockopt
+__WSAFDIsSet
+ntohl
+WSAStartup

@@ -87,13 +87,27 @@ banner4()
   echo -en "                ${ye}I I \n"
   echo -en "             ____V_____              ${gr}Version:$re 1.6.7$wh\n\n\n"
 }
+banner5()
+{
+  echo -en "                        ${re}* -------------------------------- *\n"
+  echo -en "$gr           __           ${re}| ${gr}Name: ${wh}Mr. Virus                  ${re}|\n"
+  echo -en "$gr         _|  |_         ${re}| ${gr}Type: ${wh}Trojan.Dropper             ${re}|\n"
+  echo -en "$gr       _|      |_       ${re}| ${gr}Status: ${wh}Qu1cksc0ped!!            ${re}|\n"
+  echo -en "$gr      |          |      ${re}| ${gr}Description: ${wh}He said dont use    ${re}|\n"
+  echo -en "$gr      |  ${re}X    X  ${gr}|      ${re}| ${wh}this tool. Now he is dead.       ${re}|\n"
+  echo -en "$gr   _  |  _    _  |  _   ${re}* -------------------------------- *\n"
+  echo -en "$gr  |_|_|_| |__| |_|_|_| \n"
+  echo -en "    |_|_        _|_|   \n"
+  echo -en "      |_|      |_|$wh \n\n"
+}
 
 # Execute functions
-randomStart=$(( RANDOM % 5 ))
+randomStart=$(( RANDOM % 6 ))
 case $randomStart in
 	0) banner ;;
 	1) banner1 ;;
 	2) banner2 ;;
 	3) banner3 ;;
 	4) banner4 ;;
+        5) banner5 ;;
 esac

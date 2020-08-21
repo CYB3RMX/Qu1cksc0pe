@@ -1,4 +1,5 @@
 CreateMutex
+ReleaseMutex
 CreateProcess
 GetProcessVersion
 LocalAlloc

@@ -78,7 +78,7 @@ def Analyzer():
         if Categs[key] != []:
             if key == "Information Gathering" or key == "System/Persistence" or key == "Cryptography":
                 print(f"\n{yellow}[{red}!{yellow}]__WARNING__[{red}!{yellow}]")
-            print(f"{cyan}[{red}+{cyan}]{white} Extracted Functions/Symbols about {key}")
+            print(f"{cyan}[{red}+{cyan}]{white} Extracted Functions/Symbols about {green}{key}{white}")
             print("+","-"*30,"+")
             for i in Categs[key]:
                 if i == "":
