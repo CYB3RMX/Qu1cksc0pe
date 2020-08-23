@@ -5,11 +5,6 @@ ntf
 ll
 ldiv
 ceil
-memcpy
-memset
-malloc
-realloc
-free
 octl
 nd
 ntf
@@ -17,7 +12,6 @@ bcmp
 wctob_l
 wctob
 strspn
-memrchr
 strchr
 strlen
 strtol
@@ -38,7 +32,6 @@ scanf
 sscanf
 perror
 fflush
-memchr
 sten
 sprintf
 snprintf

@@ -17,6 +17,7 @@ allStrings = open("temp.txt","r").read().split("\n")
 networkz = open("Systems/Linux/Networking.txt","r").read().split("\n")
 filez = open("Systems/Linux/Files.txt","r").read().split("\n")
 procesz = open("Systems/Linux/Processes.txt","r").read().split("\n")
+memoryz = open("Systems/Linux/Memory.txt","r").read().split("\n")
 infogaz = open("Systems/Linux/Infoga.txt","r").read().split("\n")
 persisz = open("Systems/Linux/Persistence.txt","r").read().split("\n")
 cryptoz = open("Systems/Linux/Crypto.txt","r").read().split("\n")
@@ -26,6 +27,7 @@ otherz = open("Systems/Linux/Others.txt","r").read().split("\n")
 Networking = []
 File = []
 Process = []
+Memory = []
 Information_Gathering = []
 System_Persistence = []
 Cryptography = []
@@ -36,6 +38,7 @@ scoreDict = {
         "Networking": 0,
         "File": 0,
         "Process": 0,
+        "Memory Management": 0,
         "Information Gathering":0,
         "System/Persistence":0,
         "Cryptography":0,
@@ -47,6 +50,7 @@ Categs = {
         "Networking": Networking,
         "File": File,
         "Process": Process,
+        "Memory Management": Memory,
         "Information Gathering": Information_Gathering,
         "System/Persistence": System_Persistence,
         "Cryptography": Cryptography,
@@ -58,6 +62,7 @@ dictArr = {
         "Networking": networkz,
         "File": filez,
         "Process": procesz,
+        "Memory Management": memoryz,
         "Information Gathering": infogaz,
         "System/Persistence": persisz,
         "Cryptography": cryptoz,
@@ -94,6 +99,9 @@ def Analyzer():
                         scoreDict[key] +=1
                     elif key == "Process":
                         threatScore += 15
+                        scoreDict[key] +=1
+                    elif key == "Memory Management":
+                        threatScore += 10
                         scoreDict[key] +=1
                     elif key == "Information Gathering":
                         threatScore += 20

@@ -1,0 +1,8 @@
+malloc
+realloc
+free
+calloc
+memset
+memcpy
+memrchr
+memchr
