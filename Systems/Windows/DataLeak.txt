@@ -86,3 +86,7 @@ GetConsoleScreenBufferInfo
 QueryPerformanceCounter
 NtQuerySystemInformation
 QueryServiceStatusEx
+LookupAccountSidW
+LookupAccountSidA
+AccessCheck
+GetSidSubAuthorityCount
