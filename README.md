@@ -14,12 +14,11 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - [x] Alternative usage: ```python3 qu1cksc0pe.py --file [PATH TO FILE] --analyze```
 
 # Screenshot
-![Screen](.animations/.Screenshot.jpg)
+![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>21/08/2020</b>
-- [X] Added new Windows API's/Functions.
-- [X] Added new banner.
+<b>23/08/2020</b>
+- [X] Added new category ```Memory Management``` to linux analyzer module.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic``` and ```androguard```<br>
