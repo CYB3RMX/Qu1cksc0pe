@@ -24,7 +24,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 <b>Necessary python modules</b>: ```puremagic``` and ```androguard```<br>
 <b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
 <b>Other dependencies</b>: ```VirusTotal API key```, ```binutils```, ```exiftool``` and ```aapt```.<br>
-<b>Gathering other dependencies<b>
+<b>Gathering other dependencies</b>
 - <i>VirusTotal</i>: ```https://virustotal.com```
 - <i>Binutils</i>: ```sudo apt-get install binutils```
 - <i>ExifTool</i>: ```sudo apt-get install exiftool```
