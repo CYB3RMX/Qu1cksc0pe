@@ -18,3 +18,4 @@ InitCommonControlsEx
 LoadTypeLib
 FreeLibrary
 DisableThreadLibraryCalls
+SizeofResource

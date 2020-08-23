@@ -65,3 +65,5 @@ InterlockedDecrement
 LCMapStringW
 CreateWindowExA
 SetEvent
+CreateAcceleratorTableW
+CreateAcceleratorTableA

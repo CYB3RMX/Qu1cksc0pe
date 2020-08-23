@@ -5,6 +5,7 @@ NetScheduleJobAdd
 GetSystemMenu
 CreateToolbarEx
 OpenSCManager
+OpenSCManagerA
 ShellExecute
 ShellExecuteW
 ShellExecuteExW
@@ -21,3 +22,12 @@ OpenSCManagerW
 FreeSid
 AllocateAndInitializeSid
 DeviceIoControl
+SetSecurityDescriptorOwner
+InitializeAcl
+SetSecurityDescriptorDacl
+CloseServiceHandle
+AddAccessAllowedAce
+AddAccessAllowedAceEx
+SetSecurityDescriptorGroup
+StartServiceCtrlDispatcherW
+InitializeSecurityDescriptor

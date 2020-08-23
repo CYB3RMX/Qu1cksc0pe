@@ -19,6 +19,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 # Updates
 <b>23/08/2020</b>
 - [X] Added new category ```Memory Management``` to linux analyzer module.
+- [X] Added new Windows Functions/API's.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic``` and ```androguard```<br>
