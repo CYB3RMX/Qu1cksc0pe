@@ -22,7 +22,7 @@ yellow = '\u001b[1;93m'
 # handling arguments
 args = []
 
-def scope():
+def Qu1cksc0pe():
     # Argument crating and parsing
     parser = argparse.ArgumentParser()
     parser.add_argument("--file",required=False,help="Select a suspicious file.")
@@ -40,7 +40,7 @@ def scope():
     if args.file:
         command = "strings -a {} > temp.txt".format(args.file)
         os.system(command)
-    
+
     # Analyze the target file
     if args.analyze:
         print(f"{cyan}[{red}*{cyan}]{white} Analyzing: {green}{args.file}{white}")
@@ -86,7 +86,7 @@ def scope():
         if apik[0] == '' or apik[0] == None or len(apik[0]) != 64:
             print(f"{cyan}[{red}!{cyan}]{white} Please get your API key from -> {green}https://www.virustotal.com/{white}")
             sys.exit(1)
-        else: 
+        else:
             print(f"\n{cyan}[{red}+{cyan}]{white} VirusTotal Scan")
             print("+","-"*50,"+")
             command = "./Modules/VTwrapper.py {} --vtFile {}".format(apik[0],args.file)
@@ -120,7 +120,7 @@ def scope():
         print(f"{cyan}[{red}*{cyan}]{white} Looking for packers...")
         command = "./Modules/packerAnalyzer.py {}".format(args.file)
         os.system(command)
-        
+
     # domain extraction
     if args.domain:
         command = "./Modules/domainCatcher.sh {}".format(args.file)
@@ -141,7 +141,7 @@ def scope():
 # Exectuion area
 os.system("./Modules/banners.sh")
 try:
-    scope()
+    Qu1cksc0pe()
     os.system("if [ -e temp.txt ];then rm -f temp.txt; fi")
 except:
     os.system("if [ -e temp.txt ];then rm -f temp.txt; fi")

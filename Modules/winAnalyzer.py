@@ -28,7 +28,7 @@ datarr = open("Systems/Windows/DataLeak.txt", "r").read().split("\n")
 otharr = open("Systems/Windows/Other.txt", "r").read().split("\n")
 dllArray = open("Systems/Windows/DLLlist.txt", "r").read().split("\n")
 
-# Category arrays 
+# Category arrays
 Registry = []
 File = []
 Network = []
@@ -41,7 +41,7 @@ COMObject = []
 Cryptography = []
 Info_Gathering = []
 Other = []
-    
+
 # Dictionary of Categories
 dictCateg = {
     "Registry": Registry,
@@ -55,9 +55,9 @@ dictCateg = {
     "COMObject": COMObject,
     "Cryptography": Cryptography,
     "Information Gathering": Info_Gathering,
-    "Other": Other
+    "Other/Unknown": Other
 }
-    
+
 # score table for checking how many functions in that file
 scoreDict = {
     "Registry": 0,
@@ -71,21 +71,21 @@ scoreDict = {
     "COMObject": 0,
     "Cryptography": 0,
     "Information Gathering": 0,
-    "Other": 0
+    "Other/Unknown": 0
 }
 
 # Accessing categories
 regdict={
     "Registry": regarr, "File": filearr, "Networking/Web": netarr, "Keyboard": keyarr,
     "Process": procarr, "Dll/Resource Handling": dllarr, "Evasion/Bypassing": debugarr, "System/Persistence": systarr,
-    "COMObject": comarr, "Cryptography": cryptarr,"Information Gathering": datarr, "Other": otharr
+    "COMObject": comarr, "Cryptography": cryptarr,"Information Gathering": datarr, "Other/Unknown": otharr
 }
 
 # Defining function
 def Analyzer():
     threatScore = 0
     allFuncs = 0
-    
+
     # categorizing extracted strings
     for key in regdict:
         for el in regdict[key]:
@@ -97,11 +97,11 @@ def Analyzer():
     # printing categorized strings
     for key in dictCateg:
         if dictCateg[key] != []:
-            
+
             # More important categories
             if key == "Keyboard" or key == "Evasion/Bypassing" or key == "System/Persistence" or key == "Cryptography" or key == "Information Gathering":
                 print(f"\n{yellow}[{red}!{yellow}]__WARNING__[{red}!{yellow}]")
-            
+
             # Printing zone
             print(f"{cyan}[{red}+{cyan}]{white} Extracted Functions/Strings about {green}{key}{white}")
             print("+","-"*35,"+")
@@ -145,7 +145,7 @@ def Analyzer():
                     elif key == "Information Gathering":
                         threatScore += 7
                         scoreDict[key] +=1
-                    elif key == "Other":
+                    elif key == "Other/Unknown":
                         threatScore += 1
                         scoreDict[key] +=1
                     else:
@@ -164,18 +164,23 @@ def Analyzer():
     # Statistics zone
     print(f"\n{green}->{white} Statistics for: {green}{fileName}{white}")
     print(f"{yellow}=","+"*30,"=")
-    print(f"{red}*{white} All Functions: {green}{allFuncs}")
-    if allFuncs < 10:
-        print(f"\n{cyan}[{red}!{cyan}]{white} This file might be obfuscated or encrypted. Try {green}--packer{white} to scan this file for packers.\n")
-        sys.exit(0)
+    print(f"{cyan}*{white} All Functions: {green}{allFuncs}")
 
     # printing all function statistics
     for key in scoreDict:
         if scoreDict[key] == 0:
             pass
         else:
-            print(f"{green}* {white}{key}: {green}{scoreDict[key]}{white}")
+            if key == "Keyboard" or key == "Evasion/Bypassing" or key == "System/Persistence" or key == "Cryptography" or key == "Information Gathering":
+                print(f"{red}* {white}{key}: {green}{scoreDict[key]}{white}")
+            else:
+                print(f"{green}* {white}{key}: {green}{scoreDict[key]}{white}")
     print(f"{yellow}=","+"*30,f"={white}")
+
+    # Warning about obfuscated file
+    if allFuncs < 10:
+        print(f"\n{cyan}[{red}!{cyan}]{white} This file might be obfuscated or encrypted. Try {green}--packer{white} to scan this file for packers.\n")
+        sys.exit(0)
 
     # score table
     print(f"\n{cyan}[{red}!{cyan}]{white} ATTENTION: There might be false positives in threat scaling system.")

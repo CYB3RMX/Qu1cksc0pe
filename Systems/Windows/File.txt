@@ -125,3 +125,4 @@ PathCombineW
 SetCurrentDirectoryA
 SetHandleCount
 RtlDosPathNameToNtPathName_U
+ZwCreateFile
