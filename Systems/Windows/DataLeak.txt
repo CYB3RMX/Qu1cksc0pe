@@ -90,3 +90,8 @@ LookupAccountSidW
 LookupAccountSidA
 AccessCheck
 GetSidSubAuthorityCount
+ZwQuerySystemInformation
+ZwQueryInformationFile
+NtBuildNumber
+KeGetCurrentIrql
+GetConsoleCP

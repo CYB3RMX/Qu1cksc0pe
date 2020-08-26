@@ -41,3 +41,4 @@ NtCreateKey
 ZwCreateKey
 NtSetValueKey
 ZwSetValueKey
+ZwQueryValueKey

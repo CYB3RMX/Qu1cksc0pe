@@ -67,3 +67,10 @@ CreateWindowExA
 SetEvent
 CreateAcceleratorTableW
 CreateAcceleratorTableA
+KeQueryPerformanceCounter
+KeQuerySystemTime
+RtlTimeToTimeFields
+ExAllocatePoolWithTag
+ExSystemTimeToLocalTime
+ExFreePool
+ZwClose

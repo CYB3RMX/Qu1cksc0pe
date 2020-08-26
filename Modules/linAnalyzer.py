@@ -42,7 +42,7 @@ scoreDict = {
         "Information Gathering":0,
         "System/Persistence":0,
         "Cryptography":0,
-        "Other":0
+        "Other/Unknown":0
         }
 
 # Dictionary of categories
@@ -54,7 +54,7 @@ Categs = {
         "Information Gathering": Information_Gathering,
         "System/Persistence": System_Persistence,
         "Cryptography": Cryptography,
-        "Other": Other
+        "Other/Unknown": Other
         }
 
 # Dictionary of arrays
@@ -66,7 +66,7 @@ dictArr = {
         "Information Gathering": infogaz,
         "System/Persistence": persisz,
         "Cryptography": cryptoz,
-        "Other": otherz
+        "Other/Unknown": otherz
         }
 
 # Defining function
@@ -112,7 +112,7 @@ def Analyzer():
                     elif key == "Cryptography":
                         threatScore += 25
                         scoreDict[key] +=1
-                    elif key == "Other":
+                    elif key == "Other/Unknown":
                         threatScore += 5
                         scoreDict[key] +=1
                     else:
@@ -121,23 +121,28 @@ def Analyzer():
     # Part 2
     command = "./Modules/elfAnalyz.sh"
     os.system(command)
-    
+
     # Statistics zone
     print(f"{green}->{white} Statistics for: {green}{fileName}{white}")
     print(f"{yellow}=","+"*30,"=")
-    print(f"{red}*{white} All Functions: {green}{allFuncs}")
-    if allFuncs < 10:
-        print(f"\n{cyan}[{red}!{cyan}]{white} This file might be obfuscated or encrypted. Try {green}--packer{white} to scan this file for packers.\n")
-        sys.exit(0)
+    print(f"{cyan}*{white} All Functions: {green}{allFuncs}")
 
     # Printing zone
     for key in scoreDict:
         if scoreDict[key] == 0:
             pass
         else:
-            print(f"{green}* {white}{key}: {green}{scoreDict[key]}{white}")
+            if key == "System/Persistence" or key == "Cryptography" or key == "Information Gathering":
+                print(f"{red}* {white}{key}: {green}{scoreDict[key]}{white}")
+            else:
+                print(f"{green}* {white}{key}: {green}{scoreDict[key]}{white}")
     print(f"{yellow}=","+"*30,f"={white}")
-    
+
+    # Warning about obfuscated file
+    if allFuncs < 10:
+        print(f"\n{cyan}[{red}!{cyan}]{white} This file might be obfuscated or encrypted. Try {green}--packer{white} to scan this file for packers.\n")
+        sys.exit(0)
+
     # score table
     print(f"\n{cyan}[{red}!{cyan}]{white} ATTENTION: There might be false positives in threat scaling system.")
 
