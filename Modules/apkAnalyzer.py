@@ -36,6 +36,10 @@ def Analyzer(parsed):
             print(f"{cyan}({yellow}INFO{cyan})-> {white}{pp}")
             normal += 1
 
+    # If there is no permission:
+    if danger == 0 and normal == 0:
+        print(f"{cyan}[{red}!{cyan}]{white} Not any permissions found.")
+
     print(f"{yellow}+","-"*53,f"+{white}")
 
 def Detailed(targetAPK):
@@ -67,7 +71,7 @@ if __name__ == '__main__':
     print(f"Normal: {normal}")
     if danger > normal:
         print(f"State: {red}Malicious{white}")
-    elif danger == normal:
+    elif danger == normal and danger > 0:
         print(f"State: {yellow}Suspicious{white}")
     else:
         print(f"State: {green}Clean{white}")
