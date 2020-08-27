@@ -126,3 +126,5 @@ SetCurrentDirectoryA
 SetHandleCount
 RtlDosPathNameToNtPathName_U
 ZwCreateFile
+GetSystemWindowsDirectoryA
+GetSystemWindowsDirectoryW

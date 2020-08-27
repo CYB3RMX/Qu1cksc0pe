@@ -70,3 +70,5 @@ RtlNormalizeProcessParams
 NtClose
 NtTerminateProcess
 PostThreadMessageA
+QueueUserAPC
+GetThreadPriority

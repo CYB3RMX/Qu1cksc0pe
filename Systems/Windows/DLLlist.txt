@@ -70,3 +70,6 @@ SecureDll.dll
 svchost.dll
 MemoryLoad.dll
 HAL.dll
+MSWSOCK.dll
+IPHLPAPI.DLL
+DNSAPI.dll

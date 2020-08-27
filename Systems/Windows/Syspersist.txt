@@ -31,3 +31,5 @@ AddAccessAllowedAceEx
 SetSecurityDescriptorGroup
 StartServiceCtrlDispatcherW
 InitializeSecurityDescriptor
+SetThreadPriority
+AllocConsole
