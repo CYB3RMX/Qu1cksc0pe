@@ -8,9 +8,6 @@ wh="\e[0m"
 ye="\e[1;93m"
 ma="\e[1;95m"
 
-# variables
-username=$(echo '$USERNAME')
-
 banner()
 {
   echo -en " $cy _____ _   _  __  _____  _   __ _____ _____ ___________ _____         ${gr}@ \n"
