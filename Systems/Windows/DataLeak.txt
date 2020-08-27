@@ -95,3 +95,6 @@ ZwQueryInformationFile
 NtBuildNumber
 KeGetCurrentIrql
 GetConsoleCP
+GetLogicalDriveStringsA
+GetLogicalDriveStringsW
+GetUserDefaultLCID

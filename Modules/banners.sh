@@ -8,6 +8,9 @@ wh="\e[0m"
 ye="\e[1;93m"
 ma="\e[1;95m"
 
+# variables
+username=$(echo '$USERNAME')
+
 banner()
 {
   echo -en " $cy _____ _   _  __  _____  _   __ _____ _____ ___________ _____         ${gr}@ \n"
@@ -15,7 +18,7 @@ banner()
   echo -en " $cy| | | | | | | | || /  \/| |/ / \  --.| /  \/ |/| | |_/ / |__       ${gr}@@ ${re}@ ${gr}@@ \n"
   echo -en " $cy| | | | | | | | || |    |    \   --. \ |   |  /| |  __/|  __|    ${gr}@@@${re}@@@@@${gr}@@@ \n"
   echo -en " $cy\ \/  / |_| |_| || \__/\| |\  \/\__/ / \__/\ |_/ / |   | |___      ${gr}@@ ${re}@ ${gr}@@ \n"
-  echo -en "  $cy\_/\_|\___/ \___/\____/\_| \_/\____/ \____/\___/\_|   \____/       ${gr}@ @ @ \n"                                            
+  echo -en "  $cy\_/\_|\___/ \___/\____/\_| \_/\____/ \____/\___/\_|   \____/       ${gr}@ @ @ \n"
   echo -en "                                                                       @ \n"
   echo -en "                                        ${ye}|             | \n"
   echo -en "   ${wh}Suspicious file static-analysis tool.${ye}| ${wh}By CYB3RMX_${ye} | ${wh}Version: ${gr}1.6.8 \n"
@@ -100,14 +103,37 @@ banner5()
   echo -en "    |_|_        _|_|   \n"
   echo -en "      |_|      |_|$wh \n\n"
 }
+banner6()
+{
+  echo -en "\n${cy}SIMON SAYS:\n\n"
+  echo -en "$gr         -o          o-\n"
+  echo -en "          +hydNNNNdyh+          $wh<--------------------------->\n"
+  echo -en "$gr        +mMMMMMMMMMMMMm+        $wh<  Do not click every link. >\n"
+  echo -en "$gr       dMM${wh}m:${gr}NMMMMMMN${wh}:m${gr}MMb       $wh<      Please listen me!!   >\n"
+  echo -en "$gr      hMMMMMMMMMMMMMMMMMMh      $wh<--------------------------->\n"
+  echo -en "$gr  ..  yyyyyyyyyyyyyyyyyyyy  ..    $wh/   \n"
+  echo -en "$gr.mMMm MMMMMMMMMMMMMMMMMMMM mMMm. $wh/\n"
+  echo -en "$gr:MMMM-MMMMMMMMMMMMMMMMMMMM-MMMM: \n"
+  echo -en ":MMMM-MMMMMMMMMMMMMMMMMMMM-MMMM: \n"
+  echo -en ":MMMM-MMMMMMMMMMMMMMMMMMMM-MMMM: \n"
+  echo -en ":MMMM-MMMMMMMMMMMMMMMMMMMM-MMMM: \n"
+  echo -en "-MMMM-MMMMMMMMMMMMMMMMMMMM-MMMM- \n"
+  echo -en " +yy+ MMMMMMMMMMMMMMMMMMMM +yy+  $wh<- Mr. Simon\n"
+  echo -en "$gr      mMMMMMMMMMMMMMMMMMMm \n"
+  echo -en "       /++MMMMh++hMMMM++/  \n"
+  echo -en "          MMMMo  oMMMM \n"
+  echo -en "          MMMMo  oMMMM \n"
+  echo -en "          oNMm-  -mMNs$wh \n\n"
+}
 
 # Execute functions
-randomStart=$(( RANDOM % 6 ))
+randomStart=$(( RANDOM % 7 ))
 case $randomStart in
 	0) banner ;;
 	1) banner1 ;;
 	2) banner2 ;;
 	3) banner3 ;;
 	4) banner4 ;;
-        5) banner5 ;;
+    5) banner5 ;;
+    6) banner6 ;;
 esac

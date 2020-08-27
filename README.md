@@ -20,6 +20,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 <b>27/08/2020</b>
 - [X] Minor bug fixes.
 - [X] Added more Windows Functions/API's.
+- [X] Added new banner.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic``` and ```androguard```<br>

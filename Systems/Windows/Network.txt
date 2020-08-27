@@ -69,3 +69,8 @@ getsockopt
 __WSAFDIsSet
 ntohl
 WSAStartup
+GetAcceptExSockaddrs
+AcceptEx
+InternetCrackUrlW
+DnsFree
+DnsQuery_A
