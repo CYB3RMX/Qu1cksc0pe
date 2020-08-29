@@ -1,6 +1,11 @@
 #!/usr/bin/python3
 
 import os,sys
+try:
+    from prettytable import PrettyTable
+except:
+    print("Error: >prettytable< module not found.")
+    sys.exit(1)
 
 # Getting name of the file for statistics
 fileName = str(sys.argv[1])
@@ -85,6 +90,8 @@ regdict={
 def Analyzer():
     threatScore = 0
     allFuncs = 0
+    tables = PrettyTable()
+    dllTable = PrettyTable()
 
     # categorizing extracted strings
     for key in regdict:
@@ -100,16 +107,15 @@ def Analyzer():
 
             # More important categories
             if key == "Keyboard" or key == "Evasion/Bypassing" or key == "System/Persistence" or key == "Cryptography" or key == "Information Gathering":
-                print(f"\n{yellow}[{red}!{yellow}]__WARNING__[{red}!{yellow}]")
+                print(f"\n{yellow}[{red}!{yellow}]__WARNING__[{red}!{yellow}]{white}")
 
             # Printing zone
-            print(f"{cyan}[{red}+{cyan}]{white} Extracted Functions/Strings about {green}{key}{white}")
-            print("+","-"*35,"+")
+            tables.field_names = [f"Functions or Strings about {green}{key}{white}"]
             for i in dictCateg[key]:
                 if i == "":
                     pass
                 else:
-                    print(f"{red}=> {white}{i}")
+                    tables.add_row([f"{red}{i}{white}"])
 
                     # Calculating threat score
                     if key == "Registry":
@@ -150,16 +156,16 @@ def Analyzer():
                         scoreDict[key] +=1
                     else:
                         pass
-            print("+","-"*35,"+\n")
+            print(tables)
+            tables.clear_rows()
 
     # printing extracted dll files
-    print(f"{cyan}[{red}+{cyan}]{white} Extracted DLL Strings")
-    print("+","-"*20,"+")
+    dllTable.field_names = [f"Extracted {green}DLL{white} Strings"]
     for dl in allStrings:
         if dl in dllArray:
             if dl != "":
-                print(f"{red}=> {white}{dl}")
-    print("+","-"*20,"+")
+                dllTable.add_row([f"{red}{dl}{white}"])
+    print(dllTable)
 
     # Statistics zone
     print(f"\n{green}->{white} Statistics for: {green}{fileName}{white}")

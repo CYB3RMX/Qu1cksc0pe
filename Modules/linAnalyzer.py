@@ -1,6 +1,11 @@
 #!/usr/bin/python3
 
 import os,sys
+try:
+    from prettytable import PrettyTable
+except:
+    print("Error: >prettytable< module not found.")
+    sys.exit(1)
 
 # Getting name of the file for statistics
 fileName = str(sys.argv[1])
@@ -73,6 +78,8 @@ dictArr = {
 def Analyzer():
     threatScore = 0
     allFuncs = 0
+    tables = PrettyTable()
+
     for key in dictArr:
         for elem in dictArr[key]:
             if elem in allStrings:
@@ -82,14 +89,15 @@ def Analyzer():
     for key in Categs:
         if Categs[key] != []:
             if key == "Information Gathering" or key == "System/Persistence" or key == "Cryptography":
-                print(f"\n{yellow}[{red}!{yellow}]__WARNING__[{red}!{yellow}]")
-            print(f"{cyan}[{red}+{cyan}]{white} Extracted Functions/Symbols about {green}{key}{white}")
-            print("+","-"*30,"+")
+                print(f"\n{yellow}[{red}!{yellow}]__WARNING__[{red}!{yellow}]{white}")
+
+            # Printing zone
+            tables.field_names = [f"Functions or Strings about {green}{key}{white}"]
             for i in Categs[key]:
                 if i == "":
                     pass
                 else:
-                    print(f"{red}=> {white}{i}")
+                    tables.add_row([f"{red}{i}{white}"])
                     # Threat score
                     if key == "Networking":
                         threatScore +=10
@@ -117,7 +125,8 @@ def Analyzer():
                         scoreDict[key] +=1
                     else:
                         pass
-            print("+","-"*30,"+\n")
+            print(tables)
+            tables.clear_rows()
     # Part 2
     command = "./Modules/elfAnalyz.sh"
     os.system(command)

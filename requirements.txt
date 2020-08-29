@@ -1,2 +1,3 @@
 puremagic
 androguard
+prettytable
