@@ -12,7 +12,7 @@ segmentz=$(cd Systems/Linux/; cat segments.txt)
 # Defining function
 lookFor()
 {
-   echo -en "$cyan[$red+$cyan]$white Sections\n"
+   echo -en "\n$cyan[$red+$cyan]$white Sections\n"
    echo -en "+------------------------------+\n"
    for sec in ${sectionz[@]}
    do
