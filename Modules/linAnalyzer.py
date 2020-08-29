@@ -79,6 +79,7 @@ def Analyzer():
     threatScore = 0
     allFuncs = 0
     tables = PrettyTable()
+    statistics = PrettyTable()
 
     for key in dictArr:
         for elem in dictArr[key]:
@@ -133,19 +134,19 @@ def Analyzer():
 
     # Statistics zone
     print(f"{green}->{white} Statistics for: {green}{fileName}{white}")
-    print(f"{yellow}=","+"*30,"=")
-    print(f"{cyan}*{white} All Functions: {green}{allFuncs}")
 
     # Printing zone
+    statistics.field_names = ["Categories", "Number of Functions"]
+    statistics.add_row([f"{green}All Functions{white}", f"{cyan}{allFuncs}{white}"])
     for key in scoreDict:
         if scoreDict[key] == 0:
             pass
         else:
             if key == "System/Persistence" or key == "Cryptography" or key == "Information Gathering":
-                print(f"{red}* {white}{key}: {green}{scoreDict[key]}{white}")
+                statistics.add_row([f"{yellow}{key}{white}", f"{red}{scoreDict[key]}{white}"])
             else:
-                print(f"{green}* {white}{key}: {green}{scoreDict[key]}{white}")
-    print(f"{yellow}=","+"*30,f"={white}")
+                statistics.add_row([f"{white}{key}", f"{green}{scoreDict[key]}{white}"])
+    print(statistics)
 
     # Warning about obfuscated file
     if allFuncs < 10:
