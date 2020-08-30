@@ -38,7 +38,7 @@ def Qu1cksc0pe():
 
     # Getting all strings from the file
     if args.file:
-        command = "strings -a {} > temp.txt".format(args.file)
+        command = f"if [ -e {args.file} ];then strings -a {args.file} > temp.txt; else echo 'Error: Target file not found!'; exit 1;  fi"
         os.system(command)
 
     # Analyze the target file
