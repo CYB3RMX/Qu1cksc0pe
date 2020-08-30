@@ -1,11 +1,19 @@
 #!/usr/bin/python3
 
+import json,sys,os
+
+# Module handling
 try:
     from androguard.core.bytecodes.apk import APK
 except:
     print("Error: >androguard< module not found.")
+    sys.exit(1)
 
-import json,sys,os
+try:
+    from prettytable import PrettyTable
+except:
+    print("Error: >prettytable< module not found.")
+    sys.exit(1)
 
 # Colors
 red = '\u001b[1;91m'
@@ -14,35 +22,46 @@ white = '\u001b[0m'
 green = '\u001b[1;92m'
 yellow = '\u001b[1;93m'
 
+# necessary variables
 danger = 0
 normal = 0
+
+# Permission analyzer
 def Analyzer(parsed):
     global danger
     global normal
+    statistics = PrettyTable()
+
+    # Getting blacklisted permissions
     with open("Systems/Android/perms.json", "r") as f:
         permissions = json.load(f)
 
     apkPerms = parsed.get_permissions()
     permArr = []
 
+    # Getting target APK file's permissions
     for p in range(len(permissions)):
         permArr.append(permissions[p]["permission"])
 
+    # Parsing permissions
+    statistics.field_names = [f"{green}Permissions{white}", f"{green}State{white}"]
     for pp in apkPerms:
         if pp.split(".")[-1] in permArr:
-            print(f"{cyan}({red}RISKY{cyan})-> {white}{pp}")
+            statistics.add_row([f"{pp}", f"{red}Risky{white}"])
             danger += 1
         else:
-            print(f"{cyan}({yellow}INFO{cyan})-> {white}{pp}")
+            statistics.add_row([f"{pp}", f"{yellow}Info{white}"])
             normal += 1
 
     # If there is no permission:
     if danger == 0 and normal == 0:
         print(f"{cyan}[{red}!{cyan}]{white} Not any permissions found.")
+    else:
+        print(statistics)
 
-    print(f"{yellow}+","-"*53,f"+{white}")
-
+# APK string analyzer
 def Detailed(targetAPK):
+
     # Extracting all strings to better analysis
     print(f"\n{cyan}[{red}*{cyan}]{white} Extracting strings from file...")
     print("+","-"*40,"+")
@@ -58,21 +77,29 @@ def Detailed(targetAPK):
 
 # Execution
 if __name__ == '__main__':
+
+    # Getting and parsing target APK
     targetAPK = str(sys.argv[1])
     parsed = APK(targetAPK)
-    print(f"{yellow}+","-"*20,f"{green}PERMISSIONS{yellow}","-"*20,"+")
+
+    # Permissions side
     Analyzer(parsed)
+
+    # Strings side
     Detailed(targetAPK)
 
     # Statistics zone
-    print(f"\n{yellow}+----- {green}STATISTICS{yellow} -----+{white}")
-    print("Permissions: {}".format(danger+normal))
-    print(f"RISKY: {danger}")
-    print(f"Normal: {normal}")
+    summary = PrettyTable()
+    print(f"\n{cyan}[{red}*{cyan}]{white} All Permissions: {danger+normal}")
+
+    # Printing all
+    summary.field_names = [f"{green}Permission States{white}", f"{green}Number of Permissions{white}"]
+    summary.add_row([f"{red}Risky{white}", f"{danger}"])
+    summary.add_row([f"{yellow}Info{white}", f"{normal}"])
+    print(summary)
     if danger > normal:
-        print(f"State: {red}Malicious{white}")
+        print(f"{cyan}[{red}Threat Level{cyan}]{white}: {red}Malicious{white}")
     elif danger == normal and danger > 0:
-        print(f"State: {yellow}Suspicious{white}")
+        print(f"{cyan}[{red}Threat Level{cyan}]{white}: {yellow}Suspicious{white}")
     else:
-        print(f"State: {green}Clean{white}")
-    print(f"{yellow}+----------------------+{white}\n")
+        print(f"{cyan}[{red}Threat Level{cyan}]{white}: {green}Clean{white}")
