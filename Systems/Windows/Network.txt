@@ -2,6 +2,7 @@ WSAStartup
 WSAGetLastError
 WSAEventSelect
 WSAEnumNetworkEvents
+WSACleanup
 WSARecv
 WSASend
 socket
@@ -10,6 +11,7 @@ recv
 Recv
 gethostbyname
 inet_ntoa
+inet_addr
 gethostname
 connect
 Connect
@@ -68,7 +70,6 @@ setsockopt
 getsockopt
 __WSAFDIsSet
 ntohl
-WSAStartup
 GetAcceptExSockaddrs
 AcceptEx
 InternetCrackUrlW

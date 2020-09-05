@@ -173,7 +173,7 @@ def Analyzer():
 
     # printing all function statistics
     statistics.field_names = ["Categories", "Number of Functions"]
-    statistics.add_row([f"{green}All Functions{white}", f"{cyan}{allFuncs}{white}"])
+    statistics.add_row([f"{green}All Functions{white}", f"{green}{allFuncs}{white}"])
     for key in scoreDict:
         if scoreDict[key] == 0:
             pass
@@ -181,7 +181,7 @@ def Analyzer():
             if key == "Keyboard" or key == "Evasion/Bypassing" or key == "System/Persistence" or key == "Cryptography" or key == "Information Gathering":
                 statistics.add_row([f"{yellow}{key}{white}",f"{red}{scoreDict[key]}{white}"])
             else:
-                statistics.add_row([f"{white}{key}", f"{green}{scoreDict[key]}{white}"])
+                statistics.add_row([f"{white}{key}", f"{scoreDict[key]}{white}"])
     print(statistics)
 
     # Warning about obfuscated file

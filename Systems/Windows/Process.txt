@@ -72,3 +72,7 @@ NtTerminateProcess
 PostThreadMessageA
 QueueUserAPC
 GetThreadPriority
+CreateFiber
+CreateFiberEx
+ConvertThreadToFiber
+ConvertFiberToThread

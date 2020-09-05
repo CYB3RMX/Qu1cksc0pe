@@ -33,3 +33,7 @@ StartServiceCtrlDispatcherW
 InitializeSecurityDescriptor
 SetThreadPriority
 AllocConsole
+CertOpenStore
+CertOpenSystemStore
+ReportEventW
+SwitchToFiber

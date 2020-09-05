@@ -17,3 +17,4 @@ SetThreadContext
 NtSetInformationProcess
 EnableExecuteProtectionSupport
 GetSidSubAuthority
+DeregisterEventSource
