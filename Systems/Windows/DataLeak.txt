@@ -98,3 +98,9 @@ GetConsoleCP
 GetLogicalDriveStringsA
 GetLogicalDriveStringsW
 GetUserDefaultLCID
+CertEnumCertificatesInStore
+CertFindCertificateInStore
+RegisterEventSourceW
+GetUserObjectInformationW
+GlobalMemoryStatus
+GlobalMemoryStatusEx

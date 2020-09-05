@@ -17,9 +17,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>30/08/2020</b>
-- [X] Bug fixes.
-- [X] Added pretty tables to APK analyzer.
+<b>05/09/2020</b>
+- [X] Added more Windows Functions/API's.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic```, ```androguard``` and ```prettytable```<br>

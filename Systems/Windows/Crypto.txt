@@ -14,3 +14,11 @@ EncodePointer
 EncryptFile
 DecodePointer
 DecryptFile
+CryptCreateHash
+CryptDestroyHash
+CryptGetProvParam
+CryptGenRandom
+CryptSetHashParam
+CryptSignHashW
+CryptEnumProvidersW
+CryptGetUserKey
