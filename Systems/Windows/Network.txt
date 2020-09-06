@@ -75,3 +75,10 @@ AcceptEx
 InternetCrackUrlW
 DnsFree
 DnsQuery_A
+RpcServerRegisterIfEx
+RpcMgmtStopServerListening
+RpcServerUseProtseqEpW
+RpcServerListen
+RpcServerUnregisterIf
+RpcStringBindingComposeWHook
+RpcStringBindingCompose

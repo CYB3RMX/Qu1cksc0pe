@@ -48,6 +48,7 @@ GetUserNameEx
 GetThreadTimes
 GetCommandLineA
 GetCommandLine
+GetCommandLineW
 GetStartupInfoA
 GetStartupInfoW
 TlsGetValue
@@ -104,3 +105,5 @@ RegisterEventSourceW
 GetUserObjectInformationW
 GlobalMemoryStatus
 GlobalMemoryStatusEx
+GetExitCodeThread
+GetExitCodeProcess
