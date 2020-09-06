@@ -21,7 +21,6 @@ IsWow64Process
 QueueUserAPC
 GetProcAddress
 ExitProcess
-GetExitCodeProcess
 TerminateProcess
 CreateProcessA
 GetProcessHeap
@@ -76,3 +75,13 @@ CreateFiber
 CreateFiberEx
 ConvertThreadToFiber
 ConvertFiberToThread
+OpenThread
+WaitForSingleObject
+WaitForSingleObjectEx
+WaitForMultipleObjects
+VirtualFreeEx
+Process32FirstW
+Process32NextW
+Thread32Next
+Thread32First
+SuspendThread

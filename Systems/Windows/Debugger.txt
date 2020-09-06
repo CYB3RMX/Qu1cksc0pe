@@ -18,3 +18,4 @@ NtSetInformationProcess
 EnableExecuteProtectionSupport
 GetSidSubAuthority
 DeregisterEventSource
+DebugActiveProcessStop

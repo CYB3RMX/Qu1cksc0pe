@@ -79,3 +79,10 @@ RtlVirtualUnwind
 RtlLookupFunctionEntry
 RtlCaptureContext
 CertFreeCertificateContext
+NdrServerCall2
+SetLastError
+lstrcmpiW
+wcslen
+wcsstr
+_wcsicmp
+wcschr
