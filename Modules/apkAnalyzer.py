@@ -59,6 +59,64 @@ def Analyzer(parsed):
     else:
         print(statistics)
 
+# Analyzing more deeply
+def DeepScan(parsed):
+    
+    # Getting features
+    featStat = PrettyTable()
+    featStat.field_names = [f"{green}Features{white}"]
+    features = parsed.get_features()
+    if features != []:
+        for ff in features:
+            featStat.add_row([ff])
+        print(featStat)
+    else:
+        pass
+    
+    # Activities
+    activeStat = PrettyTable()
+    activeStat.field_names = [f"{green}Activities{white}"]
+    actos = parsed.get_activities()
+    if actos != []:
+        for aa in actos:
+            activeStat.add_row([aa])
+        print(activeStat)
+    else:
+        pass
+    
+    # Services
+    servStat = PrettyTable()
+    servStat.field_names = [f"{green}Services{white}"]
+    servv = parsed.get_services()
+    if servv != []:
+        for ss in servv:
+            servStat.add_row([ss])
+        print(servStat)
+    else:
+        pass
+    
+    # Receivers
+    recvStat = PrettyTable()
+    recvStat.field_names = [f"{green}Receivers{white}"]
+    receive = parsed.get_receivers()
+    if receive != []:
+        for rr in receive:
+            recvStat.add_row([rr])
+        print(recvStat)
+    else:
+        pass
+    
+    # Providers
+    provStat = PrettyTable()
+    provStat.field_names = [f"{green}Providers{white}"]
+    provids = parsed.get_providers()
+    if provids != []:
+        for pp in provids:
+            provStat.add_row([pp])
+        print(provStat)
+    else:
+        pass
+
 # APK string analyzer
 def Detailed(targetAPK):
 
@@ -84,22 +142,9 @@ if __name__ == '__main__':
 
     # Permissions side
     Analyzer(parsed)
+    
+    # Deep scanner
+    DeepScan(parsed)
 
     # Strings side
     Detailed(targetAPK)
-
-    # Statistics zone
-    summary = PrettyTable()
-    print(f"\n{cyan}[{red}*{cyan}]{white} All Permissions: {danger+normal}")
-
-    # Printing all
-    summary.field_names = [f"{green}Permission States{white}", f"{green}Number of Permissions{white}"]
-    summary.add_row([f"{red}Risky{white}", f"{danger}"])
-    summary.add_row([f"{yellow}Info{white}", f"{normal}"])
-    print(summary)
-    if danger > normal:
-        print(f"{cyan}[{red}Threat Level{cyan}]{white}: {red}Malicious{white}")
-    elif danger == normal and danger > 0:
-        print(f"{cyan}[{red}Threat Level{cyan}]{white}: {yellow}Suspicious{white}")
-    else:
-        print(f"{cyan}[{red}Threat Level{cyan}]{white}: {green}Clean{white}")

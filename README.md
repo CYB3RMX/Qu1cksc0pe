@@ -17,8 +17,9 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>06/09/2020</b>
-- [X] Added more Windows Functions/API's. Now Qu1cksc0pe contains over 650+ Functions/API's about Windows.
+<b>08/09/2020</b>
+- [X] APK analyzer upgraded.
+- [X] Permission based threat scaling is removed from APK analyzer. Looking for better scaling solutions.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic```, ```androguard``` and ```prettytable```<br>
