@@ -1,6 +1,6 @@
 # Qu1cksc0pe
 <img src="https://img.shields.io/badge/-Linux-black?style=for-the-badge&logo=Linux&logoColor=white"> <img src="https://img.shields.io/badge/-Python-black?style=for-the-badge&logo=python&logoColor=white"> <img src="https://img.shields.io/badge/-Terminal-black?style=for-the-badge&logo=GNU%20Bash&logoColor=white"> <img src="https://img.shields.io/badge/-Bash-black?style=for-the-badge&logo=GNU%20Bash&logoColor=white"> <img src="https://img.shields.io/badge/-Apache%202.0-black?style=for-the-badge&Color=white">
-<br>This tool allows to statically analyze windows, linux executables and also APK files.<br>
+<br>This tool allows to statically analyze windows, linux, osx, executables and also APK files.<br>
 <i>You can get</i>: 
 - What DLL files are used.
 - Functions and API's.
@@ -17,9 +17,9 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>08/09/2020</b>
-- [X] APK analyzer upgraded.
-- [X] Permission based threat scaling is removed from APK analyzer. Looking for better scaling solutions.
+<b>13/09/2020</b>
+- [X] Version 1.7.0 released.
+- [X] Added OSX analyzer. Now Qu1cksc0pe can analyze OSX executables.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic```, ```androguard``` and ```prettytable```<br>

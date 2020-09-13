@@ -45,16 +45,28 @@ def Qu1cksc0pe():
     if args.analyze:
         print(f"{cyan}[{red}*{cyan}]{white} Analyzing: {green}{args.file}{white}")
         fileType = str(pr.magic_file(args.file))
+        
+        # Windows Analysis
         if "Windows Executable" in fileType or ".msi" in fileType or ".dll" in fileType or ".exe" in fileType:
             print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}Windows{white}\n")
             command = "./Modules/winAnalyzer.py {}".format(args.file)
             os.system(command)
+
+        # Linux Analysis
         elif "ELF" in fileType:
-            print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}Linux\n{white}")
+            print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}Linux{white}\n")
             command = "readelf -a {} > Modules/elves.txt".format(args.file)
             os.system(command)
             command = "./Modules/linAnalyzer.py {}".format(args.file)
             os.system(command)
+
+        # MacOSX Analysis
+        elif "Mach-O" in fileType:
+            print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}OSX{white}\n")
+            command = "./Modules/osXAnalyzer.py".format(args.file)
+            os.system(command)
+
+        # Android Analysis
         elif "PK" in fileType:
             print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}Android\n{white}")
             command = "./Modules/apkAnalyzer.py {}".format(args.file)
