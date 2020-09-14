@@ -17,9 +17,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>13/09/2020</b>
-- [X] Version 1.7.0 released.
-- [X] Added OSX analyzer. Now Qu1cksc0pe can analyze OSX executables.
+<b>14/09/2020</b>
+- [X] OSX Analyzer upgraded.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic```, ```androguard``` and ```prettytable```<br>

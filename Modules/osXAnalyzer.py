@@ -1,11 +1,14 @@
 #!/usr/bin/python3
 
-import os
+import os,sys
 try:
     from prettytable import PrettyTable
 except:
     print("Error: >prettytable< module not found.")
     sys.exit(1)
+
+# Getting filename for statistics
+fileName = str(sys.argv[1])
 
 # Colors
 white = '\u001b[0m'
@@ -19,13 +22,45 @@ allStrings = open("temp.txt", "r").read().split('\n')
 loadCommands = open("Systems/OSX/LoadCommands.txt", "r").read().split('\n')
 fileHeaders = open("Systems/OSX/Headers.txt", "r").read().split('\n')
 sharedLibs = open("Systems/OSX/SharedLibs.txt", "r").read().split('\n')
-funcStrings = open("Systems/OSX/Functions.txt", "r").read().split('\n')
+memoryz = open("Systems/OSX/Memory.txt", "r").read().split('\n')
+procesz = open("Systems/OSX/Process.txt", "r").read().split('\n')
+cryptoz = open("Systems/OSX/Cryptography.txt", "r").read().split('\n')
+otherz = open("Systems/OSX/Other.txt", "r").read().split('\n')
 
 # Arrayz
 lCommands = []
 fHeaders = []
 shLibs = []
-fStrings = []
+
+# Arrays for categorized scanning
+Memory = []
+Process = []
+Cryptography = []
+Other = []
+
+# Dictionaries for categories
+dictCateg = {
+    "Memory Management": Memory,
+    "Process": Process,
+    "Cryptography": Cryptography,
+    "Other/Unknown": Other
+}
+
+# Accessing categories
+regdict = {
+    "Memory Management": memoryz,
+    "Process": procesz,
+    "Cryptography": cryptoz,
+    "Other/Unknown": otherz
+}
+
+# Dictionary for statistics
+scoreDict = {
+    "Memory Management": 0,
+    "Process": 0,
+    "Cryptography": 0,
+    "Other/Unknown": 0
+}
 
 # Defining function
 def Analyzer():
@@ -33,13 +68,11 @@ def Analyzer():
     lcom = PrettyTable()
     fhead = PrettyTable()
     shlib = PrettyTable()
-    fstri = PrettyTable()
 
     # Preparing tables
     lcom.field_names = [f"{green}Load Commands{white}"]
     fhead.field_names = [f"{green}File Headers{white}"]
     shlib.field_names = [f"{green}Shared Libraries{white}"]
-    fstri.field_names = [f"{green}Extracted Function Strings{white}"]
 
     # Analyzing strings for load commands
     for lc in loadCommands:
@@ -59,12 +92,6 @@ def Analyzer():
             if sl != "":
                 shLibs.append(sl)
 
-    # Analyzing strings for valid functions
-    for ff in funcStrings:
-        if ff in allStrings:
-            if ff != "":
-                fStrings.append(ff)
-
     # Print all
     if fHeaders != []:
         for i in fHeaders:
@@ -81,10 +108,54 @@ def Analyzer():
             lcom.add_row(i)
         print(lcom)
 
-    if fStrings != []:
-        for i in fStrings:
-            fstri.add_row([i])
-        print(fstri)
+# Defining categorized scanning
+def Categorized():
+    # Necessary vars
+    allFuncs = 0
+    tables = PrettyTable()
+    statistics = PrettyTable()
+
+    # Categorizing extracted strings
+    for key in regdict:
+        for el in regdict[key]:
+            if el in allStrings:
+                if el != "":
+                    dictCateg[key].append(el)
+                    allFuncs += 1
+    
+    # Printing zone
+    for key in dictCateg:
+        if dictCateg[key] != []:
+            tables.field_names = [f"Functions or Strings about {green}{key}{white}"]
+            for i in dictCateg[key]:
+                if i == "":
+                    pass
+                else:
+                    tables.add_row([f"{red}{i}{white}"])
+                    if key == "Memory Management":
+                        scoreDict[key] += 1
+                    elif key == "Process":
+                        scoreDict[key] += 1
+                    elif key == "Cryptography":
+                        scoreDict[key] += 1
+                    elif key == "Other/Unknown":
+                        scoreDict[key] += 1
+                    else:
+                        pass
+            print(tables)
+            tables.clear_rows()
+    
+    # Statistics zone
+    print(f"\n{green}->{white} Statistics for: {green}{fileName}{white}")
+    statistics.field_names = ["Categories", "Number of Functions/Strings"]
+    statistics.add_row([f"{green}All Functions{white}", f"{green}{allFuncs}{white}"])
+    for key in scoreDict:
+        if scoreDict[key] == 0:
+            pass
+        else:
+            statistics.add_row([f"{white}{key}", f"{scoreDict[key]}{white}"])
+    print(statistics)
 
 # Execution
 Analyzer()
+Categorized()
