@@ -1,0 +1,16 @@
+alloc
+_alloc
+__alloc
+@__alloc
+malloc
+_malloc
+__malloc
+@__malloc
+dealloc
+_dealloc
+__dealloc
+@__dealloc
+realloc
+_realloc
+__realloc
+@__realloc

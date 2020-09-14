@@ -63,7 +63,7 @@ def Qu1cksc0pe():
         # MacOSX Analysis
         elif "Mach-O" in fileType:
             print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}OSX{white}\n")
-            command = "./Modules/osXAnalyzer.py".format(args.file)
+            command = "./Modules/osXAnalyzer.py {}".format(args.file)
             os.system(command)
 
         # Android Analysis

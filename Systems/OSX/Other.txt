@@ -1,0 +1,3 @@
+_strcpy
+_strlen
+_strrchr

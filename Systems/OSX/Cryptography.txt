@@ -1,0 +1,4 @@
+encode:
+decode:
+encodeString:
+decodeString:

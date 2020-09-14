@@ -3,6 +3,8 @@
 /System/Library/Frameworks/IOKit.framework/Versions/A/IOKit
 /usr/lib/libSystem.B.dylib
 /usr/lib/libc++.1.dylib
+/usr/lib/libstdc++.6.dylib
+/usr/lib/libgcc_s.1.dylib
 @rpath/QtCore.framework/Versions/5/QtCore
 @rpath/QtNetwork.framework/Versions/5/QtNetwork
 @executable_path/Frameworks

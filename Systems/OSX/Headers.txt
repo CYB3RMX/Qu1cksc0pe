@@ -6,6 +6,7 @@ __data
 __LINKEDIT
 __stubs
 __stub_helper
+__symbol_stub
 __gcc_except_tab__TEXT
 __const
 __cstring
