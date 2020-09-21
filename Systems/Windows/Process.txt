@@ -86,3 +86,6 @@ SuspendThread
 ThreadStart
 ThreadPriority
 ProcessStartInfo
+HeapSetInformation
+ExitThread
+TerminateThread

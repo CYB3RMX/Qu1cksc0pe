@@ -1,5 +1,6 @@
 WSAStartup
 WSAGetLastError
+WSASetLastError
 WSAEventSelect
 WSAEnumNetworkEvents
 WSACleanup
@@ -111,3 +112,10 @@ System.Net.NetworkInformation
 PingReply
 IPStatus
 FTPPutFile
+getpeername
+ntohs
+getsockname
+ioctlsocket
+freeaddrinfo
+htons
+WSAIoctl

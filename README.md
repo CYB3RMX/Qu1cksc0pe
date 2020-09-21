@@ -20,6 +20,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 <b>21/09/2020</b>
 - [X] Windows analyzer upgraded. Now you will analyze C# binaries better.
 - [X] Wordlists are fixed due duplicated word bugs.
+- [X] Windows wordlists are updated. Now Qu1cksc0pe contains over 800+ Functions and Strings about Windows.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic```, ```androguard``` and ```prettytable```<br>

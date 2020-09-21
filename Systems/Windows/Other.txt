@@ -87,3 +87,7 @@ wcsstr
 _wcsicmp
 wcschr
 IsVolatile
+SleepEx
+RtlUnwindEx
+RtlUnwind
+GetDIBits

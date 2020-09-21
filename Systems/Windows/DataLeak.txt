@@ -114,3 +114,6 @@ get_Version
 get_Platform
 GetDrives
 DriveInfo
+VerifyVersionInfoA
+GetDeviceCaps
+OpenClipboard

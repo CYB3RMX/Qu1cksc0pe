@@ -9,7 +9,6 @@ RegQueryValueExA
 RegSetValue
 RegGetValue
 RtlGetVersion
-RtlUnwind
 RtlWriteRegistryValue
 RtlCreateRegistryKey
 RegQueryValueExW
