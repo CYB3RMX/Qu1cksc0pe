@@ -77,7 +77,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 
 ## Evasion/Bypassing
 <b>This category contains functions and strings about:</b>
-- Manipulating Windows security policies and bypassing restricties.
+- Manipulating Windows security policies and bypassing restrictions.
 - Detecting debuggers and doing evasive tricks.
 
 ## System/Persistence
