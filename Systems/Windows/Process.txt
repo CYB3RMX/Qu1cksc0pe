@@ -18,7 +18,6 @@ GetCurrentThread
 WriteProcessMemory
 AdjustTokenPrivileges
 IsWow64Process
-GetProcAddress
 ExitProcess
 TerminateProcess
 CreateProcessA
