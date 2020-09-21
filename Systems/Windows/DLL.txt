@@ -1,6 +1,5 @@
 LoadLibrary
 LoadLibraryExA
-LoadLibraryA
 LoadResource
 LoadLibraryA
 LoadLibraryW

@@ -107,3 +107,10 @@ GlobalMemoryStatus
 GlobalMemoryStatusEx
 GetExitCodeThread
 GetExitCodeProcess
+SystemParametersInfo
+GetKernelObjectSecurity
+get_OSVersion
+get_Version
+get_Platform
+GetDrives
+DriveInfo

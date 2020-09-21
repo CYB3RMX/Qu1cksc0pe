@@ -4,7 +4,6 @@ CreateDirectory
 SHGetSpecialFolderPathA
 SHGetSpecialFolderPath
 FileStream
-FileMode
 FileAccess
 CompileAssemblyFromFile
 CompressFileLZMA
@@ -128,3 +127,14 @@ RtlDosPathNameToNtPathName_U
 ZwCreateFile
 GetSystemWindowsDirectoryA
 GetSystemWindowsDirectoryW
+SearchFiles
+WalkDirectoryTree
+get_FileName
+set_FileName
+GetFolderPath
+SpecialFolder
+GetFileName
+GetDirectories
+FileSystemInfo
+GetDirectoryName
+FileShare

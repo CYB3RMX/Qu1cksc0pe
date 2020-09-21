@@ -172,7 +172,7 @@ def Analyzer():
     print(f"\n{green}->{white} Statistics for: {green}{fileName}{white}")
 
     # printing all function statistics
-    statistics.field_names = ["Categories", "Number of Functions"]
+    statistics.field_names = ["Categories", "Number of Functions or Strings"]
     statistics.add_row([f"{green}All Functions{white}", f"{green}{allFuncs}{white}"])
     for key in scoreDict:
         if scoreDict[key] == 0:

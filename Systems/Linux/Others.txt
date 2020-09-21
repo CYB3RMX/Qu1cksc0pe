@@ -7,7 +7,6 @@ ldiv
 ceil
 octl
 nd
-ntf
 bcmp
 wctob_l
 wctob
@@ -58,7 +57,6 @@ _fini
 _edata
 _GLOBAL_OFFSET_TABLE_
 _end
-_IO_stdin_used
 __data_start
 __gmon_start__
 __memcpy_chk
@@ -71,7 +69,6 @@ __stack_chk_fail
 __stack_chk_fail_local
 __ctype_tolower_loc
 __asprintf_chk
-__memcpy_chk
 __get_buf
 __mb_sb_limit
 __jemalloc_arena_dalloc_small

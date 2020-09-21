@@ -19,3 +19,4 @@ EnableExecuteProtectionSupport
 GetSidSubAuthority
 DeregisterEventSource
 DebugActiveProcessStop
+System.Security.AccessControl

@@ -33,7 +33,6 @@ mkdir
 rmdir
 umount2
 fcntl
-umask
 chroot
 ustat
 dup

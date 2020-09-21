@@ -17,8 +17,9 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>14/09/2020</b>
-- [X] OSX Analyzer upgraded.
+<b>21/09/2020</b>
+- [X] Windows analyzer upgraded. Now you will analyze C# binaries better.
+- [X] Wordlists are fixed due duplicated word bugs.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic```, ```androguard``` and ```prettytable```<br>
