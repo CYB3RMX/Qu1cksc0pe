@@ -17,10 +17,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>21/09/2020</b>
-- [X] Windows analyzer upgraded. Now you will analyze C# binaries better.
-- [X] Wordlists are fixed due duplicated word bugs.
-- [X] Windows wordlists are updated. Now Qu1cksc0pe contains over 800+ Functions and Strings about Windows.
+<b>22/09/2020</b>
+- [X] Added ```--multiple``` argument. Now Qu1cksc0pe can analyze list of target files.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic```, ```androguard``` and ```prettytable```<br>
@@ -36,6 +34,10 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ## Normal analysis
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --analyze```<br>
 ![animation](.animations/analyze.gif)
+
+## Multiple analysis
+<b>Usage</b>: ```python3 qu1cksc0pe.py --multiple targets.lst```<br>
+![animation](.animations/multi.gif)
 
 ## VirusTotal
 <b>Usage for --vtFile</b>: ```python3 qu1cksc0pe.py --file suspicious_file --vtFile```<br>

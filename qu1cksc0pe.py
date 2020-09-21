@@ -19,23 +19,57 @@ white = '\u001b[0m'
 green = '\u001b[1;92m'
 yellow = '\u001b[1;93m'
 
-# handling arguments
+# Argument crating, parsing and handling
 args = []
+parser = argparse.ArgumentParser()
+parser.add_argument("--file",required=False,help="Select a suspicious file.")
+parser.add_argument("--analyze",required=False,help="Analyze target file.",action="store_true")
+parser.add_argument("--multiple",required=False,help="Analyze multiple files.")
+parser.add_argument("--vtFile",required=False,help="Scan your file with VirusTotal API.",action="store_true")
+parser.add_argument("--vtUrl",required=False,help="Scan your URL with VirusTotal API.",action="store_true")
+parser.add_argument("--metadata",required=False,help="Get exif/metadata information.",action="store_true")
+parser.add_argument("--domain",required=False,help="Extract URLs and IP addresses from file.",action="store_true")
+parser.add_argument("--packer",required=False,help="Check if your file is packed with common packers.",action="store_true")
+parser.add_argument("--key_init",required=False,help="Enter your VirusTotal API key.",action="store_true")
+parser.add_argument("--update",required=False,help="Check for updates.",action="store_true")
+args = parser.parse_args()
 
+# Basic analyzer function that handles single and multiple scans
+def BasicAnalyzer(analyzeFile):
+    print(f"{cyan}[{red}*{cyan}]{white} Analyzing: {green}{analyzeFile}{white}")
+    fileType = str(pr.magic_file(analyzeFile))
+    
+    # Windows Analysis
+    if "Windows Executable" in fileType or ".msi" in fileType or ".dll" in fileType or ".exe" in fileType:
+        print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}Windows{white}\n")
+        command = "./Modules/winAnalyzer.py {}".format(analyzeFile)
+        os.system(command)
+    
+    # Linux Analysis
+    elif "ELF" in fileType:
+        print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}Linux{white}\n")
+        command = "readelf -a {} > Modules/elves.txt".format(analyzeFile)
+        os.system(command)
+        command = "./Modules/linAnalyzer.py {}".format(analyzeFile)
+        os.system(command)
+    
+    # MacOSX Analysis
+    elif "Mach-O" in fileType:
+        print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}OSX{white}\n")
+        command = "./Modules/osXAnalyzer.py {}".format(analyzeFile)
+        os.system(command)
+    
+    # Android Analysis
+    elif "PK" in fileType:
+        print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}Android\n{white}")
+        command = "./Modules/apkAnalyzer.py {}".format(analyzeFile)
+        os.system(command)
+    else:
+        print(f"{cyan}[{red}!{cyan}]{white} Target OS could not identified. Make sure your file is an correct executable.")
+        sys.exit(1)
+
+# Main function
 def Qu1cksc0pe():
-    # Argument crating and parsing
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--file",required=False,help="Select a suspicious file.")
-    parser.add_argument("--analyze",required=False,help="Analyze target file.",action="store_true")
-    parser.add_argument("--vtFile",required=False,help="Scan your file with VirusTotal API.",action="store_true")
-    parser.add_argument("--vtUrl",required=False,help="Scan your URL with VirusTotal API.",action="store_true")
-    parser.add_argument("--metadata",required=False,help="Get exif/metadata information.",action="store_true")
-    parser.add_argument("--domain",required=False,help="Extract URLs and IP addresses from file.",action="store_true")
-    parser.add_argument("--packer",required=False,help="Check if your file is packed with common packers.",action="store_true")
-    parser.add_argument("--key_init",required=False,help="Enter your VirusTotal API key.",action="store_true")
-    parser.add_argument("--update",required=False,help="Check for updates.",action="store_true")
-    args = parser.parse_args()
-
     # Getting all strings from the file
     if args.file:
         command = f"if [ -e {args.file} ];then strings -a {args.file} > temp.txt; else echo 'Error: Target file not found!'; exit 1;  fi"
@@ -43,36 +77,22 @@ def Qu1cksc0pe():
 
     # Analyze the target file
     if args.analyze:
-        print(f"{cyan}[{red}*{cyan}]{white} Analyzing: {green}{args.file}{white}")
-        fileType = str(pr.magic_file(args.file))
-        
-        # Windows Analysis
-        if "Windows Executable" in fileType or ".msi" in fileType or ".dll" in fileType or ".exe" in fileType:
-            print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}Windows{white}\n")
-            command = "./Modules/winAnalyzer.py {}".format(args.file)
-            os.system(command)
-
-        # Linux Analysis
-        elif "ELF" in fileType:
-            print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}Linux{white}\n")
-            command = "readelf -a {} > Modules/elves.txt".format(args.file)
-            os.system(command)
-            command = "./Modules/linAnalyzer.py {}".format(args.file)
-            os.system(command)
-
-        # MacOSX Analysis
-        elif "Mach-O" in fileType:
-            print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}OSX{white}\n")
-            command = "./Modules/osXAnalyzer.py {}".format(args.file)
-            os.system(command)
-
-        # Android Analysis
-        elif "PK" in fileType:
-            print(f"{cyan}[{red}*{cyan}]{white} Target OS: {green}Android\n{white}")
-            command = "./Modules/apkAnalyzer.py {}".format(args.file)
-            os.system(command)
-        else:
-            print(f"{cyan}[{red}!{cyan}]{white} Target OS could not identified. Make sure your file is an correct executable.")
+        BasicAnalyzer(analyzeFile=args.file)
+    
+    # Multiple file analysis
+    if args.multiple:
+        try:
+            listOfFiles = open(args.multiple, "r").read().split('\n')
+            for oneFile in listOfFiles:
+                if oneFile != '':
+                    command = f"if [ -e {oneFile} ];then strings -a {oneFile} > temp.txt; else echo 'Error: Target file not found!'; exit 1;  fi"
+                    os.system(command)
+                    BasicAnalyzer(analyzeFile=oneFile)
+                    print("+","*"*40,"+")
+                else:
+                    continue
+        except:
+            print(f"{cyan}[{red}!{cyan}]{white} An error occured while parsing the files.")
             sys.exit(1)
 
     # metadata
