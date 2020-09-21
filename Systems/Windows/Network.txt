@@ -110,3 +110,4 @@ Ping
 System.Net.NetworkInformation
 PingReply
 IPStatus
+FTPPutFile

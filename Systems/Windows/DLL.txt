@@ -12,6 +12,7 @@ SafeDLLPath
 GetModuleHandle
 GetModuleHandleA
 GetModuleHandleW
+GetProcAddress
 EnumProcessModules
 InitCommonControlsEx
 LoadTypeLib
