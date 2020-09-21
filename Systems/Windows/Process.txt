@@ -18,7 +18,6 @@ GetCurrentThread
 WriteProcessMemory
 AdjustTokenPrivileges
 IsWow64Process
-QueueUserAPC
 GetProcAddress
 ExitProcess
 TerminateProcess
@@ -85,3 +84,6 @@ Process32NextW
 Thread32Next
 Thread32First
 SuspendThread
+ThreadStart
+ThreadPriority
+ProcessStartInfo

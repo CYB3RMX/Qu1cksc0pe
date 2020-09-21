@@ -37,3 +37,4 @@ CertOpenStore
 CertOpenSystemStore
 ReportEventW
 SwitchToFiber
+RawSecurityDescriptor

@@ -126,11 +126,11 @@ banner6()
 # Execute functions
 randomStart=$(( RANDOM % 7 ))
 case $randomStart in
-	0) banner ;;
+  0) banner ;;
 	1) banner1 ;;
 	2) banner2 ;;
 	3) banner3 ;;
 	4) banner4 ;;
-    5) banner5 ;;
-    6) banner6 ;;
+  5) banner5 ;;
+  6) banner6 ;;
 esac
