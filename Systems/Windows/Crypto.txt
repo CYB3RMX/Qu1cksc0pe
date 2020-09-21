@@ -36,3 +36,6 @@ CreateEncryptor
 ICryptoTransform
 ToBase64String
 AsymmetricAlgorithm
+CryptGetHashParam
+CryptAcquireContextW
+CryptHashData

@@ -138,3 +138,7 @@ GetDirectories
 FileSystemInfo
 GetDirectoryName
 FileShare
+GetTempPathA
+FindFirstFileExA
+CreateFileMappingA
+PathFileExistsA

@@ -52,7 +52,7 @@ dictCateg = {
     "Registry": Registry,
     "File": File,
     "Networking/Web": Network,
-    "Keyboard": Keyboard,
+    "Keyboard/Keylogging": Keyboard,
     "Process": Process,
     "Dll/Resource Handling": Dll,
     "Evasion/Bypassing": Evasion_Bypassing,
@@ -68,7 +68,7 @@ scoreDict = {
     "Registry": 0,
     "File": 0,
     "Networking/Web": 0,
-    "Keyboard": 0,
+    "Keyboard/Keylogging": 0,
     "Process": 0,
     "Dll/Resource Handling": 0,
     "Evasion/Bypassing": 0,
@@ -81,7 +81,7 @@ scoreDict = {
 
 # Accessing categories
 regdict={
-    "Registry": regarr, "File": filearr, "Networking/Web": netarr, "Keyboard": keyarr,
+    "Registry": regarr, "File": filearr, "Networking/Web": netarr, "Keyboard/Keylogging": keyarr,
     "Process": procarr, "Dll/Resource Handling": dllarr, "Evasion/Bypassing": debugarr, "System/Persistence": systarr,
     "COMObject": comarr, "Cryptography": cryptarr,"Information Gathering": datarr, "Other/Unknown": otharr
 }
@@ -107,7 +107,7 @@ def Analyzer():
         if dictCateg[key] != []:
 
             # More important categories
-            if key == "Keyboard" or key == "Evasion/Bypassing" or key == "System/Persistence" or key == "Cryptography" or key == "Information Gathering":
+            if key == "Keyboard/Keylogging" or key == "Evasion/Bypassing" or key == "System/Persistence" or key == "Cryptography" or key == "Information Gathering":
                 print(f"\n{yellow}[{red}!{yellow}]__WARNING__[{red}!{yellow}]{white}")
 
             # Printing zone
@@ -128,7 +128,7 @@ def Analyzer():
                     elif key == "Networking/Web":
                         threatScore += 5
                         scoreDict[key] +=1
-                    elif key == "Keyboard":
+                    elif key == "Keyboard/Keylogging":
                         threatScore += 6
                         scoreDict[key] +=1
                     elif key == "Process":
@@ -178,7 +178,7 @@ def Analyzer():
         if scoreDict[key] == 0:
             pass
         else:
-            if key == "Keyboard" or key == "Evasion/Bypassing" or key == "System/Persistence" or key == "Cryptography" or key == "Information Gathering":
+            if key == "Keyboard/Keylogging" or key == "Evasion/Bypassing" or key == "System/Persistence" or key == "Cryptography" or key == "Information Gathering":
                 statistics.add_row([f"{yellow}{key}{white}",f"{red}{scoreDict[key]}{white}"])
             else:
                 statistics.add_row([f"{white}{key}", f"{scoreDict[key]}{white}"])
