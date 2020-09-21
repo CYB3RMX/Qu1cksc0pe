@@ -45,3 +45,5 @@ OpenSubKey
 CreateSubKey
 RegistryKeyPermissionCheck
 RegistryValueKind
+RegCreateKeyW
+RegOpenKeyW

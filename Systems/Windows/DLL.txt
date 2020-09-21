@@ -21,3 +21,4 @@ DisableThreadLibraryCalls
 SizeofResource
 LoadLibraryWHook
 GetModuleHandleExW
+FreeLibraryAndExitThread

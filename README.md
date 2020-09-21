@@ -47,3 +47,62 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ## Domain
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --domain```<br><br>
 ![animation](.animations/domain.gif)
+
+# Informations about categories
+## Registry
+<b>This category contains functions and strings about:</b>
+- Creating or destroying registry keys.
+- Changing registry keys and registry logs.
+
+## File
+<b>This category contains functions and strings about:</b>
+- Creating/changing/infecting/deleting files.
+- Getting informations about file contents and file systems.
+
+## Networking/Web
+<b>This category contains functions and strings about:</b>
+- Communicating malicious hosts.
+- Download malicious files.
+- Sending informations about infected machine and its user.
+
+## Process
+<b>This category contains functions and strings about:</b>
+- Creating/infecting/terminating processes.
+- Manipulating processes.
+
+## Dll/Resource Handling
+<b>This category contains functions and strings about:</b>
+- Handling DLL files and another malware's resource files.
+- Infecting and manipulating DLL files.
+
+## Evasion/Bypassing
+<b>This category contains functions and strings about:</b>
+- Manipulating Windows security policies and bypassing restricties.
+- Detecting debuggers and doing evasive tricks.
+
+## System/Persistence
+<b>This category contains functions and strings about:</b>
+- Executing system commands.
+- Manipulating system files and get persistence in target systems.
+
+## COMObject
+<b>This category contains functions and strings about:</b>
+- Microsoft's Component Object Model system.
+
+## Cryptography
+<b>This category contains functions and strings about:</b>
+- Encrypting and decrypting files.
+- Creating and destroying hashes.
+
+## Information Gathering
+<b>This category contains functions and strings about:</b>
+- Gathering all informations from target hosts.
+
+## Keyboard/Keylogging
+<b>This category contains functions and strings about:</b>
+- Tracking infected machine's keyboard.
+- Gathering information about targets keyboard.
+
+## Memory Management
+<b>This category contains functions and strings about:</b>
+- Manipulating and using target machines memory.
