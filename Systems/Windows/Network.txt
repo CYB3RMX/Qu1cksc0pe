@@ -119,3 +119,5 @@ ioctlsocket
 freeaddrinfo
 htons
 WSAIoctl
+GetAddrInfoW
+FreeAddrInfoW

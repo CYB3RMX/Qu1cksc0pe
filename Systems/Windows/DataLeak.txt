@@ -117,3 +117,6 @@ DriveInfo
 VerifyVersionInfoA
 GetDeviceCaps
 OpenClipboard
+GetVolumeInformationW
+GetDiskFreeSpaceExW
+GetComputerNameExW
