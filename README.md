@@ -17,8 +17,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>22/09/2020</b>
-- [X] Added ```--multiple``` argument. Now Qu1cksc0pe can analyze list of target files.
+<b>24/09/2020</b>
+- [X] Packer Analyzer upgraded.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic```, ```androguard``` and ```prettytable```<br>
