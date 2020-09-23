@@ -14,8 +14,7 @@ white = '\u001b[0m'
 green = '\u001b[1;92m'
 
 # File signatures
-file_sigs = {'UPX': 'UPX0', 'UPX': 'UPX1', 
-             'AsPack': '.aspack', 'UPX': 'UPX2', 'UPX':'UPX!'}
+file_sigs = {'UPX': 'UPX0' , 'AsPack': '.aspack'}
 
 # Getting file's all strings to analyze
 try:
