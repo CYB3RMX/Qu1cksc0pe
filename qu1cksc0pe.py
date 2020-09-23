@@ -149,7 +149,6 @@ def Qu1cksc0pe():
 
     # packer detection
     if args.packer:
-        print(f"{cyan}[{red}*{cyan}]{white} Looking for packers...")
         command = "./Modules/packerAnalyzer.py {}".format(args.file)
         os.system(command)
 
