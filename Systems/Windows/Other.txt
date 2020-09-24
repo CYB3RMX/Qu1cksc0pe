@@ -1,7 +1,6 @@
 StartServiceCtrlDispatcher
 IsNTAdmin
 IsUserAnAdmin
-CMemoryException
 CWinApp
 DeactivateActCtx
 ActivateActCtx
@@ -91,3 +90,6 @@ SleepEx
 RtlUnwindEx
 RtlUnwind
 GetDIBits
+ExtractIconA
+ExtractIconExA
+SetStdHandle

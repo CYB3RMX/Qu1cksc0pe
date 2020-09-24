@@ -144,3 +144,8 @@ CreateFileMappingA
 PathFileExistsA
 GetFileAttributesExW
 GetTempPathW
+GetShortPathNameA
+SetFileAttributesA
+FindExecutableW
+DragFinish
+DragQueryPoint
