@@ -23,7 +23,8 @@ regarr = open("Systems/Windows/Registry.txt", "r").read().split("\n")
 filearr = open("Systems/Windows/File.txt", "r").read().split("\n")
 netarr = open("Systems/Windows/Network.txt", "r").read().split("\n")
 keyarr = open("Systems/Windows/Keyboard.txt", "r").read().split("\n")
-procarr = open("Systems/Windows/Process.txt").read().split("\n")
+procarr = open("Systems/Windows/Process.txt", "r").read().split("\n")
+memoarr = open("Systems/Windows/Memoryz.txt", "r").read().split("\n")
 dllarr = open("Systems/Windows/DLL.txt", "r").read().split("\n")
 debugarr = open("Systems/Windows/Debugger.txt", "r").read().split("\n")
 systarr = open("Systems/Windows/Syspersist.txt", "r").read().split("\n")
@@ -39,6 +40,7 @@ File = []
 Network = []
 Keyboard = []
 Process = []
+Memory = []
 Dll = []
 Evasion_Bypassing = []
 SystemPersistence = []
@@ -54,6 +56,7 @@ dictCateg = {
     "Networking/Web": Network,
     "Keyboard/Keylogging": Keyboard,
     "Process": Process,
+    "Memory Management": Memory,
     "Dll/Resource Handling": Dll,
     "Evasion/Bypassing": Evasion_Bypassing,
     "System/Persistence": SystemPersistence,
@@ -70,6 +73,7 @@ scoreDict = {
     "Networking/Web": 0,
     "Keyboard/Keylogging": 0,
     "Process": 0,
+    "Memory Management": 0,
     "Dll/Resource Handling": 0,
     "Evasion/Bypassing": 0,
     "System/Persistence": 0,
@@ -82,7 +86,7 @@ scoreDict = {
 # Accessing categories
 regdict={
     "Registry": regarr, "File": filearr, "Networking/Web": netarr, "Keyboard/Keylogging": keyarr,
-    "Process": procarr, "Dll/Resource Handling": dllarr, "Evasion/Bypassing": debugarr, "System/Persistence": systarr,
+    "Process": procarr, "Memory Management": memoarr, "Dll/Resource Handling": dllarr, "Evasion/Bypassing": debugarr, "System/Persistence": systarr,
     "COMObject": comarr, "Cryptography": cryptarr,"Information Gathering": datarr, "Other/Unknown": otharr
 }
 
@@ -132,6 +136,9 @@ def Analyzer():
                         threatScore += 6
                         scoreDict[key] +=1
                     elif key == "Process":
+                        threatScore += 5
+                        scoreDict[key] +=1
+                    elif key == "Memory Management":
                         threatScore += 5
                         scoreDict[key] +=1
                     elif key == "Dll/Resource Handling":

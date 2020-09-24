@@ -18,7 +18,9 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 
 # Updates
 <b>24/09/2020</b>
-- [X] Packer Analyzer upgraded.
+- [X] Packer analyzer upgraded.
+- [X] Added new category: ```Memory Management``` to Windows analyzer.
+- [X] Added new Functions/Strings to Windows wordlists.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic```, ```androguard``` and ```prettytable```<br>

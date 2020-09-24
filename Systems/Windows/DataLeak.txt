@@ -2,6 +2,7 @@ GetComputerNameA
 GetLocalTime
 GetComputerNameW
 GetSystemInfo
+RtlGetVersion
 LsaEnumerateLogonSessions
 SamIConnect
 GetTimeZoneInformation
@@ -25,6 +26,7 @@ GetCurrentDirectoryA
 GetVersion
 GetVersionEx
 GetVersionExA
+GetVersionExW
 GetThreadContext
 GetSystemDefaultLangId
 RtlGetCompressionWorkSpaceSize
@@ -103,8 +105,6 @@ CertEnumCertificatesInStore
 CertFindCertificateInStore
 RegisterEventSourceW
 GetUserObjectInformationW
-GlobalMemoryStatus
-GlobalMemoryStatusEx
 GetExitCodeThread
 GetExitCodeProcess
 SystemParametersInfo
@@ -120,3 +120,8 @@ OpenClipboard
 GetVolumeInformationW
 GetDiskFreeSpaceExW
 GetComputerNameExW
+GetThreadLocale
+GetLocaleInfoW
+EnumSystemLocalesA
+NetScheduleJobEnum
+HeapQueryInformation

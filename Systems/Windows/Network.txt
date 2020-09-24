@@ -121,3 +121,4 @@ htons
 WSAIoctl
 GetAddrInfoW
 FreeAddrInfoW
+WinHttpQueryDataAvailable
