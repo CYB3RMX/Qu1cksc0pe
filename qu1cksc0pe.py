@@ -75,7 +75,7 @@ def BasicAnalyzer(analyzeFile):
 def Qu1cksc0pe():
     # Getting all strings from the file
     if args.file:
-        command = f"if [ -e {args.file} ];then strings -a {args.file} > temp.txt; else echo 'Error: Target file not found!'; exit 1;  fi"
+        command = f"if [ -e {args.file} ];then strings --all {args.file} > temp.txt; else echo 'Error: Target file not found!'; exit 1;  fi"
         os.system(command)
 
     # Analyze the target file
@@ -88,7 +88,7 @@ def Qu1cksc0pe():
             listOfFiles = list(args.multiple)
             for oneFile in listOfFiles:
                 if oneFile != '':
-                    command = f"if [ -e {oneFile} ];then strings -a {oneFile} > temp.txt; else echo 'Target file: {oneFile} not found!'; exit 1;  fi"
+                    command = f"if [ -e {oneFile} ];then strings --all {oneFile} > temp.txt; else echo 'Target file: {oneFile} not found!'; exit 1;  fi"
                     os.system(command)
                     BasicAnalyzer(analyzeFile=oneFile)
                     print("+","*"*40,"+\n")

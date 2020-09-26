@@ -23,7 +23,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - [X] ```--multiple``` scan type is upgraded. You dont need list file anymore.
 
 # Setup
-<b>Necessary python modules</b>: ```puremagic```, ```androguard``` and ```prettytable```<br>
+<b>Necessary python modules</b>: ```puremagic```, ```androguard```, ```prettytable``` and ```fleep```<br>
 <b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
 <b>Other dependencies</b>: ```VirusTotal API key```, ```binutils```, ```exiftool``` and ```aapt```.<br>
 <b>Gathering other dependencies</b>

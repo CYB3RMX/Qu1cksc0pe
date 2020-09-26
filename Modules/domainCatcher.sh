@@ -18,13 +18,13 @@ targetFile=$1
 lookUrl()
 {
    echo -en "$cyan[$red*$cyan]$default Looking for URLs...\n\n"
-   strings -a $targetFile | grep -o "http://" &>/dev/null
+   strings --all $targetFile | grep -o "http://" &>/dev/null
    if [ $? -eq 0 ];then
       urlFindHTTP
    else
       echo -en "$cyan[$red!$cyan]$default Nothing found about HTTP\n\n"
    fi
-   strings -a $targetFile | grep -o "https://" &>/dev/null
+   strings --all $targetFile | grep -o "https://" &>/dev/null
    if [ $? -eq 0 ];then
       urlFindHTTPS
    else
@@ -36,7 +36,7 @@ lookUrl()
 lookIp()
 {
    echo -en "\n$cyan[$red*$cyan]$default Looking for IP addresses...\n\n"
-   strings -a $targetFile | grep $regex_ip &>/dev/null
+   strings --all $targetFile | grep $regex_ip &>/dev/null
    if [ $? -eq 0 ];then
       ipAddrHunter
    else
@@ -50,7 +50,7 @@ urlFindHTTP()
    # HTTP side
    echo -en "$red=>$default Extracted$green HTTP$default URLs\n"
    echo -en "+-----------------------------------+\n"
-   strings -a $targetFile | grep -o $regex_http
+   strings --all $targetFile | grep -o $regex_http
    echo -en "+-----------------------------------+\n\n"
 }
 urlFindHTTPS()
@@ -58,7 +58,7 @@ urlFindHTTPS()
    # HTTPS side
    echo -en "$red=>$default Extracted$green HTTPS$default URLs\n"
    echo -en "+-----------------------------------+\n"
-   strings -a $targetFile | grep -o $regex_https
+   strings --all $targetFile | grep -o $regex_https
    echo -en "+-----------------------------------+\n"
 }
 
@@ -67,7 +67,7 @@ ipAddrHunter()
 {
    echo -en "$red=>$default Extracted$green IP Addresses$default\n"
    echo -en "+------------------------------+\n"
-   strings -a $targetFile | grep $regex_ip
+   strings --all $targetFile | grep $regex_ip
    echo -en "+------------------------------+\n"
 }
 

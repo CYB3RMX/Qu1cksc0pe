@@ -8,9 +8,9 @@ except:
     sys.exit(1)
 
 try:
-    import puremagic as pr
+    import fleep as fl
 except:
-    print("Error: >puremagic< module not found.")
+    print("Error: >fleep< module not found.")
     sys.exit(1)
 
 # Getting name of the file for statistics
@@ -102,7 +102,9 @@ def Analyzer():
     allFuncs = 0
     tables = PrettyTable()
     dllTable = PrettyTable()
-    resTable = PrettyTable()
+    extTable = PrettyTable()
+    mimeTable = PrettyTable()
+    ftypeTable = PrettyTable()
     statistics = PrettyTable()
 
     # categorizing extracted strings
@@ -183,23 +185,32 @@ def Analyzer():
     print(dllTable)
 
     # Resource scanner zone
-    resCounter = 0
-    resTable.field_names = [f"Extracted File Extensions", "Names", "Byte Matches"]
-    resourceList = list(pr.magic_file(fileName))
-    for res in range(0, len(resourceList)):
-        extrExt = str(resourceList[res].extension)
-        extrNam = str(resourceList[res].name)
-        extrByt = str(resourceList[res].byte_match)
-        if resourceList[res].confidence >= 0.6:
-            resCounter +=1
-            if extrExt == '':
-                resTable.add_row([f"{red}No Extension{white}", f"{red}{extrNam}{white}", f"{red}{extrByt}{white}"])
-            else:
-                resTable.add_row([f"{red}{extrExt}{white}", f"{red}{extrNam}{white}", f"{red}{extrByt}{white}"])
+    extTable.field_names = [f"Extracted {green}File Extensions{white}"]
+    mimeTable.field_names = [f"Extracted {green}Mime Types{white}"]
+    ftypeTable.field_names = [f"Extracted {green}File Types{white}"]
 
-    if resCounter != 0:
-        print(resTable)
+    with open(fileName, "rb") as targFile:
+        extract = fl.get(targFile.read(128))
     
+    extArr = list(extract.extension)
+    mimeAr = list(extract.mime)
+    ftypes = list(extract.type)
+
+    if extArr != []:
+        for ex in extArr:
+            extTable.add_row([f"{red}{ex}{white}"])
+        print(extTable)
+    
+    if mimeAr != []:
+        for mt in mimeAr:
+            mimeTable.add_row([f"{red}{mt}{white}"])
+        print(mimeTable)
+    
+    if ftypes != []:
+        for ft in ftypes:
+            ftypeTable.add_row([f"{red}{ft}{white}"])
+        print(ftypeTable)
+        
     # Statistics zone
     print(f"\n{green}->{white} Statistics for: {green}{fileName}{white}")
 
