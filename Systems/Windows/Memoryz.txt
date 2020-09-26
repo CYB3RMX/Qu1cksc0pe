@@ -76,3 +76,6 @@ AtlThunk_AllocateData
 AtlThunk_DataToCode
 AtlThunk_FreeData
 AtlThunk_InitData
+memset
+memcmp
+memcpy
