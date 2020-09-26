@@ -7,6 +7,7 @@
 - Sections and segments.
 - URL's, IP addresses and emails.
 - Android permissions.
+- File extensions and their names.
 
 Qu1cksc0pe aims to get even more information about suspicious files and helps to user realizing what that file capable of.
 
@@ -17,10 +18,9 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>24/09/2020</b>
-- [X] Packer analyzer upgraded.
-- [X] Added new category: ```Memory Management``` to Windows analyzer.
-- [X] Added new Functions/Strings to Windows wordlists.
+<b>26/09/2020</b>
+- [X] Added "Magic Byte Analyzer skills" to Windows and Linux analyzer modules.
+- [X] ```--multiple``` scan type is upgraded. You dont need list file anymore.
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic```, ```androguard``` and ```prettytable```<br>
@@ -38,7 +38,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![animation](.animations/analyze.gif)
 
 ## Multiple analysis
-<b>Usage</b>: ```python3 qu1cksc0pe.py --multiple targets.lst```<br>
+<b>Usage</b>: ```python3 qu1cksc0pe.py --multiple FILE1 FILE2 ...```<br>
 ![animation](.animations/multi.gif)
 
 ## VirusTotal
