@@ -190,7 +190,7 @@ def Analyzer():
         extrExt = str(resourceList[res].extension)
         extrNam = str(resourceList[res].name)
         extrByt = str(resourceList[res].byte_match)
-        if resourceList[res].confidence >= 0.4:
+        if resourceList[res].confidence >= 0.6:
             resCounter +=1
             if extrExt == '':
                 resTable.add_row([f"{red}No Extension{white}", f"{red}{extrNam}{white}", f"{red}{extrByt}{white}"])
