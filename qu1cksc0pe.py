@@ -19,6 +19,9 @@ white = '\u001b[0m'
 green = '\u001b[1;92m'
 yellow = '\u001b[1;93m'
 
+# Banner
+os.system("./Modules/banners.sh")
+
 # Argument crating, parsing and handling
 args = []
 parser = argparse.ArgumentParser()
@@ -170,7 +173,6 @@ def Qu1cksc0pe():
         os.system(command)
 
 # Exectuion area
-os.system("./Modules/banners.sh")
 try:
     Qu1cksc0pe()
     os.system("if [ -e temp.txt ];then rm -f temp.txt; fi")
