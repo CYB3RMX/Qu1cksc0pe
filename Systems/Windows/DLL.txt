@@ -22,3 +22,4 @@ SizeofResource
 LoadLibraryWHook
 GetModuleHandleExW
 FreeLibraryAndExitThread
+Module32First
