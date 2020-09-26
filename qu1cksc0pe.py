@@ -24,7 +24,7 @@ args = []
 parser = argparse.ArgumentParser()
 parser.add_argument("--file",required=False,help="Select a suspicious file.")
 parser.add_argument("--analyze",required=False,help="Analyze target file.",action="store_true")
-parser.add_argument("--multiple",required=False,help="Analyze multiple files.")
+parser.add_argument("--multiple",required=False, nargs='+', help="Analyze multiple files.")
 parser.add_argument("--vtFile",required=False,help="Scan your file with VirusTotal API.",action="store_true")
 parser.add_argument("--vtUrl",required=False,help="Scan your URL with VirusTotal API.",action="store_true")
 parser.add_argument("--metadata",required=False,help="Get exif/metadata information.",action="store_true")
@@ -82,13 +82,13 @@ def Qu1cksc0pe():
     # Multiple file analysis
     if args.multiple:
         try:
-            listOfFiles = open(args.multiple, "r").read().split('\n')
+            listOfFiles = list(args.multiple)
             for oneFile in listOfFiles:
                 if oneFile != '':
-                    command = f"if [ -e {oneFile} ];then strings -a {oneFile} > temp.txt; else echo 'Error: Target file not found!'; exit 1;  fi"
+                    command = f"if [ -e {oneFile} ];then strings -a {oneFile} > temp.txt; else echo 'Target file: {oneFile} not found!'; exit 1;  fi"
                     os.system(command)
                     BasicAnalyzer(analyzeFile=oneFile)
-                    print("+","*"*40,"+")
+                    print("+","*"*40,"+\n")
                 else:
                     continue
         except:

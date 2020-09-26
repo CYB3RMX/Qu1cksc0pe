@@ -7,6 +7,12 @@ except:
     print("Error: >prettytable< module not found.")
     sys.exit(1)
 
+try:
+    import puremagic as pr
+except:
+    print("Error: >puremagic< module not found.")
+    sys.exit(1)
+
 # Getting name of the file for statistics
 fileName = str(sys.argv[1])
 
@@ -96,6 +102,7 @@ def Analyzer():
     allFuncs = 0
     tables = PrettyTable()
     dllTable = PrettyTable()
+    resTable = PrettyTable()
     statistics = PrettyTable()
 
     # categorizing extracted strings
@@ -175,6 +182,24 @@ def Analyzer():
                 dllTable.add_row([f"{red}{dl}{white}"])
     print(dllTable)
 
+    # Resource scanner zone
+    resCounter = 0
+    resTable.field_names = [f"Extracted File Extensions", "Names", "Byte Matches"]
+    resourceList = list(pr.magic_file(fileName))
+    for res in range(0, len(resourceList)):
+        extrExt = str(resourceList[res].extension)
+        extrNam = str(resourceList[res].name)
+        extrByt = str(resourceList[res].byte_match)
+        if resourceList[res].confidence >= 0.4:
+            resCounter +=1
+            if extrExt == '':
+                resTable.add_row([f"{red}No Extension{white}", f"{red}{extrNam}{white}", f"{red}{extrByt}{white}"])
+            else:
+                resTable.add_row([f"{red}{extrExt}{white}", f"{red}{extrNam}{white}", f"{red}{extrByt}{white}"])
+
+    if resCounter != 0:
+        print(resTable)
+    
     # Statistics zone
     print(f"\n{green}->{white} Statistics for: {green}{fileName}{white}")
 
