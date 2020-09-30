@@ -2,16 +2,11 @@
 
 import requests,os,hashlib,sys,math
 
+# Module for progressbar
 try:
     from tqdm import tqdm
 except:
     print("Module: >tqdm< not found.")
-    sys.exit(1)
-
-try:
-    from prettytable import PrettyTable
-except:
-    print("Module: >prettytable< not found.")
     sys.exit(1)
 
 # File handling
@@ -26,7 +21,7 @@ yellow = '\u001b[1;93m'
 
 def DatabaseCheck():
     if os.path.isfile("HashDB.sha1") == False:
-        print(f"{cyan}[{red}!{cyan}]{white} Local signature database not found!")
+        print(f"{cyan}[{red}!{cyan}]{white} Local signature database not found.")
         choose = str(input(f"{green}=>{white} Would you like to download it [Y/n]?: "))
         if choose == "Y" or choose == "y":
             local_database = "HashDB.zip"
@@ -41,7 +36,7 @@ def DatabaseCheck():
                     wrote = wrote + len(data)
                     ff.write(data)
             print(f"{cyan}[{red}*{cyan}]{white} Extracting file...")
-            command = f"unzip {local_database} &>/dev/null; if [ $? -eq 0 ];then echo '{cyan}[{red}+{cyan}]{white} Database downloaded successfully.'; else echo '{cyan}[{red}!{cyan}]{white} Error occured!'; exit 1; fi"
+            command = f"unzip {local_database} &>/dev/null; if [ $? -eq 0 ];then rm -rf HashDB.zip; echo '{cyan}[{red}+{cyan}]{white} Database downloaded successfully.'; else echo '{cyan}[{red}!{cyan}]{white} Error occured!'; exit 1; fi"
             os.system(command)
             sys.exit(0)
         else:
@@ -61,20 +56,25 @@ try:
 except:
     DatabaseCheck()
 
+# Total hash checking
+tot = 0
+for _ in databaseFile:
+    tot += 1
+
 # Hashing
 targetHash = GetHash(targetFile)
 hashMe = hashlib.sha1(targetHash.encode())
 finalHash = hashMe.hexdigest()
     
 # Info
-infoTable = PrettyTable()
-infoTable.field_names = [f"{green}File Name{white}", f"{green}File Hash{white}", f"{green}Threat Level{white}"]
+print(f"{cyan}[{red}*{cyan}]{white} Total Hashes: {green}{tot}{white}")
+print(f"{cyan}[{red}*{cyan}]{white} File Name: {green}{targetFile}{white}")
+print(f"{cyan}[{red}*{cyan}]{white} File Signature: {green}{finalHash}{white}")
 
 # Scanning
 if finalHash in databaseFile:
-    infoTable.add_row([f"{targetFile}", f"{finalHash}", f"{red}Malicious{white}"])
-    print(infoTable)
+    print(f"\n{cyan}[{red}DANGER{cyan}]{white}: Target file's hash is in our local database.")
+    print(f"{cyan}[{red}Threat Level{cyan}]{white}: {red}Malicious{white}\n")
 else:
-    infoTable.add_row([f"{targetFile}", f"{finalHash}", f"{yellow}Unknown{white}"])
-    print(infoTable)
+    print(f"\n{cyan}[{red}Threat Level{cyan}]{white}: {yellow}Unknown{white}\n")
     print(f"{cyan}[{yellow}INFO{cyan}]{white} Try '{green}--analyze{white}' or '{green}--vtFile{white}' instead.\n")

@@ -20,6 +20,10 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 # Updates
 <b>30/09/2020</b>
 - [X] Added ```--hashScan```. Now Qu1cksc0pe will scan files like Anti-Viruses. (Signature based scanning)
+- [X] Signature database updated.
+
+# Signature Database Information
+Number of malicious hashes: <b>2.097.364</b>
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic```, ```androguard```, ```prettytable``` and ```fleep```<br>
