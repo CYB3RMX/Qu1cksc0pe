@@ -18,9 +18,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>26/09/2020</b>
-- [X] Added "Magic Byte Analyzer skills" to Windows and Linux analyzer modules.
-- [X] ```--multiple``` scan type is upgraded. You dont need list file anymore.
+<b>30/09/2020</b>
+- [X] Added ```--hashScan```. Now Qu1cksc0pe will scan files like Anti-Viruses. (Signature based scanning)
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic```, ```androguard```, ```prettytable``` and ```fleep```<br>
