@@ -28,6 +28,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--file",required=False,help="Select a suspicious file.")
 parser.add_argument("--analyze",required=False,help="Analyze target file.",action="store_true")
 parser.add_argument("--multiple",required=False, nargs='+', help="Analyze multiple files.")
+parser.add_argument("--hashScan",required=False,help="Scan target file's hash in local database.",action="store_true")
 parser.add_argument("--vtFile",required=False,help="Scan your file with VirusTotal API.",action="store_true")
 parser.add_argument("--vtUrl",required=False,help="Scan your URL with VirusTotal API.",action="store_true")
 parser.add_argument("--metadata",required=False,help="Get exif/metadata information.",action="store_true")
@@ -97,6 +98,11 @@ def Qu1cksc0pe():
         except:
             print(f"{cyan}[{red}!{cyan}]{white} An error occured while parsing the files.")
             sys.exit(1)
+    
+    # Hash Scanning
+    if args.hashScan:
+        command = f"if [ -e {args.file} ];then ./Modules/hashScanner.py {args.file}; else echo 'Target file: {args.file} not found!'; exit 1; fi"
+        os.system(command)
 
     # metadata
     if args.metadata:
