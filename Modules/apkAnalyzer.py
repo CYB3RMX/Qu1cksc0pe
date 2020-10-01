@@ -135,16 +135,18 @@ def Detailed(targetAPK):
 
 # Execution
 if __name__ == '__main__':
-
-    # Getting and parsing target APK
-    targetAPK = str(sys.argv[1])
-    parsed = APK(targetAPK)
-
-    # Permissions side
-    Analyzer(parsed)
-    
-    # Deep scanner
-    DeepScan(parsed)
-
-    # Strings side
-    Detailed(targetAPK)
+    try:
+        # Getting and parsing target APK
+        targetAPK = str(sys.argv[1])
+        parsed = APK(targetAPK)
+        
+        # Permissions side
+        Analyzer(parsed)
+        
+        # Deep scanner
+        DeepScan(parsed)
+        
+        # Strings side
+        Detailed(targetAPK)
+    except:
+        print(f"{cyan}[{red}!{cyan}]{white} An error occured.")
