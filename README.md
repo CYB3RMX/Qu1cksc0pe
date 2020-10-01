@@ -18,11 +18,11 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>01/10/2020</b>
+<b>02/10/2020</b>
 - [X] Signature database updated.
 
 # Signature Database Information
-Number of malicious hashes: <b>4.063.444</b>
+Number of malicious hashes: <b>5.571.076</b>
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic```, ```androguard```, ```prettytable``` and ```fleep```<br>
