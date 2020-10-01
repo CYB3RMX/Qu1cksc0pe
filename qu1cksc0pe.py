@@ -168,10 +168,13 @@ def Qu1cksc0pe():
 
     # entering VT API key
     if args.key_init:
-        apikey = str(input(f"{cyan}[{red}+{cyan}]{white} Enter your VirusTotal API key: "))
-        command = "echo '{}' > Modules/.apikey.txt".format(apikey)
-        os.system(command)
-        print(f"{cyan}[{red}+{cyan}]{white} Your VirusTotal API key saved.")
+        try:
+            apikey = str(input(f"{cyan}[{red}+{cyan}]{white} Enter your VirusTotal API key: "))
+            command = "echo '{}' > Modules/.apikey.txt".format(apikey)
+            os.system(command)
+            print(f"{cyan}[{red}+{cyan}]{white} Your VirusTotal API key saved.")
+        except KeyboardInterrupt:
+            print(f"{cyan}[{red}!{cyan}]{white} Program terminated by user.")
 
     # Update checking
     if args.update:
