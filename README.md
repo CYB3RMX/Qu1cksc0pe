@@ -23,7 +23,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - [X] Signature database updated.
 
 # Signature Database Information
-Number of malicious hashes: <b>2.097.364</b>
+Number of malicious hashes: <b>3.408.084</b>
 
 # Setup
 <b>Necessary python modules</b>: ```puremagic```, ```androguard```, ```prettytable``` and ```fleep```<br>
