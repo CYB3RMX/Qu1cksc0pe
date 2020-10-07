@@ -1,14 +1,20 @@
 #!/usr/bin/python3
 
-# Colors
-yellow='\u001b[1;93m'
-green='\u001b[1;92m'
-red='\u001b[1;91m'
-white='\u001b[0m'
-cyan='\u001b[1;96m'
-
 # Necessary libs
 import os,sys,requests
+
+try:
+    from colorama import Fore, Style
+except:
+    print("Error: >colorama< module not found.")
+    sys.exit(1)
+
+# Colors
+yellow = Fore.LIGHTYELLOW_EX
+green = Fore.LIGHTGREEN_EX
+red = Fore.LIGHTRED_EX
+white = Style.RESET_ALL
+cyan = Fore.LIGHTCYAN_EX
 
 # Arguments
 try:

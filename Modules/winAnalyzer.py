@@ -13,15 +13,21 @@ except:
     print("Error: >fleep< module not found.")
     sys.exit(1)
 
+try:
+    from colorama import Fore, Style
+except:
+    print("Error: >colorama< module not found.")
+    sys.exit(1)
+
 # Getting name of the file for statistics
 fileName = str(sys.argv[1])
 
 # Colors
-red = '\u001b[1;91m'
-cyan = '\u001b[1;96m'
-white = '\u001b[0m'
-green = '\u001b[1;92m'
-yellow = '\u001b[1;93m'
+red = Fore.LIGHTRED_EX
+cyan = Fore.LIGHTCYAN_EX
+white = Style.RESET_ALL
+green = Fore.LIGHTGREEN_EX
+yellow = Fore.LIGHTYELLOW_EX
 
 # Keywords for categorized scanning
 allStrings = open("temp.txt", "r").read().split('\n')

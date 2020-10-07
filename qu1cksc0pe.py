@@ -6,18 +6,27 @@ try:
 except:
     print("Missing modules detected!")
     sys.exit(1)
+
+# Testing puremagic existence
 try:
     import puremagic as pr
 except:
     print("Error: >puremagic< module not found.")
     sys.exit(1)
 
+# Testing colorama existence
+try:
+    from colorama import Fore, Style
+except:
+    print("Error: >colorama< module not found.")
+    sys.exit(1)
+
 # Colors
-red = '\u001b[1;91m'
-cyan = '\u001b[1;96m'
-white = '\u001b[0m'
-green = '\u001b[1;92m'
-yellow = '\u001b[1;93m'
+red = Fore.LIGHTRED_EX
+cyan = Fore.LIGHTCYAN_EX
+white = Style.RESET_ALL
+green = Fore.LIGHTGREEN_EX
+yellow = Fore.LIGHTYELLOW_EX
 
 # Banner
 os.system("./Modules/banners.sh")

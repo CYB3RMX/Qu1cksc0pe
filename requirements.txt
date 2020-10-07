@@ -2,3 +2,4 @@ puremagic
 androguard
 prettytable
 fleep
+colorama

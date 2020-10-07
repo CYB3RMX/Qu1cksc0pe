@@ -7,15 +7,21 @@ except:
     print("Error: >prettytable< module not found.")
     sys.exit(1)
 
+try:
+    from colorama import Fore, Style
+except:
+    print("Error: >colorama< module not found.")
+    sys.exit(1)
+
 # Getting filename for statistics
 fileName = str(sys.argv[1])
 
 # Colors
-white = '\u001b[0m'
-red = '\u001b[1;91m'
-green = '\u001b[1;92m'
-yellow = '\u001b[1;93m'
-cyan = '\u001b[1;96m'
+white = Style.RESET_ALL
+red = Fore.LIGHTRED_EX
+green = Fore.LIGHTGREEN_EX
+yellow = Fore.LIGHTYELLOW_EX
+cyan = Fore.LIGHTCYAN_EX
 
 # Keywords ;)
 allStrings = open("temp.txt", "r").read().split('\n')
