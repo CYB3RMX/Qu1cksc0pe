@@ -33,7 +33,7 @@ Number of malicious hashes: <b>5.767.684</b>
 - ```fleep```
 - ```colorama```
 
-<b>Installation of python modules</>: ```pip3 install -r requirements.txt```<br>
+<br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
 <b>Other dependencies</b>: ```VirusTotal API key```, ```binutils```, ```exiftool``` and ```aapt```.<br>
 <b>Gathering other dependencies</b>
 - <i>VirusTotal</i>: ```https://virustotal.com```
