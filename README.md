@@ -18,20 +18,28 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>02/10/2020</b>
+<b>07/10/2020</b>
+- [X] Compatibility is improved.
 - [X] Signature database updated.
 
 # Signature Database Information
-Number of malicious hashes: <b>5.571.076</b>
+Number of malicious hashes: <b>5.767.684</b>
 
 # Setup
-<b>Necessary python modules</b>: ```puremagic```, ```androguard```, ```prettytable``` and ```fleep```<br>
-<b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
+<b>Necessary python modules</b>: 
+- ```puremagic```
+- ```androguard```
+- ```prettytable```
+- ```fleep```
+- ```colorama```
+
+<b>Installation of python modules</>: ```pip3 install -r requirements.txt```<br>
 <b>Other dependencies</b>: ```VirusTotal API key```, ```binutils```, ```exiftool``` and ```aapt```.<br>
 <b>Gathering other dependencies</b>
 - <i>VirusTotal</i>: ```https://virustotal.com```
 - <i>Binutils</i>: ```sudo apt-get install binutils```
 - <i>ExifTool</i>: ```sudo apt-get install exiftool```
+- <i>Strings</i>: ```sudo apt-get install strings```
 - <i>AAPT</i>: ```sudo apt-get install aapt```
 
 # Scan arguments

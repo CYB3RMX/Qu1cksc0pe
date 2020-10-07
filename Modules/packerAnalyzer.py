@@ -7,11 +7,17 @@ except:
     print("Module: >prettytable< not found.")
     sys.exit(1)
 
+try:
+    from colorama import Fore, Style
+except:
+    print("Error: >colorama< module not found.")
+    sys.exit(1)
+
 # Colors
-red = '\u001b[1;91m'
-cyan = '\u001b[1;96m'
-white = '\u001b[0m'
-green = '\u001b[1;92m'
+red = Fore.LIGHTRED_EX
+cyan = Fore.LIGHTCYAN_EX
+white = Style.RESET_ALL
+green = Fore.LIGHTGREEN_EX
 
 # File signatures
 file_sigs = {'UPX': 'UPX0' , 'AsPack': '.aspack'}
