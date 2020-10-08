@@ -34,9 +34,8 @@ Number of malicious hashes: <b>5.767.684</b>
 - ```colorama```
 
 <br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
-<b>Other dependencies</b>: ```VirusTotal API key```, ```binutils```, ```exiftool``` and ```aapt```.<br>
 <b>Gathering other dependencies</b>
-- <i>VirusTotal</i>: ```https://virustotal.com```
+- <i>VirusTotal API Key</i>: ```https://virustotal.com```
 - <i>Binutils</i>: ```sudo apt-get install binutils```
 - <i>ExifTool</i>: ```sudo apt-get install exiftool```
 - <i>Strings</i>: ```sudo apt-get install strings```
