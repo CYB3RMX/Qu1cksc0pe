@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
-import os,sys
+import os
+import sys
 try:
     from prettytable import PrettyTable
 except:
@@ -128,7 +129,7 @@ def Categorized():
                 if el != "":
                     dictCateg[key].append(el)
                     allFuncs += 1
-    
+
     # Printing zone
     for key in dictCateg:
         if dictCateg[key] != []:
@@ -150,7 +151,7 @@ def Categorized():
                         pass
             print(tables)
             tables.clear_rows()
-    
+
     # Statistics zone
     print(f"\n{green}->{white} Statistics for: {green}{fileName}{white}")
     statistics.field_names = ["Categories", "Number of Functions/Strings"]

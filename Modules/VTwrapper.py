@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 
 # Necessary libs
-import os,sys,requests
-
+import os
+import sys
+import requests
 try:
     from colorama import Fore, Style
 except:
@@ -16,12 +17,16 @@ red = Fore.LIGHTRED_EX
 white = Style.RESET_ALL
 cyan = Fore.LIGHTCYAN_EX
 
+# Legends
+infoS = f"{cyan}[{red}*{cyan}]{white}"
+errorS = f"{cyan}[{red}!{cyan}]{white}"
+
 # Arguments
 try:
     apik = str(sys.argv[1])
     argument = str(sys.argv[2])
 except:
-    print(f"{cyan}[{red}!{cyan}]{white} Please get your API key from -> {green}https://www.virustotal.com/{white}")
+    print(f"{errorS} Please get your API key from -> {green}https://www.virustotal.com/{white}")
     sys.exit(1)
     
 # A simple AV database for querying
@@ -40,7 +45,7 @@ avArray = ["DrWeb", "MicroWorld-eScan", "FireEye", "CAT-QuickHeal",
 allAvs = len(avArray)
 
 # A simple website array for url scanner
-phishArray = ["Botvrij.eu","Feodo Tracker", "CLEAN MX", "DNS8", "NotMining",
+phishArray = ["Botvrij.eu", "Feodo Tracker", "CLEAN MX", "DNS8", "NotMining",
               "VX Vault", "securolytics", "Tencent", "MalwarePatrol", "MalSilo",
               "Comodo Valkyrie Verdict", "PhishLabs", "EmergingThreats", "Sangfor",
               "K7AntiVirus", "Spam404", "Virusdie External Site Scan", "Artists Against 419",
@@ -68,7 +73,7 @@ def FileScan():
     try:
         targetFile = str(sys.argv[3])
     except:
-        print(f"{cyan}[{red}!{cyan}]{white} Please enter your file.")
+        print(f"{errorS} Please enter your file.")
         sys.exit(1)
 
     try:
@@ -76,9 +81,9 @@ def FileScan():
         url = "https://www.virustotal.com/vtapi/v2/file/scan"
         params = {'apikey': apik}
         filee = {'file': (targetFile, open(targetFile, 'rb'))}
-        print(f"\n{cyan}[{red}+{cyan}]{white} Sending query to VirusTotal API...")
+        print(f"\n{infoS} Sending query to VirusTotal API...")
         scanRequest = requests.post(url, files=filee, params=params)
-        print(f"{cyan}[{red}+{cyan}]{white} Query sent. Just wait a couple of seconds...")
+        print(f"{infoS} Query sent. Just wait a couple of seconds...")
         os.system("sleep 5")
         fData = scanRequest.json()
         resource = fData['resource']
@@ -86,11 +91,11 @@ def FileScan():
         # Building report request
         url1 = "https://www.virustotal.com/vtapi/v2/file/report"
         params1 = {'apikey': apik, 'resource': resource}
-        print(f"{cyan}[{red}+{cyan}]{white} Getting the scan report please wait...")
+        print(f"{infoS} Getting the scan report please wait...")
         scanReport = requests.get(url1, params=params1)
         report = scanReport.json()
     except:
-        print(f"{cyan}[{red}!{cyan}]{white} Program terminated.")
+        print(f"{errorS} Program terminated.")
         sys.exit(1)
 
     # A dictionary for detected AV
@@ -98,7 +103,7 @@ def FileScan():
     for av in avArray:
         try:
             if str(report['scans'][av]["detected"]) == "True":
-                score +=1
+                score += 1
                 detect.update({av: report['scans'][av]})
             else:
                 pass
@@ -107,9 +112,9 @@ def FileScan():
 
     # Printing and parsing the data
     if detect == {}:
-        print(f"\n{cyan}[{red}!{cyan}]{white} Nothing found harmfull about that file.")
+        print(f"\n{errorS} Nothing found harmfull about that file.")
     else:
-        print(f"\n{cyan}[{red}*{cyan}]{white} Detection: {red}{score}{white}/{red}{allAvs}")
+        print(f"\n{infoS} Detection: {red}{score}{white}/{red}{allAvs}")
         for aa in detect:
             print(f"\n{green}{aa}")
             print("\u001b[93m#"*30)
@@ -124,16 +129,16 @@ def UrlScan():
     try:
         targetUrl = str(input(f"{green}=>{white} Enter URL: "))
     except:
-        print(f"{cyan}[{red}!{cyan}]{white} Program terminated.")
+        print(f"{errorS} Program terminated.")
         sys.exit(1)
 
     # Building scan request
     try:
         url = "https://www.virustotal.com/vtapi/v2/url/scan"
-        myParams = {'apikey':apik, 'url':targetUrl}
-        print(f"\n{cyan}[{red}+{cyan}]{white} Sending query to VirusTotal API...")
+        myParams = {'apikey': apik, 'url': targetUrl}
+        print(f"\n{infoS} Sending query to VirusTotal API...")
         urlReq = requests.post(url, data=myParams)
-        print(f"{cyan}[{red}+{cyan}]{white} Query sent. Just wait a couple of seconds...")
+        print(f"{infoS} Query sent. Just wait a couple of seconds...")
         os.system("sleep 5")
         UData = urlReq.json()
         resource = UData['resource']
@@ -141,11 +146,11 @@ def UrlScan():
         # Building report request
         url1 = "https://www.virustotal.com/vtapi/v2/url/report"
         myNewParams = {'apikey': apik, 'resource': resource}
-        print(f"{cyan}[{red}+{cyan}]{white} Getting the scan report please wait...")
+        print(f"{infoS} Getting the scan report please wait...")
         urlReport = requests.get(url1, params=myNewParams)
         report = urlReport.json()
     except:
-        print(f"{cyan}[{red}!{cyan}]{white} Program terminated.")
+        print(f"{errorS} Program terminated.")
         sys.exit(1)
 
     # A dictionary for detected Scanners
@@ -162,14 +167,14 @@ def UrlScan():
 
     # Printing and parsing the data
     if detect == {}:
-        print(f"\n{cyan}[{red}!{cyan}]{white} Nothing found harmfull about that URL.")
+        print(f"\n{errorS} Nothing found harmfull about that URL.")
     else:
-        print(f"\n{cyan}[{red}*{cyan}]{white} Detection: {red}{score}{white}/{red}{allFish}")
+        print(f"\n{infoS} Detection: {red}{score}{white}/{red}{allFish}")
         for ww in detect:
             print(f"\n{green}{ww}")
             print("\u001b[93m#"*30)
             for webs in webState:
-                print("{}{}: {}{}".format(red,webs.upper(),white,detect[ww][webs]))
+                print("{}{}: {}{}".format(red, webs.upper(), white, detect[ww][webs]))
         print(" ")
 
 # Execution area
