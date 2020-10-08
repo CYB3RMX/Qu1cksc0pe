@@ -19,7 +19,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 
 # Updates
 <b>08/10/2020</b>
-- [X] Sources codes rearranged for PEP8 standarts.
+- [X] Source codes rearranged for PEP8 standarts.
 
 # Signature Database Information
 Number of malicious hashes: <b>5.767.684</b>
