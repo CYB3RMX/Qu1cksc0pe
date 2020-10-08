@@ -18,9 +18,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>07/10/2020</b>
-- [X] Compatibility is improved.
-- [X] Signature database updated.
+<b>08/10/2020</b>
+- [X] Sources codes rearranged for PEP8 standarts.
 
 # Signature Database Information
 Number of malicious hashes: <b>5.767.684</b>
@@ -34,7 +33,7 @@ Number of malicious hashes: <b>5.767.684</b>
 - ```colorama```
 
 <br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
-<b>Gathering other dependencies</b>
+<b>Gathering other dependencies</b>:
 - <i>VirusTotal API Key</i>: ```https://virustotal.com```
 - <i>Binutils</i>: ```sudo apt-get install binutils```
 - <i>ExifTool</i>: ```sudo apt-get install exiftool```

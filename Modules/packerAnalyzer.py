@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
-import os,sys
+import os
+import sys
 try:
     from prettytable import PrettyTable
 except:
@@ -19,12 +20,16 @@ cyan = Fore.LIGHTCYAN_EX
 white = Style.RESET_ALL
 green = Fore.LIGHTGREEN_EX
 
+# Legends
+infoS = f"{cyan}[{red}*{cyan}]{white}"
+errorS = f"{cyan}[{red}!{cyan}]{white}"
+
 # File signatures
-file_sigs = {'UPX': 'UPX0' , 'AsPack': '.aspack'}
+file_sigs = {'UPX': 'UPX0', 'AsPack': '.aspack'}
 
 # Getting file's all strings to analyze
 try:
-    command = "strings --all {} > tempPack.txt".format(sys.argv[1])
+    command = f"strings --all {sys.argv[1]} > tempPack.txt"
     os.system(command)
 except:
     os.system("if [ -e tempPack.txt ];then rm -f tempPack.txt; fi")
@@ -36,14 +41,14 @@ def Analyzer():
     packed = 0
     allHex = open("tempPack.txt", "r").read()
 
-    print(f"{cyan}[{red}*{cyan}]{white} Searching strings about common packers...")
+    print(f"{infoS} Searching strings about common packers...")
     for pack in file_sigs:
         if file_sigs[pack] in allHex:
             packed += 1
             packTable.add_row([f"{red}{file_sigs[pack]}{white}", f"{red}{pack}{white}"])
 
     if packed == 0:
-        print(f"{cyan}[{red}!{cyan}]{white} Nothing found.")
+        print(f"{errorS} Nothing found.")
     else:
         print(packTable)
 
@@ -52,5 +57,5 @@ try:
     Analyzer()
     os.system("if [ -e tempPack.txt ];then rm -f tempPack.txt; fi")
 except:
-    print(f"{cyan}[{red}!{cyan}]{white} Program terminated.")
+    print(f"{errorS} Program terminated.")
     os.system("if [ -e tempPack.txt ];then rm -f tempPack.txt; fi")

@@ -1,6 +1,10 @@
 #!/usr/bin/python3
 
-import requests,os,hashlib,sys,math
+import requests
+import os
+import hashlib
+import sys
+import math
 
 # Module for progressbar
 try:
@@ -25,9 +29,15 @@ white = Style.RESET_ALL
 green = Fore.LIGHTGREEN_EX
 yellow = Fore.LIGHTYELLOW_EX
 
+# Legends
+infoS = f"{cyan}[{red}*{cyan}]{white}"
+foundS = f"{cyan}[{red}+{cyan}]{white}"
+errorS = f"{cyan}[{red}!{cyan}]{white}"
+thLevel = f"{cyan}[{red}Threat Level{cyan}]{white}"
+
 def DatabaseCheck():
     if os.path.isfile("HashDB.sha1") == False:
-        print(f"{cyan}[{red}!{cyan}]{white} Local signature database not found.")
+        print(f"{errorS} Local signature database not found.")
         choose = str(input(f"{green}=>{white} Would you like to download it [Y/n]?: "))
         if choose == "Y" or choose == "y":
             local_database = "HashDB.zip"
@@ -36,13 +46,13 @@ def DatabaseCheck():
             total_size = int(req.headers.get('content-length', 0))
             block_size = 1024
             wrote = 0
-            print(f"\n{cyan}[{red}*{cyan}]{white} Downloading signature database please wait...")
+            print(f"\n{infoS} Downloading signature database please wait...")
             with open(local_database, 'wb') as ff:
                 for data in tqdm(req.iter_content(block_size), total=math.ceil(total_size//block_size), unit='KB', unit_scale=True):
                     wrote = wrote + len(data)
                     ff.write(data)
-            print(f"{cyan}[{red}*{cyan}]{white} Extracting file...")
-            command = f"unzip {local_database} &>/dev/null; if [ $? -eq 0 ];then rm -rf HashDB.zip; echo '{cyan}[{red}+{cyan}]{white} Database downloaded successfully.'; else echo '{cyan}[{red}!{cyan}]{white} Error occured!'; exit 1; fi"
+            print(f"{infoS} Extracting file...")
+            command = f"unzip {local_database} &>/dev/null; if [ $? -eq 0 ];then rm -rf HashDB.zip; echo '{foundS} Database downloaded successfully.'; else echo '{errorS} Error occured!'; exit 1; fi"
             os.system(command)
             sys.exit(0)
         else:
@@ -71,16 +81,16 @@ for _ in databaseFile:
 targetHash = GetHash(targetFile)
 hashMe = hashlib.sha1(targetHash.encode())
 finalHash = hashMe.hexdigest()
-    
+
 # Info
-print(f"{cyan}[{red}*{cyan}]{white} Total Hashes: {green}{tot}{white}")
-print(f"{cyan}[{red}*{cyan}]{white} File Name: {green}{targetFile}{white}")
-print(f"{cyan}[{red}*{cyan}]{white} File Signature: {green}{finalHash}{white}")
+print(f"{infoS} Total Hashes: {green}{tot}{white}")
+print(f"{infoS} File Name: {green}{targetFile}{white}")
+print(f"{infoS} File Signature: {green}{finalHash}{white}")
 
 # Scanning
 if finalHash in databaseFile:
     print(f"\n{cyan}[{red}DANGER{cyan}]{white}: Target file's hash is in our local database.")
-    print(f"{cyan}[{red}Threat Level{cyan}]{white}: {red}Malicious{white}\n")
+    print(f"{thLevel}: {red}Malicious{white}\n")
 else:
-    print(f"\n{cyan}[{red}Threat Level{cyan}]{white}: {yellow}Unknown{white}\n")
+    print(f"\n{thLevel}: {yellow}Unknown{white}\n")
     print(f"{cyan}[{yellow}INFO{cyan}]{white} Try '{green}--analyze{white}' or '{green}--vtFile{white}' instead.\n")

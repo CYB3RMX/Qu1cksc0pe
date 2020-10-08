@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 
-import json,sys,os
+import json
+import sys
+import os
 
 # Module handling
 try:
@@ -27,6 +29,10 @@ cyan = Fore.LIGHTCYAN_EX
 white = Style.RESET_ALL
 green = Fore.LIGHTGREEN_EX
 yellow = Fore.LIGHTYELLOW_EX
+
+# Legends
+infoS = f"{cyan}[{red}*{cyan}]{white}"
+errorS = f"{cyan}[{red}!{cyan}]{white}"
 
 # necessary variables
 danger = 0
@@ -61,13 +67,12 @@ def Analyzer(parsed):
 
     # If there is no permission:
     if danger == 0 and normal == 0:
-        print(f"{cyan}[{red}!{cyan}]{white} Not any permissions found.")
+        print(f"{errorS} Not any permissions found.")
     else:
         print(statistics)
 
 # Analyzing more deeply
 def DeepScan(parsed):
-    
     # Getting features
     featStat = PrettyTable()
     featStat.field_names = [f"{green}Features{white}"]
@@ -78,7 +83,7 @@ def DeepScan(parsed):
         print(featStat)
     else:
         pass
-    
+
     # Activities
     activeStat = PrettyTable()
     activeStat.field_names = [f"{green}Activities{white}"]
@@ -89,7 +94,7 @@ def DeepScan(parsed):
         print(activeStat)
     else:
         pass
-    
+
     # Services
     servStat = PrettyTable()
     servStat.field_names = [f"{green}Services{white}"]
@@ -100,7 +105,7 @@ def DeepScan(parsed):
         print(servStat)
     else:
         pass
-    
+
     # Receivers
     recvStat = PrettyTable()
     recvStat.field_names = [f"{green}Receivers{white}"]
@@ -111,7 +116,7 @@ def DeepScan(parsed):
         print(recvStat)
     else:
         pass
-    
+
     # Providers
     provStat = PrettyTable()
     provStat.field_names = [f"{green}Providers{white}"]
@@ -125,18 +130,17 @@ def DeepScan(parsed):
 
 # APK string analyzer
 def Detailed(targetAPK):
-
     # Extracting all strings to better analysis
-    print(f"\n{cyan}[{red}*{cyan}]{white} Extracting strings from file...")
-    print("+","-"*40,"+")
+    print(f"\n{infoS} Extracting strings from file...")
+    print("+", "-"*40, "+")
     try:
-        command = 'aapt dump strings {} | cut -f2 -d ":" > apkStr.txt'.format(targetAPK)
+        command = f'aapt dump strings {targetAPK} | cut -f2 -d ":" > apkStr.txt'
         os.system(command)
         command = './Modules/apkStranalyzer.sh'
         os.system(command)
-        print("+","-"*40,"+")
+        print("+", "-"*40, "+")
     except:
-        print(f"{cyan}[{red}!{cyan}]{white} Error: aapt tool not found.")
+        print(f"{errorS} Error: aapt tool not found.")
         sys.exit(1)
 
 # Execution
@@ -145,14 +149,14 @@ if __name__ == '__main__':
         # Getting and parsing target APK
         targetAPK = str(sys.argv[1])
         parsed = APK(targetAPK)
-        
+
         # Permissions side
         Analyzer(parsed)
-        
+
         # Deep scanner
         DeepScan(parsed)
-        
+
         # Strings side
         Detailed(targetAPK)
     except:
-        print(f"{cyan}[{red}!{cyan}]{white} An error occured.")
+        print(f"{errorS} An error occured.")
