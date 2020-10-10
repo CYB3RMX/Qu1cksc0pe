@@ -18,8 +18,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>08/10/2020</b>
-- [X] Source codes rearranged for PEP8 standarts.
+<b>10/10/2020</b>
+- [X] Added ```Non Executable``` analyzer. Now Qu1cksc0pe can analyze document files.
 
 # Signature Database Information
 Number of malicious hashes: <b>5.767.684</b>
@@ -31,6 +31,7 @@ Number of malicious hashes: <b>5.767.684</b>
 - ```prettytable```
 - ```fleep```
 - ```colorama```
+- ```oletools```
 
 <br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
 <b>Gathering other dependencies</b>:
