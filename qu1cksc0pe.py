@@ -94,12 +94,13 @@ def BasicAnalyzer(analyzeFile):
         os.system(command)
     # Android Analysis
     elif "PK" in fileType:
-        print(f"{infoS} Target OS: {green}Android\n{white}")
+        print(f"{infoS} Target OS: {green}Android{white}\n")
         command = f"./Modules/apkAnalyzer.py {analyzeFile}"
         os.system(command)
     else:
-        print(f"{errorS} Target OS could not identified. Make sure your file is an correct executable.")
-        sys.exit(1)
+        print(f"{infoS} File Type: {green}Non Executable{white}\n")
+        command = f"./Modules/nonExecAnalyzer.py {analyzeFile}"
+        os.system(command)
 
 # Main function
 def Qu1cksc0pe():

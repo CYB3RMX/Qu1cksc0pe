@@ -3,3 +3,4 @@ androguard
 prettytable
 fleep
 colorama
+oletools
