@@ -18,8 +18,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>10/10/2020</b>
-- [X] Added ```Non Executable``` analyzer. Now Qu1cksc0pe can analyze document files.
+<b>11/10/2020</b>
+- [X] Windows wordlists are updated.
 
 # Signature Database Information
 Number of malicious hashes: <b>5.767.684</b>
@@ -94,7 +94,7 @@ Number of malicious hashes: <b>5.767.684</b>
 ## System/Persistence
 <b>This category contains functions and strings about:</b>
 - Executing system commands.
-- Manipulating system files and get persistence in target systems.
+- Manipulating system files and system options to get persistence in target systems.
 
 ## COMObject
 <b>This category contains functions and strings about:</b>
@@ -107,12 +107,13 @@ Number of malicious hashes: <b>5.767.684</b>
 
 ## Information Gathering
 <b>This category contains functions and strings about:</b>
-- Gathering all informations from target hosts.
+- Gathering all informations from target hosts. Like process states, network devices etc.
 
 ## Keyboard/Keylogging
 <b>This category contains functions and strings about:</b>
 - Tracking infected machine's keyboard.
 - Gathering information about targets keyboard.
+- Managing input methods etc.
 
 ## Memory Management
 <b>This category contains functions and strings about:</b>

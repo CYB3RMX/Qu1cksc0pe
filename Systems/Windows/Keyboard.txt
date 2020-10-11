@@ -16,3 +16,12 @@ VkKeyScanA
 VkKeyScanExA
 MapVirtualKeyA
 GetKeyboardLayoutList
+ImmSimulateHotKey
+ImmInstallIMEA
+ImmInstallIME
+ImmGetProperty
+ImmGetContext
+ImmGetOpenStatus
+ImmAssociateContext
+ImmAssociateContextEx
+ImmConfigureIMEA

@@ -39,3 +39,12 @@ ReportEventW
 SwitchToFiber
 RawSecurityDescriptor
 CreateCompatibleDC
+SetNamedSecurityInfo
+SetNamedSecurityInfoW
+SetNamedSecurityInfoA
+SetSecurityDescriptorSacl
+OpenEventLogW
+OpenEventLogA
+OpenEventLog
+BackupEventLog
+ClearEventLog

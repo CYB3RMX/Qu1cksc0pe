@@ -11,9 +11,13 @@ CryptAcquireContextA
 EncodePointer
 EncryptFile
 DecodePointer
+EncryptionFileExtension
 DecryptFile
+MaxFilesizeToEncryptInBytes
+EncryptionPassword
 CryptCreateHash
 CryptDestroyHash
+GetHashCode
 CryptGetProvParam
 CryptGenRandom
 CryptSetHashParam
@@ -33,6 +37,7 @@ get_BlockSize
 set_Key
 CipherMode
 CreateEncryptor
+CreateDecryptor
 ICryptoTransform
 ToBase64String
 AsymmetricAlgorithm

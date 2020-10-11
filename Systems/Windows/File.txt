@@ -15,6 +15,12 @@ CreateFile
 CreateFileA
 RemoveDirectoryA
 RemoveDirectory
+TempExeRelativePath
+TempExePath
+FinalExeRelativePath
+FinalExePath
+WorkFolderRelativePath
+WorkFolderPath
 CreateFileW
 CopyFileA
 ReadFile
@@ -131,6 +137,7 @@ SearchFiles
 WalkDirectoryTree
 get_FileName
 set_FileName
+get_ExecutablePath
 GetFolderPath
 SpecialFolder
 GetFileName
@@ -150,3 +157,4 @@ FindExecutableW
 DragFinish
 DragQueryPoint
 GetSystemDirectoryA
+get_RootDirectory

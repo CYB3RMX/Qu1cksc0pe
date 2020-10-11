@@ -125,3 +125,7 @@ GetLocaleInfoW
 EnumSystemLocalesA
 NetScheduleJobEnum
 HeapQueryInformation
+EnumWindows
+RasGetProjectionInfoA
+RasGetProjectionInfo
+GetGUIThreadInfo
