@@ -5,6 +5,7 @@ FillMemory
 GetLargePageMinimum
 GetPhysicallyInstalledSystemMemory
 GetSystemFileCacheSize
+MemoryStream
 GetWriteWatch
 GlobalMemoryStatus
 GlobalMemoryStatusEx

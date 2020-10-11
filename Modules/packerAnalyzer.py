@@ -25,7 +25,7 @@ infoS = f"{cyan}[{red}*{cyan}]{white}"
 errorS = f"{cyan}[{red}!{cyan}]{white}"
 
 # File signatures
-file_sigs = {'UPX': 'UPX0', 'AsPack': '.aspack'}
+file_sigs = {'UPX': 'UPX0', 'AsPack': '.aspack', 'ConfuserEx v0.6.0': 'ConfuserEx v0.6.0'}
 
 # Getting file's all strings to analyze
 try:
@@ -50,7 +50,7 @@ def Analyzer():
     if packed == 0:
         print(f"{errorS} Nothing found.")
     else:
-        print(packTable)
+        print(f"{packTable}\n")
 
 # Execute and clean up
 try:

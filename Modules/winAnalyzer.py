@@ -155,10 +155,10 @@ def Analyzer():
                         threatScore += 4
                         scoreDict[key] += 1
                     elif key == "Networking/Web":
-                        threatScore += 5
+                        threatScore += 6
                         scoreDict[key] += 1
                     elif key == "Keyboard/Keylogging":
-                        threatScore += 6
+                        threatScore += 7
                         scoreDict[key] += 1
                     elif key == "Process":
                         threatScore += 5
@@ -167,7 +167,7 @@ def Analyzer():
                         threatScore += 5
                         scoreDict[key] += 1
                     elif key == "Dll/Resource Handling":
-                        threatScore += 5
+                        threatScore += 6
                         scoreDict[key] += 1
                     elif key == "Evasion/Bypassing":
                         threatScore += 9

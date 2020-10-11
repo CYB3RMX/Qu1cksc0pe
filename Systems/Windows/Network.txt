@@ -147,3 +147,4 @@ EnableHttp1_1
 CertificateRevocation
 EnableHttpTrace
 FtpDefaultExpiryTimeSecs
+RasDialA
