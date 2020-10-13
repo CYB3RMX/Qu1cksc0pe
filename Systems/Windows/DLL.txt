@@ -23,3 +23,6 @@ LoadLibraryWHook
 GetModuleHandleExW
 FreeLibraryAndExitThread
 Module32First
+DllCanUnloadNow
+DllGetClassObject
+DllRegisterServer
