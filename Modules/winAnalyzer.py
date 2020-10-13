@@ -192,12 +192,18 @@ def Analyzer():
             print(tables)
             tables.clear_rows()
 
-    # printing extracted dll files
+    # gathering extracted dll files
+    handleDll = []
     dllTable.field_names = [f"Extracted {green}DLL{white} Strings"]
     for dl in allStrings:
         if dl in dllArray:
             if dl != "":
-                dllTable.add_row([f"{red}{dl}{white}"])
+                handleDll.append(dl)
+
+    # Removing duplicates and printing
+    handleDll = list(dict.fromkeys(handleDll))
+    for ne in handleDll:
+        dllTable.add_row([f"{red}{ne}{white}"])
     print(dllTable)
 
     # Resource scanner zone
