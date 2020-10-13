@@ -18,11 +18,9 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>11/10/2020</b>
-- [X] Windows wordlists are updated.
-
-# Signature Database Information
-Number of malicious hashes: <b>5.767.684</b>
+<b>13/10/2020</b>
+- [X] Bug fixes.
+- [X] Hash database updated. More hashes will coming soon.
 
 # Setup
 <b>Necessary python modules</b>: 
