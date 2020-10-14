@@ -48,7 +48,7 @@ def DatabaseCheck():
         choose = str(input(f"{green}=>{white} Would you like to download it [Y/n]?: "))
         if choose == "Y" or choose == "y":
             local_database = "HashDB.json"
-            dbUrl = "https://raw.githubusercontent.com/CYB3RMX/MalwareHashDB/master/HashDB.json"
+            dbUrl = "https://raw.githubusercontent.com/CYB3RMX/MalwareHashDB/main/HashDB.json"
             req = requests.get(dbUrl, stream=True)
             total_size = int(req.headers.get('content-length', 0))
             block_size = 1024
