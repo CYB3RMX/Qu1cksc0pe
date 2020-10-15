@@ -47,9 +47,11 @@ parser.add_argument("--analyze", required=False,
                     help="Analyze target file.", action="store_true")
 parser.add_argument("--multiple", required=False, nargs='+',
                     help="Analyze multiple files.")
-parser.add_argument("--hashScan", required=False,
+parser.add_argument("--hashscan", required=False,
                     help="Scan target file's hash in local database.",
                     action="store_true")
+parser.add_argument("--multihash", required=False, nargs='+',
+                    help="Scan multiple file's hashes in local database.")
 parser.add_argument("--vtFile", required=False,
                     help="Scan your file with VirusTotal API.",
                     action="store_true")
@@ -127,9 +129,22 @@ def Qu1cksc0pe():
             print(f"{errorS} An error occured while parsing the files.")
             sys.exit(1)
     # Hash Scanning
-    if args.hashScan:
+    if args.hashscan:
         command = f"if [ -e {args.file} ];then ./Modules/hashScanner.py {args.file}; else echo 'Target file: {args.file} not found!'; exit 1; fi"
         os.system(command)
+    # Multi hash scanning
+    if args.multihash:
+        try:
+            listOfFiles = list(args.multihash)
+            for oneFile in listOfFiles:
+                if oneFile != '':
+                    command = f"if [ -e {oneFile} ];then ./Modules/hashScanner.py {oneFile}; else echo 'Target file: {oneFile} not found!'; exit 1; fi"
+                    os.system(command)
+                else:
+                    continue
+        except:
+            print(f"{errorS} An error occured while parsing the files.")
+            sys.exit(1)
     # metadata
     if args.metadata:
         print(f"{infoS} Exif/Metadata information")

@@ -18,9 +18,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>13/10/2020</b>
-- [X] Bug fixes.
-- [X] Hash database updated. More hashes will coming soon.
+<b>15/10/2020</b>
+- [X] Added ```--multihash``` argument. Now Qu1cksc0pe can scan multiple hashes.
 
 # Setup
 <b>Necessary python modules</b>: 
