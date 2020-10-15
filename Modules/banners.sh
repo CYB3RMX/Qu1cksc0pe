@@ -18,7 +18,7 @@ banner()
   echo -en "  $cy\_/\_|\___/ \___/\____/\_| \_/\____/ \____/\___/\_|   \____/       ${gr}@ @ @ \n"
   echo -en "                                                                       @ \n"
   echo -en "                                        ${ye}|             | \n"
-  echo -en "   ${wh}Suspicious file static-analysis tool.${ye}| ${wh}By CYB3RMX_${ye} | ${wh}Version: ${gr}1.7.1 \n"
+  echo -en "   ${wh}Suspicious file static-analysis tool.${ye}| ${wh}By CYB3RMX_${ye} | ${wh}Version: ${gr}1.7.2 \n"
   echo -en "   ${ye}-------------------------------------|             |${wh} \n\n"
 }
 banner1()
@@ -31,7 +31,7 @@ banner1()
   echo -en "$ma  dmmMMMMMMNmmNMMMMMMMMNmmNMMMMMMmmm   $wh|                              |\n"
   echo -en "$ma  NMMyoodMMMMMMMMMMMMMMMMMMMMdoosMMM   $wh| ${gr}Malware static analysis tool.$wh|\n"
   echo -en "$ma  NMM-  sMMMNNNNNNNNNNNNNNNMMy  .MMM   $wh|                              |\n"
-  echo -en "$ma  NMM-  sMMyvvvvvvvvvvvvvvsMMy  .MMM   $wh|       ${gr}Version$wh:$ye 1.7.1         $wh|\n"
+  echo -en "$ma  NMM-  sMMyvvvvvvvvvvvvvvsMMy  .MMM   $wh|       ${gr}Version$wh:$ye 1.7.2         $wh|\n"
   echo -en "$ma  ooo.  :ooooooo+    +ooooooo/   ooo   $wh+------------|||||||-----------+\n"
   echo -en "$ma           /MMMMN    mMMMM+                        $wh |||||||            \n"
   echo -en "                                                    |||||||            \n\n"
@@ -44,7 +44,7 @@ banner2()
   echo -en "      /                \ \n"
   echo -en "     ;   Qu1cksc0pe    ;; \n"
   echo -en "     |                 |;  \n"
-  echo -en "     ;     v1.7.1      ;| \n"
+  echo -en "     ;     v1.7.2      ;| \n"
   echo -en "     ;\               / ; \n"
   echo -en "      \ .           .  / \n"
   echo -en "        . -._____.-  . \n"
@@ -85,7 +85,7 @@ banner4()
   echo -en "+ --------------I I------------- + \n"
   echo -en "                I I                 ${gr}___QU1CKSC0PE___\n"
   echo -en "                ${ye}I I \n"
-  echo -en "             ____V_____              ${gr}Version:$re 1.7.1$wh\n\n\n"
+  echo -en "             ____V_____              ${ma}Version:$re 1.7.2$wh\n\n\n"
 }
 banner5()
 {
