@@ -122,9 +122,18 @@ banner6()
   echo -en "          MMMMo  oMMMM \n"
   echo -en "          oNMm-  -mMNs$wh \n\n"
 }
+banner7()
+{
+  echo -en "\n  .-------------------------------------.\n"
+  echo -en "  | [____${re}DOWNLOADING FREE RTX 3090${wh}____] |\n"
+  echo -en "  |  _________________________________  |\n"
+  echo -en "  | |${gr}:::::::::::::::::${wh}60%${gr}|${wh}            | |\n"
+  echo -en "  |  \"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"  |\n"
+  echo -en "  |_____________________________________|\n\n"
+}
 
 # Execute functions
-randomStart=$(( RANDOM % 7 ))
+randomStart=$(( RANDOM % 8 ))
 case $randomStart in
   0) banner ;;
 	1) banner1 ;;
@@ -133,4 +142,5 @@ case $randomStart in
 	4) banner4 ;;
   5) banner5 ;;
   6) banner6 ;;
+  7) banner7 ;;
 esac

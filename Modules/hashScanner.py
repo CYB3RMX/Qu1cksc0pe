@@ -117,4 +117,4 @@ if foundc != 0:
     print(f"{answTable}\n")
 else:
     print(f"{errorS} Target hash is not in our database.")
-    print(f"{infoS} Try {green}--analyze{white} and {green}--vtFile{white} instead.")
+    print(f"{infoS} Try {green}--analyze{white} and {green}--vtFile{white} instead.\n")
