@@ -47,6 +47,14 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 <b>Usage</b>: ```python3 qu1cksc0pe.py --multiple FILE1 FILE2 ...```<br>
 ![animation](.animations/multi.gif)
 
+## Hash scan
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --hashscan```<br>
+![animation](.animations/hashscan.gif)
+
+## Multiple hash scanning
+<b>Usage</b>: ```python3 qu1cksc0pe.py --multihash FILE1 FILE2 ...```<br>
+![animation](.animations/multihash.gif)
+
 ## VirusTotal
 <b>Usage for --vtFile</b>: ```python3 qu1cksc0pe.py --file suspicious_file --vtFile```<br>
 <b>Usage for --vtUrl</b>: ```python3 qu1cksc0pe.py --vtUrl```<br>
