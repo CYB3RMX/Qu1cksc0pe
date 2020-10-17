@@ -7,7 +7,7 @@ gr="\e[1;92m"
 wh="\e[0m"
 
 # Update checker variable
-version="16/10/2020"
+version="17/10/2020"
 
 updateChecker()
 {

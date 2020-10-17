@@ -42,7 +42,9 @@ os.system("./Modules/banners.sh")
 args = []
 parser = argparse.ArgumentParser()
 parser.add_argument("--file", required=False,
-                    help="Select a suspicious file.")
+                    help="Specify a file to scan or analyze.")
+parser.add_argument("--folder", required=False,
+                    help="Specify a folder to scan or analyze.")
 parser.add_argument("--analyze", required=False,
                     help="Analyze target file.", action="store_true")
 parser.add_argument("--multiple", required=False, nargs='+',
@@ -95,7 +97,7 @@ def BasicAnalyzer(analyzeFile):
         command = f"./Modules/osXAnalyzer.py {analyzeFile}"
         os.system(command)
     # Android Analysis
-    elif "PK" in fileType:
+    elif "PK" in fileType or "Android" in fileType:
         print(f"{infoS} Target OS: {green}Android{white}\n")
         command = f"./Modules/apkAnalyzer.py {analyzeFile}"
         os.system(command)
@@ -112,7 +114,13 @@ def Qu1cksc0pe():
         os.system(command)
     # Analyze the target file
     if args.analyze:
-        BasicAnalyzer(analyzeFile=args.file)
+        # Handling --file argument
+        if args.file is not None:
+            BasicAnalyzer(analyzeFile=args.file)
+        # Handling --folder argument
+        if args.folder is not None:
+            print(f"{errorS} {green}--analyze{white} argument is not supported for folder analyzing.")
+            sys.exit(1)
     # Multiple file analysis
     if args.multiple:
         try:
@@ -130,15 +138,21 @@ def Qu1cksc0pe():
             sys.exit(1)
     # Hash Scanning
     if args.hashscan:
-        command = f"if [ -e {args.file} ];then ./Modules/hashScanner.py {args.file}; else echo 'Target file: {args.file} not found!'; exit 1; fi"
-        os.system(command)
+        # Handling --file argument
+        if args.file is not None:
+            command = f"if [ -e {args.file} ];then ./Modules/hashScanner.py {args.file} --normal; else echo 'Target file: {args.file} not found!'; exit 1; fi"
+            os.system(command)
+        # Handling --folder argument
+        if args.folder is not None:
+            command = f"if [ -e {args.folder} ];then ./Modules/hashScanner.py {args.folder} --multiscan; else echo 'Target file: {args.folder} not found!'; exit 1; fi"
+            os.system(command)
     # Multi hash scanning
     if args.multihash:
         try:
             listOfFiles = list(args.multihash)
             for oneFile in listOfFiles:
                 if oneFile != '':
-                    command = f"if [ -e {oneFile} ];then ./Modules/hashScanner.py {oneFile}; else echo 'Target file: {oneFile} not found!'; exit 1; fi"
+                    command = f"if [ -e {oneFile} ];then ./Modules/hashScanner.py {oneFile} --normal; else echo 'Target file: {oneFile} not found!'; exit 1; fi"
                     os.system(command)
                 else:
                     continue
@@ -147,30 +161,42 @@ def Qu1cksc0pe():
             sys.exit(1)
     # metadata
     if args.metadata:
-        print(f"{infoS} Exif/Metadata information")
-        command = f"exiftool {args.file}"
-        print("+", "-"*50, "+")
-        os.system(command)
-        print("+", "-"*50, "+")
-    # VT File scanner
-    if args.vtFile:
-        # if there is no key quit
-        try:
-            directory = "Modules/.apikey.txt"
-            apik = open(directory, "r").read().split("\n")
-        except:
-            print(f"{errorS} Use --key_init to enter your key.")
-            sys.exit(1)
-        # if key is not valid quit
-        if apik[0] == '' or apik[0] is None or len(apik[0]) != 64:
-            print(f"{errorS} Please get your API key from -> {green}https://www.virustotal.com/{white}")
-            sys.exit(1)
-        else:
-            print(f"\n{infoS} VirusTotal Scan")
+        # Handling --file argument
+        if args.file is not None:
+            print(f"{infoS} Exif/Metadata information")
+            command = f"exiftool {args.file}"
             print("+", "-"*50, "+")
-            command = f"./Modules/VTwrapper.py {apik[0]} --vtFile {args.file}"
             os.system(command)
             print("+", "-"*50, "+")
+        # Handling --folder argument
+        if args.folder is not None:
+            print(f"{errorS} That argument has not supported for folder scanning.")
+            sys.exit(1)
+    # VT File scanner
+    if args.vtFile:
+        # Handling --file argument
+        if args.file is not None:
+            # if there is no key quit
+            try:
+                directory = "Modules/.apikey.txt"
+                apik = open(directory, "r").read().split("\n")
+            except:
+                print(f"{errorS} Use --key_init to enter your key.")
+                sys.exit(1)
+            # if key is not valid quit
+            if apik[0] == '' or apik[0] is None or len(apik[0]) != 64:
+                print(f"{errorS} Please get your API key from -> {green}https://www.virustotal.com/{white}")
+                sys.exit(1)
+            else:
+                print(f"\n{infoS} VirusTotal Scan")
+                print("+", "-"*50, "+")
+                command = f"./Modules/VTwrapper.py {apik[0]} --vtFile {args.file}"
+                os.system(command)
+                print("+", "-"*50, "+")
+        # Handling --folder argument
+        if args.folder is not None:
+            print(f"{errorS} If you want to get banned from VirusTotal then do that :).")
+            sys.exit(1)
     # VT URL scanner
     if args.vtUrl:
         # if there is no key quit
@@ -192,12 +218,24 @@ def Qu1cksc0pe():
             print("+", "-"*50, "+")
     # packer detection
     if args.packer:
-        command = f"./Modules/packerAnalyzer.py {args.file}"
-        os.system(command)
+        # Handling --file argument
+        if args.file is not None:
+            command = f"./Modules/packerAnalyzer.py {args.file} --single"
+            os.system(command)
+        # Handling --folder argument
+        if args.folder is not None:
+            command = f"./Modules/packerAnalyzer.py {args.folder} --multiscan"
+            os.system(command)
     # domain extraction
     if args.domain:
-        command = f"./Modules/domainCatcher.sh {args.file}"
-        os.system(command)
+        # Handling --file argument
+        if args.file is not None:
+            command = f"./Modules/domainCatcher.sh {args.file}"
+            os.system(command)
+        # Handling --folder argument
+        if args.folder is not None:
+            print(f"{errorS} That argument has not supported for folder scanning.")
+            sys.exit(1)
     # entering VT API key
     if args.key_init:
         try:

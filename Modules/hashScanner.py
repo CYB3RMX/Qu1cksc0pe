@@ -38,9 +38,7 @@ yellow = Fore.LIGHTYELLOW_EX
 
 # Legends
 infoS = f"{cyan}[{red}*{cyan}]{white}"
-foundS = f"{cyan}[{red}+{cyan}]{white}"
 errorS = f"{cyan}[{red}!{cyan}]{white}"
-thLevel = f"{cyan}[{red}Threat Level{cyan}]{white}"
 
 def DatabaseCheck():
     if os.path.isfile("HashDB.json") == False:
@@ -63,16 +61,25 @@ def DatabaseCheck():
             except:
                 sys.exit(0)
         else:
-            print(f"\n{cyan}[{red}ERROR{cyan}]{white} Without local database '{green}--hashScan{white}' will not work.\n")
+            print(f"\n{cyan}[{red}ERROR{cyan}]{white} Without local database '{green}--hashscan{white}' will not work.\n")
             sys.exit(1)
 
 # Hashing with md5
 def GetHash(targetFile):
     hashMd5 = hashlib.md5()
-    with open(targetFile, "rb") as ff:
-        for chunk in iter(lambda: ff.read(4096), b""):
-            hashMd5.update(chunk)
+    try:
+        with open(targetFile, "rb") as ff:
+            for chunk in iter(lambda: ff.read(4096), b""):
+                hashMd5.update(chunk)
+    except:
+        pass
     return hashMd5.hexdigest()
+
+# Hashing md5 with sha1
+def NextHash(targetHash):
+    hashMe = hashlib.sha1(targetHash.encode())
+    finalHash = hashMe.hexdigest()
+    return finalHash
 
 try:
     with open("HashDB.json") as databaseFile:
@@ -80,41 +87,80 @@ try:
 except:
     DatabaseCheck()
 
-# Hashing
-targetHash = GetHash(targetFile)
-hashMe = hashlib.sha1(targetHash.encode())
-finalHash = hashMe.hexdigest()
+# Handling single scans
+def NormalScan():
+    # Hashing
+    targetHash = GetHash(targetFile)
+    hashToScan = NextHash(targetHash)
+    # Creating answer table
+    answTable = PrettyTable()
+    answTable.field_names = [f"{green}Hash{white}", f"{green}Name{white}"]
+    # Total hashes
+    tot = 0
+    try:
+        for hh in hashData:
+            if hh['hash'] != "":
+                tot += 1
+    except:
+        pass
+    # Finding target hash
+    foundc = 0
+    try:
+        for hashes in hashData:
+            if hashes['hash'] == hashToScan:
+                answTable.add_row([f"{red}{hashToScan}{white}", f"{red}{hashes['name']}{white}"])
+                foundc += 1
+                break
+    except:
+        pass
+    # Printing informations
+    print(f"{infoS} Total Hashes: {green}{tot+1}{white}")
+    print(f"{infoS} File Name: {green}{targetFile}{white}")
+    print(f"{infoS} Target Hash: {green}{hashToScan}{white}\n")
+    if foundc != 0:
+        print(f"{answTable}\n")
+    else:
+        print(f"{errorS} Target hash is not in our database.")
+        print(f"{infoS} Try {green}--analyze{white} and {green}--vtFile{white} instead.\n")
 
-# Creating answer table
-answTable = PrettyTable()
-answTable.field_names = [f"{green}Hash{white}", f"{green}Name{white}"]
+# Handling multiple scans
+def MultipleScan():
+    # Creating summary table
+    mulansTable = PrettyTable()
+    mulansTable.field_names = [f"{green}File Names{white}", f"{green}Hash{white}", f"{green}Name{white}"]
+    # Handling folders
+    if os.path.isdir(targetFile) == True:
+        allFiles = os.listdir(targetFile)
+        # How many files in that folder?
+        filNum = 0
+        for _ in allFiles:
+            filNum += 1
+        # Lets scan them!!
+        multimalw = 0
+        print(f"{infoS} Qu1cksc0pe scans that folder for malicious files. Please wait...")
+        for tf in tqdm(range(0, filNum), desc="Scanning..."):
+            if allFiles[tf] != '':
+                scanme = f"{targetFile}/{allFiles[tf]}"
+                targetHash = GetHash(scanme)
+                hashToScan = NextHash(targetHash)
+                # Finding target hash
+                try:
+                    for hashes in hashData:
+                        if hashes['hash'] == hashToScan:
+                            mulansTable.add_row([f"{red}{allFiles[tf]}{white}", f"{red}{hashToScan}{white}", f"{red}{hashes['name']}{white}"])
+                            multimalw += 1
+                except:
+                    pass
+        # Print all
+        if multimalw != 0:
+            print(f"\n{mulansTable}\n")
+        else:
+            print(f"\n{errorS} Nothing found.\n")
 
-# Total hashes
-tot = 0
-try:
-    for hh in hashData:
-        if hh['hash'] != "":
-            tot += 1
-except:
-    pass
-
-# Finding target hash
-foundc = 0
-try:
-    for hashes in hashData:
-        if hashes['hash'] == finalHash:
-            answTable.add_row([f"{red}{finalHash}{white}", f"{red}{hashes['name']}{white}"])
-            foundc += 1
-            break
-except:
-    pass
-
-# Printing informations
-print(f"{infoS} Total Hashes: {green}{tot+1}{white}")
-print(f"{infoS} File Name: {green}{targetFile}{white}")
-print(f"{infoS} Target Hash: {green}{finalHash}{white}\n")
-if foundc != 0:
-    print(f"{answTable}\n")
-else:
-    print(f"{errorS} Target hash is not in our database.")
-    print(f"{infoS} Try {green}--analyze{white} and {green}--vtFile{white} instead.\n")
+if __name__ == '__main__':
+    if str(sys.argv[2]) == '--normal':
+        NormalScan()
+    elif str(sys.argv[2]) == '--multiscan':
+        MultipleScan()
+    else:
+        pass
