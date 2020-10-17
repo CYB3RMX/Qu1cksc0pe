@@ -18,8 +18,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>16/10/2020</b>
-- [X] Added new banner!!
+<b>17/10/2020</b>
+- [X] Added ```--folder``` argument. Now you can scan folders for threats.
 
 # Setup
 <b>Necessary python modules</b>: 
@@ -59,6 +59,10 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 <b>Usage for --vtFile</b>: ```python3 qu1cksc0pe.py --file suspicious_file --vtFile```<br>
 <b>Usage for --vtUrl</b>: ```python3 qu1cksc0pe.py --vtUrl```<br>
 ![animation](.animations/total.gif)
+
+## Folder scanning
+<b>Hash scan</b>: ```python3 qu1cksc0pe.py --folder SUSPICIOUS_FOLDER --hashscan```<br>
+<b>Packed files</b>: ```python3 qu1cksc0pe.py --folder SUSPICIOUS_FOLDER --packer```<br>
 
 ## Domain
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --domain```<br><br>
