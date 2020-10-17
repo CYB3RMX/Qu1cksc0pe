@@ -206,7 +206,7 @@ def Analyzer():
     if threatScore < 100:
         print(f"{thLevel}: {green}Clean{white}.\n")
     elif threatScore >= 100 and threatScore <= 300:
-        print(f"{thLevel} Attention: Use {green}--vtFile{white} argument to scan that file with VirusTotal. Do not trust that file.")
+        print(f"{errorS} Attention: Use {green}--vtFile{white} argument to scan that file with VirusTotal. Do not trust that file.")
         print(f"{thLevel}: {yellow}Suspicious{white}.\n")
     else:
         print(f"{thLevel}: {red}Potentially Malicious{white}.\n")
