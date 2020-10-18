@@ -12,13 +12,6 @@ except:
    print("Error: >spacy< module not found.")
    sys.exit(1)
 
-# Module for progressbar
-try:
-    from tqdm import tqdm
-except:
-    print("Module: >tqdm< not found.")
-    sys.exit(1)
-
 # Module for colors
 try:
     from colorama import Fore, Style
