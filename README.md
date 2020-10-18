@@ -18,8 +18,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>17/10/2020</b>
-- [X] Added ```--folder``` argument. Now you can scan folders for threats.
+<b>19/10/2020</b>
+- [X] Domain cathcer module is upgraded. Now it uses "Natural Language Processing" to analyze files.
 
 # Setup
 <b>Necessary python modules</b>: 
@@ -29,6 +29,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - ```fleep```
 - ```colorama```
 - ```oletools```
+- ```spacy```
 
 <br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
 <b>Gathering other dependencies</b>:
@@ -66,7 +67,6 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 
 ## Domain
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --domain```<br><br>
-![animation](.animations/domain.gif)
 
 # Informations about categories
 ## Registry

@@ -230,7 +230,7 @@ def Qu1cksc0pe():
     if args.domain:
         # Handling --file argument
         if args.file is not None:
-            command = f"./Modules/domainCatcher.sh {args.file}"
+            command = f"./Modules/domainCatcher.py"
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
