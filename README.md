@@ -19,7 +19,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 
 # Updates
 <b>19/10/2020</b>
-- [X] Domain cathcer module is upgraded. Now it uses "Natural Language Processing" to analyze files.
+- [X] Domain catcher module is upgraded. Now it uses "Natural Language Processing" to analyze files.
 
 # Setup
 <b>Necessary python modules</b>: 
