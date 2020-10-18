@@ -4,3 +4,4 @@ prettytable
 fleep
 colorama
 oletools
+spacy
