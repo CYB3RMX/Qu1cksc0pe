@@ -148,3 +148,4 @@ CertificateRevocation
 EnableHttpTrace
 FtpDefaultExpiryTimeSecs
 RasDialA
+NdisIMCopySendPerPacketInfo

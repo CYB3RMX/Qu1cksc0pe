@@ -201,10 +201,11 @@ def Analyzer():
                 handleDll.append(dl)
 
     # Removing duplicates and printing
-    handleDll = list(dict.fromkeys(handleDll))
-    for ne in handleDll:
-        dllTable.add_row([f"{red}{ne}{white}"])
-    print(dllTable)
+    if handleDll != []:
+        handleDll = list(dict.fromkeys(handleDll))
+        for ne in handleDll:
+            dllTable.add_row([f"{red}{ne}{white}"])
+        print(dllTable)
 
     # Resource scanner zone
     extTable.field_names = [f"Extracted {green}File Extensions{white}"]
@@ -251,7 +252,8 @@ def Analyzer():
 
     # Warning about obfuscated file
     if allFuncs < 10:
-        print(f"\n{errorS} This file might be obfuscated or encrypted. Try {green}--packer{white} to scan this file for packers.\n")
+        print(f"\n{errorS} This file might be obfuscated or encrypted. Try {green}--packer{white} to scan this file for packers.")
+        print(f"{errorS} You can also use {green}--hashscan{white} to scan this file.\n")
         sys.exit(0)
 
     # score table

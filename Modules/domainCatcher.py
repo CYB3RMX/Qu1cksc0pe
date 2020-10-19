@@ -36,9 +36,6 @@ magenta = Fore.LIGHTMAGENTA_EX
 infoS = f"{cyan}[{red}*{cyan}]{white}"
 errorS = f"{cyan}[{red}!{cyan}]{white}"
 
-# indicator
-indicator = 0
-
 # Handling language package
 def LangNotFound():
    print(f"{errorS} Language package not found. Without this u wont be able to analyze strings.")
@@ -71,9 +68,8 @@ def URLAnalyzer():
    for urls in allStrings:
       # Parsing and calculaing target string's similarity
       target = nlp(urls)
-      if url.similarity(target) >= 0.5:
+      if url.similarity(target) >= 0.4:
          if "http" in urls or "https" in urls or "www" in urls:
-            indicator += 1
             print(f"{cyan}({magenta}URL{cyan})->{white} {urls}")
 
 # Handling ip address analyzing
@@ -85,7 +81,7 @@ def IPAddrAnalyzer():
                'd.d.d.d', 'dd.d.d.d', 'ddd.d.d.d', 'd.dd.d.d', 'd.ddd.d.d',
                'd.d.dd.d', 'd.d.ddd.d', 'd.d.d.dd', 'd.d.d.ddd', 'dd.dd.dd.dd',
                'd.dd.dd.dd', 'dd.d.dd.dd', 'dd.dd.d.dd', 'dd.dd.dd.d', 'ddd.ddd.d.d',
-               'ddd.ddd.dd.dd', 'ddd.dd.dd.dd', 'ddd.ddd.d.dd']
+               'ddd.ddd.dd.dd', 'ddd.dd.dd.dd', 'ddd.ddd.d.dd', 'd.d.dd.dd']
 
    # Lets scan!!
    nlp = spacy.load("en")
@@ -94,7 +90,6 @@ def IPAddrAnalyzer():
       targstr = nlp(ipaddr)
       for token in targstr:
          if str(token.shape_) in ipShapes:
-            indicator += 1
             print(f"{cyan}({magenta}IP{cyan})->{white} {ipaddr}")
 
 if __name__ == '__main__':

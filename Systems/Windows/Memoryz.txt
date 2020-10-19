@@ -80,3 +80,5 @@ AtlThunk_InitData
 memset
 memcmp
 memcpy
+NdisFreeMemory
+NdisAllocateMemoryWithTagPriority
