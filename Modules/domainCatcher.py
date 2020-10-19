@@ -104,8 +104,6 @@ if __name__ == '__main__':
       th2 = Thread(target=IPAddrAnalyzer)
       th1.start()
       th2.start()
-      if indicator == 0:
-         print(f"{errorS} Nothing found about domains.")
    except:
       print(f"{errorS} An exception occured while analyzing file.")
       sys.exit(1)
