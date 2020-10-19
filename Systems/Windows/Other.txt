@@ -98,3 +98,5 @@ SetStdHandle
 ?_C@?1??_Nullstr@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@CAPBDXZ@4DB
 ?_Xlen@std@@YAXXZ
 ?_Tidy@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AAEX_N@Z
+RtlInitUnicodeString
+KeQueryTimeIncrement
