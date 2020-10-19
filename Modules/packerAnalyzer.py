@@ -36,7 +36,7 @@ targetFile = str(sys.argv[1])
 
 # File signatures
 file_sigs = {'UPX': 'UPX0', 'AsPack': '.aspack', 'ConfuserEx v0.6.0': 'ConfuserEx v0.6.0',
-            'UPX!': 'UPX!'}
+            'UPX!': 'UPX!', 'Confuser v1.9.0.0': 'Confuser v1.9.0.0'}
 
 # Simple analyzer function
 def Analyzer():
