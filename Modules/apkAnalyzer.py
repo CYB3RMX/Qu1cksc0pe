@@ -3,6 +3,7 @@
 import json
 import sys
 import os
+from threading import Thread
 
 # Module handling
 try:
@@ -23,12 +24,19 @@ except:
     print("Error: >colorama< module not found.")
     sys.exit(1)
 
+try:
+    import spacy
+except:
+    print("Error: >spacy< module not found.")
+    sys.exit(1)
+
 # Colors
 red = Fore.LIGHTRED_EX
 cyan = Fore.LIGHTCYAN_EX
 white = Style.RESET_ALL
 green = Fore.LIGHTGREEN_EX
 yellow = Fore.LIGHTYELLOW_EX
+magenta = Fore.LIGHTMAGENTA_EX
 
 # Legends
 infoS = f"{cyan}[{red}*{cyan}]{white}"
@@ -37,6 +45,12 @@ errorS = f"{cyan}[{red}!{cyan}]{white}"
 # necessary variables
 danger = 0
 normal = 0
+
+# Gathering all strings from file
+allStrings = open("temp.txt", "r").read().split('\n')
+
+ # Lets get all suspicious strings
+susStrings = open("Systems/Android/suspicious.txt", "r").read().split('\n')
 
 # Permission analyzer
 def Analyzer(parsed):
@@ -128,20 +142,37 @@ def DeepScan(parsed):
     else:
         pass
 
-# APK string analyzer
-def Detailed(targetAPK):
-    # Extracting all strings to better analysis
-    print(f"\n{infoS} Extracting strings from file...")
-    print("+", "-"*40, "+")
+# Handling language package
+def LangNotFound():
+   print(f"{errorS} Language package not found. Without this u wont be able to analyze strings.")
+   choose = str(input("=> Should I install it for you [Y/n]?: "))
+   if choose == 'Y' or choose == 'y':
+      try:
+         os.system("python3 -m spacy download en")
+         print(f"{infoS} Language package downloaded.")
+         sys.exit(0)
+      except:
+         print(f"{errorS} Program encountered an error.")
+         sys.exit(1)
+   else:
+      print(f"{errorS} Without language package this module is wont work.")
+      sys.exit(1)
+
+# APK string analyzer with NLP
+def Detailed(targetString):
+    # Our sample string to analyze
     try:
-        command = f'aapt dump strings {targetAPK} | cut -f2 -d ":" > apkStr.txt'
-        os.system(command)
-        command = './Modules/apkStranalyzer.sh'
-        os.system(command)
-        print("+", "-"*40, "+")
+        nlp = spacy.load("en")
+        sample = nlp(targetString)
     except:
-        print(f"{errorS} Error: aapt tool not found.")
-        sys.exit(1)
+        LangNotFound()
+
+    # Lets analyze!!
+    for apkstr in allStrings:
+        # Parsing and calculating
+        testme = nlp(apkstr)
+        if testme.similarity(sample) >= 0.6:
+            print(f"{cyan}({magenta}{targetString}{cyan})->{white} {apkstr}")
 
 # Execution
 if __name__ == '__main__':
@@ -157,6 +188,9 @@ if __name__ == '__main__':
         DeepScan(parsed)
 
         # Strings side
-        Detailed(targetAPK)
+        print(f"{infoS} Analyzing extracted strings from that file. Please wait...\n")
+        for sus in susStrings:
+            th1 = Thread(target=Detailed, args=sus)
+            th1.start()
     except:
         print(f"{errorS} An error occured.")
