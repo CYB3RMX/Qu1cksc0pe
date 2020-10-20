@@ -10,3 +10,6 @@ Instagram
 Facebook
 Twitter
 Scan
+Scanner
+johndoe@gmail.com
+http://crl3.digicert.com
