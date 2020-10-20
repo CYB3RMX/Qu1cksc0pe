@@ -3,7 +3,8 @@
 import json
 import sys
 import os
-from threading import Thread
+import threading
+import queue
 
 # Module handling
 try:
@@ -159,20 +160,22 @@ def LangNotFound():
       sys.exit(1)
 
 # APK string analyzer with NLP
-def Detailed(targetString):
+def Detailed(q):
     # Our sample string to analyze
-    try:
-        nlp = spacy.load("en")
-        sample = nlp(targetString)
-    except:
-        LangNotFound()
+    while not q.empty():
+        targetString = q.get()
+        try:
+            nlp = spacy.load("en")
+            sample = nlp(targetString)
+        except:
+            LangNotFound()
 
-    # Lets analyze!!
-    for apkstr in allStrings:
-        # Parsing and calculating
-        testme = nlp(apkstr)
-        if testme.similarity(sample) >= 0.6:
-            print(f"{cyan}({magenta}{targetString}{cyan})->{white} {apkstr}")
+        # Lets analyze!!
+        for apkstr in allStrings:
+            # Parsing and calculating
+            testme = nlp(apkstr)
+            if testme.similarity(sample) >= 0.6:
+                print(f"{cyan}({magenta}{targetString}{cyan})->{white} {apkstr}")
 
 # Execution
 if __name__ == '__main__':
@@ -189,8 +192,29 @@ if __name__ == '__main__':
 
         # Strings side
         print(f"{infoS} Analyzing extracted strings from that file. Please wait...\n")
+
+        # Queue object
+
+        q = queue.Queue()
+        
+        #Thread Number
+        
+        threadNumber = 0 
+
         for sus in susStrings:
-            th1 = Thread(target=Detailed, args=sus)
-            th1.start()
+            q.put(sus)
+            threadNumber += 1
+
+        ts = []
+        for i in range(0,threadNumber):
+            try:
+                t = threading.Thread(target=Detailed, args=q)
+                ts.append(t)
+                t.start()
+            except Exception as e:
+                print(e)
+        for t in ts:
+            t.join()
+        
     except:
         print(f"{errorS} An error occured.")
