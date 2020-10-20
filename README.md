@@ -18,8 +18,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>19/10/2020</b>
-- [X] Domain catcher module is upgraded. Now it uses "Natural Language Processing" to analyze files.
+<b>20/10/2020</b>
+- [X] APK analyzer module upgraded. Now it uses "Natural Language Processing" to analyze files.
 
 # Setup
 <b>Necessary python modules</b>: 
@@ -37,7 +37,6 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - <i>Binutils</i>: ```sudo apt-get install binutils```
 - <i>ExifTool</i>: ```sudo apt-get install exiftool```
 - <i>Strings</i>: ```sudo apt-get install strings```
-- <i>AAPT</i>: ```sudo apt-get install aapt```
 
 # Scan arguments
 ## Normal analysis

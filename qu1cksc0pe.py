@@ -36,7 +36,7 @@ foundS = f"{cyan}[{red}+{cyan}]{white}"
 errorS = f"{cyan}[{red}!{cyan}]{white}"
 
 # Banner
-os.system("./Modules/banners.sh")
+os.system("./Modules/banners.py")
 
 # Argument crating, parsing and handling
 args = []
