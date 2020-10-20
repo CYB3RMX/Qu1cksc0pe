@@ -182,7 +182,7 @@ def Detailed():
         for apkstr in allStrings:
             # Parsing and calculating
             testme = nlp(apkstr)
-            if testme.similarity(sample) > 0.8:
+            if testme.similarity(sample) > 0.7:
                 for token in testme:
                     if token.pos_ == "PUNCT":
                         pass
