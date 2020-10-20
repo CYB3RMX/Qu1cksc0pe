@@ -2,7 +2,7 @@ Bank
 Malware
 Money
 Camera
-Wifi
+Wi-Fi
 Location
 Password
 Login
@@ -11,5 +11,14 @@ Facebook
 Twitter
 Scan
 Scanner
+Adobe
+Aktivierungscode
+NetBank
+Australian
+Antivirus
+Heurictis
+Photoshop
+Windows
+Bankbescheinigung
 johndoe@gmail.com
 http://crl3.digicert.com

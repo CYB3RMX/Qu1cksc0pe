@@ -182,8 +182,12 @@ def Detailed():
         for apkstr in allStrings:
             # Parsing and calculating
             testme = nlp(apkstr)
-            if testme.similarity(sample) > 0.6:
-                print(f"{cyan}({magenta}*{cyan})->{white} {apkstr}")
+            if testme.similarity(sample) > 0.8:
+                for token in testme:
+                    if token.pos_ == "PUNCT":
+                        pass
+                    else:
+                        print(f"{cyan}({magenta}*{cyan})->{white} {apkstr}")
 
 # Execution
 if __name__ == '__main__':
