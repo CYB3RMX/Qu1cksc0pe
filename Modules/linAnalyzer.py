@@ -36,6 +36,9 @@ thLevel = f"{cyan}[{red}Threat Level{cyan}]{white}"
 
 # Wordlists
 allStrings = open("temp.txt", "r").read().split("\n")
+allThings = open("Modules/elves.txt", "r").read()
+sections = open("Systems/Linux/sections.txt", "r").read().split("\n")
+segments = open("Systems/Linux/segments.txt", "r").read().split("\n")
 networkz = open("Systems/Linux/Networking.txt", "r").read().split("\n")
 filez = open("Systems/Linux/Files.txt", "r").read().split("\n")
 procesz = open("Systems/Linux/Processes.txt", "r").read().split("\n")
@@ -96,6 +99,8 @@ def Analyzer():
     threatScore = 0
     allFuncs = 0
     tables = PrettyTable()
+    secTable = PrettyTable()
+    segTable = PrettyTable()
     extTable = PrettyTable()
     mimeTable = PrettyTable()
     ftypeTable = PrettyTable()
@@ -148,9 +153,30 @@ def Analyzer():
                         pass
             print(tables)
             tables.clear_rows()
-    # Part 2
-    command = "./Modules/elfAnalyz.sh"
-    os.system(command)
+
+    # Gathering sections and segments
+    secTable.field_names = [f"{green}Sections{white}"]
+    segTable.field_names = [f"{green}Segments{white}"]
+
+    # Sections
+    sec_indicator = 0
+    for se1 in sections:
+        if se1 in allThings:
+            if se1 != "":
+                secTable.add_row([f"{red}{se1}{white}"])
+                sec_indicator += 1
+    if sec_indicator != 0:
+        print(secTable)
+    
+    # Segments
+    seg_indicator = 0
+    for se2 in segments:
+        if se2 in allThings:
+            if se2 != "":
+                segTable.add_row([f"{red}{se2}{white}"])
+                seg_indicator += 1
+    if seg_indicator != 0:
+        print(segTable)
 
     # Resource scanner zone
     extTable.field_names = [f"Extracted {green}File Extensions{white}"]
@@ -180,7 +206,7 @@ def Analyzer():
         print(ftypeTable)
 
     # Statistics zone
-    print(f"{green}->{white} Statistics for: {green}{fileName}{white}")
+    print(f"\n{green}->{white} Statistics for: {green}{fileName}{white}")
 
     # Printing zone
     statistics.field_names = ["Categories", "Number of Functions"]
@@ -212,4 +238,9 @@ def Analyzer():
         print(f"{thLevel}: {red}Potentially Malicious{white}.\n")
 
 # Execute
-Analyzer()
+try:
+    Analyzer()
+    if os.path.exists("Modules/elves.txt"):
+        os.remove("Modules/elves.txt")
+except:
+    pass

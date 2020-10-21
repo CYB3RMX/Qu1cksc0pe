@@ -68,7 +68,7 @@ def URLAnalyzer():
    for urls in allStrings:
       # Parsing and calculaing target string's similarity
       target = nlp(urls)
-      if url.similarity(target) >= 0.4:
+      if url.similarity(target) >= 0.3:
          if "http" in urls or "https" in urls or "www" in urls:
             print(f"{cyan}({magenta}URL{cyan})->{white} {urls}")
 
