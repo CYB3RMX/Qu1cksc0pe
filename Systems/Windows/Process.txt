@@ -41,7 +41,6 @@ OpenMutex
 InitializeCriticalSection
 InitializeCriticalSectionAndSpinCount
 EnterCriticalSection
-SetUnhandledExceptionFilter
 CWinThread
 SetThreadStackGuarantee
 WinExec
@@ -80,3 +79,8 @@ TlsSetValue
 SetEnvironmentVariableA
 SetThreadToken
 ImpersonateSelf
+CreatePipe
+ConnectNamedPipe
+PeekNamedPipe
+CreateNamedPipeA
+DisconnectNamedPipe

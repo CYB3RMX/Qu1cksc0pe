@@ -27,12 +27,6 @@ listen
 Listen
 bind
 Bind
-PeekNamedPipe
-ConnectNamedPipe
-CreatePipe
-CreateNamedPipeA
-DisconnectNamedPipe
-GetNamedPipeInfo
 InternetOpen
 InternetOpenA
 InternetCloseHandle

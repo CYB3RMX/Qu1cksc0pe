@@ -71,8 +71,6 @@ parser.add_argument("--packer", required=False,
                     action="store_true")
 parser.add_argument("--key_init", required=False,
                     help="Enter your VirusTotal API key.", action="store_true")
-parser.add_argument("--update", required=False,
-                    help="Check for updates.", action="store_true")
 args = parser.parse_args()
 
 # Basic analyzer function that handles single and multiple scans
@@ -82,35 +80,35 @@ def BasicAnalyzer(analyzeFile):
     # Windows Analysis
     if "Windows Executable" in fileType or ".msi" in fileType or ".dll" in fileType or ".exe" in fileType:
         print(f"{infoS} Target OS: {green}Windows{white}\n")
-        command = f"./Modules/winAnalyzer.py {analyzeFile}"
+        command = f"python3 Modules/winAnalyzer.py {analyzeFile}"
         os.system(command)
     # Linux Analysis
     elif "ELF" in fileType:
         print(f"{infoS} Target OS: {green}Linux{white}\n")
         command = f"readelf -a {analyzeFile} > Modules/elves.txt"
         os.system(command)
-        command = f"./Modules/linAnalyzer.py {analyzeFile}"
+        command = f"python3 Modules/linAnalyzer.py {analyzeFile}"
         os.system(command)
     # MacOSX Analysis
     elif "Mach-O" in fileType:
         print(f"{infoS} Target OS: {green}OSX{white}\n")
-        command = f"./Modules/osXAnalyzer.py {analyzeFile}"
+        command = f"python3 Modules/osXAnalyzer.py {analyzeFile}"
         os.system(command)
     # Android Analysis
     elif "PK" in fileType or "Android" in fileType:
         print(f"{infoS} Target OS: {green}Android{white}\n")
-        command = f"./Modules/apkAnalyzer.py {analyzeFile}"
+        command = f"python3 Modules/apkAnalyzer.py {analyzeFile}"
         os.system(command)
     else:
         print(f"{infoS} File Type: {green}Non Executable{white}\n")
-        command = f"./Modules/nonExecAnalyzer.py {analyzeFile}"
+        command = f"python3 Modules/nonExecAnalyzer.py {analyzeFile}"
         os.system(command)
 
 # Main function
 def Qu1cksc0pe():
     # Getting all strings from the file
     if args.file:
-        command = f"if [ -e {args.file} ];then strings --all {args.file} > temp.txt; else echo 'Error: Target file not found!'; exit 1;  fi"
+        command = f"strings --all {args.file} > temp.txt"
         os.system(command)
     # Analyze the target file
     if args.analyze:
@@ -127,7 +125,7 @@ def Qu1cksc0pe():
             listOfFiles = list(args.multiple)
             for oneFile in listOfFiles:
                 if oneFile != '':
-                    command = f"if [ -e {oneFile} ];then strings --all {oneFile} > temp.txt; else echo 'Target file: {oneFile} not found!'; exit 1;  fi"
+                    command = f"strings --all {oneFile} > temp.txt"
                     os.system(command)
                     BasicAnalyzer(analyzeFile=oneFile)
                     print("+", "*"*40, "+\n")
@@ -140,11 +138,11 @@ def Qu1cksc0pe():
     if args.hashscan:
         # Handling --file argument
         if args.file is not None:
-            command = f"if [ -e {args.file} ];then ./Modules/hashScanner.py {args.file} --normal; else echo 'Target file: {args.file} not found!'; exit 1; fi"
+            command = f"python3 Modules/hashScanner.py {args.file} --normal"
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            command = f"if [ -e {args.folder} ];then ./Modules/hashScanner.py {args.folder} --multiscan; else echo 'Target file: {args.folder} not found!'; exit 1; fi"
+            command = f"python3 Modules/hashScanner.py {args.folder} --multiscan"
             os.system(command)
     # Multi hash scanning
     if args.multihash:
@@ -152,7 +150,7 @@ def Qu1cksc0pe():
             listOfFiles = list(args.multihash)
             for oneFile in listOfFiles:
                 if oneFile != '':
-                    command = f"if [ -e {oneFile} ];then ./Modules/hashScanner.py {oneFile} --normal; else echo 'Target file: {oneFile} not found!'; exit 1; fi"
+                    command = f"python3 Modules/hashScanner.py {oneFile} --normal"
                     os.system(command)
                 else:
                     continue
@@ -190,7 +188,7 @@ def Qu1cksc0pe():
             else:
                 print(f"\n{infoS} VirusTotal Scan")
                 print("+", "-"*50, "+")
-                command = f"./Modules/VTwrapper.py {apik[0]} --vtFile {args.file}"
+                command = f"python3 Modules/VTwrapper.py {apik[0]} --vtFile {args.file}"
                 os.system(command)
                 print("+", "-"*50, "+")
         # Handling --folder argument
@@ -213,24 +211,24 @@ def Qu1cksc0pe():
         else:
             print(f"\n{infoS} VirusTotal Scan")
             print("+", "-"*50, "+")
-            command = f"./Modules/VTwrapper.py {apik[0]} --vtUrl"
+            command = f"python3 Modules/VTwrapper.py {apik[0]} --vtUrl"
             os.system(command)
             print("+", "-"*50, "+")
     # packer detection
     if args.packer:
         # Handling --file argument
         if args.file is not None:
-            command = f"./Modules/packerAnalyzer.py {args.file} --single"
+            command = f"python3 Modules/packerAnalyzer.py {args.file} --single"
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            command = f"./Modules/packerAnalyzer.py {args.folder} --multiscan"
+            command = f"python3 Modules/packerAnalyzer.py {args.folder} --multiscan"
             os.system(command)
     # domain extraction
     if args.domain:
         # Handling --file argument
         if args.file is not None:
-            command = f"./Modules/domainCatcher.py"
+            command = "python3 Modules/domainCatcher.py"
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
@@ -240,18 +238,16 @@ def Qu1cksc0pe():
     if args.key_init:
         try:
             apikey = str(input(f"{foundS} Enter your VirusTotal API key: "))
-            command = f"echo '{apikey}' > Modules/.apikey.txt"
-            os.system(command)
+            apifile = open("Modules/.apikey.txt", "w")
+            apifile.write(apikey)
             print(f"{foundS} Your VirusTotal API key saved.")
         except KeyboardInterrupt:
             print(f"{errorS} Program terminated by user.")
-    # Update checking
-    if args.update:
-        command = "./Modules/updateCheck.sh"
-        os.system(command)
 # Exectuion area
 try:
     Qu1cksc0pe()
-    os.system("if [ -e temp.txt ];then rm -f temp.txt; fi")
+    if os.path.exists("temp.txt"):
+        os.remove("temp.txt")
 except:
-    os.system("if [ -e temp.txt ];then rm -f temp.txt; fi")
+    if os.path.exists("temp.txt"):
+        os.remove("temp.txt")

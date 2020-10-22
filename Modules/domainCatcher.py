@@ -92,13 +92,35 @@ def IPAddrAnalyzer():
          if str(token.shape_) in ipShapes:
             print(f"{cyan}({magenta}IP{cyan})->{white} {ipaddr}")
 
+# Email address analyzing
+def EmailCatcher():
+   # Example email
+   exEmail = "johnsmith@gmail.com"   
+
+   # Parsing string
+   try:
+      nlp = spacy.load("en")
+      my_mail = nlp(exEmail)
+   except:
+      LangNotFound()
+   
+   # Scan zone
+   for ems in allStrings:
+      # Parsing string
+      look = nlp(ems)
+      if my_mail.similarity(look) >= 0.8:
+         if "@" in ems:
+            print(f"{cyan}({magenta}EMAIL{cyan})->{white} {ems}")
+
 if __name__ == '__main__':
    print(f"{infoS} Qu1cksc0pe is analyzing this file for possible domain strings. It will take a while...\n")
    try:
       th1 = Thread(target=URLAnalyzer)
       th2 = Thread(target=IPAddrAnalyzer)
+      th3 = Thread(target=EmailCatcher)
       th1.start()
       th2.start()
+      th3.start()
    except:
       print(f"{errorS} An exception occured while analyzing file.")
       sys.exit(1)

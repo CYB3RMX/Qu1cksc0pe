@@ -42,10 +42,15 @@ file_sigs = {'UPX': 'UPX0', 'AsPack': '.aspack', 'ConfuserEx v0.6.0': 'ConfuserE
 def Analyzer():
     # Getting file's all strings to analyze
     try:
-        command = f"strings --all {targetFile} > tempPack.txt"
-        os.system(command)
+        if os.path.isfile(targetFile) == True:
+            command = f"strings --all {targetFile} > tempPack.txt"
+            os.system(command)
+        else:
+            pass
     except:
-        os.system("if [ -e tempPack.txt ];then rm -f tempPack.txt; fi")
+        if os.path.exists("tempPack.txt"):
+            os.remove("tempPack.txt")
+
     # Creating table
     packTable = PrettyTable()
     packTable.field_names = [f"{green}Extracted Strings{white}", f"{green}Packer Type{white}"]
@@ -81,10 +86,15 @@ def MultiAnalyzer():
             if allFiles[tf] != '':
                 scanme = f"{targetFile}/{allFiles[tf]}"
                 try:
-                    command = f"strings --all {scanme} > tempPack.txt"
-                    os.system(command)
+                    if os.path.isfile(scanme) == True:
+                        command = f"strings --all {scanme} > tempPack.txt"
+                        os.system(command)
+                    else:
+                        pass
                 except:
-                    os.system("if [ -e tempPack.txt ];then rm -f tempPack.txt; fi")
+                    if os.path.exists("tempPack.txt"):
+                        os.remove("tempPack.txt")
+
                 # Opening output file
                 allHex = open("tempPack.txt", "r").read()
                 for pack in file_sigs:
@@ -101,16 +111,20 @@ if __name__ == '__main__':
     if str(sys.argv[2]) == '--single':
         try:
             Analyzer()
-            os.system("if [ -e tempPack.txt ];then rm -f tempPack.txt; fi")
+            if os.path.exists("tempPack.txt"):
+                os.remove("tempPack.txt")
         except:
             print(f"{errorS} Program terminated.")
-            os.system("if [ -e tempPack.txt ];then rm -f tempPack.txt; fi")
+            if os.path.exists("tempPack.txt"):
+                os.remove("tempPack.txt")
     elif str(sys.argv[2]) == '--multiscan':
         try:
             MultiAnalyzer()
-            os.system("if [ -e tempPack.txt ];then rm -f tempPack.txt; fi")
+            if os.path.exists("tempPack.txt"):
+                os.remove("tempPack.txt")
         except:
             print(f"{errorS} Program terminated.")
-            os.system("if [ -e tempPack.txt ];then rm -f tempPack.txt; fi")
+            if os.path.exists("tempPack.txt"):
+                os.remove("tempPack.txt")
     else:
         pass

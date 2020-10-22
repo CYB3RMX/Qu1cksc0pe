@@ -49,3 +49,5 @@ OpenEventLog
 BackupEventLog
 ClearEventLog
 IofCompleteRequest
+ClearEventLogA
+CloseEventLog

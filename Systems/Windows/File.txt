@@ -145,6 +145,7 @@ GetDirectories
 FileSystemInfo
 GetDirectoryName
 FileShare
+GetFileTime
 GetTempPathA
 FindFirstFileExA
 CreateFileMappingA
