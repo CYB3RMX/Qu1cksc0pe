@@ -108,7 +108,7 @@ def EmailCatcher():
    for ems in allStrings:
       # Parsing string
       look = nlp(ems)
-      if my_mail.similarity(look) >= 0.8:
+      if my_mail.similarity(look) >= 0.7:
          if "@" in ems:
             print(f"{cyan}({magenta}EMAIL{cyan})->{white} {ems}")
 

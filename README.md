@@ -23,13 +23,13 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 
 # Setup
 <b>Necessary python modules</b>: 
-- ```puremagic```
-- ```androguard```
-- ```prettytable```
-- ```fleep```
-- ```colorama```
-- ```oletools```
-- ```spacy```
+- ```puremagic``` => <i>Analyzing target OS.</i>
+- ```androguard``` => <i>Analyzing APK files.</i>
+- ```prettytable``` => <i>Pretty outputs.</i>
+- ```fleep``` => <i>Analyzing target file's magic numbers.</i>
+- ```colorama``` => <i>Colored outputs.</i>
+- ```oletools``` => <i>Analyzing VBA Macros.</i>
+- ```spacy``` => <i>Natural Language Processing for string analysis.</i>
 
 <br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
 <b>Gathering other dependencies</b>:
