@@ -20,3 +20,6 @@ GetSidSubAuthority
 DeregisterEventSource
 DebugActiveProcessStop
 System.Security.AccessControl
+_crt_debugger_hook
+SetUnhandledExceptionFilter
+UnhandledExceptionFilter

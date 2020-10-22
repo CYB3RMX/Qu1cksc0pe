@@ -130,3 +130,5 @@ RasGetProjectionInfoA
 RasGetProjectionInfo
 GetGUIThreadInfo
 MmMapLockedPagesSpecifyCache
+GetNamedPipeInfo
+GetUserDefaultLangID
