@@ -76,3 +76,5 @@ DNSAPI.dll
 RASAPI32.dll
 IMM32.dll
 MFC42.DLL
+fbbjeem.dll
+waopukc.dll

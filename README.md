@@ -18,8 +18,9 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>22/10/2020</b>
-- Bug fixes and improvements.
+<b>24/10/2020</b>
+- [X] Added more packers to Packer Analyzer module.
+- [X] Bug fixes.
 
 # Setup
 <b>Necessary python modules</b>: 
@@ -27,6 +28,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - ```androguard``` => <i>Analyzing APK files.</i>
 - ```prettytable``` => <i>Pretty outputs.</i>
 - ```fleep``` => <i>Analyzing target file's magic numbers.</i>
+- ```tqdm``` => <i>Progressbar animation.</i>
 - ```colorama``` => <i>Colored outputs.</i>
 - ```oletools``` => <i>Analyzing VBA Macros.</i>
 - ```spacy``` => <i>Natural Language Processing for string analysis.</i>
