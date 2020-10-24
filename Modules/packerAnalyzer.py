@@ -36,30 +36,29 @@ targetFile = str(sys.argv[1])
 
 # File signatures
 file_sigs = {'UPX': 'UPX0', 'AsPack': '.aspack', 'ConfuserEx v0.6.0': 'ConfuserEx v0.6.0',
-            'UPX!': 'UPX!', 'Confuser v1.9.0.0': 'Confuser v1.9.0.0'}
+            'UPX!': 'UPX!', 'Confuser v1.9.0.0': 'Confuser v1.9.0.0', 'PEtite': 'petite',
+            'MEW': 'MEW', 'MPRESS_1': 'MPRESS1', 'MPRESS_2': 'MPRESS2H'}
 
 # Simple analyzer function
 def Analyzer():
     # Getting file's all strings to analyze
     try:
         if os.path.isfile(targetFile) == True:
-            command = f"strings --all {targetFile} > tempPack.txt"
-            os.system(command)
+            data = open(targetFile, "rb").read()
         else:
             pass
     except:
-        if os.path.exists("tempPack.txt"):
-            os.remove("tempPack.txt")
+        print(f"{errorS} An error occured while opening the file.")
+        sys.exit(1)
 
     # Creating table
     packTable = PrettyTable()
     packTable.field_names = [f"{green}Extracted Strings{white}", f"{green}Packer Type{white}"]
     # Scanning zone
     packed = 0
-    allHex = open("tempPack.txt", "r").read()
     print(f"{infoS} Searching strings about common packers...")
     for pack in file_sigs:
-        if file_sigs[pack] in allHex:
+        if file_sigs[pack].encode() in data:
             packed += 1
             packTable.add_row([f"{red}{file_sigs[pack]}{white}", f"{red}{pack}{white}"])
     # Printing all
@@ -67,6 +66,7 @@ def Analyzer():
         print(f"{errorS} Nothing found.")
     else:
         print(f"{packTable}\n")
+
 # Multiple analyzer function
 def MultiAnalyzer():
     # Creating summary table
@@ -87,18 +87,16 @@ def MultiAnalyzer():
                 scanme = f"{targetFile}/{allFiles[tf]}"
                 try:
                     if os.path.isfile(scanme) == True:
-                        command = f"strings --all {scanme} > tempPack.txt"
-                        os.system(command)
+                        mulData = open(scanme, "rb").read()
                     else:
                         pass
                 except:
-                    if os.path.exists("tempPack.txt"):
-                        os.remove("tempPack.txt")
+                    print(f"{errorS} An error occured while opening the file.")
+                    sys.exit(1)
 
-                # Opening output file
-                allHex = open("tempPack.txt", "r").read()
+                # Scanning!
                 for pack in file_sigs:
-                    if file_sigs[pack] in allHex:
+                    if file_sigs[pack].encode() in mulData:
                         multipack += 1
                         answers.add_row([f"{red}{allFiles[tf]}{white}", f"{red}{file_sigs[pack]}{white}", f"{red}{pack}{white}"])
         # Print all
@@ -111,20 +109,14 @@ if __name__ == '__main__':
     if str(sys.argv[2]) == '--single':
         try:
             Analyzer()
-            if os.path.exists("tempPack.txt"):
-                os.remove("tempPack.txt")
         except:
             print(f"{errorS} Program terminated.")
-            if os.path.exists("tempPack.txt"):
-                os.remove("tempPack.txt")
+
     elif str(sys.argv[2]) == '--multiscan':
         try:
             MultiAnalyzer()
-            if os.path.exists("tempPack.txt"):
-                os.remove("tempPack.txt")
         except:
             print(f"{errorS} Program terminated.")
-            if os.path.exists("tempPack.txt"):
-                os.remove("tempPack.txt")
+
     else:
         pass

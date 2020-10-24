@@ -69,7 +69,7 @@ def URLAnalyzer():
       # Parsing and calculaing target string's similarity
       target = nlp(urls)
       if url.similarity(target) >= 0.3:
-         if "http" in urls or "https" in urls or "www" in urls:
+         if "http" in urls or "https" in urls:
             print(f"{cyan}({magenta}URL{cyan})->{white} {urls}")
 
 # Handling ip address analyzing
@@ -108,8 +108,8 @@ def EmailCatcher():
    for ems in allStrings:
       # Parsing string
       look = nlp(ems)
-      if my_mail.similarity(look) >= 0.7:
-         if "@" in ems:
+      if my_mail.similarity(look) >= 0.75:
+         if "@" in ems and "." in ems:
             print(f"{cyan}({magenta}EMAIL{cyan})->{white} {ems}")
 
 if __name__ == '__main__':
