@@ -78,3 +78,6 @@ IMM32.dll
 MFC42.DLL
 fbbjeem.dll
 waopukc.dll
+L32.dll
+imagehlp.dll
+USERENV.dll
