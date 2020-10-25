@@ -95,7 +95,11 @@ def IPAddrAnalyzer():
 # Email address analyzing
 def EmailCatcher():
    # Example email
-   exEmail = "johnsmith@gmail.com"   
+   exEmail = "johnsmith@gmail.com"
+
+   # Domains
+   emDom = ['.to', '.ch', '.com', '.edu', '.gov', '.k12', '.us',
+            '.pro', '.mo', '.ed', '.iupui']
 
    # Parsing string
    try:
@@ -108,9 +112,10 @@ def EmailCatcher():
    for ems in allStrings:
       # Parsing string
       look = nlp(ems)
-      if my_mail.similarity(look) >= 0.75:
-         if "@" in ems and "." in ems:
-            print(f"{cyan}({magenta}EMAIL{cyan})->{white} {ems}")
+      if my_mail.similarity(look) >= 0.28:
+         for ext in emDom:
+            if ext in ems and "@" in ems:
+               print(f"{cyan}({magenta}EMAIL{cyan})->{white} {ems}")
 
 if __name__ == '__main__':
    print(f"{infoS} Qu1cksc0pe is analyzing this file for possible domain strings. It will take a while...\n")

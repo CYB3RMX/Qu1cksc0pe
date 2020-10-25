@@ -19,8 +19,9 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 
 # Updates
 <b>24/10/2020</b>
-- [X] Added more packers to Packer Analyzer module.
+- [X] Added more packers to ```Packer Analyzer``` module.
 - [X] Bug fixes.
+- [X] ```Domain Catcher``` module is fixed.
 
 # Setup
 <b>Necessary python modules</b>: 
