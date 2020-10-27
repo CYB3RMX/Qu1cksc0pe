@@ -65,12 +65,16 @@ def URLAnalyzer():
       LangNotFound()
 
    # Lets scan!!
+   url_indicator = 0
    for urls in allStrings:
       # Parsing and calculaing target string's similarity
       target = nlp(urls)
       if url.similarity(target) >= 0.3:
          if "http" in urls or "https" in urls:
             print(f"{cyan}({magenta}URL{cyan})->{white} {urls}")
+            url_indicator += 1
+   if url_indicator == 0:
+      print(f"{errorS} Not any possible URL strings found.")
 
 # Handling ip address analyzing
 def IPAddrAnalyzer():
@@ -81,9 +85,12 @@ def IPAddrAnalyzer():
                'd.d.d.d', 'dd.d.d.d', 'ddd.d.d.d', 'd.dd.d.d', 'd.ddd.d.d',
                'd.d.dd.d', 'd.d.ddd.d', 'd.d.d.dd', 'd.d.d.ddd', 'dd.dd.dd.dd',
                'd.dd.dd.dd', 'dd.d.dd.dd', 'dd.dd.d.dd', 'dd.dd.dd.d', 'ddd.ddd.d.d',
-               'ddd.ddd.dd.dd', 'ddd.dd.dd.dd', 'ddd.ddd.d.dd', 'd.d.dd.dd']
+               'ddd.ddd.dd.dd', 'ddd.dd.dd.dd', 'ddd.ddd.d.dd', 'd.d.dd.dd', 'ddd.dd.dd.ddd',
+               'd.dd.ddd.ddd', 'dd.ddd.ddd.dd', 'dd.d.ddd.dd', 'dd.ddd.dd.ddd', 'dd.ddd.d.d',
+               'dd.ddd.dd.d']
 
    # Lets scan!!
+   ip_indicator = 0
    nlp = spacy.load("en")
    for ipaddr in allStrings:
       # Parsing target string's shapes
@@ -91,6 +98,9 @@ def IPAddrAnalyzer():
       for token in targstr:
          if str(token.shape_) in ipShapes:
             print(f"{cyan}({magenta}IP{cyan})->{white} {ipaddr}")
+            ip_indicator += 1
+   if ip_indicator == 0:
+      print(f"{errorS} Not any possible IP strings found.")
 
 # Email address analyzing
 def EmailCatcher():
@@ -99,7 +109,7 @@ def EmailCatcher():
 
    # Domains
    emDom = ['.to', '.ch', '.com', '.edu', '.gov', '.k12', '.us',
-            '.pro', '.mo', '.ed', '.iupui']
+            '.pro', '.mo', '.ed', '.iupui', '.ru', '.uk']
 
    # Parsing string
    try:
@@ -109,6 +119,7 @@ def EmailCatcher():
       LangNotFound()
    
    # Scan zone
+   ema_indicator = 0
    for ems in allStrings:
       # Parsing string
       look = nlp(ems)
@@ -116,6 +127,9 @@ def EmailCatcher():
          for ext in emDom:
             if ext in ems and "@" in ems:
                print(f"{cyan}({magenta}EMAIL{cyan})->{white} {ems}")
+               ema_indicator += 1
+   if ema_indicator == 0:
+      print(f"{errorS} Not any possible EMAIL strings found.")
 
 if __name__ == '__main__':
    print(f"{infoS} Qu1cksc0pe is analyzing this file for possible domain strings. It will take a while...\n")
