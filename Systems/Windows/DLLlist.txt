@@ -81,3 +81,5 @@ waopukc.dll
 L32.dll
 imagehlp.dll
 USERENV.dll
+WTSAPI32.dll
+MSVCR90.dll

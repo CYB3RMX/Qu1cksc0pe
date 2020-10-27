@@ -18,10 +18,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>24/10/2020</b>
-- [X] Added more packers to ```Packer Analyzer``` module.
-- [X] Bug fixes.
-- [X] ```Domain Catcher``` module is fixed.
+<b>27/10/2020</b>
+- [X] ```Domain Catcher``` module upgraded.
 
 # Setup
 <b>Necessary python modules</b>: 
