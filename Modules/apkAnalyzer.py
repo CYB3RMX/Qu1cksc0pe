@@ -182,7 +182,7 @@ def Detailed():
         for apkstr in allStrings:
             # Parsing and calculating
             testme = nlp(apkstr)
-            if testme.similarity(sample) > 0.7:
+            if testme.similarity(sample) > 0.75:
                 for token in testme:
                     if token.pos_ == "PUNCT":
                         pass
@@ -203,25 +203,33 @@ if __name__ == '__main__':
         DeepScan(parsed)
 
         # Strings side
-        print(f"{infoS} Analyzing interesting strings. It will take a while...\n")
-        
-        #Thread Number
-        threadNumber = 0 
+        check = str(input(f"\n{infoS} Do you want to perform string analysis? It will take a while [Y/N]: "))
+        if check == "Y" or check == "y":
+            print(f"{infoS} Analyzing interesting strings. It will take a while...\n")
+            #Thread Number
+            threadNumber = 0
 
-        for sus in susStrings:
-            q.put(sus)
-            threadNumber += 1
+            # Create threads for every word in suspicious.txt
+            for sus in susStrings:
+                q.put(sus)
+                threadNumber += 1
 
-        ts = []
-        for i in range(0,threadNumber):
-            try:
-                t = threading.Thread(target=Detailed)
-                ts.append(t)
-                t.start()
-            except Exception as e:
-                print(e)
-        for t in ts:
-            t.join()
-        
+            # Lets scan!!
+            ts = []
+            for i in range(0,threadNumber):
+                try:
+                    t = threading.Thread(target=Detailed)
+                    ts.append(t)
+                    t.start()
+                except:
+                    print(f"{errorS} Program terminated.")
+                    sys.exit(1)
+
+            # Calling threads
+            for t in ts:
+                t.join()
+        else:
+            pass
+
     except:
         print(f"{errorS} An error occured.")

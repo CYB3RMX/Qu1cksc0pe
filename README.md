@@ -18,8 +18,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>27/10/2020</b>
-- [X] ```Domain Catcher``` module upgraded.
+<b>29/10/2020</b>
+- [X] ```APK Analyzer``` module is improved.
 
 # Setup
 <b>Necessary python modules</b>: 
