@@ -159,3 +159,7 @@ DragFinish
 DragQueryPoint
 GetSystemDirectoryA
 get_RootDirectory
+VarFileInfo
+FileAttributes
+GetFileNameWithoutExtension
+DirectoryInfo

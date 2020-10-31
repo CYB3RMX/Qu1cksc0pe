@@ -18,8 +18,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>29/10/2020</b>
-- [X] ```APK Analyzer``` module is improved.
+<b>31/10/2020</b>
+- [X] Added more words to Windows wordlists.
 
 # Setup
 <b>Necessary python modules</b>: 

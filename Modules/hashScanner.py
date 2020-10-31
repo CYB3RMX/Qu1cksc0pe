@@ -114,7 +114,7 @@ def NormalScan():
     except:
         pass
     # Printing informations
-    print(f"{infoS} Total Hashes: {green}{tot+1}{white}")
+    print(f"{infoS} Total Hashes: {green}{tot}{white}")
     print(f"{infoS} File Name: {green}{targetFile}{white}")
     print(f"{infoS} Target Hash: {green}{hashToScan}{white}\n")
     if foundc != 0:

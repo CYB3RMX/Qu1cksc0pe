@@ -23,3 +23,7 @@ System.Security.AccessControl
 _crt_debugger_hook
 SetUnhandledExceptionFilter
 UnhandledExceptionFilter
+DebuggableAttribute
+DebuggerNonUserCodeAttribute
+DebuggingModes
+DebuggerHiddenAttribute
