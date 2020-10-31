@@ -20,6 +20,7 @@ GetNamedPipeClientProcessId
 GetCurrentProcessorNumber
 GetWindowThreadProcessId
 GetDriveTypeW
+get_DriveType
 BitBlt
 GetDC
 GetCurrentDirectoryA

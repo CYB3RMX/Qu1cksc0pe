@@ -20,9 +20,6 @@ StrStr
 StrStrA
 StrChr
 StrChrA
-DebuggerNonUserCodeAttribute
-DebuggableAttribute
-DebuggingModes
 GetDlgItem
 GetDlgItemTextA
 GetMenu
@@ -100,3 +97,4 @@ SetStdHandle
 ?_Tidy@?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AAEX_N@Z
 RtlInitUnicodeString
 KeQueryTimeIncrement
+LastIndexOf
