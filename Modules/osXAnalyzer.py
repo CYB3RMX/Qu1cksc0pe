@@ -31,6 +31,7 @@ fileHeaders = open("Systems/OSX/Headers.txt", "r").read().split('\n')
 sharedLibs = open("Systems/OSX/SharedLibs.txt", "r").read().split('\n')
 memoryz = open("Systems/OSX/Memory.txt", "r").read().split('\n')
 procesz = open("Systems/OSX/Process.txt", "r").read().split('\n')
+infogaz = open("Systems/OSX/Infoga.txt", "r").read().split('\n')
 cryptoz = open("Systems/OSX/Cryptography.txt", "r").read().split('\n')
 otherz = open("Systems/OSX/Other.txt", "r").read().split('\n')
 
@@ -42,6 +43,7 @@ shLibs = []
 # Arrays for categorized scanning
 Memory = []
 Process = []
+Infogath = []
 Cryptography = []
 Other = []
 
@@ -49,6 +51,7 @@ Other = []
 dictCateg = {
     "Memory Management": Memory,
     "Process": Process,
+    "Information Gathering": Infogath,
     "Cryptography": Cryptography,
     "Other/Unknown": Other
 }
@@ -57,6 +60,7 @@ dictCateg = {
 regdict = {
     "Memory Management": memoryz,
     "Process": procesz,
+    "Information Gathering": infogaz,
     "Cryptography": cryptoz,
     "Other/Unknown": otherz
 }
@@ -65,6 +69,7 @@ regdict = {
 scoreDict = {
     "Memory Management": 0,
     "Process": 0,
+    "Information Gathering": 0,
     "Cryptography": 0,
     "Other/Unknown": 0
 }
@@ -133,6 +138,12 @@ def Categorized():
     # Printing zone
     for key in dictCateg:
         if dictCateg[key] != []:
+
+            # More important categories
+            if key == "Cryptography" or key == "Information Gathering":
+                print(f"\n{yellow}[{red}!{yellow}]__WARNING__[{red}!{yellow}]{white}")
+
+            # Printing area
             tables.field_names = [f"Functions or Strings about {green}{key}{white}"]
             for i in dictCateg[key]:
                 if i == "":
@@ -142,6 +153,8 @@ def Categorized():
                     if key == "Memory Management":
                         scoreDict[key] += 1
                     elif key == "Process":
+                        scoreDict[key] += 1
+                    elif key == "Information Gathering":
                         scoreDict[key] += 1
                     elif key == "Cryptography":
                         scoreDict[key] += 1
@@ -160,7 +173,10 @@ def Categorized():
         if scoreDict[key] == 0:
             pass
         else:
-            statistics.add_row([f"{white}{key}", f"{scoreDict[key]}{white}"])
+            if key == "Cryptography" or key == "Information Gathering":
+                statistics.add_row([f"{yellow}{key}{white}", f"{red}{scoreDict[key]}{white}"])
+            else:
+                statistics.add_row([f"{white}{key}", f"{scoreDict[key]}{white}"])
     print(statistics)
 
 # Execution
