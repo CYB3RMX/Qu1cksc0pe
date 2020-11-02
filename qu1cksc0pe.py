@@ -94,15 +94,19 @@ def BasicAnalyzer(analyzeFile):
         print(f"{infoS} Target OS: {green}OSX{white}\n")
         command = f"python3 Modules/osXAnalyzer.py {analyzeFile}"
         os.system(command)
+    # Document Analysis
+    elif "Document file" in fileType:
+        print(f"{infoS} File Type: {green}Non Executable{white}\n")
+        command = f"python3 Modules/nonExecAnalyzer.py {analyzeFile}"
+        os.system(command)
     # Android Analysis
-    elif "PK" in fileType or "Android" in fileType:
+    elif "PK" in fileType and "Java archive" in fileType:
         print(f"{infoS} Target OS: {green}Android{white}\n")
         command = f"python3 Modules/apkAnalyzer.py {analyzeFile}"
         os.system(command)
     else:
-        print(f"{infoS} File Type: {green}Non Executable{white}\n")
-        command = f"python3 Modules/nonExecAnalyzer.py {analyzeFile}"
-        os.system(command)
+        print(f"{errorS} File type not supported. Make sure you are analyze executable files or document files.")
+        sys.exit(1)
 
 # Main function
 def Qu1cksc0pe():
