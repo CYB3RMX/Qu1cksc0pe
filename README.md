@@ -18,8 +18,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>01/11/2020</b>
-- [X] ```OSX Analyzer``` module is upgraded.
+<b>02/11/2020</b>
+- [X] Bug fixes.
 
 # Setup
 <b>Necessary python modules</b>: 
