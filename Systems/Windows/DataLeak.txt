@@ -133,3 +133,13 @@ GetGUIThreadInfo
 MmMapLockedPagesSpecifyCache
 GetNamedPipeInfo
 GetUserDefaultLangID
+GetSysteminfo
+EnumSystemFirmwareTables
+GetComputerObjectNameA
+GetCurrentHwProfile
+GetFirmwareType
+GetProductInfo
+GetSystemFirmwareTable
+GetSystemRegistryQuota
+IsNativeVhdBoot
+RtlGetSuiteMask

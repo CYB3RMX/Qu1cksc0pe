@@ -8,7 +8,6 @@ ReleaseActCtx
 CreateActCtxW
 GetActiveWindow
 GetLastActivePopup
-GetSysteminfo
 IsProcessorFeaturePresent
 SetProcessDpiAwarenessInternal
 SetProcessDpiAwareness
@@ -38,9 +37,7 @@ SetDlgItemTextA
 GetStockObject
 LockResource
 DeleteObject
-DeleteCriticalSection
 Sleep
-LeaveCriticalSection
 IsDBCSLeadByteEx
 InterlockedExchange
 DispatchMessageA

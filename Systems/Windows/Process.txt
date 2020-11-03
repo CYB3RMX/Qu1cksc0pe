@@ -41,6 +41,8 @@ OpenMutex
 InitializeCriticalSection
 InitializeCriticalSectionAndSpinCount
 EnterCriticalSection
+DeleteCriticalSection
+LeaveCriticalSection
 CWinThread
 SetThreadStackGuarantee
 WinExec
