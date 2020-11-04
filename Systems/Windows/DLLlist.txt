@@ -83,3 +83,5 @@ imagehlp.dll
 USERENV.dll
 WTSAPI32.dll
 MSVCR90.dll
+XmlLite.dll
+UxTheme.dll
