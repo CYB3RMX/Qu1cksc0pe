@@ -86,3 +86,6 @@ ConnectNamedPipe
 PeekNamedPipe
 CreateNamedPipeA
 DisconnectNamedPipe
+System.Threading
+WaitForExit
+ParameterizedThreadStart

@@ -26,3 +26,5 @@ Module32First
 DllCanUnloadNow
 DllGetClassObject
 DllRegisterServer
+get_ResourceManager
+System.Resources

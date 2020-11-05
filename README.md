@@ -18,7 +18,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>04/11/2020</b>
+<b>05/11/2020</b>
 - [X] Added more Functions/API's to Windows wordlists. Now Qu1cksc0pe contains over 1000+ words about Windows.
 
 # Setup
