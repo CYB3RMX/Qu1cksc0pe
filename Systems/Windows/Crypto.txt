@@ -44,3 +44,4 @@ AsymmetricAlgorithm
 CryptGetHashParam
 CryptAcquireContextW
 CryptHashData
+downloadbase64

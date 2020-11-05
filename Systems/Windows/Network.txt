@@ -143,3 +143,4 @@ EnableHttpTrace
 FtpDefaultExpiryTimeSecs
 RasDialA
 NdisIMCopySendPerPacketInfo
+DownloadFile
