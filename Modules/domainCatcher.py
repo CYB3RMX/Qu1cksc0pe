@@ -109,7 +109,8 @@ def EmailCatcher():
 
    # Domains
    emDom = ['.to', '.ch', '.com', '.edu', '.gov', '.k12', '.us',
-            '.pro', '.mo', '.ed', '.iupui', '.ru', '.uk']
+            '.pro', '.mo', '.ed', '.iupui', '.ru', '.uk', '.net',
+            '.de', '.org']
 
    # Parsing string
    try:

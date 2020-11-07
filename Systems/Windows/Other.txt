@@ -96,3 +96,13 @@ RtlInitUnicodeString
 KeQueryTimeIncrement
 LastIndexOf
 GetClassNameW
+StrChrIA
+StrCmpNA
+StrCmpNW
+StrStrIA
+StrStrIW
+ImageList_Create
+DescribePixelFormat
+ColorMatchToTarget
+AnimatePalette
+EraseTape

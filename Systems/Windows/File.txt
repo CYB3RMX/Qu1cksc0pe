@@ -163,3 +163,5 @@ VarFileInfo
 FileAttributes
 GetFileNameWithoutExtension
 DirectoryInfo
+SHBrowseForFolderA
+SearchPathW
