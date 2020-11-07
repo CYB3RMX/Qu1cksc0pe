@@ -53,3 +53,5 @@ ClearEventLogA
 CloseEventLog
 set_UseShellExecute
 runcmd
+WOWShellExecute
+SHCreateProcessAsUserW

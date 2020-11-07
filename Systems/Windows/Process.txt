@@ -89,3 +89,4 @@ DisconnectNamedPipe
 System.Threading
 WaitForExit
 ParameterizedThreadStart
+SwitchToThread

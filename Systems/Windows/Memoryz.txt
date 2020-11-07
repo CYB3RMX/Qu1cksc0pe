@@ -82,3 +82,4 @@ memcmp
 memcpy
 NdisFreeMemory
 NdisAllocateMemoryWithTagPriority
+CoTaskMemAlloc

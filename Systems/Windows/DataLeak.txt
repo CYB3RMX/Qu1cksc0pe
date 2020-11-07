@@ -143,3 +143,5 @@ GetSystemFirmwareTable
 GetSystemRegistryQuota
 IsNativeVhdBoot
 RtlGetSuiteMask
+SHGetDiskFreeSpaceA
+SHGetSettings
