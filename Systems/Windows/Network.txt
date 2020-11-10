@@ -144,3 +144,7 @@ FtpDefaultExpiryTimeSecs
 RasDialA
 NdisIMCopySendPerPacketInfo
 DownloadFile
+WebServices
+My.WebServices
+GetRequestStream
+GetResponseStream

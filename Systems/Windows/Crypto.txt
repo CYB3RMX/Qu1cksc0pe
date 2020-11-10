@@ -45,3 +45,5 @@ CryptGetHashParam
 CryptAcquireContextW
 CryptHashData
 downloadbase64
+Hashtable
+BCryptDestroyKey
