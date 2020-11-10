@@ -148,3 +148,7 @@ WebServices
 My.WebServices
 GetRequestStream
 GetResponseStream
+GetDomain
+System.Web
+HttpServerUtility
+UrlTokenDecode
