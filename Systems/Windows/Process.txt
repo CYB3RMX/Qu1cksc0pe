@@ -90,3 +90,7 @@ System.Threading
 WaitForExit
 ParameterizedThreadStart
 SwitchToThread
+m_ThreadStaticValue
+STAThreadAttribute
+ThreadStaticAttribute
+HandleProcessCorruptedStateExceptionsAttribute

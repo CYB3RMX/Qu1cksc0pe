@@ -48,3 +48,5 @@ RegCreateKeyW
 RegOpenKeyW
 DllRegisterServer
 DllUnregisterServer
+RegistryProxy
+get_Registry

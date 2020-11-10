@@ -62,6 +62,7 @@ WINMM.dll
 WINHTTP.dll
 PSAPI.DLL
 PSAPI.dll
+psapi.dll
 urlmon.dll
 URLMON.dll
 libgcc_s_dw2-1.dll
@@ -85,3 +86,7 @@ WTSAPI32.dll
 MSVCR90.dll
 XmlLite.dll
 UxTheme.dll
+RichEd20.dll
+vaultcli.dll
+bcrypt.dll
+User32.dll

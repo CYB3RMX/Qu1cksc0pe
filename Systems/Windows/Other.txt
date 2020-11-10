@@ -106,3 +106,9 @@ DescribePixelFormat
 ColorMatchToTarget
 AnimatePalette
 EraseTape
+SHAutoComplete
+EditorBrowsableAttribute
+CreateAttribute
+CreateNamespaceAttribute
+RegisterWindowMessageW
+BeginDeferWindowPos
