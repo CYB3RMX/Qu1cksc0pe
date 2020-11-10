@@ -20,6 +20,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 # Updates
 <b>10/11/2020</b>
 - [X] Added more Functions/API's to Windows wordlists. Now Qu1cksc0pe contains over 1000+ words about Windows.
+- [X] Added ```--docs``` argument. Now Qu1cksc0pe can analyze document files for VBA Macros.
 
 # Setup
 <b>Necessary python modules</b>: 

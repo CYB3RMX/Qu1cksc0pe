@@ -49,6 +49,8 @@ parser.add_argument("--analyze", required=False,
                     help="Analyze target file.", action="store_true")
 parser.add_argument("--multiple", required=False, nargs='+',
                     help="Analyze multiple files.")
+parser.add_argument("--docs", required=False, help="Analyze document files.",
+                    action="store_true")
 parser.add_argument("--hashscan", required=False,
                     help="Scan target file's hash in local database.",
                     action="store_true")
@@ -94,11 +96,6 @@ def BasicAnalyzer(analyzeFile):
         print(f"{infoS} Target OS: {green}OSX{white}\n")
         command = f"python3 Modules/osXAnalyzer.py {analyzeFile}"
         os.system(command)
-    # Document Analysis
-    elif "Document file" in fileType:
-        print(f"{infoS} File Type: {green}Non Executable{white}\n")
-        command = f"python3 Modules/nonExecAnalyzer.py {analyzeFile}"
-        os.system(command)
     # Android Analysis
     elif "PK" in fileType and "Java archive" in fileType:
         print(f"{infoS} Target OS: {green}Android{white}\n")
@@ -106,6 +103,7 @@ def BasicAnalyzer(analyzeFile):
         os.system(command)
     else:
         print(f"{errorS} File type not supported. Make sure you are analyze executable files or document files.")
+        print(f"{errorS} If you want to scan document files try {green}--docs{white} argument.")
         sys.exit(1)
 
 # Main function
@@ -119,6 +117,17 @@ def Qu1cksc0pe():
         # Handling --file argument
         if args.file is not None:
             BasicAnalyzer(analyzeFile=args.file)
+        # Handling --folder argument
+        if args.folder is not None:
+            print(f"{errorS} {green}--analyze{white} argument is not supported for folder analyzing.")
+            sys.exit(1)
+    # Analyze document files
+    if args.docs:
+        # Handling --file argument
+        if args.file is not None:
+            print(f"{infoS} Analyzing: {green}{args.file}{white}")
+            command = f"python3 Modules/nonExecAnalyzer.py {args.file}"
+            os.system(command)
         # Handling --folder argument
         if args.folder is not None:
             print(f"{errorS} {green}--analyze{white} argument is not supported for folder analyzing.")

@@ -42,6 +42,7 @@ user32.dll
 MSVBVM60.DLL
 msvbvm60.dll
 VBA6.DLL
+VBA6.dll
 vba6.dll
 MSVCR80.dll
 MSVCP80.dll
@@ -90,3 +91,4 @@ RichEd20.dll
 vaultcli.dll
 bcrypt.dll
 User32.dll
+winmm.dll
