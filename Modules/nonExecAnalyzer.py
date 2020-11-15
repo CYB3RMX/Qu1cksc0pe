@@ -3,11 +3,11 @@
 import os
 import sys
 
-# Checking for fleep
+# Checking for puremagic
 try:
-    import fleep as fl
+    import puremagic as pr
 except:
-    print("Error: >fleep< module not found.")
+    print("Error: >puremagic< module not found.")
     sys.exit(1)
 
 # Checking for colorama
@@ -72,42 +72,25 @@ def MacroHunter(targetFile):
 
 # A function that handles file types, extensions etc.
 def MagicParser(targetFile):
-    # Defining tables
-    extTable = PrettyTable()
-    extTable.field_names = [f"Extracted {green}File Extensions{white}"]
+    # Defining table
+    resTable = PrettyTable()
 
-    mimTable = PrettyTable()
-    mimTable.field_names = [f"Extracted {green}Mime Types{white}"]
-
-    filTable = PrettyTable()
-    filTable.field_names = [f"Extracted {green}File Types{white}"]
-
-    # Getting data from file
-    with open(targetFile, "rb") as scope:
-        extract = fl.get(scope.read(128))
-
-    # Defining lists
-    extensions = list(extract.extension)
-    mimeTypes = list(extract.mime)
-    fileTypes = list(extract.type)
-
-    # For file extensions
-    if extensions != []:
-        for ex in extensions:
-            extTable.add_row([f"{red}{ex}{white}"])
-        print(extTable)
-
-    # For mime types
-    if mimeTypes != []:
-        for mt in mimeTypes:
-            mimTable.add_row([f"{red}{mt}{white}"])
-        print(mimTable)
-
-    # For file types
-    if fileTypes != []:
-        for ft in fileTypes:
-            filTable.add_row([f"{red}{ft}{white}"])
-        print(filTable)
+    # Magic byte parsing
+    resCounter = 0
+    resTable.field_names = [f"Extracted File Extensions", "Names", "Byte Matches", "Confidence"]
+    resourceList = list(pr.magic_file(targetFile))
+    for res in range(0, len(resourceList)):
+        extrExt = str(resourceList[res].extension)
+        extrNam = str(resourceList[res].name)
+        extrByt = str(resourceList[res].byte_match)
+        if resourceList[res].confidence >= 0.8:
+            resCounter += 1
+            if extrExt == '':
+                resTable.add_row([f"{red}No Extension{white}", f"{red}{extrNam}{white}", f"{red}{extrByt}{white}", f"{red}{resourceList[res].confidence}{white}"])
+            else:
+                resTable.add_row([f"{red}{extrExt}{white}", f"{red}{extrNam}{white}", f"{red}{extrByt}{white}", f"{red}{resourceList[res].confidence}{white}"])
+    if len(resourceList) != 0:
+        print(resTable)
 
 # Execution area
 if __name__ == '__main__':
