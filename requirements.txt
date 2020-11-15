@@ -1,7 +1,6 @@
 puremagic
 androguard
 prettytable
-fleep
 tqdm
 colorama
 oletools

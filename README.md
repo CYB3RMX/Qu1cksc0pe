@@ -18,16 +18,14 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>10/11/2020</b>
-- [X] Added more Functions/API's to Windows wordlists. Now Qu1cksc0pe contains over 1000+ words about Windows.
-- [X] Added ```--docs``` argument. Now Qu1cksc0pe can analyze document files for VBA Macros.
+<b>15/11/2020</b>
+- [X] ```fleep``` module is no more needed so its removed.
 
 # Setup
 <b>Necessary python modules</b>: 
-- ```puremagic``` => <i>Analyzing target OS.</i>
+- ```puremagic``` => <i>Analyzing target OS and magic numbers.</i>
 - ```androguard``` => <i>Analyzing APK files.</i>
 - ```prettytable``` => <i>Pretty outputs.</i>
-- ```fleep``` => <i>Analyzing target file's magic numbers.</i>
 - ```tqdm``` => <i>Progressbar animation.</i>
 - ```colorama``` => <i>Colored outputs.</i>
 - ```oletools``` => <i>Analyzing VBA Macros.</i>
