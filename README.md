@@ -49,20 +49,20 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 
 ## Hash scan
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --hashscan```<br>
-![animation](.animations/hashscan.gif)
+![animation](.animations/hash.gif)
 
-## Multiple hash scanning
-<b>Usage</b>: ```python3 qu1cksc0pe.py --multihash FILE1 FILE2 ...```<br>
-![animation](.animations/multihash.gif)
+## Folder scan
+<b>Supported Arguments</b>:
+- ```--hashscan```
+- ```--packer```
+
+<b>Usage</b>: ```python3 qu1cksc0pe.py --folder FOLDER --hashscan```<br>
+![animation](.animations/hashscan.gif)
 
 ## VirusTotal
 <b>Usage for --vtFile</b>: ```python3 qu1cksc0pe.py --file suspicious_file --vtFile```<br>
 <b>Usage for --vtUrl</b>: ```python3 qu1cksc0pe.py --vtUrl```<br>
 ![animation](.animations/total.gif)
-
-## Folder scanning
-<b>Hash scan</b>: ```python3 qu1cksc0pe.py --folder SUSPICIOUS_FOLDER --hashscan```<br>
-<b>Packed files</b>: ```python3 qu1cksc0pe.py --folder SUSPICIOUS_FOLDER --packer```<br>
 
 ## Domain
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --domain```<br><br>
