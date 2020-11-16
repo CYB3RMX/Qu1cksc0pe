@@ -18,8 +18,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>15/11/2020</b>
-- [X] ```fleep``` module is no more needed so its removed.
+<b>16/11/2020</b>
+- [X] Added more Functions/API's to Windows wordlists. Now Qu1cksc0pe contains over 1100+ Functions/API's about Windows.
 
 # Setup
 <b>Necessary python modules</b>: 

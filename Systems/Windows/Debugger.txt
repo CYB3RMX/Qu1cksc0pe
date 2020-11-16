@@ -2,6 +2,7 @@ IsDebuggerPresent
 CheckRemoteDebuggerPresent
 FindWindow
 GetTickCount
+GetTickCount64
 NtQueryInformationProcess
 OutputDebugString
 OutputDebugStringA
@@ -27,3 +28,4 @@ DebuggableAttribute
 DebuggerNonUserCodeAttribute
 DebuggingModes
 DebuggerHiddenAttribute
+HideFromDebugger

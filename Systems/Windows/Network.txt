@@ -43,6 +43,7 @@ HTTPOpenRequest
 HttpOpenRequestA
 HTTPSendRequest
 HttpSendRequestA
+HttpSendRequestW
 HTTPQueryInfo
 URLDownloadToFile
 WinHttpCloseHandle
@@ -152,3 +153,18 @@ GetDomain
 System.Web
 HttpServerUtility
 UrlTokenDecode
+WNetAddConnection2W
+WNetCancelConnection2W
+WNetUseConnectionW
+InternetSetOptionW
+InternetQueryOptionW
+InternetOpenW
+InternetOpenUrlW
+InternetConnectW
+HttpQueryInfoW
+HttpOpenRequestW
+FtpOpenFileW
+FtpGetFileSize
+IcmpCloseHandle
+IcmpCreateFile
+IcmpSendEcho
