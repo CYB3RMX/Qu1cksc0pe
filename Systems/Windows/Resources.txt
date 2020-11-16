@@ -30,3 +30,5 @@ get_ResourceManager
 System.Resources
 ResourceManager
 ResolveEventArgs
+LoadTypeLibEx
+QueryPathOfRegTypeLib

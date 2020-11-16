@@ -12,6 +12,7 @@ GetAsyncKeyState
 GetForegroundWindow
 AttachThreadInput
 RegisterHotKey
+UnregisterHotKey
 VkKeyScanA
 VkKeyScanExA
 MapVirtualKeyA

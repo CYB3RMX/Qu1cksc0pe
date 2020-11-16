@@ -92,3 +92,4 @@ vaultcli.dll
 bcrypt.dll
 User32.dll
 winmm.dll
+MPR.dll

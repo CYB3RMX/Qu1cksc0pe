@@ -1,5 +1,6 @@
 CreateService
 ControlService
+StartServiceA
 CreateProcessAsUserW
 NetScheduleJobAdd
 GetSystemMenu
@@ -55,3 +56,5 @@ set_UseShellExecute
 runcmd
 WOWShellExecute
 SHCreateProcessAsUserW
+LoadUserProfileW
+UnloadUserProfile

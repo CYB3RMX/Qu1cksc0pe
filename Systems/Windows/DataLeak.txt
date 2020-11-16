@@ -145,3 +145,7 @@ IsNativeVhdBoot
 RtlGetSuiteMask
 SHGetDiskFreeSpaceA
 SHGetSettings
+WNetOpenEnumW
+WNetGetConnectionW
+VerQueryValueW
+CreateEnvironmentBlock

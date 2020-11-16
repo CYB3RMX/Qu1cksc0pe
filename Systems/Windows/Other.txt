@@ -136,3 +136,4 @@ GraphicsPath
 System.Drawing.Drawing2D
 SoundPlayer
 System.Media
+IsThemeActive
