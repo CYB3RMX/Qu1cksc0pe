@@ -4,10 +4,19 @@
 import os
 import sys
 import requests
+
+# Checking for colorama existence
 try:
     from colorama import Fore, Style
 except:
     print("Error: >colorama< module not found.")
+    sys.exit(1)
+
+# Checking for prettytable existence
+try:
+    from prettytable import PrettyTable
+except:
+    print("Error: >prettytable< module not found.")
     sys.exit(1)
 
 # Colors
@@ -60,13 +69,18 @@ phishArray = ["Botvrij.eu", "Feodo Tracker", "CLEAN MX", "DNS8", "NotMining",
               "Fortinet", "StopForumSpam", "ZeroCERT", "Baidu-International", "Phishing Database"]
 allFish = len(phishArray)
 
-# This array is for parsing the scan reports
-avState = ["detected", "version", "result", "update"]
-webState = ["detected", "result"]
-
-# File scan function
+# Counter for reports
 score = 0
 
+# Creating table for file reports
+scanTable = PrettyTable()
+scanTable.field_names = [f"{green}Detected By{white}", f"{green}Results{white}"]
+
+# Creating table for url reports
+urlTable = PrettyTable()
+urlTable.field_names = [f"{green}Detected By{white}", f"{green}Results{white}"]
+
+# File scanner function
 def FileScan():
     global score
     # Checking file
@@ -114,13 +128,10 @@ def FileScan():
     if detect == {}:
         print(f"\n{errorS} Nothing found harmfull about that file.")
     else:
-        print(f"\n{infoS} Detection: {red}{score}{white}/{red}{allAvs}")
+        print(f"\n{infoS} Detection: {red}{score}{white}/{red}{allAvs}{white}")
         for aa in detect:
-            print(f"\n{green}{aa}")
-            print("\u001b[93m#"*30)
-            for avs in avState:
-                print("{}{}: {}{}".format(red, avs.upper(), white, detect[aa][avs]))
-        print("")
+            scanTable.add_row([aa, detect[aa]['result']])
+        print(f"{scanTable}\n")
 
 # URL scanner
 def UrlScan():
@@ -169,13 +180,10 @@ def UrlScan():
     if detect == {}:
         print(f"\n{errorS} Nothing found harmfull about that URL.")
     else:
-        print(f"\n{infoS} Detection: {red}{score}{white}/{red}{allFish}")
+        print(f"\n{infoS} Detection: {red}{score}{white}/{red}{allFish}{white}")
         for ww in detect:
-            print(f"\n{green}{ww}")
-            print("\u001b[93m#"*30)
-            for webs in webState:
-                print("{}{}: {}{}".format(red, webs.upper(), white, detect[ww][webs]))
-        print(" ")
+            urlTable.add_row([ww, detect[ww]['result']])
+        print(f"{urlTable}\n")
 
 # Execution area
 if __name__ == '__main__':

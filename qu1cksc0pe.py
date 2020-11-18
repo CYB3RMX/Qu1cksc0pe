@@ -199,11 +199,8 @@ def Qu1cksc0pe():
                 print(f"{errorS} Please get your API key from -> {green}https://www.virustotal.com/{white}")
                 sys.exit(1)
             else:
-                print(f"\n{infoS} VirusTotal Scan")
-                print("+", "-"*50, "+")
                 command = f"python3 Modules/VTwrapper.py {apik[0]} --vtFile {args.file}"
                 os.system(command)
-                print("+", "-"*50, "+")
         # Handling --folder argument
         if args.folder is not None:
             print(f"{errorS} If you want to get banned from VirusTotal then do that :).")
@@ -222,11 +219,8 @@ def Qu1cksc0pe():
             print(f"{errorS} Please get your API key from -> {green}https://www.virustotal.com/{white}")
             sys.exit(1)
         else:
-            print(f"\n{infoS} VirusTotal Scan")
-            print("+", "-"*50, "+")
             command = f"python3 Modules/VTwrapper.py {apik[0]} --vtUrl"
             os.system(command)
-            print("+", "-"*50, "+")
     # packer detection
     if args.packer:
         # Handling --file argument
