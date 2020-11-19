@@ -46,11 +46,16 @@ def LangNotFound():
          print(f"{infoS} Language package downloaded.")
          sys.exit(0)
       except:
-         print(f"{errorS} Program encountered an error.")
-         sys.exit(1)
+         sys.exit(0)
    else:
       print(f"{errorS} Without language package this module is wont work.")
       sys.exit(1)
+
+# Checking for language package existence
+try:
+   test = spacy.load("en")
+except:
+   LangNotFound()
 
 # Handling url analyzing
 def URLAnalyzer():
