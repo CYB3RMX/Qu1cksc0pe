@@ -18,8 +18,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>19/11/2020</b>
-- [X] ```VirusTotal scanner``` module is upgraded.
+<b>20/11/2020</b>
+- [X] Bug fixes.
 
 # Setup
 <b>Necessary python modules</b>: 
