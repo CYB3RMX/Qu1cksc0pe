@@ -21,6 +21,9 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 <b>20/11/2020</b>
 - [X] Bug fixes.
 
+# Note
+- [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
+
 # Setup
 <b>Necessary python modules</b>: 
 - ```puremagic``` => <i>Analyzing target OS and magic numbers.</i>
