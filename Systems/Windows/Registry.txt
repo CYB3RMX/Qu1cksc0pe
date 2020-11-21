@@ -50,3 +50,5 @@ DllRegisterServer
 DllUnregisterServer
 RegistryProxy
 get_Registry
+DeleteSubKey
+DeleteSubKeyTree

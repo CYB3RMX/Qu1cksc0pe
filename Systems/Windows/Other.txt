@@ -137,3 +137,13 @@ System.Drawing.Drawing2D
 SoundPlayer
 System.Media
 IsThemeActive
+UTF8Encoding
+WriteUInt64
+WriteNull
+WirteArray
+WriteFloat
+WriteBoolean
+WriteSingle
+TextWriter
+StringSplitOptions
+StringBuilder
