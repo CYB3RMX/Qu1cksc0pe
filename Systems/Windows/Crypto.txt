@@ -47,3 +47,12 @@ CryptHashData
 downloadbase64
 Hashtable
 BCryptDestroyKey
+AesCryptoServiceProvider
+AuthKeyLength
+MD5CryptoServiceProvider
+CryptoConfig
+CryptographicException
+HashAlgorithm
+HMACSHA256
+HmacSha256Length
+RSACryptoServiceProvider

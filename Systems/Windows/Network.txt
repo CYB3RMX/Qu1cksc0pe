@@ -168,3 +168,14 @@ FtpGetFileSize
 IcmpCloseHandle
 IcmpCreateFile
 IcmpSendEcho
+AddressFamily
+Client.Connection
+Client.Install
+get_TcpClient
+get_SslClient
+IPAddress
+Client.Handle_Packet
+ClientSocket
+KeepAlivePacket
+NetworkCredential
+UriHostNameType

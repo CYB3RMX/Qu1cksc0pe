@@ -29,3 +29,8 @@ DebuggerNonUserCodeAttribute
 DebuggingModes
 DebuggerHiddenAttribute
 HideFromDebugger
+DetectSandboxie
+DetectDebugger
+isDebuggerPresent
+RunAntiAnalysis
+AntivirusProduct

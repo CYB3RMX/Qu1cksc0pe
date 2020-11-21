@@ -149,3 +149,13 @@ WNetOpenEnumW
 WNetGetConnectionW
 VerQueryValueW
 CreateEnvironmentBlock
+ClientInfo
+ComputerInfo
+ComputerName
+get_CurrentDomain
+get_MachineName
+get_OSFullName
+get_OSVersion
+get_UserName
+GetPathRoot
+GetHostAddresses
