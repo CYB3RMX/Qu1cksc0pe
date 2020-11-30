@@ -95,3 +95,7 @@ m_ThreadStaticValue
 STAThreadAttribute
 ThreadStaticAttribute
 HandleProcessCorruptedStateExceptionsAttribute
+CreateSemaphore
+ReleaseSemaphore
+CreateMutexW
+TryEnterCriticalSection

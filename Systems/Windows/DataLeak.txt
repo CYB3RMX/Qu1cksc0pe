@@ -159,3 +159,8 @@ get_OSVersion
 get_UserName
 GetPathRoot
 GetHostAddresses
+GetFileVersionInfoSizeA
+GetFileVersionInfoA
+VerQueryValueA
+EnumPrintersA
+DocumentPropertiesA

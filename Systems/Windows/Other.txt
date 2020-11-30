@@ -147,3 +147,8 @@ WriteSingle
 TextWriter
 StringSplitOptions
 StringBuilder
+ChooseColorA
+ChooseFontA
+sndPlaySoundA
+OpenPrinterA
+ClosePrinter
