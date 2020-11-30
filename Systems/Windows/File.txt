@@ -166,3 +166,4 @@ DirectoryInfo
 SHBrowseForFolderA
 SearchPathW
 get_SystemDirectory
+CreateDirectoryW

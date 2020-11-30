@@ -26,3 +26,4 @@ ImmGetOpenStatus
 ImmAssociateContext
 ImmAssociateContextEx
 ImmConfigureIMEA
+GetKeyNameTextW

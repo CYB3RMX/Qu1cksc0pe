@@ -83,3 +83,6 @@ memcpy
 NdisFreeMemory
 NdisAllocateMemoryWithTagPriority
 CoTaskMemAlloc
+malloc
+realloc
+free

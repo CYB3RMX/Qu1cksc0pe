@@ -9,3 +9,4 @@ CException
 CoCreateGuid
 CoGetObject
 CoUninitialize
+CoSetProxyBlanket

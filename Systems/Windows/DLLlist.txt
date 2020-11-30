@@ -93,3 +93,10 @@ bcrypt.dll
 User32.dll
 winmm.dll
 MPR.dll
+imm32.dll
+uxtheme.dll
+vcltest3.dll
+MAPI32.DLL
+Lencan.dll
+loadperf.dll
+lady.dll
