@@ -20,6 +20,12 @@ except:
     print("Error: >colorama< module not found.")
     sys.exit(1)
 
+try:
+    import pefile as pf
+except:
+    print("Error: >pefile< module not found.")
+    sys.exit(1)
+
 # Getting name of the file for statistics
 fileName = str(sys.argv[1])
 
@@ -50,7 +56,6 @@ comarr = open("Systems/Windows/COMObject.txt", "r").read().split("\n")
 cryptarr = open("Systems/Windows/Crypto.txt", "r").read().split("\n")
 datarr = open("Systems/Windows/DataLeak.txt", "r").read().split("\n")
 otharr = open("Systems/Windows/Other.txt", "r").read().split("\n")
-dllArray = open("Systems/Windows/DLLlist.txt", "r").read().split("\n")
 
 # Category arrays
 Registry = []
@@ -114,12 +119,20 @@ regdict = {
 
 # Defining function
 def Analyzer():
-    threatScore = 0
+    # Creating tables
     allFuncs = 0
     tables = PrettyTable()
     dllTable = PrettyTable()
     resTable = PrettyTable()
     statistics = PrettyTable()
+
+    # Gathering information about sections
+    pe = pf.PE(fileName)
+    print(f"{infoS} Informations about Sections")
+    print("-"*40)
+    for sect in pe.sections:
+        print(sect.Name.decode().rstrip('\x00') + "\n|\n|---- Virtual Size: " + hex(sect.Misc_VirtualSize) + "\n|\n|---- Virtual Address: " + hex(sect.VirtualAddress) + "\n|\n|---- Size of Raw Data: " + hex(sect.SizeOfRawData) + "\n|\n|---- Pointer to Raw Data: " + hex(sect.PointerToRawData) + "\n|\n|---- Characteristics: " + hex(sect.Characteristics) + "\n")
+    print("-"*40)
 
     # categorizing extracted strings
     for key in regdict:
@@ -145,45 +158,32 @@ def Analyzer():
                 else:
                     tables.add_row([f"{red}{i}{white}"])
 
-                    # Calculating threat score
+                    # Logging for summary table
                     if key == "Registry":
-                        threatScore += 4
                         scoreDict[key] += 1
                     elif key == "File":
-                        threatScore += 4
                         scoreDict[key] += 1
                     elif key == "Networking/Web":
-                        threatScore += 6
                         scoreDict[key] += 1
                     elif key == "Keyboard/Keylogging":
-                        threatScore += 7
                         scoreDict[key] += 1
                     elif key == "Process":
-                        threatScore += 5
                         scoreDict[key] += 1
                     elif key == "Memory Management":
-                        threatScore += 5
                         scoreDict[key] += 1
                     elif key == "Dll/Resource Handling":
-                        threatScore += 6
                         scoreDict[key] += 1
                     elif key == "Evasion/Bypassing":
-                        threatScore += 9
                         scoreDict[key] += 1
                     elif key == "System/Persistence":
-                        threatScore += 9
                         scoreDict[key] += 1
                     elif key == "COMObject":
-                        threatScore += 4
                         scoreDict[key] += 1
                     elif key == "Cryptography":
-                        threatScore += 9
                         scoreDict[key] += 1
                     elif key == "Information Gathering":
-                        threatScore += 7
                         scoreDict[key] += 1
                     elif key == "Other/Unknown":
-                        threatScore += 1
                         scoreDict[key] += 1
                     else:
                         pass
@@ -191,19 +191,11 @@ def Analyzer():
             tables.clear_rows()
 
     # gathering extracted dll files
-    handleDll = []
-    dllTable.field_names = [f"Extracted {green}DLL{white} Strings"]
-    for dl in allStrings:
-        if dl in dllArray:
-            if dl != "":
-                handleDll.append(dl)
-
-    # Removing duplicates and printing
-    if handleDll != []:
-        handleDll = list(dict.fromkeys(handleDll))
-        for ne in handleDll:
-            dllTable.add_row([f"{red}{ne}{white}"])
-        print(dllTable)
+    dllTable.field_names = [f"Linked {green}DLL{white} Files"]
+    for items in pe.DIRECTORY_ENTRY_IMPORT:
+        dlStr = str(items.dll.decode())
+        dllTable.add_row([f"{red}{dlStr}{white}"])
+    print(dllTable)
 
     # Resource scanner zone
     resCounter = 0
@@ -239,22 +231,10 @@ def Analyzer():
     print(statistics)
 
     # Warning about obfuscated file
-    if allFuncs < 10:
+    if allFuncs < 20:
         print(f"\n{errorS} This file might be obfuscated or encrypted. Try {green}--packer{white} to scan this file for packers.")
         print(f"{errorS} You can also use {green}--hashscan{white} to scan this file.\n")
         sys.exit(0)
-
-    # score table
-    print(f"\n{errorS} ATTENTION: There might be false positives in threat scaling system.")
-
-    # score conditions
-    if threatScore < 30:
-        print(f"{thLevel}: {green}Clean{white}.\n")
-    elif threatScore >= 30 and threatScore <= 200:
-        print(f"{errorS} Attention: Use {green}--vtFile{white} argument to scan that file with VirusTotal. Do not trust that file.")
-        print(f"{thLevel}: {yellow}Suspicious{white}.\n")
-    else:
-        print(f"{thLevel}: {red}Potentially Malicious{white}.\n")
 
 # Execute
 Analyzer()

@@ -96,7 +96,6 @@ dictArr = {
 
 # Defining function
 def Analyzer():
-    threatScore = 0
     allFuncs = 0
     tables = PrettyTable()
     secTable = PrettyTable()
@@ -124,28 +123,20 @@ def Analyzer():
                     tables.add_row([f"{red}{i}{white}"])
                     # Threat score
                     if key == "Networking":
-                        threatScore += 10
                         scoreDict[key] += 1
                     elif key == "File":
-                        threatScore += 10
                         scoreDict[key] += 1
                     elif key == "Process":
-                        threatScore += 15
                         scoreDict[key] += 1
                     elif key == "Memory Management":
-                        threatScore += 10
                         scoreDict[key] += 1
                     elif key == "Information Gathering":
-                        threatScore += 20
                         scoreDict[key] += 1
                     elif key == "System/Persistence":
-                        threatScore += 20
                         scoreDict[key] += 1
                     elif key == "Cryptography":
-                        threatScore += 25
                         scoreDict[key] += 1
                     elif key == "Other/Unknown":
-                        threatScore += 5
                         scoreDict[key] += 1
                     else:
                         pass
@@ -213,17 +204,6 @@ def Analyzer():
     if allFuncs < 10:
         print(f"\n{errorS} This file might be obfuscated or encrypted. Try {green}--packer{white} to scan this file for packers.\n")
         sys.exit(0)
-
-    # score table
-    print(f"\n{errorS} ATTENTION: There might be false positives in threat scaling system.")
-
-    if threatScore < 100:
-        print(f"{thLevel}: {green}Clean{white}.\n")
-    elif threatScore >= 100 and threatScore <= 300:
-        print(f"{errorS} Attention: Use {green}--vtFile{white} argument to scan that file with VirusTotal. Do not trust that file.")
-        print(f"{thLevel}: {yellow}Suspicious{white}.\n")
-    else:
-        print(f"{thLevel}: {red}Potentially Malicious{white}.\n")
 
 # Execute
 try:

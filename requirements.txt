@@ -5,3 +5,4 @@ tqdm
 colorama
 oletools
 spacy
+pefile
