@@ -20,7 +20,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 # Updates
 <b>26/12/2020</b>
 - [X] Threat score calculator removed due false positives.
-- [X] ```Windows Analyzer`` module is upgraded.
+- [X] ```Windows Analyzer``` module is upgraded.
 - [x] <b>Coming soon</b>: GUI for Qu1cksc0pe!!
 
 # Note
