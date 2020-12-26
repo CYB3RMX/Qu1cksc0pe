@@ -18,8 +18,10 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>30/11/2020</b>
-- [X] Added more Functions/API's to Windows wordlists. Now Qu1cksc0pe contains over 1200+ words about Windows.
+<b>26/12/2020</b>
+- [X] Threat score calculator removed due false positives.
+- [X] ```Windows Analyzer`` module is upgraded.
+- [x] <b>Coming soon</b>: GUI for Qu1cksc0pe!!
 
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
@@ -32,6 +34,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - ```tqdm``` => <i>Progressbar animation.</i>
 - ```colorama``` => <i>Colored outputs.</i>
 - ```oletools``` => <i>Analyzing VBA Macros.</i>
+- ```pefile``` => <i>Gathering all information from PE files.</i>
 - ```spacy``` => <i>Natural Language Processing for string analysis.</i>
 
 <br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
