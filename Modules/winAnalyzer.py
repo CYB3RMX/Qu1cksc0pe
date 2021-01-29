@@ -39,7 +39,6 @@ yellow = Fore.LIGHTYELLOW_EX
 # Legends
 infoS = f"{cyan}[{red}*{cyan}]{white}"
 errorS = f"{cyan}[{red}!{cyan}]{white}"
-thLevel = f"{cyan}[{red}Threat Level{cyan}]{white}"
 
 # Keywords for categorized scanning
 allStrings = open("temp.txt", "r").read().split('\n')

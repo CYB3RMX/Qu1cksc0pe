@@ -86,3 +86,4 @@ CoTaskMemAlloc
 malloc
 realloc
 free
+CoTaskMemFree
