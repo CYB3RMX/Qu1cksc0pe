@@ -18,10 +18,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>26/12/2020</b>
-- [X] Threat score calculator removed due false positives.
-- [X] ```Windows Analyzer``` module is upgraded.
-- [x] <b>Coming soon</b>: GUI for Qu1cksc0pe!!
+<b>30/01/2021</b>
+- [X] Bug fixes.
 
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
