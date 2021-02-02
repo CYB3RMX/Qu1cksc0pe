@@ -157,16 +157,15 @@ def LangNotFound():
    choose = str(input("=> Should I install it for you [Y/n]?: "))
    if choose == 'Y' or choose == 'y':
       try:
-         os.system("python3 -m spacy download en")
+         os.system("python3 -m spacy download en_core_web_sm")
          print(f"{infoS} Language package downloaded.")
          sys.exit(0)
       except:
          sys.exit(0)
    else:
-      print(f"{errorS} Without language package this module is wont work.")
-      sys.exit(1)
+      print(f"\n{infoS} Continuing without string analysis...\n")
 
-# Checking for language package existence
+# Checking for language package existence if there is no package ask for user to install
 try:
     test = spacy.load("en")
 except:
@@ -210,7 +209,16 @@ if __name__ == '__main__':
         # Strings side
         check = str(input(f"\n{infoS} Do you want to perform string analysis? It will take a while [Y/N]: "))
         if check == "Y" or check == "y":
+            # Testing for language package existence
+            try:
+                nlpTest = spacy.load("en")
+            except:
+                print(f"{errorS} Language package not found. Quitting!!")
+                sys.exit(1)
+
+            # Beginning for string analysis
             print(f"{infoS} Analyzing interesting strings. It will take a while...\n")
+
             #Thread Number
             threadNumber = 0
 
@@ -236,5 +244,5 @@ if __name__ == '__main__':
         else:
             pass
 
-    except:
+    except KeyboardInterrupt:
         print(f"{errorS} An error occured. Press CTRL+C to exit.")
