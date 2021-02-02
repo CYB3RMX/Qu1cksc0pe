@@ -167,7 +167,7 @@ def LangNotFound():
 
 # Checking for language package existence if there is no package ask for user to install
 try:
-    test = spacy.load("en")
+    test = spacy.load("en_core_web_sm")
 except:
     LangNotFound()
 
@@ -177,7 +177,7 @@ def Detailed():
     while not q.empty():
         targetString = q.get()
         try:
-            nlp = spacy.load("en")
+            nlp = spacy.load("en_core_web_sm")
             sample = nlp(targetString)
         except:
             LangNotFound()
@@ -211,7 +211,7 @@ if __name__ == '__main__':
         if check == "Y" or check == "y":
             # Testing for language package existence
             try:
-                nlpTest = spacy.load("en")
+                nlpTest = spacy.load("en_core_web_sm")
             except:
                 print(f"{errorS} Language package not found. Quitting!!")
                 sys.exit(1)
