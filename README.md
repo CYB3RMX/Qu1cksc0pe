@@ -20,6 +20,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 # Updates
 <b>09/02/2021</b>
 - [X] Added ```Anti-VM``` and ```Anti-Debug``` code checker to ```ApkAnalyzer``` module.
+- [X] Bug fixes.
 
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
