@@ -18,8 +18,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>02/02/2021</b>
-- [X] Fixed some bugs on the ```apkAnalyzer``` module.
+<b>09/02/2021</b>
+- [X] Added ```Anti-VM``` and ```Anti-Debug``` code checker to ```ApkAnalyzer``` module.
 
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
@@ -28,6 +28,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 <b>Necessary python modules</b>: 
 - ```puremagic``` => <i>Analyzing target OS and magic numbers.</i>
 - ```androguard``` => <i>Analyzing APK files.</i>
+- ```apkid``` => <i>Check for Anti-VM and Anti-Debug codes.</i>
 - ```prettytable``` => <i>Pretty outputs.</i>
 - ```tqdm``` => <i>Progressbar animation.</i>
 - ```colorama``` => <i>Colored outputs.</i>

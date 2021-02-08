@@ -1,5 +1,6 @@
 puremagic
 androguard
+apkid
 prettytable
 tqdm
 colorama
