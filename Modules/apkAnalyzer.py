@@ -51,6 +51,10 @@ normal = 0
 # Gathering all strings from file
 allStrings = open("temp.txt", "r").read().split('\n')
 
+# Gathering apkid tools output
+apkid_output = open("apkid.json", "r")
+data = json.load(apkid_output)
+
 # Lets get all suspicious strings
 susStrings = open("Systems/Android/suspicious.txt", "r").read().split('\n')
 
@@ -60,6 +64,38 @@ warnings.filterwarnings("ignore")
 # Queue
 global q
 q = queue.Queue()
+
+# Function for parsing apkid tool's output
+def ApkidParser(apkid_output):
+    # Fetching and parsing anti virtualization
+    for index in range(0, 2):
+        if "anti_vm" in data["files"][index]["matches"].keys():
+            antivm = PrettyTable()
+            antivm.field_names = [f"{green}Anti Virtualization Codes{white}"]
+            if data["files"][index]["matches"]["anti_vm"] != []:
+                for avm in data["files"][index]["matches"]["anti_vm"]:
+                    antivm.add_row([avm])
+                print(antivm)
+            else:
+                pass
+            break
+        else:
+            pass
+    
+    # Fetching and parsing anti debug codes
+    for index in range(0, 2):
+        if "anti_debug" in data["files"][index]["matches"].keys():
+            antidbg = PrettyTable()
+            antidbg.field_names = [f"{green}Anti Debug Codes{white}"]
+            if data["files"][index]["matches"]["anti_debug"] != []:
+                for adb in data["files"][index]["matches"]["anti_debug"]:
+                    antidbg.add_row([adb])
+                print(antidbg)
+            else:
+                pass
+            break
+        else:
+            pass
 
 # Permission analyzer
 def Analyzer(parsed):
@@ -186,7 +222,7 @@ def Detailed():
         for apkstr in allStrings:
             # Parsing and calculating
             testme = nlp(apkstr)
-            if testme.similarity(sample) > 0.75:
+            if testme.similarity(sample) > 0.8:
                 for token in testme:
                     if token.pos_ == "PUNCT":
                         pass
@@ -196,6 +232,10 @@ def Detailed():
 # Execution
 if __name__ == '__main__':
     try:
+        # Fetching compiler information
+        compiler = data["files"][0]["matches"]["compiler"][0]
+        print(f"{infoS} Compiler Information: {green}{compiler}{white}\n")
+
         # Getting and parsing target APK
         targetAPK = str(sys.argv[1])
         parsed = APK(targetAPK)
@@ -205,6 +245,9 @@ if __name__ == '__main__':
 
         # Deep scanner
         DeepScan(parsed)
+
+        # APKID scanner
+        ApkidParser(apkid_output)
 
         # Strings side
         check = str(input(f"\n{infoS} Do you want to perform string analysis? It will take a while [Y/N]: "))
@@ -242,7 +285,7 @@ if __name__ == '__main__':
             for t in ts:
                 t.join()
         else:
-            pass
-
+            print(f"{infoS} Goodbye..")
+            sys.exit(0)
     except KeyboardInterrupt:
         print(f"{errorS} An error occured. Press CTRL+C to exit.")

@@ -23,6 +23,13 @@ except:
     print("Error: >colorama< module not found.")
     sys.exit(1)
 
+# Testing apkid existence
+try:
+    import apkid
+except:
+    print("Error: >apkid< module not found.")
+    sys.exit(1)
+
 # Colors
 red = Fore.LIGHTRED_EX
 cyan = Fore.LIGHTCYAN_EX
@@ -98,9 +105,13 @@ def BasicAnalyzer(analyzeFile):
         os.system(command)
     # Android Analysis
     elif "PK" in fileType and "Java archive" in fileType:
-        print(f"{infoS} Target OS: {green}Android{white}\n")
+        print(f"{infoS} Target OS: {green}Android{white}")
+        command = f"apkid -j {args.file} > apkid.json"
+        os.system(command)
         command = f"python3 Modules/apkAnalyzer.py {analyzeFile}"
         os.system(command)
+        if os.path.exists("apkid.json"):
+            os.remove("apkid.json")
     else:
         print(f"{errorS} File type not supported. Make sure you are analyze executable files or document files.")
         print(f"{errorS} If you want to scan document files try {green}--docs{white} argument.")
