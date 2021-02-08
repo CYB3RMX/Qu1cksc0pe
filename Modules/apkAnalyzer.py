@@ -68,34 +68,40 @@ q = queue.Queue()
 # Function for parsing apkid tool's output
 def ApkidParser(apkid_output):
     # Fetching and parsing anti virtualization
-    for index in range(0, 2):
-        if "anti_vm" in data["files"][index]["matches"].keys():
-            antivm = PrettyTable()
-            antivm.field_names = [f"{green}Anti Virtualization Codes{white}"]
-            if data["files"][index]["matches"]["anti_vm"] != []:
-                for avm in data["files"][index]["matches"]["anti_vm"]:
-                    antivm.add_row([avm])
-                print(antivm)
+    try:
+        for index in range(0, 2):
+            if "anti_vm" in data["files"][index]["matches"].keys():
+                antivm = PrettyTable()
+                antivm.field_names = [f"{green}Anti Virtualization Codes{white}"]
+                if data["files"][index]["matches"]["anti_vm"] != []:
+                    for avm in data["files"][index]["matches"]["anti_vm"]:
+                        antivm.add_row([avm])
+                    print(antivm)
+                else:
+                    pass
+                break
             else:
                 pass
-            break
-        else:
-            pass
+    except:
+        pass
     
     # Fetching and parsing anti debug codes
-    for index in range(0, 2):
-        if "anti_debug" in data["files"][index]["matches"].keys():
-            antidbg = PrettyTable()
-            antidbg.field_names = [f"{green}Anti Debug Codes{white}"]
-            if data["files"][index]["matches"]["anti_debug"] != []:
-                for adb in data["files"][index]["matches"]["anti_debug"]:
-                    antidbg.add_row([adb])
-                print(antidbg)
+    try:
+        for index in range(0, 2):
+            if "anti_debug" in data["files"][index]["matches"].keys():
+                antidbg = PrettyTable()
+                antidbg.field_names = [f"{green}Anti Debug Codes{white}"]
+                if data["files"][index]["matches"]["anti_debug"] != []:
+                    for adb in data["files"][index]["matches"]["anti_debug"]:
+                        antidbg.add_row([adb])
+                    print(antidbg)
+                else:
+                    pass
+                break
             else:
                 pass
-            break
-        else:
-            pass
+    except:
+        pass
 
 # Permission analyzer
 def Analyzer(parsed):
