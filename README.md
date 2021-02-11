@@ -8,6 +8,7 @@
 - URL's, IP addresses and emails.
 - Android permissions.
 - File extensions and their names.
+<b>And so on...</b><br>
 
 Qu1cksc0pe aims to get even more information about suspicious files and helps to user realizing what that file capable of.
 
@@ -18,9 +19,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>09/02/2021</b>
-- [X] Added ```Anti-VM``` and ```Anti-Debug``` code checker to ```ApkAnalyzer``` module.
-- [X] Bug fixes.
+<b>12/02/2021</b>
+- [X] Added ```Language Detection``` module. Now Qu1cksc0pe can detect which programming language used on target binaries.
 
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.

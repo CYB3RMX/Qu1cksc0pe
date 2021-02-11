@@ -69,6 +69,9 @@ parser.add_argument("--vtFile", required=False,
 parser.add_argument("--vtUrl", required=False,
                     help="Scan your URL with VirusTotal API.",
                     action="store_true")
+parser.add_argument("--lang", required=False,
+                    help="Detect programming language.",
+                    action="store_true")
 parser.add_argument("--metadata", required=False,
                     help="Get exif/metadata information.",
                     action="store_true")
@@ -193,6 +196,16 @@ def Qu1cksc0pe():
         # Handling --folder argument
         if args.folder is not None:
             print(f"{errorS} That argument has not supported for folder scanning.")
+            sys.exit(1)
+    # Language detection
+    if args.lang:
+        # Handling --file argument
+        if args.file is not None:
+            command = "python3 Modules/languageDetect.py"
+            os.system(command)
+        # Handling --folder argument
+        if args.folder is not None:
+            print(f"{errorS} {green}--analyze{white} argument is not supported for folder analyzing.")
             sys.exit(1)
     # VT File scanner
     if args.vtFile:

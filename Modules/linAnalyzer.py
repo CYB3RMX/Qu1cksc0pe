@@ -32,7 +32,6 @@ yellow = Fore.LIGHTYELLOW_EX
 
 # Legends
 errorS = f"{cyan}[{red}!{cyan}]{white}"
-thLevel = f"{cyan}[{red}Threat Level{cyan}]{white}"
 
 # Wordlists
 allStrings = open("temp.txt", "r").read().split("\n")
