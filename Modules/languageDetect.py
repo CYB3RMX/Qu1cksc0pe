@@ -24,10 +24,11 @@ foundS = f"{cyan}[{red}+{cyan}]{white}"
 allStrings = open("temp.txt", "r").read().split("\n")
 
 # Strings for identifying programming language
-detector = {"Golang": ["GODEBUG", "runtime.goexit"],
+detector = {"Golang": ["GODEBUG", "runtime.goexit", "runtime.gopanic"],
             "Nim": ["echoBinSafe", "nimFrame", "stdlib_system.nim.c", "nimToCStringConv"],
+            "C#": ["#GUID", "</requestedPrivileges>", "<security>", "mscoree.dll", "System.Runtime", "</assembly>", ".NET4.0E", "_CorExeMain"],
             "C++": ["std::", "libstdc++.so.6"],
-            "C": ["__libc_start_main", "GLIBC_2.2.5"]
+            "C": ["__libc_start_main", "GLIBC_2.2.5", "libc.so.6"]
 }
 
 def LanguageDetect():
