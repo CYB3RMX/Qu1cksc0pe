@@ -21,7 +21,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 # Updates
 <b>12/02/2021</b>
 - [X] Added ```Language Detection``` module. Now Qu1cksc0pe can detect which programming language used on target binaries.
-- <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --lang```
+- <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_executable --lang```
 
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
@@ -72,7 +72,10 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![animation](.animations/total.gif)
 
 ## Domain
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --domain```<br><br>
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --domain```<br>
+
+## Programming language
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_executable --lang```<br><br>
 
 # Informations about categories
 ## Registry
