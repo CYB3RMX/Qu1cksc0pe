@@ -26,6 +26,7 @@ allStrings = open("temp.txt", "r").read().split("\n")
 # Strings for identifying programming language
 detector = {"Golang": ["GODEBUG", "runtime.goexit", "runtime.gopanic"],
             "Nim": ["echoBinSafe", "nimFrame", "stdlib_system.nim.c", "nimToCStringConv"],
+            "Python": ["_PYI_PROCNAME", "Py_BuildValue", "Py_Initialize", "__main__", "pydata", "libpython3.9.so.1.0", "py_compile"],
             "C#": ["#GUID", "</requestedPrivileges>", "<security>", "mscoree.dll", "System.Runtime", "</assembly>", ".NET4.0E", "_CorExeMain"],
             "C++": ["std::", "libstdc++.so.6"],
             "C": ["__libc_start_main", "GLIBC_2.2.5", "libc.so.6"]
