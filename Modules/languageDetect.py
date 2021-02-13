@@ -55,6 +55,7 @@ def LanguageDetect():
                 sys.exit(0)
     if indicator == 0:
         print(f"{errorS} Programming language couldn\'t detected :(\n")
+        sys.exit(1)
 
 # Execution
 indmag = 0
@@ -62,7 +63,7 @@ try:
     magicNums = list(pr.magic_file(fileName))
     for mag in range(0, len(magicNums)):
         if magicNums[mag].confidence >= 0.4:
-            if "executable" in str(magicNums[mag].name):
+            if "executable" in str(magicNums[mag].name) or "Executable" in str(magicNums[mag].name):
                 indmag += 1
                 LanguageDetect()
             else:

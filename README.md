@@ -21,6 +21,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 # Updates
 <b>14/02/2021</b>
 - [X] ```Language Detection``` module upgraded.
+- [X] Bug fixes.
 
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
