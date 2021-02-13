@@ -32,6 +32,12 @@ except:
     print("Error: >spacy< module not found.")
     sys.exit(1)
 
+try:
+    import apkid
+except:
+    print("Error: >apkid< module not found.")
+    sys.exit(1)
+
 # Colors
 red = Fore.LIGHTRED_EX
 cyan = Fore.LIGHTCYAN_EX

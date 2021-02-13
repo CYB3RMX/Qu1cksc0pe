@@ -23,13 +23,6 @@ except:
     print("Error: >colorama< module not found.")
     sys.exit(1)
 
-# Testing apkid existence
-try:
-    import apkid
-except:
-    print("Error: >apkid< module not found.")
-    sys.exit(1)
-
 # Colors
 red = Fore.LIGHTRED_EX
 cyan = Fore.LIGHTCYAN_EX
@@ -201,7 +194,7 @@ def Qu1cksc0pe():
     if args.lang:
         # Handling --file argument
         if args.file is not None:
-            command = "python3 Modules/languageDetect.py"
+            command = f"python3 Modules/languageDetect.py {args.file}"
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
