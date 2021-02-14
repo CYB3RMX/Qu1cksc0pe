@@ -71,11 +71,12 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 <b>Usage for --vtUrl</b>: ```python3 qu1cksc0pe.py --vtUrl```<br>
 ![animation](.animations/total.gif)
 
-## Domain
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --domain```<br>
+## Programming language detection
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_executable --lang```<br>
+![animation](.animations/langDet.gif)
 
-## Programming language
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_executable --lang```<br><br>
+## Domain
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --domain```<br><br>
 
 # Informations about categories
 ## Registry
