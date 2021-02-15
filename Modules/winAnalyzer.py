@@ -190,11 +190,14 @@ def Analyzer():
             tables.clear_rows()
 
     # gathering extracted dll files
-    dllTable.field_names = [f"Linked {green}DLL{white} Files"]
-    for items in pe.DIRECTORY_ENTRY_IMPORT:
-        dlStr = str(items.dll.decode())
-        dllTable.add_row([f"{red}{dlStr}{white}"])
-    print(dllTable)
+    try:
+        dllTable.field_names = [f"Linked {green}DLL{white} Files"]
+        for items in pe.DIRECTORY_ENTRY_IMPORT:
+            dlStr = str(items.dll.decode())
+            dllTable.add_row([f"{red}{dlStr}{white}"])
+        print(dllTable)
+    except:
+        pass
 
     # Resource scanner zone
     resCounter = 0
