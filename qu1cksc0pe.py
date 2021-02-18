@@ -59,9 +59,6 @@ parser.add_argument("--multihash", required=False, nargs='+',
 parser.add_argument("--vtFile", required=False,
                     help="Scan your file with VirusTotal API.",
                     action="store_true")
-parser.add_argument("--vtUrl", required=False,
-                    help="Scan your URL with VirusTotal API.",
-                    action="store_true")
 parser.add_argument("--lang", required=False,
                     help="Detect programming language.",
                     action="store_true")
@@ -216,28 +213,12 @@ def Qu1cksc0pe():
                 print(f"{errorS} Please get your API key from -> {green}https://www.virustotal.com/{white}")
                 sys.exit(1)
             else:
-                command = f"python3 Modules/VTwrapper.py {apik[0]} --vtFile {args.file}"
+                command = f"python3 Modules/VTwrapper.py {apik[0]} {args.file}"
                 os.system(command)
         # Handling --folder argument
         if args.folder is not None:
             print(f"{errorS} If you want to get banned from VirusTotal then do that :).")
             sys.exit(1)
-    # VT URL scanner
-    if args.vtUrl:
-        # if there is no key quit
-        try:
-            directory = "Modules/.apikey.txt"
-            apik = open(directory, "r").read().split("\n")
-        except:
-            print(f"{errorS} Use --key_init to enter your key.")
-            sys.exit(1)
-        # if key is not valid quit
-        if apik[0] == '' or apik[0] is None or len(apik[0]) != 64:
-            print(f"{errorS} Please get your API key from -> {green}https://www.virustotal.com/{white}")
-            sys.exit(1)
-        else:
-            command = f"python3 Modules/VTwrapper.py {apik[0]} --vtUrl"
-            os.system(command)
     # packer detection
     if args.packer:
         # Handling --file argument

@@ -53,7 +53,7 @@ def LangNotFound():
 
 # Checking for language package existence
 try:
-   test = spacy.load("en")
+   test = spacy.load("en_core_web_sm")
 except:
    LangNotFound()
 
@@ -64,7 +64,7 @@ def URLAnalyzer():
 
    # Parsing string
    try:
-      nlp = spacy.load("en")
+      nlp = spacy.load("en_core_web_sm")
       url = nlp(ourUrl)
    except:
       LangNotFound()
@@ -96,7 +96,7 @@ def IPAddrAnalyzer():
 
    # Lets scan!!
    ip_indicator = 0
-   nlp = spacy.load("en")
+   nlp = spacy.load("en_core_web_sm")
    for ipaddr in allStrings:
       # Parsing target string's shapes
       targstr = nlp(ipaddr)
@@ -119,7 +119,7 @@ def EmailCatcher():
 
    # Parsing string
    try:
-      nlp = spacy.load("en")
+      nlp = spacy.load("en_core_web_sm")
       my_mail = nlp(exEmail)
    except:
       LangNotFound()

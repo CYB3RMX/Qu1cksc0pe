@@ -19,8 +19,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>15/02/2021</b>
-- [X] ```Language Detection``` module upgraded.
+<b>18/02/2021</b>
+- [X] ```VirusTotal``` module upgraded. Now it can scan files more faster!!
 - [X] Bug fixes.
 
 # Note
