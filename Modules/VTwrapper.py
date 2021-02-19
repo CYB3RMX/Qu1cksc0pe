@@ -25,6 +25,7 @@ green = Fore.LIGHTGREEN_EX
 red = Fore.LIGHTRED_EX
 white = Style.RESET_ALL
 cyan = Fore.LIGHTCYAN_EX
+magenta = Fore.LIGHTMAGENTA_EX
 
 # Legends
 errorS = f"{cyan}[{red}!{cyan}]{white}"
@@ -77,10 +78,19 @@ def CurlComm(targetFile):
 # Function for parsing report.txt
 def ReportParser():
     if os.path.exists("report.txt"):
-        print(f"{infoS} Parsing the scan report...")
+        print(f"{infoS} Parsing the scan report...\n")
         data = open("report.txt", "r")
         parser = json.loads(data.read())
         os.remove("report.txt") # Clear everything !!
+
+        # Threat Categories
+        threatTable = PrettyTable()
+        threatTable.field_names = [f"{green}Threat Categories{white}"]
+        if "data" in parser.keys():
+            if "popular_threat_classification" in parser["data"]["attributes"].keys():
+                for th in range(0, len(parser["data"]["attributes"]["popular_threat_classification"]["popular_threat_category"])):
+                    threatTable.add_row([f'{red}{parser["data"]["attributes"]["popular_threat_classification"]["popular_threat_category"][th][0]}{white}'])
+                print(threatTable)
         
         # Detections
         detect = 0
@@ -97,6 +107,52 @@ def ReportParser():
                 sys.exit(0)
         print(f"\n{infoS} Detection: {red}{detect}{white}/{red}{len(avArray)}{white}")
         print(antiTable)
+
+        # Behavior analysis
+        if "data" in parser.keys():
+            if "crowdsourced_ids_results" in parser["data"]["attributes"].keys():
+                print(f"\n{infoS} CrowdSourced IDS Reports")
+                print("+","-"*60,"+")
+                try:
+                    for crowd in range(0, len(parser["data"]["attributes"]["crowdsourced_ids_results"])):
+                        if "alert_context" in parser["data"]["attributes"]["crowdsourced_ids_results"][crowd].keys():
+                            print(f"{magenta}=> {white}Alert: {green}{crowd+1}{white}")
+                            for alrt in range(0, len(parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["alert_context"])):
+                                for repo in parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["alert_context"][alrt]:
+                                    if repo == "ja3":
+                                        pass
+                                    else:
+                                        sanitized = f"{repo}".replace("_", " ").upper()
+                                        print(f'{magenta}-----> {white}{sanitized}: {parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["alert_context"][alrt][repo]}')
+                            if parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["alert_severity"] == "high":
+                                print(f'{magenta}---> {white}Alert Severity: {red}{parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["alert_severity"]}')
+                            elif parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["alert_severity"] == "medium":
+                                print(f'{magenta}---> {white}Alert Severity: {yellow}{parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["alert_severity"]}')
+                            else:
+                                print(f'{magenta}---> {white}Alert Severity: {cyan}{parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["alert_severity"]}')
+                            print(f'{magenta}---> {white}Rule Category: {parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["rule_category"]}')
+                            print(f'{magenta}---> {white}Rule Message: {parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["rule_msg"]}')
+                            print(f'{magenta}---> {white}Rule Source: {parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["rule_source"]}')
+                            print(f'{magenta}---> {white}Rule URL: {parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["rule_url"]}\n')
+                except:
+                    pass
+                if "crowdsourced_ids_stats" in parser["data"]["attributes"].keys():
+                    print(f"\n{infoS} Alert Summary: {green}{targetFile}{white}")
+                    crowdTable = PrettyTable()
+                    crowdTable.field_names = [f"{green}Alert Level{white}", f"{green}Number of Alerts{white}"]
+                    for alrtlvl in parser["data"]["attributes"]["crowdsourced_ids_stats"]:
+                        sant = f"{alrtlvl}".upper()
+                        if alrtlvl == "high":
+                            crowdTable.add_row([f"{red}{sant}{white}", f'{parser["data"]["attributes"]["crowdsourced_ids_stats"][alrtlvl]}'])
+                        elif alrtlvl == "medium":
+                            crowdTable.add_row([f"{yellow}{sant}{white}", f'{parser["data"]["attributes"]["crowdsourced_ids_stats"][alrtlvl]}'])
+                        elif alrtlvl == "low":
+                            crowdTable.add_row([f"{cyan}{sant}{white}", f'{parser["data"]["attributes"]["crowdsourced_ids_stats"][alrtlvl]}'])
+                        else:
+                            crowdTable.add_row([f"{white}{sant}", f'{parser["data"]["attributes"]["crowdsourced_ids_stats"][alrtlvl]}'])
+                    print(f"{crowdTable}\n")
+            else:
+                print(f"\n{errorS} There is no IDS reports for target file.\n")
 
 # Execution area
 CurlComm(targetFile)
