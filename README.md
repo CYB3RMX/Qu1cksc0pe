@@ -19,9 +19,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>18/02/2021</b>
-- [X] ```VirusTotal``` module upgraded. Now it can scan files more faster!!
-- [X] Bug fixes.
+<b>19/02/2021</b>
+- [X] ```VirusTotal``` module upgraded.
 
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
@@ -67,8 +66,12 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![animation](.animations/hashscan.gif)
 
 ## VirusTotal
+<b>Report Contents</b>:
+- ```Threat Categories```
+- ```Detections```
+- ```CrowdSourced IDS Reports```
+
 <b>Usage for --vtFile</b>: ```python3 qu1cksc0pe.py --file suspicious_file --vtFile```<br>
-<b>Usage for --vtUrl</b>: ```python3 qu1cksc0pe.py --vtUrl```<br>
 ![animation](.animations/total.gif)
 
 ## Programming language detection
