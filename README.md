@@ -19,8 +19,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>19/02/2021</b>
-- [X] ```VirusTotal``` module upgraded.
+<b>21/02/2021</b>
+- [X] ```ApkAnalyzer``` module upgraded.
 
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
@@ -36,6 +36,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - ```oletools``` => <i>Analyzing VBA Macros.</i>
 - ```pefile``` => <i>Gathering all information from PE files.</i>
 - ```spacy``` => <i>Natural Language Processing for string analysis.</i>
+- ```quark-engine``` => <i>Extracting IP addresses and URLs from APK files.</i>
 
 <br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
 <b>Gathering other dependencies</b>:

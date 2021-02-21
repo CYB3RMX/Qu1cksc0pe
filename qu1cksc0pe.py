@@ -84,6 +84,7 @@ def BasicAnalyzer(analyzeFile):
         print(f"{infoS} Target OS: {green}Windows{white}\n")
         command = f"python3 Modules/winAnalyzer.py {analyzeFile}"
         os.system(command)
+
     # Linux Analysis
     elif "ELF" in fileType:
         print(f"{infoS} Target OS: {green}Linux{white}\n")
@@ -91,11 +92,13 @@ def BasicAnalyzer(analyzeFile):
         os.system(command)
         command = f"python3 Modules/linAnalyzer.py {analyzeFile}"
         os.system(command)
+
     # MacOSX Analysis
     elif "Mach-O" in fileType:
         print(f"{infoS} Target OS: {green}OSX{white}\n")
         command = f"python3 Modules/osXAnalyzer.py {analyzeFile}"
         os.system(command)
+
     # Android Analysis
     elif "PK" in fileType and "Java archive" in fileType:
         print(f"{infoS} Target OS: {green}Android{white}")
@@ -112,10 +115,15 @@ def BasicAnalyzer(analyzeFile):
 
 # Main function
 def Qu1cksc0pe():
-    # Getting all strings from the file
+    # Getting all strings from the file if the target file exists.
     if args.file:
-        command = f"strings --all {args.file} > temp.txt"
-        os.system(command)
+        if os.path.exists(args.file):
+            command = f"strings --all {args.file} > temp.txt"
+            os.system(command)
+        else:
+            print(f"{errorS} Target file not found.\n")
+            sys.exit(1)
+
     # Analyze the target file
     if args.analyze:
         # Handling --file argument
@@ -125,6 +133,7 @@ def Qu1cksc0pe():
         if args.folder is not None:
             print(f"{errorS} {green}--analyze{white} argument is not supported for folder analyzing.")
             sys.exit(1)
+
     # Analyze document files
     if args.docs:
         # Handling --file argument
@@ -136,6 +145,7 @@ def Qu1cksc0pe():
         if args.folder is not None:
             print(f"{errorS} {green}--analyze{white} argument is not supported for folder analyzing.")
             sys.exit(1)
+
     # Multiple file analysis
     if args.multiple:
         try:
@@ -151,6 +161,7 @@ def Qu1cksc0pe():
         except:
             print(f"{errorS} An error occured while parsing the files.")
             sys.exit(1)
+
     # Hash Scanning
     if args.hashscan:
         # Handling --file argument
@@ -161,6 +172,7 @@ def Qu1cksc0pe():
         if args.folder is not None:
             command = f"python3 Modules/hashScanner.py {args.folder} --multiscan"
             os.system(command)
+
     # Multi hash scanning
     if args.multihash:
         try:
@@ -174,6 +186,7 @@ def Qu1cksc0pe():
         except:
             print(f"{errorS} An error occured while parsing the files.")
             sys.exit(1)
+
     # metadata
     if args.metadata:
         # Handling --file argument
@@ -187,6 +200,7 @@ def Qu1cksc0pe():
         if args.folder is not None:
             print(f"{errorS} That argument has not supported for folder scanning.")
             sys.exit(1)
+
     # Language detection
     if args.lang:
         # Handling --file argument
@@ -197,6 +211,7 @@ def Qu1cksc0pe():
         if args.folder is not None:
             print(f"{errorS} {green}--analyze{white} argument is not supported for folder analyzing.")
             sys.exit(1)
+
     # VT File scanner
     if args.vtFile:
         # Handling --file argument
@@ -219,6 +234,7 @@ def Qu1cksc0pe():
         if args.folder is not None:
             print(f"{errorS} If you want to get banned from VirusTotal then do that :).")
             sys.exit(1)
+
     # packer detection
     if args.packer:
         # Handling --file argument
@@ -229,6 +245,7 @@ def Qu1cksc0pe():
         if args.folder is not None:
             command = f"python3 Modules/packerAnalyzer.py {args.folder} --multiscan"
             os.system(command)
+
     # domain extraction
     if args.domain:
         # Handling --file argument
@@ -239,6 +256,7 @@ def Qu1cksc0pe():
         if args.folder is not None:
             print(f"{errorS} That argument has not supported for folder scanning.")
             sys.exit(1)
+
     # entering VT API key
     if args.key_init:
         try:
@@ -248,6 +266,7 @@ def Qu1cksc0pe():
             print(f"{foundS} Your VirusTotal API key saved.")
         except KeyboardInterrupt:
             print(f"{errorS} Program terminated by user.")
+
 # Exectuion area
 try:
     Qu1cksc0pe()

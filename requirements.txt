@@ -7,3 +7,4 @@ colorama
 oletools
 spacy
 pefile
+quark-engine
