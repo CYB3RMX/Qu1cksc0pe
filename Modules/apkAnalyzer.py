@@ -38,6 +38,12 @@ except:
     print("Error: >apkid< module not found.")
     sys.exit(1)
 
+try:
+    from quark.forensic import Forensic
+except:
+    print("Error: >quark-engine< module not found.")
+    sys.exit(1)
+
 # Colors
 red = Fore.LIGHTRED_EX
 cyan = Fore.LIGHTCYAN_EX
@@ -108,6 +114,27 @@ def ApkidParser(apkid_output):
                 pass
     except:
         pass
+# Scan files with quark-engine
+def Quarked(targetAPK):
+    print(f"\n{infoS} Extracting IP addresses and URLs. Please wait...")
+    # Parsing phase
+    forensic = Forensic(targetAPK)
+
+    # Extract ip addresses from file
+    ipTables = PrettyTable()
+    ipTables.field_names = [f"{green}Extracted IP Addresses{white}"]
+    if len(forensic.get_ip()) != 0:
+        for ips in forensic.get_ip():
+            ipTables.add_row([ips])
+        print(ipTables)
+    
+    # Extract domains from file
+    domainTable = PrettyTable()
+    domainTable.field_names = [f"{green}Extracted URL\'s{white}"]
+    if len(forensic.get_url()) != 0:
+        for urls in forensic.get_url():
+            domainTable.add_row([urls])
+        print(domainTable)
 
 # Permission analyzer
 def Analyzer(parsed):
@@ -260,6 +287,9 @@ if __name__ == '__main__':
 
         # APKID scanner
         ApkidParser(apkid_output)
+
+        # Quark scanner
+        Quarked(targetAPK)
 
         # Strings side
         check = str(input(f"\n{infoS} Do you want to perform string analysis? It will take a while [Y/N]: "))
