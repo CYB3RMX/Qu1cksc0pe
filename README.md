@@ -76,6 +76,10 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 <b>Usage for --vtFile</b>: ```python3 qu1cksc0pe.py --file suspicious_file --vtFile```<br>
 ![animation](.animations/total.gif)
 
+## Document scan
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_document --docs```<br>
+![animation](.animations/docs.gif)
+
 ## Programming language detection
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_executable --lang```<br>
 ![animation](.animations/langDet.gif)

@@ -139,10 +139,10 @@ def MagicParser(targetFile):
         print(resTable)
 
 # Execution area
-#try:
-BasicInfoGa(targetFile)
-print(f"\n{infoS} Performing magic number analysis...")
-MagicParser(targetFile)
-#except:
-    #print(f"{errorS} An error occured while analyzing that file.")
-    #sys.exit(1)
+try:
+    BasicInfoGa(targetFile)
+    print(f"\n{infoS} Performing magic number analysis...")
+    MagicParser(targetFile)
+except:
+    print(f"{errorS} An error occured while analyzing that file.")
+    sys.exit(1)
