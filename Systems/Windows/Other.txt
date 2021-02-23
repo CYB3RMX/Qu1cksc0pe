@@ -152,3 +152,14 @@ ChooseFontA
 sndPlaySoundA
 OpenPrinterA
 ClosePrinter
+get_btn_CustomerRegistration
+set_btn_CustomerRegistration
+btn_CustomerRegistration
+ButtonBase
+BusinessCollectionBase
+ConsoleApplicationBase
+DictionaryBase
+System.Drawing.Bitmap
+System.Windows.Forms.Form
+System.Windows.Forms
+VideoGame_System

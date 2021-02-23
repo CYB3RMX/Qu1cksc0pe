@@ -32,3 +32,4 @@ ResourceManager
 ResolveEventArgs
 LoadTypeLibEx
 QueryPathOfRegTypeLib
+RemoteRpcDll

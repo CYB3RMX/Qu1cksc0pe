@@ -179,3 +179,8 @@ ClientSocket
 KeepAlivePacket
 NetworkCredential
 UriHostNameType
+4System.Web.Services.Protocols.SoapHttpClientProtocol
+System.Data.SqlClient
+SqlConnection
+get_WebServices
+UseStrictIPv6AddressParsing
