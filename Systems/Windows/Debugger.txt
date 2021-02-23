@@ -34,3 +34,4 @@ DetectDebugger
 isDebuggerPresent
 RunAntiAnalysis
 AntivirusProduct
+DebuggerBrowsableState

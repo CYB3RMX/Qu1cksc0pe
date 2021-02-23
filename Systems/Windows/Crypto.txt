@@ -56,3 +56,4 @@ HashAlgorithm
 HMACSHA256
 HmacSha256Length
 RSACryptoServiceProvider
+SchUseStrongCrypto

@@ -19,8 +19,9 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>21/02/2021</b>
-- [X] ```ApkAnalyzer``` module upgraded.
+<b>23/02/2021</b>
+- [X] ```Document Analyzer``` module upgraded.
+- [X] Added more Windows API's/Functions to Windows wordlists.
 
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
