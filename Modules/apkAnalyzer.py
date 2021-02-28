@@ -114,6 +114,25 @@ def ApkidParser(apkid_output):
                 pass
     except:
         pass
+
+    # Fetching and parsing obfuscators
+    try:
+        for index in range(0, 2):
+            if "obfuscator" in data["files"][index]["matches"].keys():
+                obfusTable = PrettyTable()
+                obfusTable.field_names = [f"{green}Obfuscation{white}"]
+                if data["files"][index]["matches"]["obfuscator"] != []:
+                    for obf in data["files"][index]["matches"]["obfuscator"]:
+                        obfusTable.add_row([obf])
+                    print(obfusTable)
+                else:
+                    pass
+                break
+            else:
+                pass
+    except:
+        pass
+
 # Scan files with quark-engine
 def Quarked(targetAPK):
     print(f"\n{infoS} Extracting IP addresses and URLs. Please wait...")
