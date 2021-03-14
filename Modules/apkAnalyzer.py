@@ -44,6 +44,12 @@ except:
     print("Error: >quark-engine< module not found.")
     sys.exit(1)
 
+try:
+    import pyaxmlparser
+except:
+    print("Error: >pyaxmlparser< module not found.")
+    sys.exit(1)
+
 # Colors
 red = Fore.LIGHTRED_EX
 cyan = Fore.LIGHTCYAN_EX
@@ -79,63 +85,49 @@ q = queue.Queue()
 
 # Function for parsing apkid tool's output
 def ApkidParser(apkid_output):
-    # Fetching and parsing anti virtualization
-    try:
-        for index in range(0, 2):
-            if "anti_vm" in data["files"][index]["matches"].keys():
-                antivm = PrettyTable()
-                antivm.field_names = [f"{green}Anti Virtualization Codes{white}"]
-                if data["files"][index]["matches"]["anti_vm"] != []:
-                    for avm in data["files"][index]["matches"]["anti_vm"]:
-                        antivm.add_row([avm])
-                    print(antivm)
-                else:
-                    pass
-                break
-            else:
-                pass
-    except:
-        pass
-    
-    # Fetching and parsing anti debug codes
-    try:
-        for index in range(0, 2):
-            if "anti_debug" in data["files"][index]["matches"].keys():
-                antidbg = PrettyTable()
-                antidbg.field_names = [f"{green}Anti Debug Codes{white}"]
-                if data["files"][index]["matches"]["anti_debug"] != []:
-                    for adb in data["files"][index]["matches"]["anti_debug"]:
-                        antidbg.add_row([adb])
-                    print(antidbg)
-                else:
-                    pass
-                break
-            else:
-                pass
-    except:
-        pass
+    print(f"\n{infoS} Performing APKID analysis...")
+    for index in range(0, len(data["files"])):
+        print(f"{red}====>{white} File Name: {green}{data['files'][index]['filename']}{white}")
 
-    # Fetching and parsing obfuscators
-    try:
-        for index in range(0, 2):
-            if "obfuscator" in data["files"][index]["matches"].keys():
-                obfusTable = PrettyTable()
-                obfusTable.field_names = [f"{green}Obfuscation{white}"]
-                if data["files"][index]["matches"]["obfuscator"] != []:
-                    for obf in data["files"][index]["matches"]["obfuscator"]:
-                        obfusTable.add_row([obf])
-                    print(obfusTable)
-                else:
-                    pass
-                break
-            else:
-                pass
-    except:
-        pass
+        # Fetching compiler information
+        compiler = data["files"][index]["matches"]["compiler"][0]
+        print(f"{red}==>{white} Compiler Information: {green}{compiler}{white}\n")
+
+        # Fetching and parsing anti virtualization
+        if "anti_vm" in data["files"][index]["matches"].keys():
+            print(f"{green}--->{magenta} Anti Virtualization Codes{white}")
+            if data["files"][index]["matches"]["anti_vm"] != []:
+                for avm in data["files"][index]["matches"]["anti_vm"]:
+                    print(f">> {avm}")
+                print(" ")
+        
+        # Fetching and parsing anti debug codes
+        if "anti_debug" in data["files"][index]["matches"].keys():
+            print(f"{green}--->{magenta} Anti Debug Codes{white}")
+            if data["files"][index]["matches"]["anti_debug"] != []:
+                for adb in data["files"][index]["matches"]["anti_debug"]:
+                    print(f">> {adb}")
+                print(" ")
+        
+        # Fetching and parsing anti disassembly
+        if "anti_disassembly" in data["files"][index]["matches"].keys():
+            print(f"{green}--->{magenta} Anti Disassembly{white}")
+            if data["files"][index]["matches"]["anti_disassembly"] != []:
+                for disas in data["files"][index]["matches"]["anti_disassembly"]:
+                    print(f">> {disas}")
+                print(" ")
+
+        # Fetching and parsing obfuscators
+        if "obfuscator" in data["files"][index]["matches"].keys():
+            print(f"{green}--->{magenta} Obfuscation{white}")
+            if data["files"][index]["matches"]["obfuscator"] != []:
+                for obf in data["files"][index]["matches"]["obfuscator"]:
+                    print(f">> {obf}")
+                print(" ")
 
 # Scan files with quark-engine
 def Quarked(targetAPK):
-    print(f"\n{infoS} Extracting IP addresses and URLs. Please wait...")
+    print(f"{infoS} Extracting IP addresses and URLs. Please wait...")
     # Parsing phase
     forensic = Forensic(targetAPK)
 
@@ -258,12 +250,13 @@ def LangNotFound():
          sys.exit(0)
    else:
       print(f"\n{infoS} Continuing without string analysis...\n")
+      return False
 
 # Checking for language package existence if there is no package ask for user to install
 try:
     test = spacy.load("en_core_web_sm")
 except:
-    LangNotFound()
+    anlyzed = LangNotFound()
 
 # APK string analyzer with NLP
 def Detailed():
@@ -287,15 +280,39 @@ def Detailed():
                     else:
                         print(f"{cyan}({magenta}*{cyan})->{white} {apkstr}")
 
+def GeneralInformation(targetAPK):
+    print(f"{infoS} General Informations about {green}{targetAPK}{white}")
+
+    # Parsing target apk file
+    axmlTime = pyaxmlparser.APK(targetAPK)
+
+    # Lets print!!
+    print(f"{red}>>>>{white} App Name: {green}{axmlTime.get_app_name()}{white}")
+    print(f"{red}>>>>{white} Package Name: {green}{axmlTime.get_package()}{white}")
+    print(f"{red}>>>>{white} SDK Version: {green}{axmlTime.get_effective_target_sdk_version()}{white}")
+    print(f"{red}>>>>{white} Main Activity: {green}{axmlTime.get_main_activity()}{white}")
+    if axmlTime.get_libraries() != []:
+        print(f"{red}>>>>{white} Libraries:")
+        for libs in axmlTime.get_libraries():
+            print(f"{magenta}>>{white} {libs}")
+        print(" ")
+    
+    if axmlTime.get_signature_names() != []:
+        print(f"{red}>>>>{white} Signatures:")
+        for sigs in axmlTime.get_signature_names():
+            print(f"{magenta}>>{white} {sigs}")
+        print(" ")
+
 # Execution
 if __name__ == '__main__':
     try:
-        # Fetching compiler information
-        compiler = data["files"][0]["matches"]["compiler"][0]
-        print(f"{infoS} Compiler Information: {green}{compiler}{white}\n")
-
-        # Getting and parsing target APK
+        # Getting target APK
         targetAPK = str(sys.argv[1])
+
+        # General informations
+        GeneralInformation(targetAPK)
+
+        # Parsing target apk for androguard
         parsed = APK(targetAPK)
 
         # Permissions side
@@ -311,42 +328,43 @@ if __name__ == '__main__':
         Quarked(targetAPK)
 
         # Strings side
-        check = str(input(f"\n{infoS} Do you want to perform string analysis? It will take a while [Y/N]: "))
-        if check == "Y" or check == "y":
-            # Testing for language package existence
-            try:
-                nlpTest = spacy.load("en_core_web_sm")
-            except:
-                print(f"{errorS} Language package not found. Quitting!!")
-                sys.exit(1)
-
-            # Beginning for string analysis
-            print(f"{infoS} Analyzing interesting strings. It will take a while...\n")
-
-            #Thread Number
-            threadNumber = 0
-
-            # Create threads for every word in suspicious.txt
-            for sus in susStrings:
-                q.put(sus)
-                threadNumber += 1
-
-            # Lets scan!!
-            ts = []
-            for i in range(0,threadNumber):
+        if anlyzed != False:
+            check = str(input(f"\n{infoS} Do you want to perform string analysis? It will take a while [Y/N]: "))
+            if check == "Y" or check == "y":
+                # Testing for language package existence
                 try:
-                    t = threading.Thread(target=Detailed)
-                    ts.append(t)
-                    t.start()
+                    nlpTest = spacy.load("en_core_web_sm")
                 except:
-                    print(f"{errorS} Program terminated.")
+                    print(f"{errorS} Language package not found. Quitting!!")
                     sys.exit(1)
-
-            # Calling threads
-            for t in ts:
-                t.join()
-        else:
-            print(f"{infoS} Goodbye..")
-            sys.exit(0)
+                
+                # Beginning for string analysis
+                print(f"{infoS} Analyzing interesting strings. It will take a while...\n")
+                
+                #Thread Number
+                threadNumber = 0
+                
+                # Create threads for every word in suspicious.txt
+                for sus in susStrings:
+                    q.put(sus)
+                    threadNumber += 1
+                
+                # Lets scan!!
+                ts = []
+                for i in range(0,threadNumber):
+                    try:
+                        t = threading.Thread(target=Detailed)
+                        ts.append(t)
+                        t.start()
+                    except:
+                        print(f"{errorS} Program terminated.")
+                        sys.exit(1)
+                
+                # Calling threads
+                for t in ts:
+                    t.join()
+            else:
+                print(f"{infoS} Goodbye..")
+                sys.exit(0)
     except KeyboardInterrupt:
         print(f"{errorS} An error occured. Press CTRL+C to exit.")

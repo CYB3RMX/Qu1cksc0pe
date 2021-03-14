@@ -167,8 +167,9 @@ def Analyzer():
         print(segTable)
 
     # Resource scanner zone
+    print(f"{infoS} Performing magic number analysis...")
     resCounter = 0
-    resTable.field_names = [f"Extracted File Extensions", "Names", "Byte Matches", "Confidence"]
+    resTable.field_names = [f"File Extensions", "Names", "Byte Matches", "Confidence"]
     resourceList = list(pr.magic_file(fileName))
     for res in range(0, len(resourceList)):
         extrExt = str(resourceList[res].extension)

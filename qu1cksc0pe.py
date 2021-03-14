@@ -16,6 +16,13 @@ except:
     print("Error: >puremagic< module not found.")
     sys.exit(1)
 
+# Testing pyaxmlparser existence
+try:
+    from pyaxmlparser import APK
+except:
+    print("Error: >pyaxmlparser< module not found.")
+    sys.exit(1)
+
 # Testing colorama existence
 try:
     from colorama import Fore, Style
@@ -101,13 +108,18 @@ def BasicAnalyzer(analyzeFile):
 
     # Android Analysis
     elif "PK" in fileType and "Java archive" in fileType:
-        print(f"{infoS} Target OS: {green}Android{white}")
-        command = f"apkid -j {args.file} > apkid.json"
-        os.system(command)
-        command = f"python3 Modules/apkAnalyzer.py {analyzeFile}"
-        os.system(command)
-        if os.path.exists("apkid.json"):
-            os.remove("apkid.json")
+        look = APK(analyzeFile)
+        if look.is_valid_APK() == True:
+            print(f"{infoS} Target OS: {green}Android{white}")
+            command = f"apkid -j {args.file} > apkid.json"
+            os.system(command)
+            command = f"python3 Modules/apkAnalyzer.py {analyzeFile}"
+            os.system(command)
+            if os.path.exists("apkid.json"):
+                os.remove("apkid.json")
+        else:
+            print(f"{errorS} Qu1cksc0pe doesn\'t support archive analysis for now ;)")
+            sys.exit(1)
     else:
         print(f"{errorS} File type not supported. Make sure you are analyze executable files or document files.")
         print(f"{errorS} If you want to scan document files try {green}--docs{white} argument.")
