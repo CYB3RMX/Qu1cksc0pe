@@ -19,7 +19,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>28/02/2021</b>
+<b>14/03/2021</b>
 - [X] ```ApkAnalyzer``` module upgraded.
 
 # Note
@@ -29,7 +29,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 <b>Necessary python modules</b>: 
 - ```puremagic``` => <i>Analyzing target OS and magic numbers.</i>
 - ```androguard``` => <i>Analyzing APK files.</i>
-- ```apkid``` => <i>Check for Anti-VM and Anti-Debug codes.</i>
+- ```apkid``` => <i>Check for Obfuscators, Anti-Disassembly, Anti-VM and Anti-Debug.</i>
 - ```prettytable``` => <i>Pretty outputs.</i>
 - ```tqdm``` => <i>Progressbar animation.</i>
 - ```colorama``` => <i>Colored outputs.</i>
@@ -37,6 +37,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - ```pefile``` => <i>Gathering all information from PE files.</i>
 - ```spacy``` => <i>Natural Language Processing for string analysis.</i>
 - ```quark-engine``` => <i>Extracting IP addresses and URLs from APK files.</i>
+- ```pyaxmlparser``` => <i>Gathering informations from target APK files.</i>
 
 <br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
 <b>Gathering other dependencies</b>:

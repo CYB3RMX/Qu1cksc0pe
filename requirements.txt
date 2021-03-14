@@ -8,3 +8,4 @@ oletools
 spacy
 pefile
 quark-engine
+pyaxmlparser
