@@ -50,6 +50,9 @@ except:
     print("Error: >pyaxmlparser< module not found.")
     sys.exit(1)
 
+# Disabling pyaxmlparser's logs
+pyaxmlparser.core.log.disabled = True
+
 # Colors
 red = Fore.LIGHTRED_EX
 cyan = Fore.LIGHTCYAN_EX
@@ -90,8 +93,11 @@ def ApkidParser(apkid_output):
         print(f"{red}====>{white} File Name: {green}{data['files'][index]['filename']}{white}")
 
         # Fetching compiler information
-        compiler = data["files"][index]["matches"]["compiler"][0]
-        print(f"{red}==>{white} Compiler Information: {green}{compiler}{white}\n")
+        try:
+            compiler = data["files"][index]["matches"]["compiler"][0]
+            print(f"{red}==>{white} Compiler Information: {green}{compiler}{white}\n")
+        except KeyError:
+            print(f"{errorS} There is no information about compiler.\n")
 
         # Fetching and parsing anti virtualization
         if "anti_vm" in data["files"][index]["matches"].keys():
@@ -291,17 +297,20 @@ def GeneralInformation(targetAPK):
     print(f"{red}>>>>{white} Package Name: {green}{axmlTime.get_package()}{white}")
     print(f"{red}>>>>{white} SDK Version: {green}{axmlTime.get_effective_target_sdk_version()}{white}")
     print(f"{red}>>>>{white} Main Activity: {green}{axmlTime.get_main_activity()}{white}")
-    if axmlTime.get_libraries() != []:
-        print(f"{red}>>>>{white} Libraries:")
-        for libs in axmlTime.get_libraries():
-            print(f"{magenta}>>{white} {libs}")
-        print(" ")
-    
-    if axmlTime.get_signature_names() != []:
-        print(f"{red}>>>>{white} Signatures:")
-        for sigs in axmlTime.get_signature_names():
-            print(f"{magenta}>>{white} {sigs}")
-        print(" ")
+    try:
+        if axmlTime.get_libraries() != []:
+            print(f"{red}>>>>{white} Libraries:")
+            for libs in axmlTime.get_libraries():
+                print(f"{magenta}>>{white} {libs}")
+            print(" ")
+
+        if axmlTime.get_signature_names() != []:
+            print(f"{red}>>>>{white} Signatures:")
+            for sigs in axmlTime.get_signature_names():
+                print(f"{magenta}>>{white} {sigs}")
+            print(" ")
+    except:
+        pass
 
 # Execution
 if __name__ == '__main__':
