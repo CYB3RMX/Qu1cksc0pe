@@ -18,7 +18,7 @@ except:
 
 # Testing pyaxmlparser existence
 try:
-    from pyaxmlparser import APK
+    import pyaxmlparser
 except:
     print("Error: >pyaxmlparser< module not found.")
     sys.exit(1)
@@ -29,6 +29,9 @@ try:
 except:
     print("Error: >colorama< module not found.")
     sys.exit(1)
+
+# Disabling pyaxmlparser's logs
+pyaxmlparser.core.log.disabled = True
 
 # Colors
 red = Fore.LIGHTRED_EX
@@ -108,7 +111,7 @@ def BasicAnalyzer(analyzeFile):
 
     # Android Analysis
     elif "PK" in fileType and "Java archive" in fileType:
-        look = APK(analyzeFile)
+        look = pyaxmlparser.APK(analyzeFile)
         if look.is_valid_APK() == True:
             print(f"{infoS} Target OS: {green}Android{white}")
             command = f"apkid -j {args.file} > apkid.json"

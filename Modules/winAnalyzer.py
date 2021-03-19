@@ -200,7 +200,7 @@ def Analyzer():
         pass
 
     # Resource scanner zone
-    print(f"{infoS} Performing magic number analysis...")
+    print(f"\n{infoS} Performing magic number analysis...")
     resCounter = 0
     resTable.field_names = [f"File Extensions", "Names", "Byte Matches", "Confidence"]
     resourceList = list(pr.magic_file(fileName))

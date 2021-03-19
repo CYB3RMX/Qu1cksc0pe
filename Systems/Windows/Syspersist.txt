@@ -58,3 +58,4 @@ WOWShellExecute
 SHCreateProcessAsUserW
 LoadUserProfileW
 UnloadUserProfile
+ChangeServiceConfig2A
