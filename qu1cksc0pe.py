@@ -285,8 +285,15 @@ def Qu1cksc0pe():
 # Exectuion area
 try:
     Qu1cksc0pe()
+    # Cleaning up...
     if os.path.exists("temp.txt"):
         os.remove("temp.txt")
+
+    if os.path.exists("LibScope"):
+        os.system("rm -rf LibScope/")
 except:
     if os.path.exists("temp.txt"):
         os.remove("temp.txt")
+    
+    if os.path.exists("LibScope"):
+        os.system("rm -rf LibScope/")

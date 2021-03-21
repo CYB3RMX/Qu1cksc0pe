@@ -6,6 +6,7 @@ import os
 import threading
 import queue
 import warnings
+import configparser
 
 # Module handling
 try:
@@ -50,6 +51,12 @@ except:
     print("Error: >pyaxmlparser< module not found.")
     sys.exit(1)
 
+try:
+    import yara
+except:
+    print("Error: >yara< module not found.")
+    sys.exit(1)
+
 # Disabling pyaxmlparser's logs
 pyaxmlparser.core.log.disabled = True
 
@@ -63,6 +70,7 @@ magenta = Fore.LIGHTMAGENTA_EX
 
 # Legends
 infoS = f"{cyan}[{red}*{cyan}]{white}"
+foundS = f"{cyan}[{red}+{cyan}]{white}"
 errorS = f"{cyan}[{red}!{cyan}]{white}"
 
 # necessary variables
@@ -131,8 +139,70 @@ def ApkidParser(apkid_output):
                     print(f">> {obf}")
                 print(" ")
 
+# Library Hunter
+def AndroLibScanner(target_file):
+    # Parsing file name
+    yara_target = os.path.split(target_file)[1]
+
+    # Parsing config file to get rule path
+    conf = configparser.ConfigParser()
+    conf.read("Systems/Android/libScanner.conf")
+    rule_path = conf["Rule_PATH"]["rulepath"]
+    allRules = os.listdir(rule_path)
+
+    # Summary table
+    yaraTable = PrettyTable()
+
+    # This array for holding and parsing easily matched rules
+    yara_matches = []
+    for rul in allRules:
+        try:
+            rules = yara.compile(f"{rule_path}{rul}")
+            tempmatch = rules.match(target_file)
+            if tempmatch != []:
+                yara_matches.append(tempmatch[0])
+        except:
+            continue
+
+    # Printing area
+    if yara_matches != []:
+        print(f"\n{foundS} Matched Rules for: {green}{yara_target}{white}\n")
+        for rul in yara_matches:
+            print(f"{magenta}>>>>{white} {rul}")
+            yaraTable.field_names = [f"{green}Offset{white}", f"{green}Matched String{white}"]
+            for mm in rul.strings:
+                yaraTable.add_row([f"{hex(mm[0])}", f"{str(mm[2])}"])
+            print(f"{yaraTable}\n")
+            yaraTable.clear_rows()
+    else:
+        print(f"{errorS} Not any rules matched for this file.\n")
+def MultiYaraScanner(targetAPK):
+    lib_files_indicator = 0
+    # Configurating decompiler...
+    conf = configparser.ConfigParser()
+    conf.read("Systems/Android/libScanner.conf")
+    decompiler_path = conf["Decompiler"]["decompiler"]
+
+    # Executing decompiler...
+    os.system(f"{decompiler_path} -q -d LibScope {targetAPK}")
+
+    # Scan for library files and analyze them
+    path = "LibScope/resources/"
+    fnames = []
+    for root, d_names, f_names in os.walk(path):
+        for ff in f_names:
+            fnames.append(os.path.join(root, ff))
+    if fnames != []:
+        for extens in fnames:
+            if os.path.splitext(extens)[1] == ".so":
+                lib_files_indicator += 1
+                AndroLibScanner(target_file=extens)
+    if lib_files_indicator == 0:
+        print(f"{errorS} Not any library files found for analysis.")
+
 # Scan files with quark-engine
 def Quarked(targetAPK):
+    not_found_indicator = 0
     print(f"{infoS} Extracting IP addresses and URLs. Please wait...")
     # Parsing phase
     forensic = Forensic(targetAPK)
@@ -144,6 +214,8 @@ def Quarked(targetAPK):
         for ips in forensic.get_ip():
             ipTables.add_row([ips])
         print(ipTables)
+    else:
+        not_found_indicator += 1
     
     # Extract domains from file
     domainTable = PrettyTable()
@@ -152,6 +224,11 @@ def Quarked(targetAPK):
         for urls in forensic.get_url():
             domainTable.add_row([urls])
         print(domainTable)
+    else:
+        not_found_indicator += 1
+
+    if not_found_indicator == 2:
+        print(f"{errorS} Not any Email or IP string found in target file.")
 
 # Permission analyzer
 def Analyzer(parsed):
@@ -329,6 +406,14 @@ if __name__ == '__main__':
 
         # Deep scanner
         DeepScan(parsed)
+
+        # Decompiling and scanning libraries
+        print(f"\n{infoS} Performing library analysis...")
+        try:
+            MultiYaraScanner(targetAPK)
+        except:
+            print(f"{errorS} An error occured while decompiling the file. Please check configuration file and modify the {green}Decompiler{white} option.")
+            print(f"{infoS} Configuration file path: {green}Systems/Android/libScanner.conf{white}")
 
         # APKID scanner
         ApkidParser(apkid_output)

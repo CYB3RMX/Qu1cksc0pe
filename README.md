@@ -19,8 +19,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>20/03/2021</b>
-- [X] Bug fixes.
+<b>21/03/2021</b>
+- [X] Added ```Android Library Scanner``` to ```ApkAnalyzer``` module. Qu1cksc0pe now more effective against APK files.
 
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
@@ -38,6 +38,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - ```spacy``` => <i>Natural Language Processing for string analysis.</i>
 - ```quark-engine``` => <i>Extracting IP addresses and URLs from APK files.</i>
 - ```pyaxmlparser``` => <i>Gathering informations from target APK files.</i>
+- ```yara-python``` => <i>Android library scanning with Yara rules.</i>
 
 <br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
 <b>Gathering other dependencies</b>:
