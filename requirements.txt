@@ -9,3 +9,4 @@ spacy
 pefile
 quark-engine
 pyaxmlparser
+yara-python
