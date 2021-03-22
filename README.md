@@ -20,8 +20,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 
 # Updates
 <b>21/03/2021</b>
-- [X] Added ```Android Library Scanner``` to ```ApkAnalyzer``` module. Qu1cksc0pe now more effective against APK files.<br>
-<b>22/03/2021</b>
+- [X] Added ```Android Library Scanner``` to ```ApkAnalyzer``` module. Qu1cksc0pe now more effective against APK files.
 - [X] Added ```--install``` argument. Now you can install or uninstall Qu1cksc0pe.
 
 # Note
@@ -50,7 +49,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - <i>Strings</i>: ```sudo apt-get install strings```
 
 # Installation
-- [X] You can install Qu1cksc0pe easily on your system. Just execute the following command.
+- [X] You can install Qu1cksc0pe easily on your system. Just execute the following command.<br>
 <b>Command</b>: ```sudo python3 qu1cksc0pe.py --install```
 
 # Scan arguments
