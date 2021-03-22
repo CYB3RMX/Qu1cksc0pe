@@ -22,6 +22,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 <b>21/03/2021</b>
 - [X] Added ```Android Library Scanner``` to ```ApkAnalyzer``` module. Qu1cksc0pe now more effective against APK files.
 - [X] Added ```--install``` argument. Now you can install or uninstall Qu1cksc0pe.
+- [X] Added new Yara rules.
 
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
