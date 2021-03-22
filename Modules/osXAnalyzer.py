@@ -24,16 +24,19 @@ green = Fore.LIGHTGREEN_EX
 yellow = Fore.LIGHTYELLOW_EX
 cyan = Fore.LIGHTCYAN_EX
 
+# Gathering Qu1cksc0pe path variable
+sc0pe_path = open(".path_handler", "r").read()
+
 # Keywords ;)
 allStrings = open("temp.txt", "r").read().split('\n')
-loadCommands = open("Systems/OSX/LoadCommands.txt", "r").read().split('\n')
-fileHeaders = open("Systems/OSX/Headers.txt", "r").read().split('\n')
-sharedLibs = open("Systems/OSX/SharedLibs.txt", "r").read().split('\n')
-memoryz = open("Systems/OSX/Memory.txt", "r").read().split('\n')
-procesz = open("Systems/OSX/Process.txt", "r").read().split('\n')
-infogaz = open("Systems/OSX/Infoga.txt", "r").read().split('\n')
-cryptoz = open("Systems/OSX/Cryptography.txt", "r").read().split('\n')
-otherz = open("Systems/OSX/Other.txt", "r").read().split('\n')
+loadCommands = open(f"{sc0pe_path}/Systems/OSX/LoadCommands.txt", "r").read().split('\n')
+fileHeaders = open(f"{sc0pe_path}/Systems/OSX/Headers.txt", "r").read().split('\n')
+sharedLibs = open(f"{sc0pe_path}/Systems/OSX/SharedLibs.txt", "r").read().split('\n')
+memoryz = open(f"{sc0pe_path}/Systems/OSX/Memory.txt", "r").read().split('\n')
+procesz = open(f"{sc0pe_path}/Systems/OSX/Process.txt", "r").read().split('\n')
+infogaz = open(f"{sc0pe_path}/Systems/OSX/Infoga.txt", "r").read().split('\n')
+cryptoz = open(f"{sc0pe_path}/Systems/OSX/Cryptography.txt", "r").read().split('\n')
+otherz = open(f"{sc0pe_path}/Systems/OSX/Other.txt", "r").read().split('\n')
 
 # Arrayz
 lCommands = []
