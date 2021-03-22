@@ -20,7 +20,9 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 
 # Updates
 <b>21/03/2021</b>
-- [X] Added ```Android Library Scanner``` to ```ApkAnalyzer``` module. Qu1cksc0pe now more effective against APK files.
+- [X] Added ```Android Library Scanner``` to ```ApkAnalyzer``` module. Qu1cksc0pe now more effective against APK files.<br>
+<b>22/03/2021</b>
+- [X] Added ```--install``` argument. Now you can install or uninstall Qu1cksc0pe.
 
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
@@ -46,6 +48,10 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - <i>Binutils</i>: ```sudo apt-get install binutils```
 - <i>ExifTool</i>: ```sudo apt-get install exiftool```
 - <i>Strings</i>: ```sudo apt-get install strings```
+
+# Installation
+- [X] You can install Qu1cksc0pe easily on your system. Just execute the following command.
+<b>Command</b>: ```sudo python3 qu1cksc0pe.py --install```
 
 # Scan arguments
 ## Normal analysis

@@ -32,20 +32,24 @@ yellow = Fore.LIGHTYELLOW_EX
 
 # Legends
 errorS = f"{cyan}[{red}!{cyan}]{white}"
+infoS = f"{cyan}[{red}*{cyan}]{white}"
+
+# Gathering Qu1cksc0pe path variable
+sc0pe_path = open(".path_handler", "r").read()
 
 # Wordlists
 allStrings = open("temp.txt", "r").read().split("\n")
-allThings = open("Modules/elves.txt", "r").read()
-sections = open("Systems/Linux/sections.txt", "r").read().split("\n")
-segments = open("Systems/Linux/segments.txt", "r").read().split("\n")
-networkz = open("Systems/Linux/Networking.txt", "r").read().split("\n")
-filez = open("Systems/Linux/Files.txt", "r").read().split("\n")
-procesz = open("Systems/Linux/Processes.txt", "r").read().split("\n")
-memoryz = open("Systems/Linux/Memory.txt", "r").read().split("\n")
-infogaz = open("Systems/Linux/Infoga.txt", "r").read().split("\n")
-persisz = open("Systems/Linux/Persistence.txt", "r").read().split("\n")
-cryptoz = open("Systems/Linux/Crypto.txt", "r").read().split("\n")
-otherz = open("Systems/Linux/Others.txt", "r").read().split("\n")
+allThings = open("elves.txt", "r").read()
+sections = open(f"{sc0pe_path}/Systems/Linux/sections.txt", "r").read().split("\n")
+segments = open(f"{sc0pe_path}/Systems/Linux/segments.txt", "r").read().split("\n")
+networkz = open(f"{sc0pe_path}/Systems/Linux/Networking.txt", "r").read().split("\n")
+filez = open(f"{sc0pe_path}/Systems/Linux/Files.txt", "r").read().split("\n")
+procesz = open(f"{sc0pe_path}/Systems/Linux/Processes.txt", "r").read().split("\n")
+memoryz = open(f"{sc0pe_path}/Systems/Linux/Memory.txt", "r").read().split("\n")
+infogaz = open(f"{sc0pe_path}/Systems/Linux/Infoga.txt", "r").read().split("\n")
+persisz = open(f"{sc0pe_path}/Systems/Linux/Persistence.txt", "r").read().split("\n")
+cryptoz = open(f"{sc0pe_path}/Systems/Linux/Crypto.txt", "r").read().split("\n")
+otherz = open(f"{sc0pe_path}/Systems/Linux/Others.txt", "r").read().split("\n")
 
 # Categories
 Networking = []

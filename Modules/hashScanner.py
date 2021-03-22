@@ -6,6 +6,7 @@ import hashlib
 import sys
 import math
 import json
+import getpass
 
 # Module for progressbar
 try:
@@ -40,12 +41,27 @@ yellow = Fore.LIGHTYELLOW_EX
 infoS = f"{cyan}[{red}*{cyan}]{white}"
 errorS = f"{cyan}[{red}!{cyan}]{white}"
 
+# Gathering username
+username = getpass.getuser()
+
+# Gathering Qu1cksc0pe path variable
+sc0pe_path = open(".path_handler", "r").read()
+
+# Directory checking
+if os.path.exists(f"/home/{username}/sc0pe_Base/"):
+    pass
+else:
+    os.system(f"mkdir /home/{username}/sc0pe_Base/")
+
+# Configurating installation directory
+install_dir = f"/home/{username}/sc0pe_Base"
+
 def DatabaseCheck():
-    if os.path.isfile("HashDB.json") == False:
+    if os.path.isfile(f"{install_dir}/HashDB.json") == False:
         print(f"{errorS} Local signature database not found.")
         choose = str(input(f"{green}=>{white} Would you like to download it [Y/n]?: "))
         if choose == "Y" or choose == "y":
-            local_database = "HashDB.json"
+            local_database = f"{install_dir}/HashDB.json"
             dbUrl = "https://raw.githubusercontent.com/CYB3RMX/MalwareHashDB/main/HashDB.json"
             req = requests.get(dbUrl, stream=True)
             total_size = int(req.headers.get('content-length', 0))
@@ -82,7 +98,7 @@ def NextHash(targetHash):
     return finalHash
 
 try:
-    with open("HashDB.json") as databaseFile:
+    with open(f"{install_dir}/HashDB.json") as databaseFile:
         hashData = json.load(databaseFile)
 except:
     DatabaseCheck()

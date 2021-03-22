@@ -40,21 +40,24 @@ yellow = Fore.LIGHTYELLOW_EX
 infoS = f"{cyan}[{red}*{cyan}]{white}"
 errorS = f"{cyan}[{red}!{cyan}]{white}"
 
+# Gathering Qu1cksc0pe path variable
+sc0pe_path = open(".path_handler", "r").read()
+
 # Keywords for categorized scanning
 allStrings = open("temp.txt", "r").read().split('\n')
-regarr = open("Systems/Windows/Registry.txt", "r").read().split("\n")
-filearr = open("Systems/Windows/File.txt", "r").read().split("\n")
-netarr = open("Systems/Windows/Network.txt", "r").read().split("\n")
-keyarr = open("Systems/Windows/Keyboard.txt", "r").read().split("\n")
-procarr = open("Systems/Windows/Process.txt", "r").read().split("\n")
-memoarr = open("Systems/Windows/Memoryz.txt", "r").read().split("\n")
-dllarr = open("Systems/Windows/Resources.txt", "r").read().split("\n")
-debugarr = open("Systems/Windows/Debugger.txt", "r").read().split("\n")
-systarr = open("Systems/Windows/Syspersist.txt", "r").read().split("\n")
-comarr = open("Systems/Windows/COMObject.txt", "r").read().split("\n")
-cryptarr = open("Systems/Windows/Crypto.txt", "r").read().split("\n")
-datarr = open("Systems/Windows/DataLeak.txt", "r").read().split("\n")
-otharr = open("Systems/Windows/Other.txt", "r").read().split("\n")
+regarr = open(f"{sc0pe_path}/Systems/Windows/Registry.txt", "r").read().split("\n")
+filearr = open(f"{sc0pe_path}/Systems/Windows/File.txt", "r").read().split("\n")
+netarr = open(f"{sc0pe_path}/Systems/Windows/Network.txt", "r").read().split("\n")
+keyarr = open(f"{sc0pe_path}/Systems/Windows/Keyboard.txt", "r").read().split("\n")
+procarr = open(f"{sc0pe_path}/Systems/Windows/Process.txt", "r").read().split("\n")
+memoarr = open(f"{sc0pe_path}/Systems/Windows/Memoryz.txt", "r").read().split("\n")
+dllarr = open(f"{sc0pe_path}/Systems/Windows/Resources.txt", "r").read().split("\n")
+debugarr = open(f"{sc0pe_path}/Systems/Windows/Debugger.txt", "r").read().split("\n")
+systarr = open(f"{sc0pe_path}/Systems/Windows/Syspersist.txt", "r").read().split("\n")
+comarr = open(f"{sc0pe_path}/Systems/Windows/COMObject.txt", "r").read().split("\n")
+cryptarr = open(f"{sc0pe_path}/Systems/Windows/Crypto.txt", "r").read().split("\n")
+datarr = open(f"{sc0pe_path}/Systems/Windows/DataLeak.txt", "r").read().split("\n")
+otharr = open(f"{sc0pe_path}/Systems/Windows/Other.txt", "r").read().split("\n")
 
 # Category arrays
 Registry = []

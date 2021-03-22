@@ -73,6 +73,9 @@ infoS = f"{cyan}[{red}*{cyan}]{white}"
 foundS = f"{cyan}[{red}+{cyan}]{white}"
 errorS = f"{cyan}[{red}!{cyan}]{white}"
 
+# Gathering Qu1cksc0pe path variable
+sc0pe_path = open(".path_handler", "r").read()
+
 # necessary variables
 danger = 0
 normal = 0
@@ -85,7 +88,7 @@ apkid_output = open("apkid.json", "r")
 data = json.load(apkid_output)
 
 # Lets get all suspicious strings
-susStrings = open("Systems/Android/suspicious.txt", "r").read().split('\n')
+susStrings = open(f"{sc0pe_path}/Systems/Android/suspicious.txt", "r").read().split('\n')
 
 # Ignoring spacy's warnings
 warnings.filterwarnings("ignore")
@@ -146,7 +149,7 @@ def AndroLibScanner(target_file):
 
     # Parsing config file to get rule path
     conf = configparser.ConfigParser()
-    conf.read("Systems/Android/libScanner.conf")
+    conf.read(f"{sc0pe_path}/Systems/Android/libScanner.conf")
     rule_path = conf["Rule_PATH"]["rulepath"]
     allRules = os.listdir(rule_path)
 
@@ -175,12 +178,12 @@ def AndroLibScanner(target_file):
             print(f"{yaraTable}\n")
             yaraTable.clear_rows()
     else:
-        print(f"{errorS} Not any rules matched for this file.\n")
+        print(f"{errorS} Not any rules matched for {green}{yara_target}{white}.\n")
 def MultiYaraScanner(targetAPK):
     lib_files_indicator = 0
     # Configurating decompiler...
     conf = configparser.ConfigParser()
-    conf.read("Systems/Android/libScanner.conf")
+    conf.read(f"{sc0pe_path}/Systems/Android/libScanner.conf")
     decompiler_path = conf["Decompiler"]["decompiler"]
 
     # Executing decompiler...
@@ -237,7 +240,7 @@ def Analyzer(parsed):
     statistics = PrettyTable()
 
     # Getting blacklisted permissions
-    with open("Systems/Android/perms.json", "r") as f:
+    with open(f"{sc0pe_path}/Systems/Android/perms.json", "r") as f:
         permissions = json.load(f)
 
     apkPerms = parsed.get_permissions()
@@ -413,7 +416,7 @@ if __name__ == '__main__':
             MultiYaraScanner(targetAPK)
         except:
             print(f"{errorS} An error occured while decompiling the file. Please check configuration file and modify the {green}Decompiler{white} option.")
-            print(f"{infoS} Configuration file path: {green}Systems/Android/libScanner.conf{white}")
+            print(f"{infoS} Configuration file path: {green}{sc0pe_path}/Systems/Android/libScanner.conf{white}")
 
         # APKID scanner
         ApkidParser(apkid_output)
