@@ -144,9 +144,7 @@ def ApkidParser(apkid_output):
 
 # Library Hunter
 def AndroLibScanner(target_file):
-    # Parsing file name
-    yara_target = os.path.split(target_file)[1]
-
+    yara_match_indicator = 0
     # Parsing config file to get rule path
     conf = configparser.ConfigParser()
     conf.read(f"{sc0pe_path}/Systems/Android/libScanner.conf")
@@ -169,7 +167,8 @@ def AndroLibScanner(target_file):
 
     # Printing area
     if yara_matches != []:
-        print(f"\n{foundS} Matched Rules for: {green}{yara_target}{white}\n")
+        print(f"\n{foundS} Matched Rules for: {green}{target_file}{white}\n")
+        yara_match_indicator += 1
         for rul in yara_matches:
             print(f"{magenta}>>>>{white} {rul}")
             yaraTable.field_names = [f"{green}Offset{white}", f"{green}Matched String{white}"]
@@ -177,8 +176,9 @@ def AndroLibScanner(target_file):
                 yaraTable.add_row([f"{hex(mm[0])}", f"{str(mm[2])}"])
             print(f"{yaraTable}\n")
             yaraTable.clear_rows()
-    else:
-        print(f"{errorS} Not any rules matched for {green}{yara_target}{white}.\n")
+
+    if yara_match_indicator == 0:
+        print(f"{errorS} Not any rules matched for {green}{target_file}{white}.\n")
 def MultiYaraScanner(targetAPK):
     lib_files_indicator = 0
     # Configurating decompiler...
