@@ -295,7 +295,7 @@ def Analyzer():
 
     # Parsing sections
     for sect in pe.sections:
-        if sect.get_entropy() >= 6:
+        if sect.get_entropy() >= 7:
             peStatistics.add_row([sect.Name.decode().rstrip('\x00'), hex(sect.Misc_VirtualSize), hex(sect.VirtualAddress), hex(sect.SizeOfRawData), hex(sect.PointerToRawData), f"{red}{sect.get_entropy()}{white} (Possible obfuscation!!)"])
         else:
             peStatistics.add_row([sect.Name.decode().rstrip('\x00'), hex(sect.Misc_VirtualSize), hex(sect.VirtualAddress), hex(sect.SizeOfRawData), hex(sect.PointerToRawData), sect.get_entropy()])
