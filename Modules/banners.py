@@ -26,23 +26,23 @@ banner1=f"""
 {cy}\  \/ / |_| |_| || \__/\| |\  \/\__/ / \__/\ |_/ / |   | |___      {gr}@@ {re}@ {gr}@@
 {cy} \_/\_|\___/ \___/\____/\_| \_/\____/ \____/\___/\_|   \____/       {gr}@ @ @
                                                                       @
-                                       {ye}|             |
-  {wh}Suspicious file static-analysis tool.{ye}| {wh}By CYB3RMX_ {ye}| {wh}Version: {gr}1.7.5
-  {ye}-------------------------------------|             |{wh}\n
+                                          {ye}|             |
+  {wh}All in One static malware analysis tool.{ye}| {wh}By CYB3RMX_ {ye}| {wh}Version: {gr}1.7.5
+  {ye}----------------------------------------|             |{wh}\n
 """
 banner2=f"""
         {ma}:ooooo/        /ooooo:
            +MMd^^^^^^^^hMMo
         oNNNMMMNNNNNNNNMMMNNNs
-     /oodMMdooyMMMMMMMMyoodMMdoo/      {wh}+------------------------------+
-   {ma}..dMMMMMy. :MMMMMMMM/  sMMMMMm..    {wh}|         {gr}Qu1cksc0pe           {wh}|
-  {ma}dmmMMMMMMNmmNMMMMMMMMNmmNMMMMMMmmm   {wh}|                              |
-  {ma}NMMyoodMMMMMMMMMMMMMMMMMMMMdoosMMM   {wh}| {gr}Malware static analysis tool.{wh}|
-  {ma}NMM-  sMMMNNNNNNNNNNNNNNNMMy  .MMM   {wh}|                              |
-  {ma}NMM-  sMMyvvvvvvvvvvvvvvsMMy  .MMM   {wh}|       {gr}Version{wh}: {ye}1.7.5         {wh}|
-  {ma}ooo.  :ooooooo+    +ooooooo/   ooo   {wh}+------------|||||||-----------+
-           {ma}/MMMMN    mMMMM+                         {wh}|||||||
-                                                    |||||||\n
+     /oodMMdooyMMMMMMMMyoodMMdoo/      {wh}+-----------------------------------------+
+   {ma}..dMMMMMy. :MMMMMMMM/  sMMMMMm..    {wh}|              {gr}Qu1cksc0pe                 {wh}|
+  {ma}dmmMMMMMMNmmNMMMMMMMMNmmNMMMMMMmmm   {wh}|                                         |
+  {ma}NMMyoodMMMMMMMMMMMMMMMMMMMMdoosMMM   {wh}| {gr}All in One static malware analysis tool.{wh}|
+  {ma}NMM-  sMMMNNNNNNNNNNNNNNNMMy  .MMM   {wh}|                                         |
+  {ma}NMM-  sMMyvvvvvvvvvvvvvvsMMy  .MMM   {wh}|             {gr}Version{wh}: {ye}1.7.5              {wh}|
+  {ma}ooo.  :ooooooo+    +ooooooo/   ooo   {wh}+-----------------|||||||-----------------+
+           {ma}/MMMMN    mMMMM+                              {wh}|||||||
+                                                         |||||||\n
 """
 banner3=f"""
             ______
@@ -133,7 +133,28 @@ banner8=f"""
   |  \"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"  |
   |_____________________________________|\n
 """
-randomBanner = random.randint(1, 8)
+banner9=f"""
+{gr}                            .oodMMMM
+                   .oodMMMMMMMMMMMMM
+{re}       ..oodMMM{gr}  MMMMMMMMMMMMMMMMMMM
+{re} oodMMMMMMMMMMM{gr}  MMMMMMMMMMMMMMMMMMM
+{re} MMMMMMMMMMMMMM{gr}  MMMMMMMMMMMMMMMMMMM
+{re} MMMMMMMMMMMMMM{gr}  MMMMMMMMMMMMMMMMMMM        {wh}One day Windows will be {gr}MALWAREPROOF{wh}...
+{re} MMMMMMMMMMMMMM{gr}  MMMMMMMMMMMMMMMMMMM
+{re} MMMMMMMMMMMMMM{gr}  MMMMMMMMMMMMMMMMMMM
+{re} MMMMMMMMMMMMMM{gr}  MMMMMMMMMMMMMMMMMMM                      {wh}Just kidding XDD
+					    
+{cy} MMMMMMMMMMMMMM{ye}  MMMMMMMMMMMMMMMMMMM
+{cy} MMMMMMMMMMMMMM{ye}  MMMMMMMMMMMMMMMMMMM
+{cy} MMMMMMMMMMMMMM{ye}  MMMMMMMMMMMMMMMMMMM
+{cy} MMMMMMMMMMMMMM{ye}  MMMMMMMMMMMMMMMMMMM
+{cy} MMMMMMMMMMMMMM{ye}  MMMMMMMMMMMMMMMMMMM
+{cy} `^^^^^^MMMMMMM{ye}  MMMMMMMMMMMMMMMMMMM
+{cy}       ````^^^^{ye}  ^^MMMMMMMMMMMMMMMMM
+                      ````^^^^^^MMMM{wh}
+"""
+
+randomBanner = random.randint(1, 9)
 if randomBanner == 1:
     print(banner1)
 elif randomBanner == 2:
@@ -150,5 +171,7 @@ elif randomBanner == 7:
     print(banner7)
 elif randomBanner == 8:
     print(banner8)
+elif randomBanner == 9:
+    print(banner9)
 else:
     pass

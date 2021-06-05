@@ -19,8 +19,9 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>23/05/2021</b>
-- [X] Added ```PE Structure and Assembly Analyzer``` to ```Windows Analyzer``` module. Qu1cksc0pe now can analyze given executable's PE structure and locate possible function call addresses from disassembled code.
+<b>05/06/2021</b>
+- [X] ```Windows Analyzer``` and ```Android Analyzer``` modules are upgraded.
+- [X] Added more YARA rules.
 
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.

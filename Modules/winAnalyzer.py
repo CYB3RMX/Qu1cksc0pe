@@ -33,10 +33,10 @@ except:
     print("Error: >capstone< module not found.")
     sys.exit(1)
 
-# Getting name of the file for statistics
+#--------------------------------------------- Getting name of the file for statistics
 fileName = str(sys.argv[1])
 
-# Colors
+#--------------------------------------------- Colors
 red = Fore.LIGHTRED_EX
 cyan = Fore.LIGHTCYAN_EX
 white = Style.RESET_ALL
@@ -44,15 +44,21 @@ green = Fore.LIGHTGREEN_EX
 yellow = Fore.LIGHTYELLOW_EX
 magenta = Fore.LIGHTMAGENTA_EX
 
-# Legends
+#--------------------------------------------- Legends
 infoS = f"{cyan}[{red}*{cyan}]{white}"
 errorS = f"{cyan}[{red}!{cyan}]{white}"
 
-# Gathering Qu1cksc0pe path variable
+#--------------------------------------------- Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
-# Keywords for categorized scanning
-allStrings = open("temp.txt", "r").read().split('\n')
+#--------------------------------------------- Gathering all function imports from binary
+allStrings = []
+binaryfile = pf.PE(fileName)
+for imps in binaryfile.DIRECTORY_ENTRY_IMPORT:
+    for im in imps.imports:
+        allStrings.append([im.name.decode("ascii"), hex(im.address)])
+
+#--------------------------------------------------------------------- Keywords for categorized scanning
 regarr = open(f"{sc0pe_path}/Systems/Windows/Registry.txt", "r").read().split("\n")
 filearr = open(f"{sc0pe_path}/Systems/Windows/File.txt", "r").read().split("\n")
 netarr = open(f"{sc0pe_path}/Systems/Windows/Network.txt", "r").read().split("\n")
@@ -67,7 +73,7 @@ cryptarr = open(f"{sc0pe_path}/Systems/Windows/Crypto.txt", "r").read().split("\
 datarr = open(f"{sc0pe_path}/Systems/Windows/DataLeak.txt", "r").read().split("\n")
 otharr = open(f"{sc0pe_path}/Systems/Windows/Other.txt", "r").read().split("\n")
 
-# Category arrays
+#------------------------------------------- Category arrays
 Registry = []
 File = []
 Network = []
@@ -82,7 +88,7 @@ Cryptography = []
 Info_Gathering = []
 Other = []
 
-# Dictionary of Categories
+#--------------------------------------------- Dictionary of Categories
 dictCateg = {
     "Registry": Registry,
     "File": File,
@@ -99,7 +105,7 @@ dictCateg = {
     "Other/Unknown": Other
 }
 
-# score table for checking how many functions in that file
+#---------------------------------------- Score table for checking how many functions in that file
 scoreDict = {
     "Registry": 0,
     "File": 0,
@@ -116,7 +122,7 @@ scoreDict = {
     "Other/Unknown": 0
 }
 
-# Accessing categories
+#---------------------------------------------------- Accessing categories
 regdict = {
     "Registry": regarr, "File": filearr,
     "Networking/Web": netarr, "Keyboard/Keylogging": keyarr,
@@ -127,7 +133,7 @@ regdict = {
     "Information Gathering": datarr, "Other/Unknown": otharr
 }
 
-# A function that locates entry point of base code address
+#--------------------------------------- A function that locates entry point of base code address
 def GetMainCode(sections, base_of_code):
     '''
     Parameter 1: Sections of a program
@@ -150,7 +156,7 @@ def GetMainCode(sections, base_of_code):
         else:
             return None
 
-# A function that disassembles binary's base code address and locates possible function calls
+#------------------------------------- A function that disassembles binary's base code address and locates possible function calls
 def Disassembler(executable):
     fcalls = 0
 
@@ -186,7 +192,7 @@ def Disassembler(executable):
     savestat.writelines(str(assemblyTable_func_calls))
     return fcalls
 
-# Defining function
+#------------------------------------ Defining function
 def Analyzer():
     # Creating tables
     allFuncs = 0
@@ -197,11 +203,11 @@ def Analyzer():
     statistics = PrettyTable()
 
     # categorizing extracted strings
-    for key in regdict:
-        for el in regdict[key]:
-            if el in allStrings:
-                if el != "":
-                    dictCateg[key].append(el)
+    for win_api in allStrings:
+        for key in regdict:
+            if win_api[0] in regdict[key]:
+                if win_api[0] != "":
+                    dictCateg[key].append(win_api)
                     allFuncs += 1
 
     # printing categorized strings
@@ -213,12 +219,12 @@ def Analyzer():
                 print(f"\n{yellow}[{red}!{yellow}]__WARNING__[{red}!{yellow}]{white}")
 
             # Printing zone
-            tables.field_names = [f"Functions or Strings about {green}{key}{white}"]
-            for i in dictCateg[key]:
-                if i == "":
+            tables.field_names = [f"Functions or Strings about {green}{key}{white}", "Address"]
+            for func in dictCateg[key]:
+                if func[0] == "":
                     pass
                 else:
-                    tables.add_row([f"{red}{i}{white}"])
+                    tables.add_row([f"{red}{func[0]}{white}", f"{red}{func[1]}{white}"])
 
                     # Logging for summary table
                     if key == "Registry":
@@ -255,7 +261,7 @@ def Analyzer():
     # gathering extracted dll files
     try:
         dllTable.field_names = [f"Linked {green}DLL{white} Files"]
-        for items in pe.DIRECTORY_ENTRY_IMPORT:
+        for items in binaryfile.DIRECTORY_ENTRY_IMPORT:
             dlStr = str(items.dll.decode())
             dllTable.add_row([f"{red}{dlStr}{white}"])
         print(dllTable)
