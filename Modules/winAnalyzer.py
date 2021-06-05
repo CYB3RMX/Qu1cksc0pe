@@ -55,8 +55,11 @@ sc0pe_path = open(".path_handler", "r").read()
 allStrings = []
 binaryfile = pf.PE(fileName)
 for imps in binaryfile.DIRECTORY_ENTRY_IMPORT:
-    for im in imps.imports:
-        allStrings.append([im.name.decode("ascii"), hex(im.address)])
+    try:
+        for im in imps.imports:
+            allStrings.append([im.name.decode("ascii"), hex(im.address)])
+    except:
+        continue
 
 #--------------------------------------------------------------------- Keywords for categorized scanning
 regarr = open(f"{sc0pe_path}/Systems/Windows/Registry.txt", "r").read().split("\n")
