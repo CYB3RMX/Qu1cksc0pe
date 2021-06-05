@@ -167,7 +167,7 @@ def AndroLibScanner(target_file):
 
     # Printing area
     if yara_matches != []:
-        print(f"\n{foundS} Matched Rules for: {green}{target_file}{white}\n")
+        print(f"{foundS} Matched Rules for: {green}{target_file}{white}\n")
         yara_match_indicator += 1
         for rul in yara_matches:
             print(f"{magenta}>>>>{white} {rul}")
@@ -186,22 +186,27 @@ def MultiYaraScanner(targetAPK):
     conf.read(f"{sc0pe_path}/Systems/Android/libScanner.conf")
     decompiler_path = conf["Decompiler"]["decompiler"]
 
-    # Executing decompiler...
-    os.system(f"{decompiler_path} -q -d LibScope {targetAPK}")
+    # Check if the decompiler exist on system
+    if os.path.exists(decompiler_path):
+        # Executing decompiler...
+        os.system(f"{decompiler_path} -q -d LibScope {targetAPK}")
 
-    # Scan for library files and analyze them
-    path = "LibScope/resources/"
-    fnames = []
-    for root, d_names, f_names in os.walk(path):
-        for ff in f_names:
-            fnames.append(os.path.join(root, ff))
-    if fnames != []:
-        for extens in fnames:
-            if os.path.splitext(extens)[1] == ".so":
-                lib_files_indicator += 1
-                AndroLibScanner(target_file=extens)
-    if lib_files_indicator == 0:
-        print(f"{errorS} Not any library files found for analysis.")
+        # Scan for library files and analyze them
+        path = "LibScope/resources/"
+        fnames = []
+        for root, d_names, f_names in os.walk(path):
+            for ff in f_names:
+                fnames.append(os.path.join(root, ff))
+        if fnames != []:
+            for extens in fnames:
+                if os.path.splitext(extens)[1] == ".so":
+                    lib_files_indicator += 1
+                    AndroLibScanner(target_file=extens)
+
+        if lib_files_indicator == 0:
+            print(f"{errorS} Not any library files found for analysis.")
+    else:
+        print(f"{errorS} Decompiler({green}JADX{white}) not found. Skipping...")
 
 # Scan files with quark-engine
 def Quarked(targetAPK):
@@ -409,6 +414,10 @@ if __name__ == '__main__':
 
         # Deep scanner
         DeepScan(parsed)
+
+        # Yara matches
+        print(f"\n{infoS} Performing YARA rule matching...")
+        AndroLibScanner(target_file=targetAPK)
 
         # Decompiling and scanning libraries
         print(f"\n{infoS} Performing library analysis...")
