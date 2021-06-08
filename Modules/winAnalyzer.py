@@ -2,6 +2,7 @@
 
 import os
 import sys
+import json
 try:
     from prettytable import PrettyTable
 except:
@@ -214,6 +215,7 @@ def Analyzer():
                     allFuncs += 1
 
     # printing categorized strings
+    import_indicator = 0
     for key in dictCateg:
         if dictCateg[key] != []:
 
@@ -228,6 +230,7 @@ def Analyzer():
                     pass
                 else:
                     tables.add_row([f"{red}{func[0]}{white}", f"{red}{func[1]}{white}"])
+                    import_indicator += 1
 
                     # Logging for summary table
                     if key == "Registry":
@@ -261,6 +264,11 @@ def Analyzer():
             print(tables)
             tables.clear_rows()
 
+    # If there is no function imported in target executable
+    if import_indicator == 0:
+        print(f"{errorS} There is no function/API imports found.")
+        print(f"{magenta}>>{white} Try '{green}--packer{white}' or '{green}--lang{white}' to see additional info about target file.\n")
+
     # gathering extracted dll files
     try:
         dllTable.field_names = [f"Linked {green}DLL{white} Files"]
@@ -270,6 +278,24 @@ def Analyzer():
         print(dllTable)
     except:
         pass
+
+    # MWCFG zone
+    print(f"\n{infoS} Searching for configs from {green}mwcfg.info{white}...")
+    try:
+        os.system(f"curl -s -X POST --upload-file {fileName} https://mwcfg.info/ > mwcfg.json")
+        if os.path.exists("mwcfg.json"):
+            mwcfg_data = open("mwcfg.json")
+            mwcfg = json.loads(mwcfg_data.read())
+            if mwcfg["configs"] != []:
+                print(mwcfg["configs"])
+            else:
+                print(f"{errorS} There is no data for {green}{fileName}{white}")
+            os.remove("mwcfg.json")
+        else:
+            print(f"{errorS} An error occured while querying the file. Skipping...")
+    except:
+        print(f"{errorS} An error occured while querying the file. Skipping...")
+        os.remove("mwcfg.json")
 
     # Resource scanner zone
     print(f"\n{infoS} Performing magic number analysis...")

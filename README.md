@@ -19,9 +19,10 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>05/06/2021</b>
-- [X] ```Windows Analyzer``` and ```Android Analyzer``` modules are upgraded.
+<b>08/06/2021</b>
+- [X] Added ```Malware Config Extraction``` to ```Windows Analyzer``` and ```Linux Analyzer``` modules. Now Qu1cksc0pe can look for malware configurations via ```https://mwcfg.info```
 - [X] Added more YARA rules.
+- [X] Bug fixes.
 
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
