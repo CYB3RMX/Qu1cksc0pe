@@ -19,8 +19,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>08/06/2021</b>
-- [X] Added ```Malware Config Extraction``` to ```Windows Analyzer``` and ```Linux Analyzer``` modules. Now Qu1cksc0pe can look for malware configurations via ```https://mwcfg.info```
+<b>22/06/2021</b>
+- [X] ```Windows Analyzer``` module is upgraded. Now Qu1cksc0pe can look for YARA rule matches in Windows binaries.
 - [X] Added more YARA rules.
 - [X] Bug fixes.
 

@@ -171,7 +171,7 @@ def AndroLibScanner(target_file):
         yara_match_indicator += 1
         for rul in yara_matches:
             print(f"{magenta}>>>>{white} {rul}")
-            yaraTable.field_names = [f"{green}Offset{white}", f"{green}Matched String{white}"]
+            yaraTable.field_names = [f"{green}Offset{white}", f"{green}Matched String/Byte{white}"]
             for mm in rul.strings:
                 yaraTable.add_row([f"{hex(mm[0])}", f"{str(mm[2])}"])
             print(f"{yaraTable}\n")

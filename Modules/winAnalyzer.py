@@ -3,6 +3,7 @@
 import os
 import sys
 import json
+import configparser
 try:
     from prettytable import PrettyTable
 except:
@@ -34,6 +35,12 @@ except:
     print("Error: >capstone< module not found.")
     sys.exit(1)
 
+try:
+    import yara
+except:
+    print("Error: >yara< module not found.")
+    sys.exit(1)
+
 #--------------------------------------------- Getting name of the file for statistics
 fileName = str(sys.argv[1])
 
@@ -47,6 +54,7 @@ magenta = Fore.LIGHTMAGENTA_EX
 
 #--------------------------------------------- Legends
 infoS = f"{cyan}[{red}*{cyan}]{white}"
+foundS = f"{cyan}[{red}+{cyan}]{white}"
 errorS = f"{cyan}[{red}!{cyan}]{white}"
 
 #--------------------------------------------- Gathering Qu1cksc0pe path variable
@@ -54,13 +62,17 @@ sc0pe_path = open(".path_handler", "r").read()
 
 #--------------------------------------------- Gathering all function imports from binary
 allStrings = []
-binaryfile = pf.PE(fileName)
-for imps in binaryfile.DIRECTORY_ENTRY_IMPORT:
-    try:
-        for im in imps.imports:
-            allStrings.append([im.name.decode("ascii"), hex(im.address)])
-    except:
-        continue
+try:
+    binaryfile = pf.PE(fileName)
+    for imps in binaryfile.DIRECTORY_ENTRY_IMPORT:
+        try:
+            for im in imps.imports:
+                allStrings.append([im.name.decode("ascii"), hex(im.address)])
+        except:
+            continue
+except:
+    print(f"{errorS} Couldn\'t locate import entries. Quitting...")
+    sys.exit(1)
 
 #--------------------------------------------------------------------- Keywords for categorized scanning
 regarr = open(f"{sc0pe_path}/Systems/Windows/Registry.txt", "r").read().split("\n")
@@ -196,6 +208,45 @@ def Disassembler(executable):
     savestat.writelines(str(assemblyTable_func_calls))
     return fcalls
 
+#------------------------------------ Yara rule matcher
+def WindowsYara(target_file):
+    yara_match_indicator = 0
+    # Parsing config file to get rule path
+    conf = configparser.ConfigParser()
+    conf.read(f"{sc0pe_path}/Systems/Windows/windows.conf")
+    rule_path = conf["Rule_PATH"]["rulepath"]
+    finalpath = f"{sc0pe_path}/{rule_path}"
+    allRules = os.listdir(finalpath)
+
+    # Summary table
+    yaraTable = PrettyTable()
+
+    # This array for holding and parsing easily matched rules
+    yara_matches = []
+    for rul in allRules:
+        try:
+            rules = yara.compile(f"{finalpath}{rul}")
+            tempmatch = rules.match(target_file)
+            if tempmatch != []:
+                yara_matches.append(tempmatch[0])
+        except:
+            continue
+
+    # Printing area
+    if yara_matches != []:
+        print(f"\n{foundS} Matched Rules for: {green}{target_file}{white}")
+        yara_match_indicator += 1
+        for rul in yara_matches:
+            print(f"{magenta}>>>>{white} {rul}")
+            yaraTable.field_names = [f"{green}Offset{white}", f"{green}Matched String/Byte{white}"]
+            for mm in rul.strings:
+                yaraTable.add_row([f"{hex(mm[0])}", f"{str(mm[2])}"])
+            print(f"{yaraTable}\n")
+            yaraTable.clear_rows()
+
+    if yara_match_indicator == 0:
+        print(f"{errorS} Not any rules matched for {green}{target_file}{white}.\n")
+
 #------------------------------------ Defining function
 def Analyzer():
     # Creating tables
@@ -278,6 +329,10 @@ def Analyzer():
         print(dllTable)
     except:
         pass
+
+    # Yara rule match
+    print(f"\n{infoS} Performing YARA rule matching...")
+    WindowsYara(target_file=fileName)
 
     # MWCFG zone
     print(f"\n{infoS} Searching for configs from {green}mwcfg.info{white}...")
