@@ -161,7 +161,9 @@ def AndroLibScanner(target_file):
             rules = yara.compile(f"{rule_path}{rul}")
             tempmatch = rules.match(target_file)
             if tempmatch != []:
-                yara_matches.append(tempmatch[0])
+                for matched in tempmatch:
+                    if matched.strings != []:
+                        yara_matches.append(matched)
         except:
             continue
 
