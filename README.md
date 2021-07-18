@@ -24,6 +24,9 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - [X] Added more YARA rules.
 - [X] Bug fixes.
 
+# Available On
+![blackarch_banner](.animations/blackarch.png)
+
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
 
