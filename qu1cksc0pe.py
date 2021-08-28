@@ -380,7 +380,7 @@ def Qu1cksc0pe():
 try:
     Qu1cksc0pe()
     # Cleaning up...
-    junkFiles = ["temp.txt", ".path_handler", "elves.txt"]
+    junkFiles = ["temp.txt", ".path_handler", "elves.txt", ".target-file.txt", ".target-folder.txt"]
     for junk in junkFiles:
         if os.path.exists(junk):
             os.remove(junk)
@@ -388,7 +388,7 @@ try:
     if os.path.exists("LibScope"):
         os.system("rm -rf LibScope/")
 except:
-    junkFiles = ["temp.txt", ".path_handler", "elves.txt"]
+    junkFiles = ["temp.txt", ".path_handler", "elves.txt", ".target-file.txt", ".target-folder.txt"]
     for junk in junkFiles:
         if os.path.exists(junk):
             os.remove(junk)
