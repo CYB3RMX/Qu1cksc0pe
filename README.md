@@ -94,6 +94,10 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_executable --lang```<br>
 ![animation](.animations/langDet.gif)
 
+## Interactive shell
+<b>Usage</b>: ```python3 qu1cksc0pe.py --console```<br>
+![animation](.animations/console.gif)
+
 ## Domain
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --domain```<br><br>
 
