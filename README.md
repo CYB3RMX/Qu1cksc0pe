@@ -19,10 +19,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>22/06/2021</b>
-- [X] ```Windows Analyzer``` module is upgraded. Now Qu1cksc0pe can look for YARA rule matches in Windows binaries.
-- [X] Added more YARA rules.
-- [X] Bug fixes.
+<b>28/08/2021</b>
+- [X] Added interactive shell. Now you can use Qu1cksc0pe on it's own shell!!
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
@@ -45,6 +43,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - ```pyaxmlparser``` => <i>Gathering informations from target APK files.</i>
 - ```yara-python``` => <i>Android library scanning with Yara rules.</i>
 - ```capstone``` => <i>Disassembling binaries.</i>
+- ```prompt_toolkit``` => <i>Interactive shell.</i>
 
 <br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
 <b>Gathering other dependencies</b>:
