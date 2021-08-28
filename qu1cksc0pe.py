@@ -109,6 +109,8 @@ parser.add_argument("--domain", required=False,
 parser.add_argument("--packer", required=False,
                     help="Check if your file is packed with common packers.",
                     action="store_true")
+parser.add_argument("--console", required=False,
+                    help="Use Qu1cksc0pe on interactive shell.", action="store_true")
 parser.add_argument("--install", required=False,
                     help="Install or Uninstall Qu1cksc0pe.", action="store_true")
 parser.add_argument("--key_init", required=False,
@@ -301,6 +303,11 @@ def Qu1cksc0pe():
         if args.folder is not None:
             print(f"{errorS} That argument has not supported for folder scanning.")
             sys.exit(1)
+
+    # Interactive shell
+    if args.console:
+        command = f"python3 {sc0pe_path}/Modules/console.py"
+        os.system(command)
 
     # entering VT API key
     if args.key_init:
