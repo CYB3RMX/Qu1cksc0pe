@@ -79,6 +79,14 @@ console_commands = NestedCompleter.from_nested_dict({
         "android",
         "osx"
     },
+    "set": {
+        "target-file",
+        "target-folder"
+    },
+    "show": {
+        "target-file",
+        "target-folder"
+    },
     "document": None,
     "language": None,
     "packer": None,
@@ -90,103 +98,164 @@ console_commands = NestedCompleter.from_nested_dict({
 try:
     while True:
         con_command = prompt(console_output, style=console_style, completer=console_commands)
+
+        # Exit and clear everything
         if con_command == "exit":
-            junkFiles = ["temp.txt", ".path_handler", "elves.txt"]
+            junkFiles = ["temp.txt", ".path_handler", "elves.txt", ".target-file.txt", ".target-folder.txt"]
             for junk in junkFiles:
                 if os.path.exists(junk):
                     os.remove(junk)
             print(f"\n{infoS} Goodbye :3")
             sys.exit(0)
+
+        # Simple clear command
         elif con_command == "clear":
             os.system("clear")
 
+        # Specifying target file
+        elif con_command == "set target-file":
+            filename = str(input(f"{foundS} Enter full path of target file: "))
+            if os.path.isfile(filename):
+                with open(".target-file.txt", "w") as tfile:
+                    tfile.write(filename)
+            else:
+                print(f"{errorS} Please enter a correct file.")
+
+        # Specifying target folder
+        elif con_command == "set target-folder":
+            foldername = str(input(f"{foundS} Enter full path of target folder: "))
+            if os.path.isdir(foldername):
+                with open(".target-folder.txt", "w") as tfolder:
+                    tfolder.write(foldername)
+            else:
+                print(f"{errorS} Please enter a correct folder.")
+
+        # Show file or folder
+        elif con_command == "show target-file":
+            if os.path.exists(".target-file.txt"):
+                tfile = open(".target-file.txt", "r").read()
+                print(f"{foundS} Target file: {tfile}")
+            else:
+                print(f"{errorS} There is no target file.")
+
+        elif con_command == "show target-folder":
+            if os.path.exists(".target-folder.txt"):
+                tfolder = open(".target-folder.txt", "r").read()
+                print(f"{foundS} Target folder: {tfolder}")
+            else:
+                print(f"{errorS} There is no target folder.")
+
         # Windows analysis
         elif con_command == "analyze windows":
-            filename = str(input(f"{foundS} Enter full path of target file: "))
-            print(f"\n{infoS} Analyzing: {green}{filename}{white}")
-            fileType = str(pr.magic_file(filename))
-            if "Windows Executable" in fileType or ".msi" in fileType or ".dll" in fileType or ".exe" in fileType:
-                print(f"{infoS} Target OS: {green}Windows{white}\n")
-                command = f"python3 {sc0pe_path}/Modules/winAnalyzer.py {filename}"
-                os.system(command)
+            if os.path.exists(".target-file.txt"):
+                filename = open(".target-file.txt", "r").read()
+                print(f"\n{infoS} Analyzing: {green}{filename}{white}")
+                fileType = str(pr.magic_file(filename))
+                if "Windows Executable" in fileType or ".msi" in fileType or ".dll" in fileType or ".exe" in fileType:
+                    print(f"{infoS} Target OS: {green}Windows{white}\n")
+                    command = f"python3 {sc0pe_path}/Modules/winAnalyzer.py {filename}"
+                    os.system(command)
+            else:
+                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
 
         # Linux Analysis
         elif con_command == "analyze linux":
-            filename = str(input(f"{foundS} Enter full path of target file: "))
-            print(f"\n{infoS} Analyzing: {green}{filename}{white}")
-            fileType = str(pr.magic_file(filename))
-            if "ELF" in fileType:
-                command = f"strings --all {filename} > temp.txt"
-                os.system(command)
-                print(f"{infoS} Target OS: {green}Linux{white}\n")
-                command = f"readelf -a {filename} > elves.txt"
-                os.system(command)
-                command = f"python3 {sc0pe_path}/Modules/linAnalyzer.py {filename}"
-                os.system(command)
-                os.remove(f"{sc0pe_path}/temp.txt")
+            if os.path.exists(".target-file.txt"):
+                filename = open(".target-file.txt", "r").read()
+                print(f"\n{infoS} Analyzing: {green}{filename}{white}")
+                fileType = str(pr.magic_file(filename))
+                if "ELF" in fileType:
+                    command = f"strings --all {filename} > temp.txt"
+                    os.system(command)
+                    print(f"{infoS} Target OS: {green}Linux{white}\n")
+                    command = f"readelf -a {filename} > elves.txt"
+                    os.system(command)
+                    command = f"python3 {sc0pe_path}/Modules/linAnalyzer.py {filename}"
+                    os.system(command)
+                    os.remove(f"{sc0pe_path}/temp.txt")
+            else:
+                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
 
         # MacOSX Analysis
         elif con_command == "analyze osx":
-            filename = str(input(f"{foundS} Enter full path of target file: "))
-            print(f"\n{infoS} Analyzing: {green}{filename}{white}")
-            fileType = str(pr.magic_file(filename))
-            if "Mach-O" in fileType:
-                command = f"strings --all {filename} > temp.txt"
-                os.system(command)
-                print(f"{infoS} Target OS: {green}OSX{white}\n")
-                command = f"python3 {sc0pe_path}/Modules/osXAnalyzer.py {filename}"
-                os.system(command)
-                os.remove(f"{sc0pe_path}/temp.txt")
+            if os.path.exists(".target-file.txt"):
+                filename = open(".target-file.txt", "r").read()
+                print(f"\n{infoS} Analyzing: {green}{filename}{white}")
+                fileType = str(pr.magic_file(filename))
+                if "Mach-O" in fileType:
+                    command = f"strings --all {filename} > temp.txt"
+                    os.system(command)
+                    print(f"{infoS} Target OS: {green}OSX{white}\n")
+                    command = f"python3 {sc0pe_path}/Modules/osXAnalyzer.py {filename}"
+                    os.system(command)
+                    os.remove(f"{sc0pe_path}/temp.txt")
+            else:
+                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
 
         # Android Analysis
         elif con_command == "analyze android":
-            filename = str(input(f"{foundS} Enter full path of target file: "))
-            print(f"\n{infoS} Analyzing: {green}{filename}{white}")
-            fileType = str(pr.magic_file(filename))
-            if "PK" in fileType and "Java archive" in fileType:
-                look = pyaxmlparser.APK(filename)
-                if look.is_valid_APK() == True:
-                    command = f"strings --all {filename} > temp.txt"
-                    os.system(command)
-                    print(f"{infoS} Target OS: {green}Android{white}")
-                    command = f"apkid -j {filename} > apkid.json"
-                    os.system(command)
-                    command = f"python3 {sc0pe_path}/Modules/apkAnalyzer.py {filename}"
-                    os.system(command)
-                    if os.path.exists("apkid.json"):
-                        os.remove("apkid.json")
-                    os.remove(f"{sc0pe_path}/temp.txt")
+            if os.path.exists(".target-file.txt"):
+                filename = open(".target-file.txt", "r").read()
+                print(f"\n{infoS} Analyzing: {green}{filename}{white}")
+                fileType = str(pr.magic_file(filename))
+                if "PK" in fileType and "Java archive" in fileType:
+                    look = pyaxmlparser.APK(filename)
+                    if look.is_valid_APK() == True:
+                        command = f"strings --all {filename} > temp.txt"
+                        os.system(command)
+                        print(f"{infoS} Target OS: {green}Android{white}")
+                        command = f"apkid -j {filename} > apkid.json"
+                        os.system(command)
+                        command = f"python3 {sc0pe_path}/Modules/apkAnalyzer.py {filename}"
+                        os.system(command)
+                        if os.path.exists("apkid.json"):
+                            os.remove("apkid.json")
+                        os.remove(f"{sc0pe_path}/temp.txt")
+                else:
+                    print(f"{errorS} Qu1cksc0pe doesn\'t support archive analysis for now ;)")
+                    sys.exit(1)
             else:
-                print(f"{errorS} Qu1cksc0pe doesn\'t support archive analysis for now ;)")
-                sys.exit(1)
+                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
 
         # Document Analysis
         elif con_command == "document":
-            filename = str(input(f"{foundS} Enter full path of target file: "))
-            print(f"{infoS} Analyzing: {green}{filename}{white}")
-            command = f"python3 {sc0pe_path}/Modules/nonExecAnalyzer.py {filename}"
-            os.system(command)
+            if os.path.exists(".target-file.txt"):
+                filename = open(".target-file.txt", "r").read()
+                print(f"{infoS} Analyzing: {green}{filename}{white}")
+                command = f"python3 {sc0pe_path}/Modules/nonExecAnalyzer.py {filename}"
+                os.system(command)
+            else:
+                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
 
         # Language Detection
         elif con_command == "language":
-            filename = str(input(f"{foundS} Enter full path of target file: "))
-            command = f"strings --all {filename} > temp.txt"
-            os.system(command)
-            command = f"python3 {sc0pe_path}/Modules/languageDetect.py {filename}"
-            os.system(command)
-            os.remove(f"{sc0pe_path}/temp.txt")
+            if os.path.exists(".target-file.txt"):
+                filename = open(".target-file.txt", "r").read()
+                command = f"strings --all {filename} > temp.txt"
+                os.system(command)
+                command = f"python3 {sc0pe_path}/Modules/languageDetect.py {filename}"
+                os.system(command)
+                os.remove(f"{sc0pe_path}/temp.txt")
+            else:
+                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
 
         # Packer Detection
         elif con_command == "packer":
-            filename = str(input(f"{foundS} Enter full path of target file: "))
-            command = f"python3 {sc0pe_path}/Modules/packerAnalyzer.py {filename} --single"
-            os.system(command)
+            if os.path.exists(".target-file.txt"):
+                filename = open(".target-file.txt", "r").read()
+                command = f"python3 {sc0pe_path}/Modules/packerAnalyzer.py {filename} --single"
+                os.system(command)
+            else:
+                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
 
         # Hash Scanner
         elif con_command == "hash-scan":
-            foldername = str(input(f"{foundS} Enter full path of target folder: "))
-            command = f"python3 {sc0pe_path}/Modules/hashScanner.py {foldername} --multiscan"
-            os.system(command)
+            if os.path.exists(".target-folder.txt"):
+                foldername = open(".target-folder.txt", "r").read()
+                command = f"python3 {sc0pe_path}/Modules/hashScanner.py {foldername} --multiscan"
+                os.system(command)
+            else:
+                print(f"{errorS} You must specify target folder with {green}set target-folder{white} command.")
 
         # Wrong command
         else:
