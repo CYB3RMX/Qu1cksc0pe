@@ -19,8 +19,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>28/08/2021</b>
-- [X] Added interactive shell. Now you can use Qu1cksc0pe on it's own shell!!
+<b>29/08/2021</b>
+- [X] ```Interactive shell``` upgraded.
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
