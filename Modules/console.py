@@ -69,7 +69,7 @@ console_output = [
 
 
 # Message
-print(f"{infoS} Entering interactive shell mode...\n")
+print(f"{infoS} Entering interactive shell mode...")
 
 # Parsing commands
 console_commands = NestedCompleter.from_nested_dict({
@@ -83,10 +83,6 @@ console_commands = NestedCompleter.from_nested_dict({
         "target-file",
         "target-folder"
     },
-    "show": {
-        "target-file",
-        "target-folder"
-    },
     "document": None,
     "language": None,
     "packer": None,
@@ -97,6 +93,20 @@ console_commands = NestedCompleter.from_nested_dict({
 
 try:
     while True:
+        # Print target file or folder if it is specified
+        if os.path.exists(".target-file.txt"):
+            targ_file = open(".target-file.txt", "r").read()
+            con_targ1 = os.path.split(targ_file)[1]
+        else:
+            con_targ1 = f"{red}Not specified{white}."
+
+        if os.path.exists(".target-folder.txt"):
+            targ_fold = open(".target-folder.txt", "r").read()
+        else:
+            targ_fold = f"{red}Not specified{white}."
+
+        # Console output
+        print(f"\n{cyan}[{white}Target File: {green}{con_targ1}{white} {yellow}|{white} Target Folder: {green}{targ_fold}{cyan}]")
         con_command = prompt(console_output, style=console_style, completer=console_commands)
 
         # Exit and clear everything
@@ -129,21 +139,6 @@ try:
                     tfolder.write(foldername)
             else:
                 print(f"{errorS} Please enter a correct folder.")
-
-        # Show file or folder
-        elif con_command == "show target-file":
-            if os.path.exists(".target-file.txt"):
-                tfile = open(".target-file.txt", "r").read()
-                print(f"{foundS} Target file: {tfile}")
-            else:
-                print(f"{errorS} There is no target file.")
-
-        elif con_command == "show target-folder":
-            if os.path.exists(".target-folder.txt"):
-                tfolder = open(".target-folder.txt", "r").read()
-                print(f"{foundS} Target folder: {tfolder}")
-            else:
-                print(f"{errorS} There is no target folder.")
 
         # Windows analysis
         elif con_command == "analyze windows":
