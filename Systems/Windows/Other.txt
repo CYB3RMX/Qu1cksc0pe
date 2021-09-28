@@ -163,3 +163,4 @@ System.Drawing.Bitmap
 System.Windows.Forms.Form
 System.Windows.Forms
 VideoGame_System
+SHBrowseForFolderW

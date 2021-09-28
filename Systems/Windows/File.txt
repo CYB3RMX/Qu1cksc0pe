@@ -167,3 +167,7 @@ SHBrowseForFolderA
 SearchPathW
 get_SystemDirectory
 CreateDirectoryW
+SHFileOperationW
+ShellExecuteW
+SHGetPathFromIDListW
+SHGetSpecialFolderLocation
