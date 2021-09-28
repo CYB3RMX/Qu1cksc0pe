@@ -5,10 +5,8 @@ prettytable
 tqdm
 colorama
 oletools
-spacy
 pefile
 quark-engine
 pyaxmlparser
 yara-python
-capstone
 prompt_toolkit

@@ -1,16 +1,7 @@
 #!/usr/bin/python3
 
-import os
+import re
 import sys
-import warnings
-from threading import Thread
-
-# Module for natural language processing
-try:
-   import spacy
-except:
-   print("Error: >spacy< module not found.")
-   sys.exit(1)
 
 # Module for colors
 try:
@@ -21,9 +12,6 @@ except:
 
 # All strings
 allStrings = open("temp.txt", "r").read().split('\n')
-
-# Suppressing spacy warnings
-warnings.filterwarnings("ignore")
 
 # Colors
 red = Fore.LIGHTRED_EX
@@ -36,116 +24,39 @@ magenta = Fore.LIGHTMAGENTA_EX
 infoS = f"{cyan}[{red}*{cyan}]{white}"
 errorS = f"{cyan}[{red}!{cyan}]{white}"
 
-# Handling language package
-def LangNotFound():
-   print(f"{errorS} Language package not found. Without this u wont be able to analyze strings.")
-   choose = str(input("=> Should I install it for you [Y/n]?: "))
-   if choose == 'Y' or choose == 'y':
-      try:
-         os.system("python3 -m spacy download en")
-         print(f"{infoS} Language package downloaded.")
-         sys.exit(0)
-      except:
-         sys.exit(0)
-   else:
-      print(f"{errorS} Without language package this module is wont work.")
-      sys.exit(1)
+# Regex zone (Thanks to: https://github.com/dwisiswant0 for regex strings)
+regex_dict = {
+   "Amazon_AWS_Access_Key_ID": r"([^A-Z0-9]|^)(AKIA|A3T|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{12,}",
+   "Amazon_AWS_S3_Bucket": r"//s3-[a-z0-9-]+\\.amazonaws\\.com/[a-z0-9._-]+",
+   "Discord_BOT_Token": r"((?:N|M|O)[a-zA-Z0-9]{23}\\.[a-zA-Z0-9-_]{6}\\.[a-zA-Z0-9-_]{27})$",
+   "Facebook_Secret_Key": r"([f|F][a|A][c|C][e|E][b|B][o|O][o|O][k|K]|[f|F][b|B])(.{0,20})?['\"][0-9a-f]{32}",
+   "Bitcoin_Wallet_Address": r"^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$",
+   "Firebase": r"[a-z0-9.-]+\\.firebaseio\\.com",
+   "GitHub": r"[g|G][i|I][t|T][h|H][u|U][b|B].*['|\"][0-9a-zA-Z]{35,40}['|\"]",
+   "Google_API_Key": r"AIza[0-9A-Za-z\\-_]{35}",
+   "Heroku_API_Key": r"[h|H][e|E][r|R][o|O][k|K][u|U].*[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}",
+   "IP_Address": r"(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])",
+   "URL": r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+",
+   "Monero_Wallet_Address": r"4[0-9AB][123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{93}",
+   "Mac_Address": r"(([0-9A-Fa-f]{2}[:]){5}[0-9A-Fa-f]{2}|([0-9A-Fa-f]{2}[-]){5}[0-9A-Fa-f]{2}|([0-9A-Fa-f]{4}[\\.]){2}[0-9A-Fa-f]{4})$",
+   "Mailto": r"(?<=mailto:)[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9.-]+"
+}
 
-# Checking for language package existence
-try:
-   test = spacy.load("en_core_web_sm")
-except:
-   LangNotFound()
+# Main function
+def RegexScanner():
+   counter = 0
+   print(f"{infoS} Qu1cksc0pe is analyzing this file for possible domain strings. Please wait...\n")
+   for key in regex_dict:
+      for targ in allStrings:
+         try:
+            match = re.findall(str(regex_dict[key]), str(targ))
+            if match != []:
+               print(f"{cyan}[{red}{key}{cyan}]>{white} {match[0]}")
+               counter += 1
+         except:
+            continue
+   if counter == 0:
+      print(f"{errorS} Not any possible domain strings found.")
 
-# Handling url analyzing
-def URLAnalyzer():
-   # Our example url string
-   ourUrl = "http://crl3.digicert.com"
-
-   # Parsing string
-   try:
-      nlp = spacy.load("en_core_web_sm")
-      url = nlp(ourUrl)
-   except:
-      LangNotFound()
-
-   # Lets scan!!
-   url_indicator = 0
-   for urls in allStrings:
-      # Parsing and calculaing target string's similarity
-      target = nlp(urls)
-      if url.similarity(target) >= 0.3:
-         if "http" in urls or "https" in urls:
-            print(f"{cyan}({magenta}URL{cyan})->{white} {urls}")
-            url_indicator += 1
-   if url_indicator == 0:
-      print(f"{errorS} Not any possible URL strings found.")
-
-# Handling ip address analyzing
-def IPAddrAnalyzer():
-   # Example ip shapes
-   ipShapes = ['ddd.ddd.ddd.ddd', 'dd.ddd.ddd.ddd', 'd.ddd.ddd.ddd',
-               'ddd.d.ddd.ddd', 'ddd.dd.ddd.ddd', 'ddd.ddd.d.ddd',
-               'ddd.ddd.dd.ddd', 'ddd.ddd.ddd.d', 'ddd.ddd.ddd.dd',
-               'd.d.d.d', 'dd.d.d.d', 'ddd.d.d.d', 'd.dd.d.d', 'd.ddd.d.d',
-               'd.d.dd.d', 'd.d.ddd.d', 'd.d.d.dd', 'd.d.d.ddd', 'dd.dd.dd.dd',
-               'd.dd.dd.dd', 'dd.d.dd.dd', 'dd.dd.d.dd', 'dd.dd.dd.d', 'ddd.ddd.d.d',
-               'ddd.ddd.dd.dd', 'ddd.dd.dd.dd', 'ddd.ddd.d.dd', 'd.d.dd.dd', 'ddd.dd.dd.ddd',
-               'd.dd.ddd.ddd', 'dd.ddd.ddd.dd', 'dd.d.ddd.dd', 'dd.ddd.dd.ddd', 'dd.ddd.d.d',
-               'dd.ddd.dd.d']
-
-   # Lets scan!!
-   ip_indicator = 0
-   nlp = spacy.load("en_core_web_sm")
-   for ipaddr in allStrings:
-      # Parsing target string's shapes
-      targstr = nlp(ipaddr)
-      for token in targstr:
-         if str(token.shape_) in ipShapes:
-            print(f"{cyan}({magenta}IP{cyan})->{white} {ipaddr}")
-            ip_indicator += 1
-   if ip_indicator == 0:
-      print(f"{errorS} Not any possible IP strings found.")
-
-# Email address analyzing
-def EmailCatcher():
-   # Example email
-   exEmail = "johnsmith@gmail.com"
-
-   # Domains
-   emDom = ['.to', '.ch', '.com', '.edu', '.gov', '.k12', '.us',
-            '.pro', '.mo', '.ed', '.iupui', '.ru', '.uk', '.net',
-            '.de', '.org']
-
-   # Parsing string
-   try:
-      nlp = spacy.load("en_core_web_sm")
-      my_mail = nlp(exEmail)
-   except:
-      LangNotFound()
-   
-   # Scan zone
-   ema_indicator = 0
-   for ems in allStrings:
-      # Parsing string
-      look = nlp(ems)
-      if my_mail.similarity(look) >= 0.28:
-         for ext in emDom:
-            if ext in ems and "@" in ems:
-               print(f"{cyan}({magenta}EMAIL{cyan})->{white} {ems}")
-               ema_indicator += 1
-   if ema_indicator == 0:
-      print(f"{errorS} Not any possible EMAIL strings found.")
-
-if __name__ == '__main__':
-   print(f"{infoS} Qu1cksc0pe is analyzing this file for possible domain strings. It will take a while...\n")
-   try:
-      th1 = Thread(target=URLAnalyzer)
-      th2 = Thread(target=IPAddrAnalyzer)
-      th3 = Thread(target=EmailCatcher)
-      th1.start()
-      th2.start()
-      th3.start()
-   except:
-      print(f"{errorS} An exception occured while analyzing file.")
-      sys.exit(1)
+#Execution zone
+RegexScanner()

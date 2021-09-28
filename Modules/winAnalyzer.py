@@ -29,13 +29,6 @@ except:
     sys.exit(1)
 
 try:
-    from capstone import *
-    from capstone.x86 import *
-except:
-    print("Error: >capstone< module not found.")
-    sys.exit(1)
-
-try:
     import yara
 except:
     print("Error: >yara< module not found.")
@@ -148,65 +141,6 @@ regdict = {
     "COMObject": comarr, "Cryptography": cryptarr,
     "Information Gathering": datarr, "Other/Unknown": otharr
 }
-
-#--------------------------------------- A function that locates entry point of base code address
-def GetMainCode(sections, base_of_code):
-    '''
-    Parameter 1: Sections of a program
-    Parameter 2: Address of the first instruction of the program
-    '''
-    addresses = []
-    
-    # Extracting all sections from the target executable
-    for section in sections:
-        addresses.append(section.VirtualAddress)
-    
-    # Locating and parsing address of base_of_code
-    if base_of_code in addresses:
-        return sections[addresses.index(base_of_code)]
-    else:
-        addresses.append(base_of_code)
-        addresses.sort()
-        if addresses.index(base_of_code) != 0:
-            return sections[addresses.index(base_of_code)-1]
-        else:
-            return None
-
-#------------------------------------- A function that disassembles binary's base code address and locates possible function calls
-def Disassembler(executable):
-    fcalls = 0
-
-    assemblyTable_func_calls = PrettyTable()
-    assemblyTable_func_calls.field_names = ["Address", "Mnemonic", "Operands"]
-    # Gathering address of main code section
-    main_code = GetMainCode(executable.sections, executable.OPTIONAL_HEADER.BaseOfCode)
-    
-    # Configurating disassembler options
-    mode = Cs(CS_ARCH_X86, CS_MODE_32)
-    mode.detail = True
-    last_address = 0
-    last_size = 0
-    
-    # Specifying beginning and ending addresses
-    begin = main_code.PointerToRawData
-    end = begin+main_code.SizeOfRawData
-    
-    # Disassembling and locating possible function calls
-    while True:
-        data = executable.get_memory_mapped_image()[begin:end]
-        for ind in mode.disasm(data, begin):
-            if "call" in ind.mnemonic or "jmp" in ind.mnemonic:
-                fcalls += 1
-                assemblyTable_func_calls.add_row([hex(ind.address), ind.mnemonic, ind.op_str])
-            last_address = int(ind.address)
-            last_size = int(ind.size)
-        begin = max(int(last_address), begin)+last_size+1
-        if begin >= end:
-            break
-    print(f"{red}>!>{white} Assembly output is saved into '{green}assembly_output.txt{white}'.\n")
-    savestat = open(f"assembly_output.txt", "w")
-    savestat.writelines(str(assemblyTable_func_calls))
-    return fcalls
 
 #------------------------------------ Yara rule matcher
 def WindowsYara(target_file):
@@ -391,9 +325,7 @@ def Analyzer():
             peStatistics.add_row([sect.Name.decode().rstrip('\x00'), hex(sect.Misc_VirtualSize), hex(sect.VirtualAddress), hex(sect.SizeOfRawData), hex(sect.PointerToRawData), f"{red}{sect.get_entropy()}{white} (Possible obfuscation!!)"])
         else:
             peStatistics.add_row([sect.Name.decode().rstrip('\x00'), hex(sect.Misc_VirtualSize), hex(sect.VirtualAddress), hex(sect.SizeOfRawData), hex(sect.PointerToRawData), sect.get_entropy()])
-    assembly = Disassembler(pe)
     print(f"{magenta}>>{white} Time Date Stamp: {green}{datestamp}{white}")
-    print(f"{magenta}>>{white} Number of possible function calls in base of code: {green}{assembly}{white}")
     print(peStatistics)
 
     # Statistics zone
