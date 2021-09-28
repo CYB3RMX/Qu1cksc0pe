@@ -171,21 +171,6 @@ def Analyzer():
     if seg_indicator != 0:
         print(segTable)
 
-    # MWCFG zone
-    print(f"\n{infoS} Searching for configs from {green}mwcfg.info{white}...")
-    os.system(f"curl -s -X POST --upload-file {fileName} https://mwcfg.info/ > mwcfg.json")
-    if os.path.exists("mwcfg.json"):
-        mwcfg_data = open("mwcfg.json")
-        mwcfg = json.loads(mwcfg_data.read())
-        if mwcfg["configs"] != []:
-            print(mwcfg["configs"])
-        else:
-            print(f"{errorS} There is no data for {green}{fileName}{white}")
-        os.remove("mwcfg.json")
-    else:
-        print(f"{errorS} An error occured while querying the file. Skipping...")
-        os.remove("mwcfg.json")
-
     # Resource scanner zone
     print(f"\n{infoS} Performing magic number analysis...")
     resCounter = 0

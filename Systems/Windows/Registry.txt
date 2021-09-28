@@ -53,3 +53,4 @@ get_Registry
 DeleteSubKey
 DeleteSubKeyTree
 RegFlushKey
+RegEnumValueW

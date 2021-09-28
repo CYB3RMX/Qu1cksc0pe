@@ -165,3 +165,4 @@ VerQueryValueA
 EnumPrintersA
 DocumentPropertiesA
 GetPerAdapterInfo
+SHGetFileInfoW
