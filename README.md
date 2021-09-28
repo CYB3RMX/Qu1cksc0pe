@@ -19,8 +19,10 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>29/08/2021</b>
-- [X] ```Interactive shell``` upgraded.
+<b>28/09/2021</b>
+- [X] ```Disassembler function``` removed from ```Windows Analyzer``` module.
+- [X] ```NLP``` based domain scanning removed due errors/bugs.
+- [X] ```Domain Catcher``` module is upgraded.
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
@@ -38,11 +40,9 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - ```colorama``` => <i>Colored outputs.</i>
 - ```oletools``` => <i>Analyzing VBA Macros.</i>
 - ```pefile``` => <i>Gathering all information from PE files.</i>
-- ```spacy``` => <i>Natural Language Processing for string analysis.</i>
 - ```quark-engine``` => <i>Extracting IP addresses and URLs from APK files.</i>
 - ```pyaxmlparser``` => <i>Gathering informations from target APK files.</i>
 - ```yara-python``` => <i>Android library scanning with Yara rules.</i>
-- ```capstone``` => <i>Disassembling binaries.</i>
 - ```prompt_toolkit``` => <i>Interactive shell.</i>
 
 <br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>

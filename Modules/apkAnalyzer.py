@@ -3,9 +3,6 @@
 import json
 import sys
 import os
-import threading
-import queue
-import warnings
 import configparser
 
 # Module handling
@@ -25,18 +22,6 @@ try:
     from colorama import Fore, Style
 except:
     print("Error: >colorama< module not found.")
-    sys.exit(1)
-
-try:
-    import spacy
-except:
-    print("Error: >spacy< module not found.")
-    sys.exit(1)
-
-try:
-    import apkid
-except:
-    print("Error: >apkid< module not found.")
     sys.exit(1)
 
 try:
@@ -86,16 +71,6 @@ allStrings = open("temp.txt", "r").read().split('\n')
 # Gathering apkid tools output
 apkid_output = open("apkid.json", "r")
 data = json.load(apkid_output)
-
-# Lets get all suspicious strings
-susStrings = open(f"{sc0pe_path}/Systems/Android/suspicious.txt", "r").read().split('\n')
-
-# Ignoring spacy's warnings
-warnings.filterwarnings("ignore")
-
-# Queue
-global q
-q = queue.Queue()
 
 # Function for parsing apkid tool's output
 def ApkidParser(apkid_output):
@@ -330,49 +305,6 @@ def DeepScan(parsed):
     else:
         pass
 
-# Handling language package
-def LangNotFound():
-   print(f"{errorS} Language package not found. Without this u wont be able to analyze strings.")
-   choose = str(input("=> Should I install it for you [Y/n]?: "))
-   if choose == 'Y' or choose == 'y':
-      try:
-         os.system("python3 -m spacy download en_core_web_sm")
-         print(f"{infoS} Language package downloaded.")
-         sys.exit(0)
-      except:
-         sys.exit(0)
-   else:
-      print(f"\n{infoS} Continuing without string analysis...\n")
-      return False
-
-# Checking for language package existence if there is no package ask for user to install
-try:
-    test = spacy.load("en_core_web_sm")
-except:
-    anlyzed = LangNotFound()
-
-# APK string analyzer with NLP
-def Detailed():
-    # Our sample string to analyze
-    while not q.empty():
-        targetString = q.get()
-        try:
-            nlp = spacy.load("en_core_web_sm")
-            sample = nlp(targetString)
-        except:
-            LangNotFound()
-
-        # Lets analyze!!
-        for apkstr in allStrings:
-            # Parsing and calculating
-            testme = nlp(apkstr)
-            if testme.similarity(sample) > 0.8:
-                for token in testme:
-                    if token.pos_ == "PUNCT":
-                        pass
-                    else:
-                        print(f"{cyan}({magenta}*{cyan})->{white} {apkstr}")
-
 def GeneralInformation(targetAPK):
     print(f"{infoS} General Informations about {green}{targetAPK}{white}")
 
@@ -434,45 +366,5 @@ if __name__ == '__main__':
 
         # Quark scanner
         Quarked(targetAPK)
-
-        # Strings side
-        if anlyzed != False:
-            check = str(input(f"\n{infoS} Do you want to perform string analysis? It will take a while [Y/N]: "))
-            if check == "Y" or check == "y":
-                # Testing for language package existence
-                try:
-                    nlpTest = spacy.load("en_core_web_sm")
-                except:
-                    print(f"{errorS} Language package not found. Quitting!!")
-                    sys.exit(1)
-                
-                # Beginning for string analysis
-                print(f"{infoS} Analyzing interesting strings. It will take a while...\n")
-                
-                #Thread Number
-                threadNumber = 0
-                
-                # Create threads for every word in suspicious.txt
-                for sus in susStrings:
-                    q.put(sus)
-                    threadNumber += 1
-                
-                # Lets scan!!
-                ts = []
-                for i in range(0,threadNumber):
-                    try:
-                        t = threading.Thread(target=Detailed)
-                        ts.append(t)
-                        t.start()
-                    except:
-                        print(f"{errorS} Program terminated.")
-                        sys.exit(1)
-                
-                # Calling threads
-                for t in ts:
-                    t.join()
-            else:
-                print(f"{infoS} Goodbye..")
-                sys.exit(0)
     except KeyboardInterrupt:
         print(f"{errorS} An error occured. Press CTRL+C to exit.")
