@@ -1,12 +1,12 @@
 puremagic
-androguard
+androguard==3.4.0a1
 apkid
 prettytable
 tqdm
 colorama
 oletools
 pefile
-quark-engine
+quark-engine==21.8.1
 pyaxmlparser
 yara-python
-prompt_toolkit
+prompt_toolkit==3.0.19

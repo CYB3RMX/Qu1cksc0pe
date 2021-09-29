@@ -19,10 +19,8 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>28/09/2021</b>
-- [X] ```Disassembler function``` removed from ```Windows Analyzer``` module.
-- [X] ```NLP``` based domain scanning removed due errors/bugs.
-- [X] ```Domain Catcher``` module is upgraded.
+<b>29/09/2021</b>
+- [X] Python module conflicts has been fixed.
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
