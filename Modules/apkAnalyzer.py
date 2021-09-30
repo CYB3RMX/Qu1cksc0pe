@@ -4,6 +4,7 @@ import json
 import sys
 import os
 import configparser
+import requests
 
 # Module handling
 try:
@@ -194,10 +195,29 @@ def Quarked(targetAPK):
 
     # Extract ip addresses from file
     ipTables = PrettyTable()
-    ipTables.field_names = [f"{green}Extracted IP Addresses{white}"]
+    ipTables.field_names = [f"{green}IP Address{white}", 
+                            f"{green}Country{white}", 
+                            f"{green}City{white}", 
+                            f"{green}Region{white}", 
+                            f"{green}ISP{white}", 
+                            f"{green}Proxy{white}",
+                            f"{green}Hosting{white}"
+                            ]
     if len(forensic.get_ip()) != 0:
         for ips in forensic.get_ip():
-            ipTables.add_row([ips])
+            if ips[0] != '0':
+                data = requests.get(f"http://ip-api.com/json/{ips}?fields=status,message,country,countryCode,region,regionName,city,isp,proxy,hosting")
+                if data.json()['status'] != 'fail':
+                    ipTables.add_row(
+                        [
+                            ips, data.json()['country'], 
+                            data.json()['city'], 
+                            data.json()['regionName'], 
+                            data.json()['isp'],
+                            data.json()['proxy'],
+                            data.json()['hosting']
+                        ]
+                    )
         print(ipTables)
     else:
         not_found_indicator += 1
