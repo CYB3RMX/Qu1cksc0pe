@@ -84,6 +84,7 @@ console_commands = NestedCompleter.from_nested_dict({
         "target-folder"
     },
     "document": None,
+    "domain": None,
     "language": None,
     "packer": None,
     "hash-scan": None,
@@ -219,6 +220,18 @@ try:
                 print(f"{infoS} Analyzing: {green}{filename}{white}")
                 command = f"python3 {sc0pe_path}/Modules/nonExecAnalyzer.py {filename}"
                 os.system(command)
+            else:
+                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
+
+        # Domain extractor
+        elif con_command == "domain":
+            if os.path.exists(".target-file.txt"):
+                filename = open(".target-file.txt", "r").read()
+                command = f"strings --all {filename} > temp.txt"
+                os.system(command)
+                command = f"python3 {sc0pe_path}/Modules/domainCatcher.py {filename}"
+                os.system(command)
+                os.remove(f"{sc0pe_path}/temp.txt")
             else:
                 print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
 

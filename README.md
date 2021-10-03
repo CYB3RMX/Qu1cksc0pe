@@ -19,9 +19,9 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>30/09/2021</b>
-- [X] ```ApkAnalyzer module``` is upgraded. (Added IP Address OSINT module)
-![osint_png](.animations/osint.png)
+<b>03/10/2021</b>
+- [X] ```ApkAnalyzer module``` is now do basic security checks for target applications. (This feature will be upgraded soon.)
+![update_png](.animations/update.png)
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)

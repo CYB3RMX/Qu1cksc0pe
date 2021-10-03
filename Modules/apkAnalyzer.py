@@ -167,10 +167,11 @@ def MultiYaraScanner(targetAPK):
     # Check if the decompiler exist on system
     if os.path.exists(decompiler_path):
         # Executing decompiler...
-        os.system(f"{decompiler_path} -q -d LibScope {targetAPK}")
+        print(f"{infoS} Decompiling target APK file...")
+        os.system(f"{decompiler_path} -q -d TargetAPK {targetAPK}")
 
         # Scan for library files and analyze them
-        path = "LibScope/resources/"
+        path = "TargetAPK/resources/"
         fnames = []
         for root, d_names, f_names in os.walk(path):
             for ff in f_names:
@@ -326,7 +327,7 @@ def DeepScan(parsed):
         pass
 
 def GeneralInformation(targetAPK):
-    print(f"{infoS} General Informations about {green}{targetAPK}{white}")
+    print(f"\n{infoS} General Informations about {green}{targetAPK}{white}")
 
     # Parsing target apk file
     axmlTime = pyaxmlparser.APK(targetAPK)

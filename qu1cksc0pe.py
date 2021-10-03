@@ -152,6 +152,12 @@ def BasicAnalyzer(analyzeFile):
             os.system(command)
             if os.path.exists("apkid.json"):
                 os.remove("apkid.json")
+            # APP Security
+            choice = str(input(f"\n{infoS} Do you want to check target app\'s security? This process will take a while.[Y/n]: "))
+            if choice == "Y" or choice == "y":
+                os.system(f"python3 {sc0pe_path}/Modules/apkSecCheck.py")
+            else:
+                pass
         else:
             print(f"{errorS} Qu1cksc0pe doesn\'t support archive analysis for now ;)")
             sys.exit(1)
@@ -385,13 +391,13 @@ try:
         if os.path.exists(junk):
             os.remove(junk)
 
-    if os.path.exists("LibScope"):
-        os.system("rm -rf LibScope/")
+    if os.path.exists("TargetAPK/"):
+        os.system("rm -rf TargetAPK/")
 except:
     junkFiles = ["temp.txt", ".path_handler", "elves.txt", ".target-file.txt", ".target-folder.txt"]
     for junk in junkFiles:
         if os.path.exists(junk):
             os.remove(junk)
 
-    if os.path.exists("LibScope"):
-        os.system("rm -rf LibScope/")
+    if os.path.exists("TargetAPK/"):
+        os.system("rm -rf TargetAPK/")
