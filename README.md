@@ -63,7 +63,7 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 
 # Installation
 - [X] You can install Qu1cksc0pe easily on your system. Just execute the following command.<br>
-<b>Command 0</b>: ```sudo pip3 install -r requirements.txt```
+<b>Command 0</b>: ```sudo pip3 install -r requirements.txt```<br>
 <b>Command 1</b>: ```sudo python3 qu1cksc0pe.py --install```
 
 # Scan arguments
