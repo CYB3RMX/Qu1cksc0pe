@@ -51,9 +51,20 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - <i>ExifTool</i>: ```sudo apt-get install exiftool```
 - <i>Strings</i>: ```sudo apt-get install strings```
 
+**Alert**
+> **You must specify jadx binary path in Systems/Android/libScanner.conf**
+```ini
+[Rule_PATH]
+rulepath = /Systems/Android/YaraRules/
+
+[Decompiler]
+decompiler = JADX_BINARY_PATH <-- You must specify this.
+```
+
 # Installation
 - [X] You can install Qu1cksc0pe easily on your system. Just execute the following command.<br>
-<b>Command</b>: ```sudo python3 qu1cksc0pe.py --install```
+<b>Command 0</b>: ```sudo pip3 install -r requirements.txt```
+<b>Command 1</b>: ```sudo python3 qu1cksc0pe.py --install```
 
 # Scan arguments
 ## Normal analysis
