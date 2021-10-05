@@ -10,10 +10,12 @@
 - File extensions and their names.
 <br><b>And so on...</b><br>
 
-Qu1cksc0pe aims to get even more information about suspicious files and helps to user realizing what that file capable of.
+Qu1cksc0pe aims to get even more information about suspicious files and helps user realize what that file is capable of.
 
-- [x] Usage: ```python3 qu1cksc0pe.py --file suspicious_file --analyze```
-- [x] Alternative usage: ```python3 qu1cksc0pe.py --file [PATH TO FILE] --analyze```
+# Usage
+```
+python3 qu1cksc0pe.py --file suspicious_file --analyze
+```
 
 # Screenshot
 ![Screen](.animations/Screenshot.png)
