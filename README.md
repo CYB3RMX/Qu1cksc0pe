@@ -1,7 +1,8 @@
 # Qu1cksc0pe
 <img src="https://img.shields.io/badge/-Linux-black?style=for-the-badge&logo=Linux&logoColor=white"> <img src="https://img.shields.io/badge/-Python-black?style=for-the-badge&logo=python&logoColor=white"> <img src="https://img.shields.io/badge/-Terminal-black?style=for-the-badge&logo=GNU%20Bash&logoColor=white"> <img src="https://img.shields.io/badge/-Apache%202.0-black?style=for-the-badge&Color=white">
 <br>This tool allows you to statically analyze Windows, Linux, OSX executables and APK files.<br>
-<i>You can get</i>: 
+
+*You can get*: 
 - What DLL files are used.
 - Functions and APIs.
 - Sections and segments.
@@ -10,10 +11,12 @@
 - File extensions and their names.
 <br><b>And so on...</b><br>
 
-Qu1cksc0pe aims to get even more information about suspicious files and helps to user realizing what that file capable of.
+Qu1cksc0pe aims to get even more information about suspicious files and helps user realize what that file is capable of.
 
-- [x] Usage: ```python3 qu1cksc0pe.py --file suspicious_file --analyze```
-- [x] Alternative usage: ```python3 qu1cksc0pe.py --file [PATH TO FILE] --analyze```
+# Usage
+```
+python3 qu1cksc0pe.py --file suspicious_file --analyze
+```
 
 # Screenshot
 ![Screen](.animations/Screenshot.png)
@@ -115,17 +118,17 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 ## Registry
 <b>This category contains functions and strings about:</b>
 - Creating or destroying registry keys.
-- Changing registry keys and registry logs.
+- Changing registry keys and logs.
 
 ## File
 <b>This category contains functions and strings about:</b>
-- Creating/changing/infecting/deleting files.
-- Getting informations about file contents and file systems.
+- Creating/modifying/infecting/deleting files.
+- Getting information about file contents and filesystems.
 
 ## Networking/Web
 <b>This category contains functions and strings about:</b>
-- Communicating malicious hosts.
-- Download malicious files.
+- Communicating with malicious hosts.
+- Downloading malicious files.
 - Sending informations about infected machine and its user.
 
 ## Process
@@ -159,7 +162,7 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 
 ## Information Gathering
 <b>This category contains functions and strings about:</b>
-- Gathering all informations from target hosts. Like process states, network devices etc.
+- Gathering informations from target hosts like process states, network devices etc.
 
 ## Keyboard/Keylogging
 <b>This category contains functions and strings about:</b>
