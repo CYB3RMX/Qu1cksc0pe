@@ -118,17 +118,17 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 ## Registry
 <b>This category contains functions and strings about:</b>
 - Creating or destroying registry keys.
-- Changing registry keys and registry logs.
+- Changing registry keys and logs.
 
 ## File
 <b>This category contains functions and strings about:</b>
-- Creating/changing/infecting/deleting files.
-- Getting informations about file contents and file systems.
+- Creating/modifying/infecting/deleting files.
+- Getting information about file contents and filesystems.
 
 ## Networking/Web
 <b>This category contains functions and strings about:</b>
-- Communicating malicious hosts.
-- Download malicious files.
+- Communicating with malicious hosts.
+- Downloading malicious files.
 - Sending informations about infected machine and its user.
 
 ## Process
@@ -162,7 +162,7 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 
 ## Information Gathering
 <b>This category contains functions and strings about:</b>
-- Gathering all informations from target hosts. Like process states, network devices etc.
+- Gathering informations from target hosts like process states, network devices etc.
 
 ## Keyboard/Keylogging
 <b>This category contains functions and strings about:</b>
