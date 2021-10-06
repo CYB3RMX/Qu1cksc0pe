@@ -1,7 +1,8 @@
 # Qu1cksc0pe
 <img src="https://img.shields.io/badge/-Linux-black?style=for-the-badge&logo=Linux&logoColor=white"> <img src="https://img.shields.io/badge/-Python-black?style=for-the-badge&logo=python&logoColor=white"> <img src="https://img.shields.io/badge/-Terminal-black?style=for-the-badge&logo=GNU%20Bash&logoColor=white"> <img src="https://img.shields.io/badge/-Apache%202.0-black?style=for-the-badge&Color=white">
 <br>This tool allows you to statically analyze Windows, Linux, OSX executables and APK files.<br>
-<i>You can get</i>: 
+
+*You can get*: 
 - What DLL files are used.
 - Functions and APIs.
 - Sections and segments.
