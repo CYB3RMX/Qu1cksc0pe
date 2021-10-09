@@ -89,6 +89,8 @@ parser.add_argument("--multiple", required=False, nargs='+',
                     help="Analyze multiple files.")
 parser.add_argument("--docs", required=False, help="Analyze document files.",
                     action="store_true")
+parser.add_argument("--runtime", required=False,
+                    help="Analyze APK files dynamically.", action="store_true")
 parser.add_argument("--hashscan", required=False,
                     help="Scan target file's hash in local database.",
                     action="store_true")
@@ -309,6 +311,11 @@ def Qu1cksc0pe():
         if args.folder is not None:
             print(f"{errorS} That argument has not supported for folder scanning.")
             sys.exit(1)
+
+    # Dynamic APK analyzer
+    if args.runtime:
+        command = f"python3 {sc0pe_path}/Modules/androidRuntime.py"
+        os.system(command)
 
     # Interactive shell
     if args.console:
