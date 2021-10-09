@@ -5,6 +5,13 @@ import sys
 import time
 
 try:
+    from prompt_toolkit import prompt
+    from prompt_toolkit.completion import WordCompleter
+except:
+    print("Error: >prompt_toolkit< module not found.")
+    sys.exit(1)
+
+try:
     import frida
 except:
     print("Error: >frida< module not found.")
@@ -63,48 +70,59 @@ def FridaMain():
     devices = device_manager.enumerate_devices()
     if devices != []:
         count = 0
+        numbers = []
         for dd in devices:
-            devTable.add_row([count, dd.id, dd.name, dd.type])
+            devTable.add_row([count+1, dd.id, dd.name, dd.type])
             count += 1
+            numbers.append(str(count))
         print(devTable)
 
     # Select target device
-    device_index = int(input(f"\n{magenta}>>>{white} Select a device: "))
+    device_completer = WordCompleter(numbers)
+    device_index = prompt("\n>>> Select a device: ", completer=device_completer)
 
     # Enumerating installed applications
     print(f"\n{infoS} Enumerating installed applications...")
     try:
-        applications = devices[device_index].enumerate_applications()
+        applications = devices[int(device_index)-1].enumerate_applications()
+        package_list = []
         for app in applications:
             appTable.add_row([app.name, app.identifier])
+            package_list.append(app.identifier)
         print(appTable)
     except frida.ServerNotRunningError:
-        print(f"{errorS} Unable to connect to remote frida-server.")
+        print(f"{errorS} Unable to connect to remote frida-server.\n")
         sys.exit(1)
 
     # Select target application
-    target_application = str(input(f"\n{magenta}>>>{white} Enter package name: "))
+    app_completer = WordCompleter(package_list)
+    target_application = prompt("\n>>> Enter package name: ", completer=app_completer)
 
     # Script menu
     print(f"\n{infoS} Gathering available FRIDA scripts...")
     menu_content = os.listdir(f"{sc0pe_path}/Systems/Android/FridaScripts/")
+    sc_list = []
     for sc in menu_content:
         scname = sc.replace("-", " ")
         scriptTable.add_row([scname.replace(".js", "").upper(), sc.replace(".js", "")])
+        sc_list.append(sc.replace(".js", ""))
     print(scriptTable)
-    use_script = str(input(f"\n{magenta}>>>{white} Enter file name: "))
+
+    # Selecting scripts
+    script_completer = WordCompleter(sc_list)
+    use_script = prompt("\n>>> Enter file name: ", completer=script_completer)
 
     # Process management
     try:
-        process = devices[device_index].spawn([target_application])
-        devices[device_index].resume(process)
+        process = devices[int(device_index)-1].spawn([target_application])
+        devices[int(device_index)-1].resume(process)
         time.sleep(1)
     except frida.NotSupportedError:
-        print(f"{errorS} An error occured while attach on remote device. Is frida-server running on remote device?")
+        print(f"{errorS} An error occured while attach on remote device. Is frida-server running on remote device?\n")
         sys.exit(1)
 
     # Session handling
-    session = devices[device_index].attach(process)
+    session = devices[int(device_index)-1].attach(process)
     script = session.create_script(open(f"{sc0pe_path}/Systems/Android/FridaScripts/{use_script}.js").read())
     script.load()
     while True:
