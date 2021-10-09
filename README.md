@@ -1,27 +1,30 @@
 # Qu1cksc0pe
 <img src="https://img.shields.io/badge/-Linux-black?style=for-the-badge&logo=Linux&logoColor=white"> <img src="https://img.shields.io/badge/-Python-black?style=for-the-badge&logo=python&logoColor=white"> <img src="https://img.shields.io/badge/-Terminal-black?style=for-the-badge&logo=GNU%20Bash&logoColor=white"> <img src="https://img.shields.io/badge/-Apache%202.0-black?style=for-the-badge&Color=white">
-<br>This tool allows to statically analyze windows, linux, osx, executables and also APK files.<br>
-<i>You can get</i>: 
+<br>This tool allows you to statically analyze Windows, Linux, OSX executables and APK files.<br>
+
+*You can get*: 
 - What DLL files are used.
-- Functions and API's.
+- Functions and APIs.
 - Sections and segments.
-- URL's, IP addresses and emails.
+- URLs, IP addresses and emails.
 - Android permissions.
 - File extensions and their names.
 <br><b>And so on...</b><br>
 
-Qu1cksc0pe aims to get even more information about suspicious files and helps to user realizing what that file capable of.
+Qu1cksc0pe aims to get even more information about suspicious files and helps user realize what that file is capable of.
 
-- [x] Usage: ```python3 qu1cksc0pe.py --file suspicious_file --analyze```
-- [x] Alternative usage: ```python3 qu1cksc0pe.py --file [PATH TO FILE] --analyze```
+# Usage
+```
+python3 qu1cksc0pe.py --file suspicious_file --analyze
+```
 
 # Screenshot
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>03/10/2021</b>
-- [X] ```ApkAnalyzer module``` is now do basic security checks for target applications. (This feature will be upgraded soon.)
-![update_png](.animations/update.png)
+<b>09/10/2021</b>
+- [X] Added ```AndroidRuntime``` module. Now you can analyze android applications dynamically!!
+![update_png](.animations/update.gif)
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
@@ -43,6 +46,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps to
 - ```pyaxmlparser``` => <i>Gathering informations from target APK files.</i>
 - ```yara-python``` => <i>Android library scanning with Yara rules.</i>
 - ```prompt_toolkit``` => <i>Interactive shell.</i>
+- ```frida``` => <i>Performing dynamic analysis against android applications.</i>
 
 <br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
 <b>Gathering other dependencies</b>:
@@ -62,7 +66,7 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 ```
 
 # Installation
-- [X] You can install Qu1cksc0pe easily on your system. Just execute the following command.<br>
+- [X] You can install Qu1cksc0pe easily on your system. Just execute the following commands.<br>
 <b>Command 0</b>: ```sudo pip3 install -r requirements.txt```<br>
 <b>Command 1</b>: ```sudo python3 qu1cksc0pe.py --install```
 
@@ -115,17 +119,17 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 ## Registry
 <b>This category contains functions and strings about:</b>
 - Creating or destroying registry keys.
-- Changing registry keys and registry logs.
+- Changing registry keys and logs.
 
 ## File
 <b>This category contains functions and strings about:</b>
-- Creating/changing/infecting/deleting files.
-- Getting informations about file contents and file systems.
+- Creating/modifying/infecting/deleting files.
+- Getting information about file contents and filesystems.
 
 ## Networking/Web
 <b>This category contains functions and strings about:</b>
-- Communicating malicious hosts.
-- Download malicious files.
+- Communicating with malicious hosts.
+- Downloading malicious files.
 - Sending informations about infected machine and its user.
 
 ## Process
@@ -159,7 +163,7 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 
 ## Information Gathering
 <b>This category contains functions and strings about:</b>
-- Gathering all informations from target hosts. Like process states, network devices etc.
+- Gathering informations from target hosts like process states, network devices etc.
 
 ## Keyboard/Keylogging
 <b>This category contains functions and strings about:</b>
@@ -170,3 +174,6 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 ## Memory Management
 <b>This category contains functions and strings about:</b>
 - Manipulating and using target machines memory.
+
+# Thanks to
+For most of FRIDA scripts: <i>https://github.com/Ch0pin/</i>

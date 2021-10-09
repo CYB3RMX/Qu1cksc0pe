@@ -29,9 +29,13 @@ errorS = f"{cyan}[{red}!{cyan}]{white}"
 
 def ManifestAnalysis():
     # Obtaining manifest file
-    manifest_path = "TargetAPK/resources/AndroidManifest.xml"
-    manifest_tree = etr.parse(manifest_path)
-    manifest_root = manifest_tree.getroot()
+    try:
+        manifest_path = "TargetAPK/resources/AndroidManifest.xml"
+        manifest_tree = etr.parse(manifest_path)
+        manifest_root = manifest_tree.getroot()
+    except FileNotFoundError:
+        print(f"{errorS} An error occured while parsing {green}AndroidManifest.xml{white}. Did your APK file decompiled correctly?")
+        sys.exit(1)
 
     # Gathering informations
     app_data = manifest_root.findall("application")
