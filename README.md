@@ -24,7 +24,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 # Updates
 <b>13/10/2021</b>
 - [X] Several bug fixes.
-- [X] ```VirusTotal module``` is upgraded.
+- [X] ```VirusTotal module``` is upgraded.<br>
 ![update_png](.animations/update.png)
 
 # Available On
