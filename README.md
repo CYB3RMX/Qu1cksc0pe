@@ -19,7 +19,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ```
 
 # Screenshot
-![Screen](.animations/Screenshot.png)
+![Screen](.animations/Screenshot.jpg)
 
 # Updates
 <b>13/10/2021</b>
