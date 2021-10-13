@@ -173,8 +173,12 @@ def Qu1cksc0pe():
     # Getting all strings from the file if the target file exists.
     if args.file:
         if os.path.exists(args.file):
-            command = f"strings --all {args.file} > temp.txt"
-            os.system(command)
+            if os.path.exists("/usr/bin/strings"):
+                command = f"strings --all {args.file} > temp.txt"
+                os.system(command)
+            else:
+                print(f"{errorS} {green}strings{white} command not found. You need to install it.")
+                sys.exit(1)
         else:
             print(f"{errorS} Target file not found.\n")
             sys.exit(1)

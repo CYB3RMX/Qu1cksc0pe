@@ -85,12 +85,25 @@ def ReportParser():
 
         # Threat Categories
         threatTable = PrettyTable()
-        threatTable.field_names = [f"{green}Threat Categories{white}"]
+        threatTable.field_names = [f"{green}Threat Categories{white}", f"{green}Count{white}"]
         if "data" in parser.keys():
             if "popular_threat_classification" in parser["data"]["attributes"].keys():
-                for th in range(0, len(parser["data"]["attributes"]["popular_threat_classification"]["popular_threat_category"])):
-                    threatTable.add_row([f'{red}{parser["data"]["attributes"]["popular_threat_classification"]["popular_threat_category"][th][0]}{white}'])
+                if "suggested_threat_label" in parser["data"]["attributes"]["popular_threat_classification"].keys():
+                    print(f"\n{infoS} Potential Threat Label: " + f'{red}{parser["data"]["attributes"]["popular_threat_classification"]["suggested_threat_label"]}{white}')
+
+                # Counting threat category
+                if "popular_threat_category" in parser["data"]["attributes"]["popular_threat_classification"].keys():
+                    for th in range(0, len(parser["data"]["attributes"]["popular_threat_classification"]["popular_threat_category"])):
+                        threatTable.add_row([f'{red}{parser["data"]["attributes"]["popular_threat_classification"]["popular_threat_category"][th]["value"]}{white}',f'{red}{parser["data"]["attributes"]["popular_threat_classification"]["popular_threat_category"][th]["count"]}{white}'])
                 print(threatTable)
+
+                # Counting threat names
+                nameTable = PrettyTable()
+                nameTable.field_names = [f"{green}Threat Names{white}",f"{green}Count{white}"]
+                if "popular_threat_name" in parser["data"]["attributes"]["popular_threat_classification"].keys():
+                    for th in range(0, len(parser["data"]["attributes"]["popular_threat_classification"]["popular_threat_name"])):
+                        nameTable.add_row([f'{red}{parser["data"]["attributes"]["popular_threat_classification"]["popular_threat_name"][th]["value"]}{white}',f'{red}{parser["data"]["attributes"]["popular_threat_classification"]["popular_threat_name"][th]["count"]}{white}'])
+                print(nameTable)
         
         # Detections
         detect = 0
