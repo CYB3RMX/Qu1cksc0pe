@@ -47,14 +47,19 @@ username = getpass.getuser()
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
+# User home detection
+homeD = "/home"
+if sys.platform == "darwin":
+    homeD = "/Users"
+
 # Directory checking
-if os.path.exists(f"/home/{username}/sc0pe_Base/"):
+if os.path.exists(f"{homeD}/{username}/sc0pe_Base/"):
     pass
 else:
-    os.system(f"mkdir /home/{username}/sc0pe_Base/")
+    os.system(f"mkdir {homeD}/{username}/sc0pe_Base/")
 
 # Configurating installation directory
-install_dir = f"/home/{username}/sc0pe_Base"
+install_dir = f"{homeD}/{username}/sc0pe_Base"
 
 def DatabaseCheck():
     if os.path.isfile(f"{install_dir}/HashDB.json") == False:
