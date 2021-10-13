@@ -76,6 +76,11 @@ else:
 # Banner
 os.system(f"python3 {sc0pe_path}/Modules/banners.py")
 
+# User home detection
+homeD = "/home"
+if sys.platform == "darwin":
+    homeD = "/Users"
+
 # Argument crating, parsing and handling
 args = []
 parser = argparse.ArgumentParser()
@@ -174,7 +179,10 @@ def Qu1cksc0pe():
     if args.file:
         if os.path.exists(args.file):
             if os.path.exists("/usr/bin/strings"):
-                command = f"strings --all {args.file} > temp.txt"
+                allA = "--all"
+                if sys.platform == "darwin":
+                    allA = "-a"
+                command = f"strings {allA} {args.file} > temp.txt"
                 os.system(command)
             else:
                 print(f"{errorS} {green}strings{white} command not found. You need to install it.")
@@ -277,7 +285,7 @@ def Qu1cksc0pe():
         if args.file is not None:
             # if there is no key quit
             try:
-                directory = f"/home/{username}/sc0pe_Base/sc0pe_VT_apikey.txt"
+                directory = f"{homeD}/{username}/sc0pe_Base/sc0pe_VT_apikey.txt"
                 apik = open(directory, "r").read().split("\n")
             except:
                 print(f"{errorS} Use --key_init to enter your key.")
@@ -329,13 +337,13 @@ def Qu1cksc0pe():
     # entering VT API key
     if args.key_init:
         try:
-            if os.path.exists(f"/home/{username}/sc0pe_Base/"):
+            if os.path.exists(f"{homeD}/{username}/sc0pe_Base/"):
                 pass
             else:
-                os.system(f"mkdir /home/{username}/sc0pe_Base/")
+                os.system(f"mkdir {homeD}/{username}/sc0pe_Base/")
 
             apikey = str(input(f"{foundS} Enter your VirusTotal API key: "))
-            apifile = open(f"/home/{username}/sc0pe_Base/sc0pe_VT_apikey.txt", "w")
+            apifile = open(f"{homeD}/{username}/sc0pe_Base/sc0pe_VT_apikey.txt", "w")
             apifile.write(apikey)
             print(f"{foundS} Your VirusTotal API key saved.")
         except KeyboardInterrupt:
