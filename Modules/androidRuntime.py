@@ -44,8 +44,12 @@ errorS = f"{cyan}[{red}!{cyan}]{white}"
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
-def FridaMain():
-    # Tables!!
+# Device manager
+device_manager = frida.get_device_manager()
+devices = device_manager.enumerate_devices()
+
+def GetDevices(devices) -> list:
+    # Tables
     devTable = PrettyTable()
     devTable.field_names = [
         f"{green}Number{white}", 
@@ -53,21 +57,8 @@ def FridaMain():
         f"{green}Device Name{white}", 
         f"{green}Connection Type{white}"
     ]
-    appTable = PrettyTable()
-    appTable.field_names = [
-        f"{green}Application Name{white}",
-        f"{green}Package Name{white}"
-    ]
-    scriptTable = PrettyTable()
-    scriptTable.field_names = [
-        f"{green}Description{white}",
-        f"{green}File Name{white}"
-    ]
 
-    # Device enumeration
-    print(f"{infoS} Enumerating devices...")
-    device_manager = frida.get_device_manager()
-    devices = device_manager.enumerate_devices()
+    # Parsing device informations
     if devices != []:
         count = 0
         numbers = []
@@ -76,30 +67,38 @@ def FridaMain():
             count += 1
             numbers.append(str(count))
         print(devTable)
+        return numbers
 
-    # Select target device
-    device_completer = WordCompleter(numbers)
-    device_index = prompt("\n>>> Select a device: ", completer=device_completer)
+def GetPackages(index) -> list:
+    # Tables
+    appTable = PrettyTable()
+    appTable.field_names = [
+        f"{green}Application Name{white}",
+        f"{green}Package Name{white}"
+    ]
 
-    # Enumerating installed applications
-    print(f"\n{infoS} Enumerating installed applications...")
+    # Parsing application informations
     try:
-        applications = devices[int(device_index)-1].enumerate_applications()
+        applications = devices[int(index)-1].enumerate_applications()
         package_list = []
         for app in applications:
             appTable.add_row([app.name, app.identifier])
             package_list.append(app.identifier)
         print(appTable)
+        return package_list
     except frida.ServerNotRunningError:
         print(f"{errorS} Unable to connect to remote frida-server.\n")
         sys.exit(1)
 
-    # Select target application
-    app_completer = WordCompleter(package_list)
-    target_application = prompt("\n>>> Enter package name: ", completer=app_completer)
+def GetScripts() -> list:
+    # Tables
+    scriptTable = PrettyTable()
+    scriptTable.field_names = [
+        f"{green}Description{white}",
+        f"{green}File Name{white}"
+    ]
 
-    # Script menu
-    print(f"\n{infoS} Gathering available FRIDA scripts...")
+    # Gathering and parsing script files
     menu_content = os.listdir(f"{sc0pe_path}/Systems/Android/FridaScripts/")
     sc_list = []
     for sc in menu_content:
@@ -107,10 +106,27 @@ def FridaMain():
         scriptTable.add_row([scname.replace(".js", "").upper(), sc.replace(".js", "")])
         sc_list.append(sc.replace(".js", ""))
     print(scriptTable)
+    return sc_list
 
-    # Selecting scripts
-    script_completer = WordCompleter(sc_list)
-    use_script = prompt("\n>>> Enter file name: ", completer=script_completer)
+def FridaMain():
+    try:
+        # Device enumeration
+        print(f"{infoS} Enumerating devices...")
+        device_completer = WordCompleter(GetDevices(devices))
+        device_index = prompt("\n>>> Select a device: ", completer=device_completer)
+
+        # Enumerating installed applications
+        print(f"\n{infoS} Enumerating installed applications...")
+        app_completer = WordCompleter(GetPackages(index=device_index))
+        target_application = prompt("\n>>> Enter package name: ", completer=app_completer)
+
+        # Script menu
+        print(f"\n{infoS} Gathering available FRIDA scripts...")
+        script_completer = WordCompleter(GetScripts())
+        use_script = prompt("\n>>> Enter file name: ", completer=script_completer)
+    except:
+        print(f"{errorS} Program terminated.")
+        sys.exit(1)
 
     # Process management
     try:

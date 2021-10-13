@@ -22,9 +22,10 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>09/10/2021</b>
-- [X] Added ```AndroidRuntime``` module. Now you can analyze android applications dynamically!!
-![update_png](.animations/update.gif)
+<b>13/10/2021</b>
+- [X] Several bug fixes.
+- [X] ```VirusTotal module``` is upgraded.
+![update_png](.animations/update.png)
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
@@ -78,6 +79,12 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 ## Multiple analysis
 <b>Usage</b>: ```python3 qu1cksc0pe.py --multiple FILE1 FILE2 ...```<br>
 ![animation](.animations/multi.gif)
+
+## Dynamic instrumentation with FRIDA scripts (for android applications)
+**Alert**
+> **You must connect a virtual device or physical device to your computer.**
+<b>Usage</b>: ```python3 qu1cksc0pe.py --runtime```<br>
+![animation](.animations/dynamic.gif)
 
 ## Hash scan
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --hashscan```<br>
@@ -176,4 +183,5 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 - Manipulating and using target machines memory.
 
 # Thanks to
-For most of FRIDA scripts: <i>https://github.com/Ch0pin/</i>
+For most of FRIDA scripts: <i>https://github.com/Ch0pin/</i><br>
+Another scripts: <i>https://codeshare.frida.re/browse</i>

@@ -161,14 +161,18 @@ try:
                 print(f"\n{infoS} Analyzing: {green}{filename}{white}")
                 fileType = str(pr.magic_file(filename))
                 if "ELF" in fileType:
-                    command = f"strings --all {filename} > temp.txt"
-                    os.system(command)
-                    print(f"{infoS} Target OS: {green}Linux{white}\n")
-                    command = f"readelf -a {filename} > elves.txt"
-                    os.system(command)
-                    command = f"python3 {sc0pe_path}/Modules/linAnalyzer.py {filename}"
-                    os.system(command)
-                    os.remove(f"{sc0pe_path}/temp.txt")
+                    if os.path.exists("/usr/bin/strings"):
+                        command = f"strings --all {filename} > temp.txt"
+                        os.system(command)
+                        print(f"{infoS} Target OS: {green}Linux{white}\n")
+                        command = f"readelf -a {filename} > elves.txt"
+                        os.system(command)
+                        command = f"python3 {sc0pe_path}/Modules/linAnalyzer.py {filename}"
+                        os.system(command)
+                        os.remove(f"{sc0pe_path}/temp.txt")
+                    else:
+                        print(f"{errorS} {green}strings{white} command not found. You need to install it.")
+                        sys.exit(1)
             else:
                 print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
 
@@ -179,12 +183,16 @@ try:
                 print(f"\n{infoS} Analyzing: {green}{filename}{white}")
                 fileType = str(pr.magic_file(filename))
                 if "Mach-O" in fileType:
-                    command = f"strings --all {filename} > temp.txt"
-                    os.system(command)
-                    print(f"{infoS} Target OS: {green}OSX{white}\n")
-                    command = f"python3 {sc0pe_path}/Modules/osXAnalyzer.py {filename}"
-                    os.system(command)
-                    os.remove(f"{sc0pe_path}/temp.txt")
+                    if os.path.exists("/usr/bin/strings"):
+                        command = f"strings --all {filename} > temp.txt"
+                        os.system(command)
+                        print(f"{infoS} Target OS: {green}OSX{white}\n")
+                        command = f"python3 {sc0pe_path}/Modules/osXAnalyzer.py {filename}"
+                        os.system(command)
+                        os.remove(f"{sc0pe_path}/temp.txt")
+                    else:
+                        print(f"{errorS} {green}strings{white} command not found. You need to install it.")
+                        sys.exit(1)
             else:
                 print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
 
@@ -197,16 +205,20 @@ try:
                 if "PK" in fileType and "Java archive" in fileType:
                     look = pyaxmlparser.APK(filename)
                     if look.is_valid_APK() == True:
-                        command = f"strings --all {filename} > temp.txt"
-                        os.system(command)
-                        print(f"{infoS} Target OS: {green}Android{white}")
-                        command = f"apkid -j {filename} > apkid.json"
-                        os.system(command)
-                        command = f"python3 {sc0pe_path}/Modules/apkAnalyzer.py {filename}"
-                        os.system(command)
-                        if os.path.exists("apkid.json"):
-                            os.remove("apkid.json")
-                        os.remove(f"{sc0pe_path}/temp.txt")
+                        if os.path.exists("/usr/bin/strings"):
+                            command = f"strings --all {filename} > temp.txt"
+                            os.system(command)
+                            print(f"{infoS} Target OS: {green}Android{white}")
+                            command = f"apkid -j {filename} > apkid.json"
+                            os.system(command)
+                            command = f"python3 {sc0pe_path}/Modules/apkAnalyzer.py {filename}"
+                            os.system(command)
+                            if os.path.exists("apkid.json"):
+                                os.remove("apkid.json")
+                            os.remove(f"{sc0pe_path}/temp.txt")
+                        else:
+                            print(f"{errorS} {green}strings{white} command not found. You need to install it.")
+                            sys.exit(1)
                 else:
                     print(f"{errorS} Qu1cksc0pe doesn\'t support archive analysis for now ;)")
                     sys.exit(1)
@@ -227,11 +239,15 @@ try:
         elif con_command == "domain":
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
-                command = f"strings --all {filename} > temp.txt"
-                os.system(command)
-                command = f"python3 {sc0pe_path}/Modules/domainCatcher.py {filename}"
-                os.system(command)
-                os.remove(f"{sc0pe_path}/temp.txt")
+                if os.path.exists("/usr/bin/strings"):
+                    command = f"strings --all {filename} > temp.txt"
+                    os.system(command)
+                    command = f"python3 {sc0pe_path}/Modules/domainCatcher.py {filename}"
+                    os.system(command)
+                    os.remove(f"{sc0pe_path}/temp.txt")
+                else:
+                    print(f"{errorS} {green}strings{white} command not found. You need to install it.")
+                    sys.exit(1)
             else:
                 print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
 
@@ -239,11 +255,15 @@ try:
         elif con_command == "language":
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
-                command = f"strings --all {filename} > temp.txt"
-                os.system(command)
-                command = f"python3 {sc0pe_path}/Modules/languageDetect.py {filename}"
-                os.system(command)
-                os.remove(f"{sc0pe_path}/temp.txt")
+                if os.path.exists("/usr/bin/strings"):
+                    command = f"strings --all {filename} > temp.txt"
+                    os.system(command)
+                    command = f"python3 {sc0pe_path}/Modules/languageDetect.py {filename}"
+                    os.system(command)
+                    os.remove(f"{sc0pe_path}/temp.txt")
+                else:
+                    print(f"{errorS} {green}strings{white} command not found. You need to install it.")
+                    sys.exit(1)
             else:
                 print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
 
