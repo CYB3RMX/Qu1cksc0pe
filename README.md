@@ -83,7 +83,7 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 ## Dynamic instrumentation with FRIDA scripts (for android applications)
 **Alert**
 > **You must connect a virtual device or physical device to your computer.**
-<b>Usage</b>: ```python3 qu1cksc0pe.py --runtime```<br>
+<br><b>Usage</b>: ```python3 qu1cksc0pe.py --runtime```<br>
 ![animation](.animations/dynamic.gif)
 
 ## Hash scan
