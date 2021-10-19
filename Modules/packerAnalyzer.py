@@ -9,6 +9,12 @@ except:
     sys.exit(1)
 
 try:
+    import yara
+except:
+    print("Error: >yara< module not found.")
+    sys.exit(1)
+
+try:
     from colorama import Fore, Style
 except:
     print("Error: >colorama< module not found.")
@@ -26,9 +32,14 @@ red = Fore.LIGHTRED_EX
 cyan = Fore.LIGHTCYAN_EX
 white = Style.RESET_ALL
 green = Fore.LIGHTGREEN_EX
+magenta = Fore.LIGHTMAGENTA_EX
+
+# Path variable
+sc0pe_path = open(".path_handler", "r").read()
 
 # Legends
 infoS = f"{cyan}[{red}*{cyan}]{white}"
+foundS = f"{cyan}[{red}+{cyan}]{white}"
 errorS = f"{cyan}[{red}!{cyan}]{white}"
 
 # Target file
@@ -38,6 +49,46 @@ targetFile = str(sys.argv[1])
 file_sigs = {'UPX': 'UPX0', 'AsPack': '.aspack', 'ConfuserEx v0.6.0': 'ConfuserEx v0.6.0',
             'UPX!': 'UPX!', 'Confuser v1.9.0.0': 'Confuser v1.9.0.0', 'PEtite': 'petite',
             'MEW': 'MEW', 'MPRESS_1': 'MPRESS1', 'MPRESS_2': 'MPRESS2H'}
+
+# YARA rule based scanner
+def YaraBased(target_file):
+    # Indicator
+    yara_match_indicator = 0
+
+    # Gathering all rules
+    allRules = os.listdir(f"{sc0pe_path}/Systems/Multiple/Packer_Rules/")
+
+    # Tables!!
+    yaraTable = PrettyTable()
+
+    # Parsing rule matches
+    yara_matches = []
+    for rul in allRules:
+        try:
+            rules = yara.compile(f"{sc0pe_path}/Systems/Multiple/Packer_Rules/{rul}")
+            tempmatch = rules.match(target_file)
+            if tempmatch != []:
+                for matched in tempmatch:
+                    if matched.strings != []:
+                        yara_matches.append(matched)
+        except:
+            continue
+
+    # Printing area
+    if yara_matches != []:
+        print(f"\n{foundS} Matched Rules for: {green}{target_file}{white}")
+        yara_match_indicator += 1
+        for rul in yara_matches:
+            print(f"{magenta}>>>>{white} {rul}")
+            yaraTable.field_names = [f"{green}Offset{white}", f"{green}Matched String/Byte{white}"]
+            for mm in rul.strings:
+                yaraTable.add_row([f"{hex(mm[0])}", f"{str(mm[2])}"])
+            print(f"{yaraTable}\n")
+            yaraTable.clear_rows()
+
+    # If there is no match
+    if yara_match_indicator == 0:
+        print(f"{errorS} Not any rules matched for {green}{target_file}{white}.\n")
 
 # Simple analyzer function
 def Analyzer():
@@ -56,16 +107,19 @@ def Analyzer():
     packTable.field_names = [f"{green}Extracted Strings{white}", f"{green}Packer Type{white}"]
     # Scanning zone
     packed = 0
-    print(f"{infoS} Searching strings about common packers...")
+    print(f"{infoS} Performing {green}strings{white} based scan...")
     for pack in file_sigs:
         if file_sigs[pack].encode() in data:
             packed += 1
             packTable.add_row([f"{red}{file_sigs[pack]}{white}", f"{red}{pack}{white}"])
     # Printing all
     if packed == 0:
-        print(f"{errorS} Nothing found.")
+        print(f"{errorS} Nothing found.\n")
     else:
         print(f"{packTable}\n")
+
+    print(f"{infoS} Performing {green}YARA rule{white} based scan...")
+    YaraBased(target_file=targetFile)
 
 # Multiple analyzer function
 def MultiAnalyzer():

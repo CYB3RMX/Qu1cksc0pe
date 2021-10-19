@@ -22,10 +22,12 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>13/10/2021</b>
-- [X] Several bug fixes.
-- [X] ```VirusTotal module``` is upgraded.<br>
-![update_png](.animations/update.png)
+<b>19/10/2021</b>
+- [X] ```PackerAnalyzer``` module is upgraded. Now it also can perform ```YARA rule``` based scans.<br>
+![update_png](.animations/update1.png)
+
+- [X] Now Qu1cksc0pe can gather information from ```Google Play Store``` for android applications.<br>
+![update_png](.animations/update2.png)
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
@@ -83,6 +85,7 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 ## Dynamic instrumentation with FRIDA scripts (for android applications)
 **Alert**
 > **You must connect a virtual device or physical device to your computer.**
+
 <br><b>Usage</b>: ```python3 qu1cksc0pe.py --runtime```<br>
 ![animation](.animations/dynamic.gif)
 
