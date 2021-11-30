@@ -73,6 +73,11 @@ allStrings = open("temp.txt", "r").read().split('\n')
 apkid_output = open("apkid.json", "r")
 data = json.load(apkid_output)
 
+# Categories
+categs = {"Banker": [], "SMS Bot": [], "Base64": [],
+          "Information Gathering": [], "Database": [], "File Operations": [],
+          "Persistence/Managing": []}
+
 # Function for parsing apkid tool's output
 def ApkidParser(apkid_output):
     print(f"\n{infoS} Performing APKID analysis...")
@@ -186,6 +191,44 @@ def MultiYaraScanner(targetAPK):
             print(f"{errorS} Not any library files found for analysis.")
     else:
         print(f"{errorS} Decompiler({green}JADX{white}) not found. Skipping...")
+
+# Source code analysis TODO: look for better algorithm!!
+def ScanSource(targetAPK):
+    # Parsing main activity
+    fhandler = pyaxmlparser.APK(targetAPK)
+    parsed_main = fhandler.get_main_activity().split(".")
+
+    # Tables
+    sanalTable = PrettyTable()
+    sanalTable.field_names = ["Code/Pattern", "File"]
+
+    # Gathering code patterns
+    pattern_file = json.load(open(f"{sc0pe_path}/Systems/Android/detections.json"))
+
+    # Check for decompiled source
+    if os.path.exists("TargetAPK/"):
+        path = "TargetAPK/sources/"
+        fnames = []
+        for root, d_names, f_names in os.walk(path):
+            for ff in f_names:
+                fnames.append(os.path.join(root, ff))
+        if fnames != []:
+            for sources in fnames:
+                for index in range(0, len(pattern_file)):
+                    for elem in pattern_file[index]:
+                        for item in pattern_file[index][elem]:
+                            if item in open(sources, "r").read() and parsed_main[1] in sources.replace("TargetAPK/sources/", ""):
+                                categs[elem].append([str(item), sources.replace('TargetAPK/sources/', '')])
+
+        # Printing report
+        for cat in categs:
+            if categs[cat] != []:
+                print(f"{red}>>>{white} Category: {green}{cat}{white}")
+                for element in categs[cat]:
+                    sanalTable.add_row([f"{yellow}{element[0]}{white}", f"{cyan}{element[1]}{white}"])
+                print(f"{sanalTable}\n")
+                sanalTable.clear_rows()
+
 
 # Scan files with quark-engine
 def Quarked(targetAPK):
@@ -392,6 +435,10 @@ if __name__ == '__main__':
         except:
             print(f"{errorS} An error occured while decompiling the file. Please check configuration file and modify the {green}Decompiler{white} option.")
             print(f"{infoS} Configuration file path: {green}{sc0pe_path}/Systems/Android/libScanner.conf{white}")
+
+        # Source code analysis zone
+        print(f"\n{infoS} Performing source code analysis...")
+        ScanSource(targetAPK)
 
         # APKID scanner
         ApkidParser(apkid_output)

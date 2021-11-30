@@ -22,12 +22,9 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>19/10/2021</b>
-- [X] ```PackerAnalyzer``` module is upgraded. Now it also can perform ```YARA rule``` based scans.<br>
-![update_png](.animations/update1.png)
-
-- [X] Now Qu1cksc0pe can gather information from ```Google Play Store``` for android applications.<br>
-![update_png](.animations/update2.png)
+<b>30/11/2021</b>
+- [X] Added ```Source Code Analysis``` capability to ```APK Analyzer``` module. Now Qu1cksc0pe can decompile given APK file and then analyzes it's source codes.<br>
+![update_png](.animations/update.png)
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)

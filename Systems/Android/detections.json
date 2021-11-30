@@ -1,0 +1,58 @@
+[
+    {
+        "Banker": [
+            "com.paypal.android",
+            "getString(\"payerId\");",
+            "jSONObject.put(\"merchantName\", extras.getString(\"loc_key_1\"));",
+            "SendMoney",
+            "PaypalCreditPayment",
+            "CASH_LOAD",
+            "FIND_ATM"
+        ]
+    },
+    {
+        "SMS Bot": [
+            "smsto://",
+            "sms_sdk_Q"
+        ]
+    },
+    {
+        "Base64": [
+            "Base64.decode",
+            "Base64.encode",
+            "android.util.Base64"
+        ]
+    },
+    {
+        "Information Gathering": [
+            "telephonyManager.getNetworkCountryIso",
+            "getActiveNetworkInfo()"
+        ]
+    },
+    {
+        "Database": [
+            "execSQL",
+            "android.database.sqlite.SQLiteDatabase",
+            "getWritableDatabase()"
+        ]
+    },
+    {
+        "File Operations": [
+            "getFilesDir()",
+            "getAbsolutePath()",
+            "java.io.InputStream",
+            "getResources()",
+            "FileOutputStream"
+        ]
+    },
+    {
+        "Persistence/Managing": [
+            "startService",
+            "AccessibilityServiceInfo",
+            "startForeground",
+            "AccessibilityNodeInfo",
+            "android.accessibilityservice.GestureDescription.Builder",
+            "com.google.android.packageinstaller"
+        ]
+    }
+]
