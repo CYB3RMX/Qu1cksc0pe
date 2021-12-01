@@ -2,6 +2,7 @@
 
 import json
 import sys
+import re
 import os
 import configparser
 import requests
@@ -193,11 +194,7 @@ def MultiYaraScanner(targetAPK):
         print(f"{errorS} Decompiler({green}JADX{white}) not found. Skipping...")
 
 # Source code analysis TODO: look for better algorithm!!
-def ScanSource(targetAPK):
-    # Parsing main activity
-    fhandler = pyaxmlparser.APK(targetAPK)
-    parsed_main = fhandler.get_main_activity().split(".")
-
+def ScanSource():
     # Tables
     sanalTable = PrettyTable()
     sanalTable.field_names = ["Code/Pattern", "File"]
@@ -217,17 +214,23 @@ def ScanSource(targetAPK):
                 for index in range(0, len(pattern_file)):
                     for elem in pattern_file[index]:
                         for item in pattern_file[index][elem]:
-                            if item in open(sources, "r").read() and parsed_main[1] in sources.replace("TargetAPK/sources/", ""):
+                            regx = re.findall(item, open(sources, "r").read())
+                            if regx != [] and '' not in regx:
                                 categs[elem].append([str(item), sources.replace('TargetAPK/sources/', '')])
+                                
+    else:
+        print(f"{errorS} Couldn\'t locate source codes. Did target file decompiled correctly?")
+        print(f"{infoS} {green}Hint{white}: Don\'t forget to specify decompiler path in Systems/Android/libScanner.conf")
 
-        # Printing report
-        for cat in categs:
-            if categs[cat] != []:
-                print(f"{red}>>>{white} Category: {green}{cat}{white}")
-                for element in categs[cat]:
-                    sanalTable.add_row([f"{yellow}{element[0]}{white}", f"{cyan}{element[1]}{white}"])
-                print(f"{sanalTable}\n")
-                sanalTable.clear_rows()
+    # Printing report
+    for cat in categs:
+        if categs[cat] != []:
+            print(f"{red}>>>{white} Category: {green}{cat}{white}")
+            for element in categs[cat]:
+                sanalTable.add_row([f"{yellow}{element[0]}{white}", f"{cyan}{element[1]}{white}"])
+            print(f"{sanalTable}\n")
+            sanalTable.clear_rows()
+        
 
 
 # Scan files with quark-engine
@@ -438,7 +441,7 @@ if __name__ == '__main__':
 
         # Source code analysis zone
         print(f"\n{infoS} Performing source code analysis...")
-        ScanSource(targetAPK)
+        ScanSource()
 
         # APKID scanner
         ApkidParser(apkid_output)

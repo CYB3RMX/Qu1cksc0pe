@@ -26,14 +26,23 @@
     {
         "Information Gathering": [
             "telephonyManager.getNetworkCountryIso",
-            "getActiveNetworkInfo()"
+            "getActiveNetworkInfo()",
+            "getAllCellInfo()",
+            "getImei()",
+            "getDeviceId()",
+            "getMeid()",
+            "getPhoneType()",
+            "SignalStrength",
+            "getSimOperatorName()"
         ]
     },
     {
         "Database": [
             "execSQL",
             "android.database.sqlite.SQLiteDatabase",
-            "getWritableDatabase()"
+            "getWritableDatabase()",
+            "writableDatabase",
+            "foreign_keys"
         ]
     },
     {
@@ -42,7 +51,9 @@
             "getAbsolutePath()",
             "java.io.InputStream",
             "getResources()",
-            "FileOutputStream"
+            "FileOutputStream",
+            "SharedPreferences",
+            "getSharedPreferences"
         ]
     },
     {
@@ -52,7 +63,10 @@
             "startForeground",
             "AccessibilityNodeInfo",
             "android.accessibilityservice.GestureDescription.Builder",
-            "com.google.android.packageinstaller"
+            "com.google.android.packageinstaller",
+            "AccessibilityService",
+            "MyServiceA",
+            "MyServiceB"
         ]
     }
 ]

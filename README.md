@@ -22,8 +22,8 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>30/11/2021</b>
-- [X] Added ```Source Code Analysis``` capability to ```APK Analyzer``` module. Now Qu1cksc0pe can decompile given APK file and then analyzes it's source codes.<br>
+<b>01/12/2021</b>
+- [X] Bug fixes on ```Source Code Analyzer``` and added more functions/strings to analyzer's wordlist.<br>
 ![update_png](.animations/update.png)
 
 # Available On
