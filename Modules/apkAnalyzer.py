@@ -77,7 +77,8 @@ data = json.load(apkid_output)
 # Categories
 categs = {"Banker": [], "SMS Bot": [], "Base64": [],
           "Information Gathering": [], "Database": [], "File Operations": [],
-          "Persistence/Managing": [], "Network/Internet": [], "SSL Pining": []}
+          "Persistence/Managing": [], "Network/Internet": [], "SSL Pining": [],
+          "Dynamic Class/Dex Loading": [], "Java Reflection": []}
 
 # Function for parsing apkid tool's output
 def ApkidParser(apkid_output):
