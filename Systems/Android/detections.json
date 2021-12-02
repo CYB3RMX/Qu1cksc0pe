@@ -38,7 +38,12 @@
             "getMeid()",
             "getPhoneType()",
             "SignalStrength",
-            "getSimOperatorName()"
+            "getSimOperatorName()",
+            "getInterface()",
+            "getInetAddresses()",
+            "getActiveNetworkList()",
+            "getSystemService(\"wifi\")",
+            "WifiManager"
         ]
     },
     {
@@ -56,9 +61,12 @@
             "getAbsolutePath()",
             "java.io.InputStream",
             "getResources()",
+            "FileInputStream",
             "FileOutputStream",
             "SharedPreferences",
-            "getSharedPreferences"
+            "getSharedPreferences",
+            "android.permission.READ_EXTERNAL_STORAGE",
+            "android.permission.WRITE_EXTERNAL_STORAGE"
         ]
     },
     {
@@ -71,13 +79,23 @@
             "com.google.android.packageinstaller",
             "AccessibilityService",
             "MyServiceA",
-            "MyServiceB"
+            "MyServiceB",
+            "Process.killProcess"
         ]
     },
     {
         "Network/Internet": [
             "java.net.URL",
-            "loadUrl"
+            "loadUrl",
+            "javax.net.ssl.HttpsURLConnection",
+            "java.net.HttpURLConnection",
+            "url.openConnection",
+            "httpURLConnection.connect",
+            "httpsURLConnection.connect",
+            "httpsURLConnection.disconnect",
+            "setSSLSocketFactory",
+            "setRequestMethod",
+            "WifiManager"
         ]
     },
     {
@@ -86,6 +104,22 @@
             "java.security.cert.X509Certificate",
             "X509Certificate",
             "CertificatePinner"
+        ]
+    },
+    {
+        "Dynamic Class/Dex Loading": [
+            "dalvik.system.DexClassLoader",
+            "DexClassLoader",
+            "loadClass",
+            "getSystemClassLoader()",
+            "ClassLoader"
+        ]
+    },
+    {
+        "Java Reflection": [
+            "getDeclaredMethods()",
+            "java.lang.reflect",
+            "Class.forName"
         ]
     }
 ]
