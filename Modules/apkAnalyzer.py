@@ -77,7 +77,7 @@ data = json.load(apkid_output)
 # Categories
 categs = {"Banker": [], "SMS Bot": [], "Base64": [],
           "Information Gathering": [], "Database": [], "File Operations": [],
-          "Persistence/Managing": []}
+          "Persistence/Managing": [], "Network/Internet": [], "SSL Pining": []}
 
 # Function for parsing apkid tool's output
 def ApkidParser(apkid_output):
@@ -194,7 +194,11 @@ def MultiYaraScanner(targetAPK):
         print(f"{errorS} Decompiler({green}JADX{white}) not found. Skipping...")
 
 # Source code analysis TODO: look for better algorithm!!
-def ScanSource():
+def ScanSource(targetAPK):
+    # Parsing main activity
+    fhandler = pyaxmlparser.APK(targetAPK)
+    parsed_package = fhandler.get_package().split(".")
+
     # Tables
     sanalTable = PrettyTable()
     sanalTable.field_names = ["Code/Pattern", "File"]
@@ -210,13 +214,18 @@ def ScanSource():
             for ff in f_names:
                 fnames.append(os.path.join(root, ff))
         if fnames != []:
+            question = input(f"{infoS} Do you want to analyze another packages [Y/n]?: ")
             for sources in fnames:
                 for index in range(0, len(pattern_file)):
                     for elem in pattern_file[index]:
                         for item in pattern_file[index][elem]:
                             regx = re.findall(item, open(sources, "r").read())
-                            if regx != [] and '' not in regx:
-                                categs[elem].append([str(item), sources.replace('TargetAPK/sources/', '')])
+                            if question == "Y" or question == "y":
+                                if regx != [] and '' not in regx:
+                                    categs[elem].append([str(item), sources.replace('TargetAPK/sources/', '')])
+                            else:
+                                if regx != [] and '' not in regx and parsed_package[1] in sources.replace('TargetAPK/sources/', ''):
+                                    categs[elem].append([str(item), sources.replace('TargetAPK/sources/', '')])
                                 
     else:
         print(f"{errorS} Couldn\'t locate source codes. Did target file decompiled correctly?")
@@ -441,7 +450,7 @@ if __name__ == '__main__':
 
         # Source code analysis zone
         print(f"\n{infoS} Performing source code analysis...")
-        ScanSource()
+        ScanSource(targetAPK)
 
         # APKID scanner
         ApkidParser(apkid_output)
