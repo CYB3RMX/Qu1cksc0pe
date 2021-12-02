@@ -13,7 +13,12 @@
     {
         "SMS Bot": [
             "smsto://",
-            "sms_sdk_Q"
+            "sms_sdk_Q",
+            "android.permission.RECEIVE_SMS",
+            "android.telephony.SmsMessage",
+            "SMSBroadcastReceiver",
+            "SMS_RECEIVED",
+            "SmsMessage"
         ]
     },
     {
@@ -67,6 +72,20 @@
             "AccessibilityService",
             "MyServiceA",
             "MyServiceB"
+        ]
+    },
+    {
+        "Network/Internet": [
+            "java.net.URL",
+            "loadUrl"
+        ]
+    },
+    {
+        "SSL Pining": [
+            "CertificateFactory",
+            "java.security.cert.X509Certificate",
+            "X509Certificate",
+            "CertificatePinner"
         ]
     }
 ]
