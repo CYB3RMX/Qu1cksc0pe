@@ -7,18 +7,33 @@
             "SendMoney",
             "PaypalCreditPayment",
             "CASH_LOAD",
-            "FIND_ATM"
+            "FIND_ATM",
+            "\"at_at.spardat.netbanking.html\"",
+            "\"at_com.bankaustria.android.olb.html\"",
+            "\"at_easybank.html\"",
+            "\"at_volksbank.html\"",
+            "\"au_anzSingaporeDigitalBanking.html\"",
+            "\"au_bankwest.html\"",
+            "\"au_fusionATMLocator.html\"",
+            "my.com.maybank2u"
         ]
     },
     {
         "SMS Bot": [
             "smsto://",
+            "content://sms/inbox",
             "sms_sdk_Q",
             "android.permission.RECEIVE_SMS",
+            "android.permission.READ_SMS",
+            "android.permission.SEND_SMS",
             "android.telephony.SmsMessage",
             "SMSBroadcastReceiver",
             "SMS_RECEIVED",
-            "SmsMessage"
+            "SmsMessage",
+            "android.telephony.SmsManager",
+            "SmsManager",
+            "sendTextMessage",
+            "SMS_SEND"
         ]
     },
     {
@@ -31,42 +46,68 @@
     {
         "Information Gathering": [
             "telephonyManager.getNetworkCountryIso",
-            "getActiveNetworkInfo()",
-            "getAllCellInfo()",
-            "getImei()",
-            "getDeviceId()",
-            "getMeid()",
-            "getPhoneType()",
+            "getActiveNetworkInfo",
+            "getAllCellInfo",
+            "getImei",
+            "getDeviceId",
+            "getMeid",
+            "getPhoneType",
             "SignalStrength",
-            "getSimOperatorName()",
-            "getInterface()",
-            "getInetAddresses()",
-            "getActiveNetworkList()",
+            "getSimOperatorName",
+            "getInterface",
+            "getInetAddresses",
+            "getActiveNetworkList",
             "getSystemService(\"wifi\")",
-            "WifiManager"
+            "WifiManager",
+            "getLine1Number",
+            "getNetworkOperator",
+            "getCellLocation",
+            "getLatitude",
+            "getLongitude",
+            "TelephonyUtil.getIMEI",
+            "GsmCellLocation",
+            "\"/proc/sys/kernel/random/boot_id\"",
+            "getIpAddress",
+            "isConnected",
+            "getWifiData"
         ]
     },
     {
         "Database": [
             "execSQL",
             "android.database.sqlite.SQLiteDatabase",
-            "getWritableDatabase()",
+            "getWritableDatabase",
             "writableDatabase",
             "foreign_keys"
         ]
     },
     {
         "File Operations": [
-            "getFilesDir()",
-            "getAbsolutePath()",
+            "getFilesDir",
+            "getAbsolutePath",
             "java.io.InputStream",
-            "getResources()",
+            "getResources",
             "FileInputStream",
             "FileOutputStream",
             "SharedPreferences",
             "getSharedPreferences",
             "android.permission.READ_EXTERNAL_STORAGE",
-            "android.permission.WRITE_EXTERNAL_STORAGE"
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+            "file://",
+            "file:///android_asset/",
+            "getRootPath",
+            "content://telephony/siminfo",
+            "\"/sdcard/Android/data/\"",
+            "\"DCIM/\"",
+            "\"Camera/\"",
+            "\"Documents/\"",
+            "/storage/",
+            "com.android.externalstorage.documents",
+            "com.android.externalstorage",
+            "com.android.providers.downloads.documents",
+            "content://downloads/public_downloads",
+            "com.android.providers.media.documents",
+            "/file/"
         ]
     },
     {
@@ -80,12 +121,15 @@
             "AccessibilityService",
             "MyServiceA",
             "MyServiceB",
-            "Process.killProcess"
+            "Process.killProcess",
+            "exec",
+            "Runtime.getRuntime"
         ]
     },
     {
         "Network/Internet": [
             "java.net.URL",
+            "java.net.URLConnection",
             "loadUrl",
             "javax.net.ssl.HttpsURLConnection",
             "java.net.HttpURLConnection",
@@ -95,15 +139,38 @@
             "httpsURLConnection.disconnect",
             "setSSLSocketFactory",
             "setRequestMethod",
-            "WifiManager"
+            "WifiManager",
+            "getResponseCode",
+            "getResponseMessage",
+            "Content-Type",
+            "openConnection",
+            "getContentLength",
+            "SocketTimeoutException",
+            "java.net.SocketTimeoutException",
+            "ServerSocket",
+            "getLocalAddress",
+            "getLocalPort",
+            "\"FTP response 421 received.  Server closed connection.\"",
+            "FileDownloaderService",
+            "WebViewClient",
+            "http.proxyHost",
+            "http.proxyPort",
+            "\"address.hostAddress\"",
+            "\"Proxy.address() is not an InetSocketAddress: \"",
+            "Proxy.Type.SOCKS",
+            "proxy.type",
+            "android.webkit.BrowserFrame"
         ]
     },
     {
-        "SSL Pining": [
+        "SSL Pining/Certificate Handling": [
             "CertificateFactory",
             "java.security.cert.X509Certificate",
             "X509Certificate",
-            "CertificatePinner"
+            "CertificatePinner",
+            "javax.net.ssl.X509TrustManager",
+            "X509TrustManagerExtensions",
+            "checkServerTrusted"
         ]
     },
     {
@@ -111,15 +178,42 @@
             "dalvik.system.DexClassLoader",
             "DexClassLoader",
             "loadClass",
-            "getSystemClassLoader()",
+            "getSystemClassLoader",
             "ClassLoader"
         ]
     },
     {
         "Java Reflection": [
-            "getDeclaredMethods()",
+            "getDeclaredMethods",
             "java.lang.reflect",
             "Class.forName"
+        ]
+    },
+    {
+        "Root Detection": [
+            "{\"/system/xbin/which\", \"su\"}",
+            "check_su_binary"
+        ]
+    },
+    {
+        "Cryptography": [
+            "javax.crypto.Cipher",
+            "javax.crypto.KeyGenerator",
+            "javax.crypto.SecretKey",
+            "javax.crypto.Mac",
+            "javax.crypto.SecretKeyFactory",
+            "javax.crypto.spec.PBEKeySpec",
+            "\"Cannot parse iv:ciphertext:mac\"",
+            "\"SecureRandom.SHA1PRNG\"",
+            "org.apache.harmony.xnet.provider.jsse.NativeCrypto",
+            "RAND_seed",
+            "SecureRandom.SHA1PRNG",
+            "SecretKey",
+            "PBKDF2WithHmacSHA1",
+            "AES",
+            "HmacSHA256",
+            "AES/CBC/PKCS5Padding",
+            "\"AESUtils\""
         ]
     }
 ]

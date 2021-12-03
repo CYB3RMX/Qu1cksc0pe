@@ -77,8 +77,9 @@ data = json.load(apkid_output)
 # Categories
 categs = {"Banker": [], "SMS Bot": [], "Base64": [],
           "Information Gathering": [], "Database": [], "File Operations": [],
-          "Persistence/Managing": [], "Network/Internet": [], "SSL Pining": [],
-          "Dynamic Class/Dex Loading": [], "Java Reflection": []}
+          "Persistence/Managing": [], "Network/Internet": [], "SSL Pining/Certificate Handling": [],
+          "Dynamic Class/Dex Loading": [], "Java Reflection": [], "Root Detection": [],
+          "Cryptography": []}
 
 # Function for parsing apkid tool's output
 def ApkidParser(apkid_output):
@@ -215,7 +216,7 @@ def ScanSource(targetAPK):
             for ff in f_names:
                 fnames.append(os.path.join(root, ff))
         if fnames != []:
-            question = input(f"{infoS} Do you want to analyze another packages [Y/n]?: ")
+            question = input(f"{infoS} Do you want to analyze all packages [Y/n]?: ")
             for sources in fnames:
                 for index in range(0, len(pattern_file)):
                     for elem in pattern_file[index]:
