@@ -1,0 +1,27 @@
+[
+    {
+        "Windows Executable File": [
+            "4D5A900003000000"
+        ]
+    },
+    {
+        "PKZIP Archive File": [
+            "504B0304"
+        ]
+    },
+    {
+        "Java Archive File": [
+            "504B03040A000000"
+        ]
+    },
+    {
+        "Dalvik Executable File": [
+            "6465780A"
+        ]
+    },
+    {
+        "ELF Executable File": [
+            "7F454C4602010100"
+        ]
+    }
+]
