@@ -99,6 +99,8 @@ parser.add_argument("--runtime", required=False,
 parser.add_argument("--hashscan", required=False,
                     help="Scan target file's hash in local database.",
                     action="store_true")
+parser.add_argument("--sigcheck", required=False,
+                    help="Scan file signatures in target file.", action="store_true")
 parser.add_argument("--multihash", required=False, nargs='+',
                     help="Scan multiple file's hashes in local database.")
 parser.add_argument("--vtFile", required=False,
@@ -210,7 +212,7 @@ def Qu1cksc0pe():
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            print(f"{errorS} {green}--analyze{white} argument is not supported for folder analysis.")
+            print(f"{errorS} {green}--docs{white} argument is not supported for folder analysis.")
             sys.exit(1)
 
     # Multiple file analysis
@@ -239,6 +241,17 @@ def Qu1cksc0pe():
         if args.folder is not None:
             command = f"python3 {sc0pe_path}/Modules/hashScanner.py {args.folder} --multiscan"
             os.system(command)
+
+    # File signature scanner
+    if args.sigcheck:
+        # Handling --file argument
+        if args.file is not None:
+            command = f"python3 {sc0pe_path}/Modules/sigChecker.py {args.file}"
+            os.system(command)
+        # Handling --folder argument
+        if args.folder is not None:
+            print(f"{errorS} {green}--sigcheck{white} argument is not supported for folder analyzing.")
+            sys.exit(1)
 
     # Multi hash scanning
     if args.multihash:
@@ -276,7 +289,7 @@ def Qu1cksc0pe():
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            print(f"{errorS} {green}--analyze{white} argument is not supported for folder analyzing.")
+            print(f"{errorS} {green}--lang{white} argument is not supported for folder analyzing.")
             sys.exit(1)
 
     # VT File scanner

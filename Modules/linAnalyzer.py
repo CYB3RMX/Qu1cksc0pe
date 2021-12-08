@@ -2,7 +2,6 @@
 
 import os
 import sys
-import json
 try:
     from prettytable import PrettyTable
 except:
@@ -170,24 +169,6 @@ def Analyzer():
                 seg_indicator += 1
     if seg_indicator != 0:
         print(segTable)
-
-    # Resource scanner zone
-    print(f"\n{infoS} Performing magic number analysis...")
-    resCounter = 0
-    resTable.field_names = [f"File Extensions", "Names", "Byte Matches", "Confidence"]
-    resourceList = list(pr.magic_file(fileName))
-    for res in range(0, len(resourceList)):
-        extrExt = str(resourceList[res].extension)
-        extrNam = str(resourceList[res].name)
-        extrByt = str(resourceList[res].byte_match)
-        if resourceList[res].confidence >= 0.4:
-            resCounter += 1
-            if extrExt == '':
-                resTable.add_row([f"{red}No Extension{white}", f"{red}{extrNam}{white}", f"{red}{extrByt}{white}", f"{red}{resourceList[res].confidence}{white}"])
-            else:
-                resTable.add_row([f"{red}{extrExt}{white}", f"{red}{extrNam}{white}", f"{red}{extrByt}{white}", f"{red}{resourceList[res].confidence}{white}"])
-    if len(resourceList) != 0:
-        print(resTable)
 
     # Statistics zone
     print(f"\n{green}->{white} Statistics for: {green}{fileName}{white}")

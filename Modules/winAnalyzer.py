@@ -2,7 +2,6 @@
 
 import os
 import sys
-import json
 import configparser
 try:
     from prettytable import PrettyTable
@@ -270,27 +269,6 @@ def Analyzer():
     print(f"\n{infoS} Performing YARA rule matching...")
     WindowsYara(target_file=fileName)
 
-    # Resource scanner zone
-    print(f"\n{infoS} Performing magic number analysis...")
-    resCounter = 0
-    resTable.field_names = [f"File Extensions", "Names", "Byte Matches", "Confidence"]
-    resourceList = list(pr.magic_file(fileName))
-    for res in range(0, len(resourceList)):
-        extrExt = str(resourceList[res].extension)
-        extrNam = str(resourceList[res].name)
-        extrByt = str(resourceList[res].byte_match)
-        if resourceList[res].confidence >= 0.4:
-            resCounter += 1
-            if extrExt == '':
-                resTable.add_row([f"{red}No Extension{white}", f"{red}{extrNam}{white}", f"{red}{extrByt}{white}", f"{red}{resourceList[res].confidence}{white}"])
-            else:
-                resTable.add_row([f"{red}{extrExt}{white}", f"{red}{extrNam}{white}", f"{red}{extrByt}{white}", f"{red}{resourceList[res].confidence}{white}"])
-    if len(resourceList) != 0:
-        print(resTable)
-
-    # Assembly and pe structure analysis zone
-    print(f"\n{infoS} Performing PE file structure and assembly code analysis...\n")
-    
     # Gathering information about sections
     peStatistics.field_names = ["Section Name", "Virtual Size", "Virtual Address", "Size Of Raw Data", "Pointer to Raw Data", "Entropy"]
 

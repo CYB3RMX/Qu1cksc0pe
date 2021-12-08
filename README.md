@@ -22,8 +22,8 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.jpg)
 
 # Updates
-<b>03/12/2021</b>
-- [X] ```Source Code Analyzer``` is upgraded.<br>
+<b>08/12/2021</b>
+- [X] Added ```File Signature Analyzer``` module.<br>
 ![update_png](.animations/update.png)
 
 # Available On
