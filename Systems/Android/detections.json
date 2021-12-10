@@ -33,7 +33,9 @@
             "android.telephony.SmsManager",
             "SmsManager",
             "sendTextMessage",
-            "SMS_SEND"
+            "SMS_SEND",
+            "{\"sms/sent\", \"sms/inbox\", \"sms/draft\"};",
+            "\"send_sms\""
         ]
     },
     {
@@ -69,7 +71,8 @@
             "\"/proc/sys/kernel/random/boot_id\"",
             "getIpAddress",
             "isConnected",
-            "getWifiData"
+            "getWifiData",
+            "getLastKnownLocation"
         ]
     },
     {
@@ -122,8 +125,11 @@
             "MyServiceA",
             "MyServiceB",
             "Process.killProcess",
-            "exec",
-            "Runtime.getRuntime"
+            "Runtime.getRuntime",
+            "\"run_admin_device\"",
+            "android.app.admin.DevicePolicyManager",
+            "\"device_policy\"",
+            "removeActiveAdmin"
         ]
     },
     {
@@ -159,7 +165,11 @@
             "\"Proxy.address() is not an InetSocketAddress: \"",
             "Proxy.Type.SOCKS",
             "proxy.type",
-            "android.webkit.BrowserFrame"
+            "android.webkit.BrowserFrame",
+            "\"run_socks5\"",
+            "\"stop_socks5\"",
+            "\"rat_connect\"",
+            "\"change_url_connect\""
         ]
     },
     {
@@ -179,7 +189,8 @@
             "DexClassLoader",
             "loadClass",
             "getSystemClassLoader",
-            "ClassLoader"
+            "ClassLoader",
+            "\"patch.ring0.run\""
         ]
     },
     {
@@ -192,7 +203,10 @@
     {
         "Root Detection": [
             "{\"/system/xbin/which\", \"su\"}",
-            "check_su_binary"
+            "check_su_binary",
+            "\"/data/su_test\"",
+            "/system/app/Superuser.apk",
+            "\"to shell exec which for find su :\""
         ]
     },
     {
@@ -214,6 +228,15 @@
             "HmacSHA256",
             "AES/CBC/PKCS5Padding",
             "\"AESUtils\""
+        ]
+    },
+    {
+        "Command Execution": [
+            "exec",
+            "\"cat /proc/self/cgroup\"",
+            "\"sh\"",
+            "\"ps\"",
+            "{\"sh\", \"-c\", str}"
         ]
     }
 ]

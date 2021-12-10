@@ -79,7 +79,7 @@ categs = {"Banker": [], "SMS Bot": [], "Base64": [],
           "Information Gathering": [], "Database": [], "File Operations": [],
           "Persistence/Managing": [], "Network/Internet": [], "SSL Pining/Certificate Handling": [],
           "Dynamic Class/Dex Loading": [], "Java Reflection": [], "Root Detection": [],
-          "Cryptography": []}
+          "Cryptography": [], "Command Execution": []}
 
 # Function for parsing apkid tool's output
 def ApkidParser(apkid_output):
