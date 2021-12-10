@@ -19,7 +19,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ```
 
 # Screenshot
-![Screen](.animations/Screenshot.jpg)
+![Screen](.animations/Screenshot.png)
 
 # Updates
 <b>10/12/2021</b>
@@ -109,6 +109,10 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 ## Document scan
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_document --docs```<br>
 ![animation](.animations/docs.gif)
+
+## File signature analyzer
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --sigcheck```<br>
+![animation](.animations/sigcheck.gif)
 
 ## Programming language detection
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_executable --lang```<br>
