@@ -6,7 +6,7 @@
     },
     {
         "PKZIP Archive File": [
-            "504B0304"
+            "504B030433000300"
         ]
     },
     {
@@ -22,6 +22,51 @@
     {
         "ELF Executable File": [
             "7F454C4602010100"
+        ]
+    },
+    {
+        "Portable Network Graphics File": [
+            "89504E470D0A1A0A"
+        ]
+    },
+    {
+        "XZ Archive File": [
+            "FD377A585A0000"
+        ]
+    },
+    {
+        "GZIP Archive File": [
+            "1F8B0808D1"
+        ]
+    },
+    {
+        "BZIP2 Compressed File": [
+            "425A683931"
+        ]
+    },
+    {
+        "RARv5 Compressed File": [
+            "526172211A070100"
+        ]
+    },
+    {
+        "RARv4 Compressed File": [
+            "526172211A0700"
+        ]
+    },
+    {
+        "Tape Archive File": [
+            "7573746172"
+        ]
+    },
+    {
+        "Microsoft Word 2007+": [
+            "504B030414000600"
+        ]
+    },
+    {
+        "Composite Document File": [
+            "D0CF11E0A1B11AE1"
         ]
     }
 ]
