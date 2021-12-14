@@ -1,0 +1,21 @@
+{
+        "Hydra": {
+            "Activities": [
+                "bot.components.locker.LockerActivity",
+                "bot.components.locker.LockerActivity$DummyActivity",
+                "bot.components.screencast.ScreencastStartActivity",
+                "bot.sms.ComposeSmsActivity"
+            ],
+            "Services": [
+                "bot.sms.HeadlessSmsSendService",
+                "bot.components.injects.system.InjAccessibilityService",
+                "core.PeriodicJobService",
+                "core.injects_core.Worker"
+            ],
+            "Receivers": [
+                "bot.sms.MmsReceiver",
+                "bot.sms.SmsReceiver",
+                "bot.receivers.MainReceiver"
+            ]
+        }
+}

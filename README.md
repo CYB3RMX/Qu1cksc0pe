@@ -22,8 +22,9 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>10/12/2021</b>
-- [X] ```Source Code Analyzer``` and ```File Signature Analyzer``` modules are upgraded.<br>
+<b>15/12/2021</b>
+- [X] Added ```Malware Family Detection``` capability to ```APK Analyzer``` module. Now Qu1cksc0pe can detect both ```Hydra``` and ```FluBot``` families for now.<br>
+![update_png](.animations/update.png)
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
