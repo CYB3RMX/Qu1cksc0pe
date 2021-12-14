@@ -110,7 +110,17 @@
             "com.android.providers.downloads.documents",
             "content://downloads/public_downloads",
             "com.android.providers.media.documents",
-            "/file/"
+            "/file/",
+            ".tar.gz",
+            "\"externalSdCard\"",
+            "\"sdCard\"",
+            "\"mounted\"",
+            "\"mounted_ro\"",
+            "\"/mnt/sdcard\"",
+            "\"/proc/mounts\"",
+            "\"/dev/block/vold/\"",
+            "\"/system/etc/vold.fstab\"",
+            "\"dev_mount\""
         ]
     },
     {
@@ -236,7 +246,8 @@
             "\"cat /proc/self/cgroup\"",
             "\"sh\"",
             "\"ps\"",
-            "{\"sh\", \"-c\", str}"
+            "{\"sh\", \"-c\",",
+            "\"tar -czvf /sdcard/\""
         ]
     }
 ]

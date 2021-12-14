@@ -242,7 +242,52 @@ def ScanSource(targetAPK):
             print(f"{sanalTable}\n")
             sanalTable.clear_rows()
         
+# Analyzer for malware family detection
+def CheckFamily(targetApk):
+    # Scores
+    scoreDict = {
+        "Hydra": 0,
+        "FluBot": 0
+    }
 
+    # Parsing target apk file
+    checktarg = pyaxmlparser.APK(targetApk)
+    content = checktarg.get_activities()
+    content += checktarg.get_services()
+    content += checktarg.get_receivers()
+
+    # Gathering data
+    fam_data = json.load(open(f"{sc0pe_path}/Systems/Android/family.json"))
+
+    # Family: Hydra
+    for key in fam_data:
+        try:
+            for act_key in fam_data[key]:
+                for dat in fam_data[key][act_key]:
+                    actreg = re.findall(dat, str(content))
+                    if actreg != []:
+                        scoreDict[key] += 1
+        except:
+            continue
+
+    # Family: FluBot
+        # Checking activity name patterns
+    act = re.findall(r".p[a-z0-9]{0,9}", str(checktarg.get_activities()))
+    if len(act) == len(checktarg.get_activities()):
+        scoreDict["FluBot"] += 1
+        # Checking service name patterns
+    ser = re.findall(r".p[a-z0-9]{0,9}", str(checktarg.get_services()))
+    if len(ser) == len(checktarg.get_services()):
+        scoreDict["FluBot"] += 1
+        # Checking receiver name patterns
+    rec = re.findall(r".p[a-z0-9]{0,9}", str(checktarg.get_receivers()))
+    if len(rec) == len(checktarg.get_receivers()):
+        scoreDict["FluBot"] += 1
+
+    # Checking statistics
+    for fam in scoreDict:
+        if scoreDict[fam] != 0:
+            print(f"{red}>>>{white} Possible Malware Family: {green}{fam}{white}")
 
 # Scan files with quark-engine
 def Quarked(targetAPK):
@@ -437,6 +482,10 @@ if __name__ == '__main__':
 
         # Deep scanner
         DeepScan(parsed)
+
+        # Malware family detection
+        print(f"\n{infoS} Performing malware family detection...")
+        CheckFamily(targetApk=targetAPK)
 
         # Yara matches
         print(f"\n{infoS} Performing YARA rule matching...")
