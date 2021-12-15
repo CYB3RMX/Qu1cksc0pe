@@ -17,5 +17,43 @@
                 "bot.sms.SmsReceiver",
                 "bot.receivers.MainReceiver"
             ]
+        },
+        "MoqHao": {
+            "Activities": [
+                "vzcActivity",
+                "lcijActivity"
+            ],
+            "Services": [
+                "fnoService",
+                "xcmService",
+                "sdkService"
+            ],
+            "Receivers": [
+                "vboReceiver",
+                "k1cActivity",
+                "oaActivity",
+                "ivqReceiver",
+                "labReceiver",
+                "idReceiver",
+                "vcService",
+                "knReceiver"
+            ]
+        },
+        "SharkBot": {
+            "Activities": [
+                ".aaOverlay",
+                ".ComposeSmsActivity"
+            ],
+            "Services": [
+                ".MyServicePush",
+                ".ComposeSmsActivity_VIA_MESSAGE",
+                ".MyServiceA",
+                ".MyServiceB"
+            ],
+            "Receivers": [
+                ".MyReceiverSMS",
+                ".MyReceiverMMS",
+                ".aaBootReceiver"
+            ]
         }
 }

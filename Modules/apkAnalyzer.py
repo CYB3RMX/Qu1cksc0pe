@@ -81,6 +81,14 @@ categs = {"Banker": [], "SMS Bot": [], "Base64": [],
           "Dynamic Class/Dex Loading": [], "Java Reflection": [], "Root Detection": [],
           "Cryptography": [], "Command Execution": []}
 
+# Scores
+scoreDict = {
+    "Hydra": 0,
+    "FluBot": 0,
+    "MoqHao": 0,
+    "SharkBot": 0
+}
+
 # Function for parsing apkid tool's output
 def ApkidParser(apkid_output):
     print(f"\n{infoS} Performing APKID analysis...")
@@ -244,12 +252,6 @@ def ScanSource(targetAPK):
         
 # Analyzer for malware family detection
 def CheckFamily(targetApk):
-    # Scores
-    scoreDict = {
-        "Hydra": 0,
-        "FluBot": 0
-    }
-
     # Parsing target apk file
     checktarg = pyaxmlparser.APK(targetApk)
     content = checktarg.get_activities()
@@ -259,7 +261,7 @@ def CheckFamily(targetApk):
     # Gathering data
     fam_data = json.load(open(f"{sc0pe_path}/Systems/Android/family.json"))
 
-    # Family: Hydra
+    # Family: Hydra, MoqHao, SharkBot
     for key in fam_data:
         try:
             for act_key in fam_data[key]:
@@ -285,9 +287,11 @@ def CheckFamily(targetApk):
         scoreDict["FluBot"] += 1
 
     # Checking statistics
-    for fam in scoreDict:
-        if scoreDict[fam] != 0:
-            print(f"{red}>>>{white} Possible Malware Family: {green}{fam}{white}")
+    sort_score = sorted(scoreDict.items(), key=lambda ff: ff[1], reverse=True)
+    if sort_score[0][1] != 0:
+        print(f"{red}>>>{white} Possible Malware Family: {green}{sort_score[0][0]}{white}")
+    else:
+        print(f"{errorS} Couldn\'t detect malware family.")
 
 # Scan files with quark-engine
 def Quarked(targetAPK):
