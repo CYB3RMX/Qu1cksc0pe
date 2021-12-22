@@ -35,7 +35,6 @@ red = Fore.LIGHTRED_EX
 cyan = Fore.LIGHTCYAN_EX
 white = Style.RESET_ALL
 green = Fore.LIGHTGREEN_EX
-yellow = Fore.LIGHTYELLOW_EX
 
 # Legends
 infoS = f"{cyan}[{red}*{cyan}]{white}"
@@ -96,12 +95,7 @@ def GetHash(targetFile):
         pass
     return hashMd5.hexdigest()
 
-# Hashing md5 with sha1
-def NextHash(targetHash):
-    hashMe = hashlib.sha1(targetHash.encode())
-    finalHash = hashMe.hexdigest()
-    return finalHash
-
+# Accessing hash database content
 try:
     with open(f"{install_dir}/HashDB.json") as databaseFile:
         hashData = json.load(databaseFile)
@@ -112,10 +106,11 @@ except:
 def NormalScan():
     # Hashing
     targetHash = GetHash(targetFile)
-    hashToScan = NextHash(targetHash)
+
     # Creating answer table
     answTable = PrettyTable()
     answTable.field_names = [f"{green}Hash{white}", f"{green}Name{white}"]
+
     # Total hashes
     tot = 0
     try:
@@ -124,20 +119,22 @@ def NormalScan():
                 tot += 1
     except:
         pass
+
     # Finding target hash
     foundc = 0
     try:
         for hashes in hashData:
-            if hashes['hash'] == hashToScan:
-                answTable.add_row([f"{red}{hashToScan}{white}", f"{red}{hashes['name']}{white}"])
+            if hashes['hash'] == targetHash:
+                answTable.add_row([f"{red}{targetHash}{white}", f"{red}{hashes['name']}{white}"])
                 foundc += 1
                 break
     except:
         pass
+
     # Printing informations
     print(f"{infoS} Total Hashes: {green}{tot}{white}")
     print(f"{infoS} File Name: {green}{targetFile}{white}")
-    print(f"{infoS} Target Hash: {green}{hashToScan}{white}\n")
+    print(f"{infoS} Target Hash: {green}{targetHash}{white}\n")
     if foundc != 0:
         print(f"{answTable}\n")
     else:
@@ -149,13 +146,16 @@ def MultipleScan():
     # Creating summary table
     mulansTable = PrettyTable()
     mulansTable.field_names = [f"{green}File Names{white}", f"{green}Hash{white}", f"{green}Name{white}"]
+
     # Handling folders
     if os.path.isdir(targetFile) == True:
         allFiles = os.listdir(targetFile)
+
         # How many files in that folder?
         filNum = 0
         for _ in allFiles:
             filNum += 1
+
         # Lets scan them!!
         multimalw = 0
         print(f"{infoS} Qu1cksc0pe scans that folder for malicious files. Please wait...")
@@ -163,12 +163,12 @@ def MultipleScan():
             if allFiles[tf] != '':
                 scanme = f"{targetFile}/{allFiles[tf]}"
                 targetHash = GetHash(scanme)
-                hashToScan = NextHash(targetHash)
+
                 # Finding target hash
                 try:
                     for hashes in hashData:
-                        if hashes['hash'] == hashToScan:
-                            mulansTable.add_row([f"{red}{allFiles[tf]}{white}", f"{red}{hashToScan}{white}", f"{red}{hashes['name']}{white}"])
+                        if hashes['hash'] == targetHash:
+                            mulansTable.add_row([f"{red}{allFiles[tf]}{white}", f"{red}{targetHash}{white}", f"{red}{hashes['name']}{white}"])
                             multimalw += 1
                 except:
                     pass
