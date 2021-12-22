@@ -22,14 +22,8 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>15/12/2021</b>
-- [X] Added ```Malware Family Detection``` capability to ```APK Analyzer``` module.<br>
-<b>Now Qu1cksc0pe can detect these malware families:</b>
-- ```MoqHao```
-- ```SharkBot```
-- ```FluBot```
-- ```Hydra```<br>
-![update_png](.animations/update.png)
+<b>22/12/2021</b>
+- [X] ```HashScanner``` module is fixed.
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
