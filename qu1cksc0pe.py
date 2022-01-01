@@ -90,8 +90,6 @@ parser.add_argument("--folder", required=False,
                     help="Specify a folder to scan or analyze.")
 parser.add_argument("--analyze", required=False,
                     help="Analyze target file.", action="store_true")
-parser.add_argument("--multiple", required=False, nargs='+',
-                    help="Analyze multiple files.")
 parser.add_argument("--docs", required=False, help="Analyze document files.",
                     action="store_true")
 parser.add_argument("--runtime", required=False,
@@ -99,10 +97,10 @@ parser.add_argument("--runtime", required=False,
 parser.add_argument("--hashscan", required=False,
                     help="Scan target file's hash in local database.",
                     action="store_true")
+parser.add_argument("--resource", required=False,
+                    help="Analyze resources in target file", action="store_true")
 parser.add_argument("--sigcheck", required=False,
                     help="Scan file signatures in target file.", action="store_true")
-parser.add_argument("--multihash", required=False, nargs='+',
-                    help="Scan multiple file's hashes in local database.")
 parser.add_argument("--vtFile", required=False,
                     help="Scan your file with VirusTotal API.",
                     action="store_true")
@@ -215,22 +213,6 @@ def Qu1cksc0pe():
             print(f"{errorS} {green}--docs{white} argument is not supported for folder analysis.")
             sys.exit(1)
 
-    # Multiple file analysis
-    if args.multiple:
-        try:
-            listOfFiles = list(args.multiple)
-            for oneFile in listOfFiles:
-                if oneFile != '':
-                    command = f"strings --all {oneFile} > temp.txt"
-                    os.system(command)
-                    BasicAnalyzer(analyzeFile=oneFile)
-                    print("+", "*"*40, "+\n")
-                else:
-                    continue
-        except:
-            print(f"{errorS} An error occured while parsing the files.")
-            sys.exit(1)
-
     # Hash Scanning
     if args.hashscan:
         # Handling --file argument
@@ -253,18 +235,15 @@ def Qu1cksc0pe():
             print(f"{errorS} {green}--sigcheck{white} argument is not supported for folder analyzing.")
             sys.exit(1)
 
-    # Multi hash scanning
-    if args.multihash:
-        try:
-            listOfFiles = list(args.multihash)
-            for oneFile in listOfFiles:
-                if oneFile != '':
-                    command = f"python3 {sc0pe_path}/Modules/hashScanner.py {oneFile} --normal"
-                    os.system(command)
-                else:
-                    continue
-        except:
-            print(f"{errorS} An error occured while parsing the files.")
+    # Resource analyzer
+    if args.resource:
+        # Handling --file argument
+        if args.file is not None:
+            command = f"python3 {sc0pe_path}/Modules/resourceChecker.py {args.file}"
+            os.system(command)
+        # Handling --folder argument
+        if args.folder is not None:
+            print(f"{errorS} {green}--resource{white} argument is not supported for folder analyzing.")
             sys.exit(1)
 
     # metadata

@@ -41,7 +41,7 @@ infoS = f"{cyan}[{red}*{cyan}]{white}"
 errorS = f"{cyan}[{red}!{cyan}]{white}"
 
 # Gathering username
-username = getpass.getuser()
+username = getpass.getuser() # NOTE: If you run program as sudo your username will be "root" !!
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()

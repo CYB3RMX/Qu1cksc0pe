@@ -22,8 +22,10 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>22/12/2021</b>
-- [X] ```HashScanner``` module is fixed.
+<b>01/01/2022</b>
+- [X] Added new Yara rules.
+- [X] Added ```Resource Analyzer``` module. Now Qu1cksc0pe can analyze also resources in target files. (Only Android for now.)<br>
+![animation](.animations/resource.gif)
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
@@ -74,9 +76,9 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --analyze```<br>
 ![animation](.animations/analyze.gif)
 
-## Multiple analysis
-<b>Usage</b>: ```python3 qu1cksc0pe.py --multiple FILE1 FILE2 ...```<br>
-![animation](.animations/multi.gif)
+## Resource analysis
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --resource```<br>
+![animation](.animations/resource.gif)
 
 ## Dynamic instrumentation with FRIDA scripts (for android applications)
 **Alert**
