@@ -210,7 +210,7 @@ def Qu1cksc0pe():
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            print(f"{errorS} {green}--docs{white} argument is not supported for folder analysis.")
+            print(f"{errorS} {green}--docs{white} argument is not supported for folder analyzing.")
             sys.exit(1)
 
     # Hash Scanning
@@ -250,14 +250,11 @@ def Qu1cksc0pe():
     if args.metadata:
         # Handling --file argument
         if args.file is not None:
-            print(f"{infoS} Exif/Metadata information")
-            command = f"exiftool {args.file}"
-            print("+", "-"*50, "+")
+            command = f"python3 {sc0pe_path}/Modules/metadata.py {args.file}"
             os.system(command)
-            print("+", "-"*50, "+")
         # Handling --folder argument
         if args.folder is not None:
-            print(f"{errorS} That argument has not supported for folder scanning.")
+            print(f"{errorS} {green}--metadata{white} argument is not supported for folder analyzing.")
             sys.exit(1)
 
     # Language detection

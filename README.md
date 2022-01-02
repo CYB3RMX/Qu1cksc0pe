@@ -22,10 +22,8 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>01/01/2022</b>
-- [X] Added new Yara rules.
-- [X] Added ```Resource Analyzer``` module. Now Qu1cksc0pe can analyze also resources in target files. (Only Android for now.)<br>
-![animation](.animations/resource.gif)
+<b>03/01/2022</b>
+- [X] ```Metadata``` module is upgraded.
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
@@ -48,12 +46,12 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 - ```yara-python``` => <i>Android library scanning with Yara rules.</i>
 - ```prompt_toolkit``` => <i>Interactive shell.</i>
 - ```frida``` => <i>Performing dynamic analysis against android applications.</i>
+- ```PyExifTool``` => <i>Metadata extraction and analysis.</i>
 
 <br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
 <b>Gathering other dependencies</b>:
 - <i>VirusTotal API Key</i>: ```https://virustotal.com```
 - <i>Binutils</i>: ```sudo apt-get install binutils```
-- <i>ExifTool</i>: ```sudo apt-get install exiftool```
 - <i>Strings</i>: ```sudo apt-get install strings```
 
 **Alert**
