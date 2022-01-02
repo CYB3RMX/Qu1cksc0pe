@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import re
 import sys
 
@@ -153,8 +154,11 @@ def ParseAndroid(target):
 
 # Execution zone
 targFile = sys.argv[1]
-ostype = CheckOS(targFile)
-if ostype == "Android":
-    ParseAndroid(targFile)
+if os.path.isfile(targFile):
+    ostype = CheckOS(targFile)
+    if ostype == "Android":
+        ParseAndroid(targFile)
+    else:
+        print(f"{errorS} Target OS couldn\'t detected.")
 else:
-    print(f"{errorS} Target OS couldn\'t detected.")
+    print(f"{errorS} Target file not found.")
