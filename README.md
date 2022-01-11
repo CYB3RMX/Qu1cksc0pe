@@ -25,7 +25,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 <b>12/01/2022</b>
 - [X] Added ```Setup Health Checker``` module. Now you can check what dependencies needed for better experience.
 - <b>Usage</b>: ```python3 qu1cksc0pe.py --health```<br>
-![update](.animations/update.gif)
+![update](.animations/update.png)
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
