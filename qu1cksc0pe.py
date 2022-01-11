@@ -90,38 +90,41 @@ parser.add_argument("--folder", required=False,
                     help="Specify a folder to scan or analyze.")
 parser.add_argument("--analyze", required=False,
                     help="Analyze target file.", action="store_true")
+parser.add_argument("--console", required=False,
+                    help="Use Qu1cksc0pe on interactive shell.", action="store_true")
 parser.add_argument("--docs", required=False, help="Analyze document files.",
                     action="store_true")
-parser.add_argument("--runtime", required=False,
-                    help="Analyze APK files dynamically.", action="store_true")
+parser.add_argument("--domain", required=False,
+                    help="Extract URLs and IP addresses from file.",
+                    action="store_true")
 parser.add_argument("--hashscan", required=False,
                     help="Scan target file's hash in local database.",
                     action="store_true")
-parser.add_argument("--resource", required=False,
-                    help="Analyze resources in target file", action="store_true")
-parser.add_argument("--sigcheck", required=False,
-                    help="Scan file signatures in target file.", action="store_true")
-parser.add_argument("--vtFile", required=False,
-                    help="Scan your file with VirusTotal API.",
+parser.add_argument("--health", required=False,
+                    help="Check for dependencies and configurations.",
                     action="store_true")
+parser.add_argument("--install", required=False,
+                    help="Install or Uninstall Qu1cksc0pe.", action="store_true")
+parser.add_argument("--key_init", required=False,
+                    help="Enter your VirusTotal API key.", action="store_true")
 parser.add_argument("--lang", required=False,
                     help="Detect programming language.",
                     action="store_true")
 parser.add_argument("--metadata", required=False,
                     help="Get exif/metadata information.",
                     action="store_true")
-parser.add_argument("--domain", required=False,
-                    help="Extract URLs and IP addresses from file.",
-                    action="store_true")
 parser.add_argument("--packer", required=False,
                     help="Check if your file is packed with common packers.",
                     action="store_true")
-parser.add_argument("--console", required=False,
-                    help="Use Qu1cksc0pe on interactive shell.", action="store_true")
-parser.add_argument("--install", required=False,
-                    help="Install or Uninstall Qu1cksc0pe.", action="store_true")
-parser.add_argument("--key_init", required=False,
-                    help="Enter your VirusTotal API key.", action="store_true")
+parser.add_argument("--resource", required=False,
+                    help="Analyze resources in target file", action="store_true")
+parser.add_argument("--runtime", required=False,
+                    help="Analyze APK files dynamically.", action="store_true")
+parser.add_argument("--sigcheck", required=False,
+                    help="Scan file signatures in target file.", action="store_true")
+parser.add_argument("--vtFile", required=False,
+                    help="Scan your file with VirusTotal API.",
+                    action="store_true")
 args = parser.parse_args()
 
 # Basic analyzer function that handles single and multiple scans
@@ -321,6 +324,11 @@ def Qu1cksc0pe():
     # Interactive shell
     if args.console:
         command = f"python3 {sc0pe_path}/Modules/console.py"
+        os.system(command)
+
+    # Dependency checker
+    if args.health:
+        command = f"python3 {sc0pe_path}/Modules/checkHealth.py"
         os.system(command)
 
     # entering VT API key
