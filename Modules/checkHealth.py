@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 
 import os
+import re
 import sys
+import requests
 import getpass
 import importlib
 import configparser
@@ -21,16 +23,33 @@ green = Fore.LIGHTGREEN_EX
 
 # Legends
 infoS = f"{cyan}[{red}*{cyan}]{white}"
+errorS = f"{cyan}[{red}!{cyan}]{white}"
 
 # User home detection
 homeD = "/home"
 if sys.platform == "darwin":
     homeD = "/Users"
 
+# Commit
+latest_commit = "14/01/2022"
+
+# Checking for latest commits
+print(f"{infoS} Checking for latest commit...")
+user_agent = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0"}
+req = requests.get("https://raw.githubusercontent.com/CYB3RMX/Qu1cksc0pe/master/README.md", headers=user_agent)
+if req.ok:
+    match = re.findall(latest_commit, str(req.content))
+    if match != []:
+        print(f"{red}>>>{white} State: {green}Up to date{white}")
+    else:
+        print(f"{red}>>>{white} State: {red}Out of date{white}")
+else:
+    print(f"{errorS} Couldn\'t get latest commit data")
+
 # Environment variables
 sc0pe_path = open(".path_handler", "r").read()
 username = getpass.getuser()
-print(f"{infoS} Checking for environment...")
+print(f"\n{infoS} Checking for environment...")
 if username == "root":
     print(f"{red}>>>{white} Username: {red}root{white} (Not recommended!)")
 else:
