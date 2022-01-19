@@ -31,7 +31,7 @@ if sys.platform == "darwin":
     homeD = "/Users"
 
 # Commit
-latest_commit = "14/01/2022"
+latest_commit = "20/01/2022"
 
 # Checking for latest commits
 print(f"{infoS} Checking for latest commit...")
@@ -58,7 +58,7 @@ print(f"{red}>>>{white} Tool path: {green}{sc0pe_path}{white}\n")
 
 # Resource checks
 user_directory = f"{homeD}/{username}/sc0pe_Base"
-resource = {"HashDB.json": "Malware Hash Database", 
+resource = {"HashDB": "Malware Hash Database", 
             "sc0pe_VT_apikey.txt": "VirusTotal API key"}
 print(f"{infoS} Checking for resources...")
 for res in resource:
