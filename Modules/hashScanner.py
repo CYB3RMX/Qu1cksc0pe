@@ -5,8 +5,13 @@ import os
 import hashlib
 import sys
 import math
-import json
 import getpass
+
+try:
+    import sqlite3
+except:
+    print("Module: >sqlite3< not found.")
+    sys.exit(1)
 
 # Module for progressbar
 try:
@@ -61,12 +66,12 @@ else:
 install_dir = f"{homeD}/{username}/sc0pe_Base"
 
 def DatabaseCheck():
-    if os.path.isfile(f"{install_dir}/HashDB.json") == False:
+    if os.path.isfile(f"{install_dir}/HashDB") == False:
         print(f"{errorS} Local signature database not found.")
         choose = str(input(f"{green}=>{white} Would you like to download it [Y/n]?: "))
         if choose == "Y" or choose == "y":
-            local_database = f"{install_dir}/HashDB.json"
-            dbUrl = "https://raw.githubusercontent.com/CYB3RMX/MalwareHashDB/main/HashDB.json"
+            local_database = f"{install_dir}/HashDB"
+            dbUrl = "https://raw.githubusercontent.com/CYB3RMX/MalwareHashDB/main/HashDB"
             req = requests.get(dbUrl, stream=True)
             total_size = int(req.headers.get('content-length', 0))
             block_size = 1024
@@ -96,10 +101,10 @@ def GetHash(targetFile):
     return hashMd5.hexdigest()
 
 # Accessing hash database content
-try:
-    with open(f"{install_dir}/HashDB.json") as databaseFile:
-        hashData = json.load(databaseFile)
-except:
+if os.path.exists(f"{install_dir}/HashDB"):
+    hashbase = sqlite3.connect(f"{install_dir}/HashDB")
+    dbcursor = hashbase.cursor()
+else:
     DatabaseCheck()
 
 # Handling single scans
@@ -112,34 +117,22 @@ def NormalScan():
     answTable.field_names = [f"{green}Hash{white}", f"{green}Name{white}"]
 
     # Total hashes
-    tot = 0
-    try:
-        for hh in hashData:
-            if hh['hash'] != "":
-                tot += 1
-    except:
-        pass
-
-    # Finding target hash
-    foundc = 0
-    try:
-        for hashes in hashData:
-            if hashes['hash'] == targetHash:
-                answTable.add_row([f"{red}{targetHash}{white}", f"{red}{hashes['name']}{white}"])
-                foundc += 1
-                break
-    except:
-        pass
+    database_content = dbcursor.execute(f"SELECT * FROM HashDB").fetchall()
 
     # Printing informations
-    print(f"{infoS} Total Hashes: {green}{tot}{white}")
+    print(f"{infoS} Total Hashes: {green}{len(database_content)}{white}")
     print(f"{infoS} File Name: {green}{targetFile}{white}")
     print(f"{infoS} Target Hash: {green}{targetHash}{white}\n")
-    if foundc != 0:
+
+    # Finding target hash in the database_content
+    db_answer = dbcursor.execute(f"SELECT * FROM HashDB where hash=\"{targetHash}\"").fetchall()
+    if db_answer != []:
+        answTable.add_row([f"{red}{db_answer[0][0]}{white}", f"{red}{db_answer[0][1]}{white}"])
         print(f"{answTable}\n")
     else:
         print(f"{errorS} Target hash is not in our database.")
         print(f"{infoS} Try {green}--analyze{white} and {green}--vtFile{white} instead.\n")
+    hashbase.close()
 
 # Handling multiple scans
 def MultipleScan():
@@ -164,14 +157,13 @@ def MultipleScan():
                 scanme = f"{targetFile}/{allFiles[tf]}"
                 targetHash = GetHash(scanme)
 
-                # Finding target hash
-                try:
-                    for hashes in hashData:
-                        if hashes['hash'] == targetHash:
-                            mulansTable.add_row([f"{red}{allFiles[tf]}{white}", f"{red}{targetHash}{white}", f"{red}{hashes['name']}{white}"])
-                            multimalw += 1
-                except:
-                    pass
+                # Finding target hash in the database_content
+                db_answers = dbcursor.execute(f"SELECT * FROM HashDB where hash=\"{targetHash}\"").fetchall()
+                if db_answers != []:
+                    mulansTable.add_row([f"{red}{allFiles[tf]}{white}", f"{red}{db_answers[0][0]}{white}", f"{red}{db_answers[0][1]}{white}"])
+                    multimalw += 1
+        hashbase.close()
+
         # Print all
         if multimalw != 0:
             print(f"\n{mulansTable}\n")
