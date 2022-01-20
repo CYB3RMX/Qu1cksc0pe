@@ -31,7 +31,7 @@ if sys.platform == "darwin":
     homeD = "/Users"
 
 # Commit
-latest_commit = "20/01/2022"
+latest_commit = "21/01/2022"
 
 # Checking for latest commits
 print(f"{infoS} Checking for latest commit...")

@@ -22,7 +22,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>20/01/2022</b>
+<b>21/01/2022</b>
 - [X] ```HashScanner module``` is upgraded.
 - [X] ```Interactive Shell Mode``` is upgraded. Now you can specify your target files/folders faster with autocompletion.<br>
 ![update_gif](.animations/update.gif)
