@@ -142,25 +142,29 @@ def MultipleScan():
 
     # Handling folders
     if os.path.isdir(targetFile) == True:
-        allFiles = os.listdir(targetFile)
+        print(f"{infoS} Gathering all files under that directory please wait...")
+        # Get all files under that directory recursively...
+        file_names = []
+        for root, d_names, f_names in os.walk(targetFile):
+            for ff in f_names:
+                file_names.append(os.path.join(root, ff))
 
         # How many files in that folder?
-        filNum = 0
-        for _ in allFiles:
-            filNum += 1
+        filNum = len(file_names)
+        print(f"{green}>>>{white} Total files about to scan: {cyan}{filNum}{white}\n")
 
         # Lets scan them!!
         multimalw = 0
-        print(f"{infoS} Qu1cksc0pe scans that folder for malicious files. Please wait...")
+        print(f"{infoS} Qu1cksc0pe scans everything under that folder for malicious things. Please wait...")
         for tf in tqdm(range(0, filNum), desc="Scanning..."):
-            if allFiles[tf] != '':
-                scanme = f"{targetFile}/{allFiles[tf]}"
+            if file_names[tf] != '':
+                scanme = f"{file_names[tf]}"
                 targetHash = GetHash(scanme)
 
                 # Finding target hash in the database_content
                 db_answers = dbcursor.execute(f"SELECT * FROM HashDB where hash=\"{targetHash}\"").fetchall()
                 if db_answers != []:
-                    mulansTable.add_row([f"{red}{allFiles[tf]}{white}", f"{red}{db_answers[0][0]}{white}", f"{red}{db_answers[0][1]}{white}"])
+                    mulansTable.add_row([f"{red}{file_names[tf]}{white}", f"{red}{db_answers[0][0]}{white}", f"{red}{db_answers[0][1]}{white}"])
                     multimalw += 1
         hashbase.close()
 
