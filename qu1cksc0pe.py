@@ -40,7 +40,6 @@ red = Fore.LIGHTRED_EX
 cyan = Fore.LIGHTCYAN_EX
 white = Style.RESET_ALL
 green = Fore.LIGHTGREEN_EX
-yellow = Fore.LIGHTYELLOW_EX
 
 # Legends
 infoS = f"{cyan}[{red}*{cyan}]{white}"

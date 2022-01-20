@@ -189,7 +189,6 @@ def Analyzer():
     tables = PrettyTable()
     peStatistics = PrettyTable()
     dllTable = PrettyTable()
-    resTable = PrettyTable()
     statistics = PrettyTable()
 
     # categorizing extracted strings
