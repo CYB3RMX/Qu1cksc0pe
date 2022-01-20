@@ -1,7 +1,10 @@
 #!/usr/bin/python3
 
 import os
+import readline
 import sys
+import glob
+import getpass
 
 # Testing prompt_toolkit existence
 try:
@@ -48,6 +51,14 @@ errorS = f"{cyan}[{red}!{cyan}]{white}"
 # Path variable
 sc0pe_path = open(".path_handler", "r").read()
 
+# Gathering username
+username = getpass.getuser()
+
+# User home detection
+homeD = "/home"
+if sys.platform == "darwin":
+    homeD = "/Users"
+
 console_style = Style.from_dict({
     # User input (default text).
     'input':          '#ff0066',
@@ -67,6 +78,12 @@ console_output = [
     ('class:input', ''),
 ]
 
+# File path completer
+def complete(text, state):
+    return (glob.glob(text+"*")+[None])[state]
+readline.set_completer_delims(" \t\n;")
+readline.parse_and_bind("tab: complete")
+readline.set_completer(complete)
 
 # Message
 print(f"{infoS} Entering interactive shell mode...")
@@ -86,10 +103,14 @@ console_commands = NestedCompleter.from_nested_dict({
     "document": None,
     "domain": None,
     "language": None,
+    "metadata": None,
     "packer": None,
+    "sigcheck": None,
+    "health": None,
     "hash-scan": None,
     "exit": None,
-    "clear": None
+    "clear": None,
+    "virustotal": None
 })
 
 try:
@@ -284,6 +305,46 @@ try:
                 os.system(command)
             else:
                 print(f"{errorS} You must specify target folder with {green}set target-folder{white} command.")
+
+         # File signature analysis
+        elif con_command == "sigcheck":
+            if os.path.exists(".target-file.txt"):
+                filename = open(".target-file.txt", "r").read()
+                command = f"python3 {sc0pe_path}/Modules/sigChecker.py {filename}"
+                os.system(command)
+            else:
+                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
+
+        # Setup health checker
+        elif con_command == "health":
+            command = f"python3 {sc0pe_path}/Modules/checkHealth.py"
+            os.system(command)
+
+        # Metadata analyzer
+        elif con_command == "metadata":
+            if os.path.exists(".target-file.txt"):
+                foldername = open(".target-file.txt", "r").read()
+                command = f"python3 {sc0pe_path}/Modules/metadata.py {filename}"
+                os.system(command)
+            else:
+                print(f"{errorS} You must specify target folder with {green}set target-folder{white} command.")
+
+        # VirusTotal scan
+        elif con_command == "virustotal":
+            # if there is no key quit
+            try:
+                directory = f"{homeD}/{username}/sc0pe_Base/sc0pe_VT_apikey.txt"
+                apik = open(directory, "r").read().split("\n")
+            except:
+                print(f"{errorS} Use key_init to enter your key.")
+                sys.exit(1)
+            # if key is not valid quit
+            if apik[0] == '' or apik[0] is None or len(apik[0]) != 64:
+                print(f"{errorS} Please get your API key from -> {green}https://www.virustotal.com/{white}")
+                sys.exit(1)
+            else:
+                command = f"python3 {sc0pe_path}/Modules/VTwrapper.py {apik[0]} {filename}"
+                os.system(command)
 
         # Wrong command
         else:
