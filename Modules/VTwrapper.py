@@ -1,9 +1,18 @@
 #!/usr/bin/python3
 
-import os
+from ipaddress import ip_address
+import re
 import sys
-import json
 import hashlib
+import requests
+
+# Checking for rich existence
+try:
+    from rich.table import Table
+    from rich.console import Console
+except:
+    print("Error: >rich< module not found.")
+    sys.exit(1)
 
 # Checking for colorama existence
 try:
@@ -12,12 +21,8 @@ except:
     print("Error: >colorama< module not found.")
     sys.exit(1)
 
-# Checking for prettytable existence
-try:
-    from prettytable import PrettyTable
-except:
-    print("Error: >prettytable< module not found.")
-    sys.exit(1)
+# Rich console
+r_console = Console()
 
 # Colors
 yellow = Fore.LIGHTYELLOW_EX
@@ -35,12 +40,12 @@ infoS = f"{cyan}[{red}*{cyan}]{white}"
 try:
     apikey = str(sys.argv[1])
 except:
-    print(f"{errorS} Please get your API key from -> {green}https://www.virustotal.com/{white}")
+    r_console.print("[blink bold white on red]Please get your API key from [white]-> [bold green][a]https://www.virustotal.com/[/a]")
     sys.exit(1)
 try:
     targetFile = str(sys.argv[2])
 except:
-    print(f"{errorS} Please enter your file.")
+    r_console.print("\n[bold white on red]Please enter your file!!\n")
     sys.exit(1)
 
 # An array for AV names
@@ -67,106 +72,148 @@ def Hasher(targetFile):
     finalHash = hashlib.md5(open(targetFile, "rb").read()).hexdigest()
     return finalHash
 
-# Function for querying target file's hashes on VT with curl command
-def CurlComm(targetFile):
-    # TODO: Look for better solutions instead of os.system() !!
+# Function for querying target file's hashes on VT
+def DoRequest(targetFile):
     print(f"\n{infoS} Sending query to VirusTotal API...")
+    # Building request
+    request_headers = {"x-apikey": apikey}
     targetHash = Hasher(targetFile)
-    command = f'curl -s -X GET --url https://www.virustotal.com/api/v3/files/{targetHash} --header "x-apikey: {apikey}" > report.txt'
-    os.system(command)
+    vt_data = requests.get(f"https://www.virustotal.com/api/v3/files/{targetHash}", headers=request_headers)
+    if vt_data.ok:
+        return vt_data.json()
+    else:
+        return None
 
 # Function for parsing report.txt
-def ReportParser():
-    if os.path.exists("report.txt"):
+def ReportParser(reportStr):
+    if reportStr is not None:
         print(f"{infoS} Parsing the scan report...\n")
-        data = open("report.txt", "r")
-        parser = json.loads(data.read())
-        os.remove("report.txt") # Clear everything !!
 
         # Threat Categories
-        threatTable = PrettyTable()
-        threatTable.field_names = [f"{green}Threat Categories{white}", f"{green}Count{white}"]
-        if "data" in parser.keys():
-            if "popular_threat_classification" in parser["data"]["attributes"].keys():
-                if "suggested_threat_label" in parser["data"]["attributes"]["popular_threat_classification"].keys():
-                    print(f"\n{infoS} Potential Threat Label: " + f'{red}{parser["data"]["attributes"]["popular_threat_classification"]["suggested_threat_label"]}{white}')
+        threatTable = Table()
+        threatTable.add_column("[bold green]Threat Categories", justify="center")
+        threatTable.add_column("[bold green]Count", justify="center")
+        if "data" in reportStr.keys():
+            if "popular_threat_classification" in reportStr["data"]["attributes"].keys():
+                if "suggested_threat_label" in reportStr["data"]["attributes"]["popular_threat_classification"].keys():
+                    print(f"\n{infoS} Potential Threat Label: " + f'{red}{reportStr["data"]["attributes"]["popular_threat_classification"]["suggested_threat_label"]}{white}')
 
                 # Counting threat category
-                if "popular_threat_category" in parser["data"]["attributes"]["popular_threat_classification"].keys():
-                    for th in range(0, len(parser["data"]["attributes"]["popular_threat_classification"]["popular_threat_category"])):
-                        threatTable.add_row([f'{red}{parser["data"]["attributes"]["popular_threat_classification"]["popular_threat_category"][th]["value"]}{white}',f'{red}{parser["data"]["attributes"]["popular_threat_classification"]["popular_threat_category"][th]["count"]}{white}'])
-                print(threatTable)
+                if "popular_threat_category" in reportStr["data"]["attributes"]["popular_threat_classification"].keys():
+                    for th in range(0, len(reportStr["data"]["attributes"]["popular_threat_classification"]["popular_threat_category"])):
+                        threatTable.add_row(
+                            f"[bold red]{reportStr['data']['attributes']['popular_threat_classification']['popular_threat_category'][th]['value']}",
+                            f"[bold red]{reportStr['data']['attributes']['popular_threat_classification']['popular_threat_category'][th]['count']}"
+                        )
+                r_console.print(threatTable)
 
                 # Counting threat names
-                nameTable = PrettyTable()
-                nameTable.field_names = [f"{green}Threat Names{white}",f"{green}Count{white}"]
-                if "popular_threat_name" in parser["data"]["attributes"]["popular_threat_classification"].keys():
-                    for th in range(0, len(parser["data"]["attributes"]["popular_threat_classification"]["popular_threat_name"])):
-                        nameTable.add_row([f'{red}{parser["data"]["attributes"]["popular_threat_classification"]["popular_threat_name"][th]["value"]}{white}',f'{red}{parser["data"]["attributes"]["popular_threat_classification"]["popular_threat_name"][th]["count"]}{white}'])
-                print(nameTable)
+                nameTable = Table()
+                nameTable.add_column("[bold green]Threat Names", justify="center")
+                nameTable.add_column("[bold green]Count", justify="center")
+                if "popular_threat_name" in reportStr["data"]["attributes"]["popular_threat_classification"].keys():
+                    for th in range(0, len(reportStr["data"]["attributes"]["popular_threat_classification"]["popular_threat_name"])):
+                        nameTable.add_row(
+                            f"[bold red]{reportStr['data']['attributes']['popular_threat_classification']['popular_threat_name'][th]['value']}",
+                            f"[bold red]{reportStr['data']['attributes']['popular_threat_classification']['popular_threat_name'][th]['count']}"
+                        )
+                r_console.print(nameTable)
         
         # Detections
         detect = 0
-        antiTable = PrettyTable()
-        antiTable.field_names = [f"{green}Detected By{white}", f"{green}Results{white}"]
+        antiTable = Table()
+        antiTable.add_column("[bold green]Detected By", justify="center")
+        antiTable.add_column("[bold green]Results", justify="center")
         for av in avArray:
-            if "data" in parser.keys():
-                if av in parser["data"]["attributes"]["last_analysis_results"].keys():
-                    if parser["data"]["attributes"]["last_analysis_results"][av]["result"] is not None:
+            if "data" in reportStr.keys():
+                if av in reportStr["data"]["attributes"]["last_analysis_results"].keys():
+                    if reportStr["data"]["attributes"]["last_analysis_results"][av]["result"] is not None:
                         detect += 1
-                        antiTable.add_row([av, parser["data"]["attributes"]["last_analysis_results"][av]["result"]])
+                        antiTable.add_row(av, reportStr["data"]["attributes"]["last_analysis_results"][av]["result"])
             else:
                 print(f"\n{errorS} Nothing found harmfull about that file.")
                 sys.exit(0)
         print(f"\n{infoS} Detection: {red}{detect}{white}/{red}{len(avArray)}{white}")
-        print(antiTable)
+        r_console.print(antiTable)
 
         # Behavior analysis
-        if "data" in parser.keys():
-            if "crowdsourced_ids_results" in parser["data"]["attributes"].keys():
-                print(f"\n{infoS} CrowdSourced IDS Reports")
-                print("+","-"*60,"+")
-                try:
-                    for crowd in range(0, len(parser["data"]["attributes"]["crowdsourced_ids_results"])):
-                        if "alert_context" in parser["data"]["attributes"]["crowdsourced_ids_results"][crowd].keys():
-                            print(f"{magenta}=> {white}Alert: {green}{crowd+1}{white}")
-                            for alrt in range(0, len(parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["alert_context"])):
-                                for repo in parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["alert_context"][alrt]:
-                                    if repo == "ja3":
-                                        pass
-                                    else:
-                                        sanitized = f"{repo}".replace("_", " ").upper()
-                                        print(f'{magenta}-----> {white}{sanitized}: {parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["alert_context"][alrt][repo]}')
-                            if parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["alert_severity"] == "high":
-                                print(f'{magenta}---> {white}Alert Severity: {red}{parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["alert_severity"]}')
-                            elif parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["alert_severity"] == "medium":
-                                print(f'{magenta}---> {white}Alert Severity: {yellow}{parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["alert_severity"]}')
+        if "data" in reportStr.keys():
+            if "crowdsourced_ids_results" in reportStr["data"]["attributes"].keys():
+                idsTable = Table(title="\n* CrowdSourced IDS Reports *", title_justify="center", title_style="bold cyan")
+                idsTable.add_column("Alert Number", justify="center")
+                idsTable.add_column("SRC IP", justify="center")
+                idsTable.add_column("SRC Port", justify="center")
+                idsTable.add_column("DST IP", justify="center")
+                idsTable.add_column("DST Port", justify="center")
+                idsTable.add_column("Alert Severity", justify="center")
+                idsTable.add_column("Rule Category", justify="center")
+                idsTable.add_column("Rule Source", justify="center")
+                for crowd in range(0, len(reportStr["data"]["attributes"]["crowdsourced_ids_results"])):
+                    try:
+                        ids_alert = reportStr["data"]["attributes"]["crowdsourced_ids_results"][crowd]
+                        rule_categ = ids_alert["rule_category"]
+                        severity = ids_alert["alert_severity"]
+                        rule_source = ids_alert["rule_source"]
+                        if "alert_context" in ids_alert.keys():
+                            for mycontext in ids_alert["alert_context"]:
+                                # Look for source ip address
+                                if "src_ip" in mycontext.keys():
+                                    ip_address = mycontext["src_ip"]
+                                else:
+                                    ip_address = "none"
+
+                                # Look for source ports
+                                if "src_port" in mycontext.keys():
+                                    portnum = mycontext["src_port"]
+                                else:
+                                    portnum = "none"
+
+                                # Look for destination ip address
+                                if "dest_ip" in mycontext.keys():
+                                    dest_address = mycontext["dest_ip"]
+                                else:
+                                    dest_address = "none"
+
+                                # Look for destination ports
+                                if "dest_port" in mycontext.keys():
+                                    dest_port = mycontext["dest_port"]
+                                else:
+                                    dest_port = "none"
+
+                            # Adding to table with alert_severity classification
+                            if severity == "high":
+                                idsTable.add_row(str(crowd+1), str(ip_address), str(portnum), str(dest_address), str(dest_port), f"[bold red]{severity}", str(rule_categ), str(rule_source))
+                            elif severity == "medium":
+                                idsTable.add_row(str(crowd+1), str(ip_address), str(portnum), str(dest_address), str(dest_port), f"[bold yellow]{severity}", str(rule_categ), str(rule_source))
+                            elif severity == "low":
+                                idsTable.add_row(str(crowd+1), str(ip_address), str(portnum), str(dest_address), str(dest_port), f"[bold cyan]{severity}", str(rule_categ), str(rule_source))
                             else:
-                                print(f'{magenta}---> {white}Alert Severity: {cyan}{parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["alert_severity"]}')
-                            print(f'{magenta}---> {white}Rule Category: {parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["rule_category"]}')
-                            print(f'{magenta}---> {white}Rule Message: {parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["rule_msg"]}')
-                            print(f'{magenta}---> {white}Rule Source: {parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["rule_source"]}')
-                            print(f'{magenta}---> {white}Rule URL: {parser["data"]["attributes"]["crowdsourced_ids_results"][crowd]["rule_url"]}\n')
-                except:
-                    pass
-                if "crowdsourced_ids_stats" in parser["data"]["attributes"].keys():
+                                idsTable.add_row(str(crowd+1), str(ip_address), str(portnum), str(dest_address), str(dest_port), str(severity), str(rule_categ), str(rule_source))
+                    except:
+                        continue
+                # Print results
+                r_console.print(idsTable)
+
+                if "crowdsourced_ids_stats" in reportStr["data"]["attributes"].keys():
                     print(f"\n{infoS} Alert Summary: {green}{targetFile}{white}")
-                    crowdTable = PrettyTable()
-                    crowdTable.field_names = [f"{green}Alert Level{white}", f"{green}Number of Alerts{white}"]
-                    for alrtlvl in parser["data"]["attributes"]["crowdsourced_ids_stats"]:
+                    crowdTable = Table()
+                    crowdTable.add_column("[bold green]Alert Level", justify="center")
+                    crowdTable.add_column("[bold green]Number of Alerts", justify="center")
+                    for alrtlvl in reportStr["data"]["attributes"]["crowdsourced_ids_stats"]:
                         sant = f"{alrtlvl}".upper()
                         if alrtlvl == "high":
-                            crowdTable.add_row([f"{red}{sant}{white}", f'{parser["data"]["attributes"]["crowdsourced_ids_stats"][alrtlvl]}'])
+                            crowdTable.add_row(f"[bold red]{sant}", f"[bold red]{reportStr['data']['attributes']['crowdsourced_ids_stats'][alrtlvl]}")
                         elif alrtlvl == "medium":
-                            crowdTable.add_row([f"{yellow}{sant}{white}", f'{parser["data"]["attributes"]["crowdsourced_ids_stats"][alrtlvl]}'])
+                            crowdTable.add_row(f"[bold yellow]{sant}", f"[bold yellow]{reportStr['data']['attributes']['crowdsourced_ids_stats'][alrtlvl]}")
                         elif alrtlvl == "low":
-                            crowdTable.add_row([f"{cyan}{sant}{white}", f'{parser["data"]["attributes"]["crowdsourced_ids_stats"][alrtlvl]}'])
+                            crowdTable.add_row(f"[bold cyan]{sant}", f"[bold cyan]{reportStr['data']['attributes']['crowdsourced_ids_stats'][alrtlvl]}")
                         else:
-                            crowdTable.add_row([f"{white}{sant}", f'{parser["data"]["attributes"]["crowdsourced_ids_stats"][alrtlvl]}'])
-                    print(f"{crowdTable}\n")
+                            crowdTable.add_row(str(sant), f'{reportStr["data"]["attributes"]["crowdsourced_ids_stats"][alrtlvl]}')
+                    r_console.print(crowdTable)
+                    print(" ")
             else:
-                print(f"\n{errorS} There is no IDS reports for target file.\n")
+                r_console.print("\n[bold white on red]There is no IDS reports for target file.\n")
 
 # Execution area
-CurlComm(targetFile)
-ReportParser()
+reportstr = DoRequest(targetFile)
+ReportParser(reportstr)

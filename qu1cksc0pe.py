@@ -11,6 +11,14 @@ except:
     print("Missing modules detected!")
     sys.exit(1)
 
+# Testing rich existence
+try:
+    from rich.table import Table
+    from rich.console import Console
+except:
+    print("Error: >rich< module not found.")
+    sys.exit(1)
+
 # Testing puremagic existence
 try:
     import puremagic as pr
@@ -34,6 +42,9 @@ except:
 
 # Disabling pyaxmlparser's logs
 pyaxmlparser.core.log.disabled = True
+
+# Rich console
+r_console = Console()
 
 # Colors
 red = Fore.LIGHTRED_EX
@@ -168,11 +179,11 @@ def BasicAnalyzer(analyzeFile):
             else:
                 pass
         else:
-            print(f"{errorS} Qu1cksc0pe doesn\'t support archive analysis for now ;)")
+            r_console.print("\n[bold white on red]Qu1cksc0pe doesn\'t support archive analysis for now ;)\n")
             sys.exit(1)
     else:
-        print(f"{errorS} File type not supported. Make sure you are analyze executable files or document files.")
-        print(f"{errorS} If you want to scan document files try {green}--docs{white} argument.")
+        r_console.print("\n[bold white on red]File type not supported. Make sure you are analyze executable files or document files.")
+        r_console.print("[bold]>>> If you want to scan document files try [bold green][i]--docs[/i] [white]argument.")
         sys.exit(1)
 
 # Main function
@@ -187,10 +198,10 @@ def Qu1cksc0pe():
                 command = f"strings {allA} {args.file} > temp.txt"
                 os.system(command)
             else:
-                print(f"{errorS} {green}strings{white} command not found. You need to install it.")
+                r_console.print("[bold white on red][blink]strings[/blink] command not found. You need to install it.")
                 sys.exit(1)
         else:
-            print(f"{errorS} Target file not found.\n")
+            r_console.print("[bold white on red]Target file not found!\n")
             sys.exit(1)
 
     # Analyze the target file
@@ -200,7 +211,7 @@ def Qu1cksc0pe():
             BasicAnalyzer(analyzeFile=args.file)
         # Handling --folder argument
         if args.folder is not None:
-            print(f"{errorS} {green}--analyze{white} argument is not supported for folder analyzing.")
+            r_console.print("[bold white on red][blink]--analyze[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
 
     # Analyze document files
@@ -212,7 +223,7 @@ def Qu1cksc0pe():
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            print(f"{errorS} {green}--docs{white} argument is not supported for folder analyzing.")
+            r_console.print("[bold white on red][blink]--docs[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
 
     # Hash Scanning
@@ -234,7 +245,7 @@ def Qu1cksc0pe():
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            print(f"{errorS} {green}--sigcheck{white} argument is not supported for folder analyzing.")
+            r_console.print("[bold white on red][blink]--sigcheck[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
 
     # Resource analyzer
@@ -245,7 +256,7 @@ def Qu1cksc0pe():
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            print(f"{errorS} {green}--resource{white} argument is not supported for folder analyzing.")
+            r_console.print("[bold white on red][blink]--resource[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
 
     # metadata
@@ -256,7 +267,7 @@ def Qu1cksc0pe():
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            print(f"{errorS} {green}--metadata{white} argument is not supported for folder analyzing.")
+            r_console.print("[bold white on red][blink]--metadata[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
 
     # Language detection
@@ -267,7 +278,7 @@ def Qu1cksc0pe():
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            print(f"{errorS} {green}--lang{white} argument is not supported for folder analyzing.")
+            r_console.print("[bold white on red][blink]--lang[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
 
     # VT File scanner
@@ -279,18 +290,18 @@ def Qu1cksc0pe():
                 directory = f"{homeD}/{username}/sc0pe_Base/sc0pe_VT_apikey.txt"
                 apik = open(directory, "r").read().split("\n")
             except:
-                print(f"{errorS} Use --key_init to enter your key.")
+                r_console.print("[bold white on red]Use [blink]--key_init[/blink] to enter your key!\n")
                 sys.exit(1)
             # if key is not valid quit
             if apik[0] == '' or apik[0] is None or len(apik[0]) != 64:
-                print(f"{errorS} Please get your API key from -> {green}https://www.virustotal.com/{white}")
+                r_console.print("[bold]Please get your API key from -> [bold green][a]https://www.virustotal.com/[/a]\n")
                 sys.exit(1)
             else:
                 command = f"python3 {sc0pe_path}/Modules/VTwrapper.py {apik[0]} {args.file}"
                 os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            print(f"{errorS} If you want to get banned from VirusTotal then do that :).")
+            r_console.print("[bold white on red]If you want to get banned from VirusTotal then do that :).\n")
             sys.exit(1)
 
     # packer detection
@@ -312,7 +323,7 @@ def Qu1cksc0pe():
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            print(f"{errorS} That argument has not supported for folder scanning.")
+            r_console.print("[bold white on red][blink]--domain[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
 
     # Dynamic APK analyzer
@@ -343,7 +354,7 @@ def Qu1cksc0pe():
             apifile.write(apikey)
             print(f"{foundS} Your VirusTotal API key saved.")
         except KeyboardInterrupt:
-            print(f"{errorS} Program terminated by user.")
+            r_console.print("\n[bold white on red]Program terminated by user.\n")
 
     # Install Qu1cksc0pe on your system!!
     if args.install:
@@ -391,10 +402,10 @@ def Qu1cksc0pe():
                 os.system("rm -rf /opt/Qu1cksc0pe")
                 print(f"{infoS} Uninstallation completed.")
             else:
-                print(f"\n{errorS} Wrong option. Quitting!!")
+                r_console.print("\n[bold white on red]Wrong option. Quitting!!\n")
                 sys.exit(1)
         else:
-            print(f"{errorS} Please use this argument as {green}root{white}")
+            r_console.print("\n[bold white on red]Please use this argument as [blink]root[/blink]!!\n")
             sys.exit(1)
 
 # Exectuion area

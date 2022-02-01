@@ -4,9 +4,10 @@ import sys
 import xml.etree.ElementTree as etr
 
 try:
-    from prettytable import PrettyTable
+    from rich.table import Table
+    from rich.console import Console
 except:
-    print("Error: >prettytable< module not found.")
+    print("Error: >rich< module not found.")
     sys.exit(1)
 
 try:
@@ -15,13 +16,15 @@ except:
     print("Error: >colorama< module not found.")
     sys.exit(1)
 
+# Rich console
+r_console = Console()
+
 # Colors
 red = Fore.LIGHTRED_EX
 cyan = Fore.LIGHTCYAN_EX
 white = Style.RESET_ALL
 green = Fore.LIGHTGREEN_EX
 yellow = Fore.LIGHTYELLOW_EX
-magenta = Fore.LIGHTMAGENTA_EX
 
 # Legends
 infoS = f"{cyan}[{red}*{cyan}]{white}"
@@ -46,7 +49,7 @@ def ManifestAnalysis():
         "{http://schemas.android.com/apk/res/android}debuggable": "No entry found.",
         "{http://schemas.android.com/apk/res/android}usesCleartextTraffic": "No entry found.",
         "{http://schemas.android.com/apk/res/android}allowBackup": "No entry found.",
-        "{http://schemas.android.com/apk/res/android}networkSecurityConfig": f"{red}Not found{white}"
+        "{http://schemas.android.com/apk/res/android}networkSecurityConfig": "Not found"
     }
 
     # Check for values
@@ -62,17 +65,18 @@ def ManifestAnalysis():
                     sec_dict[sec] = f"{red}Insecure{white}"
 
     # Tables!!
-    reportTable = PrettyTable()
-    reportTable.field_names = [f"{yellow}Debuggable{white}", f"{yellow}AllowBackup{white}", f"{yellow}ClearTextTraffic{white}", f"{yellow}NetworkSecurityConfig{white}"]
+    reportTable = Table()
+    reportTable.add_column("[bold yellow]Debuggable", justify="center")
+    reportTable.add_column("[bold yellow]AllowBackup", justify="center")
+    reportTable.add_column("[bold yellow]ClearTextTraffic", justify="center")
+    reportTable.add_column("[bold yellow]NetworkSecurityConfig", justify="center")
     reportTable.add_row(
-        [
-            sec_dict['{http://schemas.android.com/apk/res/android}debuggable'],
-            sec_dict['{http://schemas.android.com/apk/res/android}allowBackup'],
-            sec_dict['{http://schemas.android.com/apk/res/android}usesCleartextTraffic'],
-            sec_dict['{http://schemas.android.com/apk/res/android}networkSecurityConfig']
-        ]
+        str(sec_dict['{http://schemas.android.com/apk/res/android}debuggable']),
+        str(sec_dict['{http://schemas.android.com/apk/res/android}allowBackup']),
+        str(sec_dict['{http://schemas.android.com/apk/res/android}usesCleartextTraffic']),
+        str(sec_dict['{http://schemas.android.com/apk/res/android}networkSecurityConfig'])
     )
-    print(reportTable)
+    r_console.print(reportTable)
 
     # Check for permission flags
     permLevel = "No entry found."
@@ -83,15 +87,15 @@ def ManifestAnalysis():
                 permLevel = f"{green}{perm_data[0].attrib['{http://schemas.android.com/apk/res/android}protectionLevel']}{white}"
             else:
                 permLevel = f"{red}{perm_data[0].attrib['{http://schemas.android.com/apk/res/android}protectionLevel']}{white}"
-        permTable = PrettyTable()
-        permTable.field_names = [f"{yellow}Permission{white}", f"{yellow}Flag{white}"]
+
+        permTable = Table()
+        permTable.add_column("[bold yellow]Permission", justify="center")
+        permTable.add_column("[bold yellow]Flag", justify="center")
         permTable.add_row(
-            [
-                perm_data[0].attrib["{http://schemas.android.com/apk/res/android}name"],
-                permLevel
-            ]
+            str(perm_data[0].attrib["{http://schemas.android.com/apk/res/android}name"]),
+            str(permLevel)
         )
-        print(permTable)
+        r_console.print(permTable)
     except IndexError:
         print(f"{errorS} There is no entry about permission flags.")
 
@@ -100,62 +104,56 @@ def ManifestAnalysis():
     print(f"\n{infoS} Searching for exported activities...")
 
     # Pretty output
-    actTable = PrettyTable()
-    actTable.field_names = [f"{yellow}Activity{white}", f"{yellow}Exported{white}"]
+    actTable = Table()
+    actTable.add_column("[bold yellow]Activity", justify="center")
+    actTable.add_column("[bold yellow]Exported", justify="center")
     for tags in range(0, len(app_data[0])):
         if app_data[0][tags].tag == "activity":
             if "{http://schemas.android.com/apk/res/android}exported" in app_data[0][tags].keys():
                 if app_data[0][tags].get("{http://schemas.android.com/apk/res/android}exported") == "true":
                     actTable.add_row(
-                        [
-                            app_data[0][tags].get('{http://schemas.android.com/apk/res/android}name'),
-                            f"{red}{app_data[0][tags].get('{http://schemas.android.com/apk/res/android}exported')}{white}"
-                        ]
+                        str(app_data[0][tags].get('{http://schemas.android.com/apk/res/android}name')),
+                        f"[bold red]{app_data[0][tags].get('{http://schemas.android.com/apk/res/android}exported')}"
                     )
                     exp_indicator += 1
                 else:
                     actTable.add_row(
-                        [
-                            app_data[0][tags].get('{http://schemas.android.com/apk/res/android}name'),
-                            f"{green}{app_data[0][tags].get('{http://schemas.android.com/apk/res/android}exported')}{white}"
-                        ]
+                        str(app_data[0][tags].get('{http://schemas.android.com/apk/res/android}name')),
+                        f"[bold green]{app_data[0][tags].get('{http://schemas.android.com/apk/res/android}exported')}"
                     )
                     exp_indicator += 1
     if exp_indicator == 0:
         print(f"{errorS} There is no entry about exported activites.")
     else:
-        print(actTable)
+        r_console.print(actTable)
 
     # Exported providers
     pro_indicator = 0
     print(f"\n{infoS} Searching for exported providers...")
 
     # Pretty output
-    proTable = PrettyTable()
-    proTable.field_names = [f"{yellow}Provider{white}", f"{yellow}Exported{white}"]
+    proTable = Table()
+    proTable.add_column("[bold yellow]Provider", justify="center")
+    proTable.add_column("[bold yellow]Exported", justify="center")
     for tags in range(0, len(app_data[0])):
         if app_data[0][tags].tag == "provider":
             if "{http://schemas.android.com/apk/res/android}exported" in app_data[0][tags].keys():
                 if app_data[0][tags].get("{http://schemas.android.com/apk/res/android}exported") == "true":
                     proTable.add_row(
-                        [
-                            app_data[0][tags].get('{http://schemas.android.com/apk/res/android}name'),
-                            f"{red}{app_data[0][tags].get('{http://schemas.android.com/apk/res/android}exported')}{white}"
-                        ]
+                        str(app_data[0][tags].get('{http://schemas.android.com/apk/res/android}name')),
+                        f"[bold red]{app_data[0][tags].get('{http://schemas.android.com/apk/res/android}exported')}"
                     )
                     pro_indicator += 1
                 else:
                     proTable.add_row(
-                        [
-                            app_data[0][tags].get('{http://schemas.android.com/apk/res/android}name'),
-                            f"{green}{app_data[0][tags].get('{http://schemas.android.com/apk/res/android}exported')}{white}"
-                        ]
+                        str(app_data[0][tags].get('{http://schemas.android.com/apk/res/android}name')),
+                        f"[bold green]{app_data[0][tags].get('{http://schemas.android.com/apk/res/android}exported')}"
                     )
                     pro_indicator += 1
     if pro_indicator == 0:
         print(f"{errorS} There is no entry about exported providers.")
     else:
-        print(proTable)
+        r_console.print(proTable)
 
 # Execution
 ManifestAnalysis()

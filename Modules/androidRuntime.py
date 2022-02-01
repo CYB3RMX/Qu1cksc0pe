@@ -12,6 +12,13 @@ except:
     sys.exit(1)
 
 try:
+    from rich.table import Table
+    from rich.console import Console
+except:
+    print("Error: >rich< not found.")
+    sys.exit(1)
+
+try:
     import frida
 except:
     print("Error: >frida< module not found.")
@@ -23,11 +30,8 @@ except:
     print("Error: >colorama< module not found.")
     sys.exit(1)
 
-try:
-    from prettytable import PrettyTable
-except:
-    print("Error: >prettytable< module not found.")
-    sys.exit(1)
+# Rich console
+r_console = Console()
 
 # Colors
 red = Fore.LIGHTRED_EX
@@ -50,41 +54,37 @@ devices = device_manager.enumerate_devices()
 
 def GetDevices(devices) -> list:
     # Tables
-    devTable = PrettyTable()
-    devTable.field_names = [
-        f"{green}Number{white}", 
-        f"{green}Device ID{white}", 
-        f"{green}Device Name{white}", 
-        f"{green}Connection Type{white}"
-    ]
+    devTable = Table()
+    devTable.add_column("[bold green]Number", justify="center")
+    devTable.add_column("[bold green]Device ID", justify="center")
+    devTable.add_column("[bold green]Device Name", justify="center")
+    devTable.add_column("[bold green]Connection Type", justify="center")
 
     # Parsing device informations
     if devices != []:
         count = 0
         numbers = []
         for dd in devices:
-            devTable.add_row([count+1, dd.id, dd.name, dd.type])
+            devTable.add_row(str(count+1), str(dd.id), str(dd.name), str(dd.type))
             count += 1
             numbers.append(str(count))
-        print(devTable)
+        r_console.print(devTable)
         return numbers
 
 def GetPackages(index) -> list:
     # Tables
-    appTable = PrettyTable()
-    appTable.field_names = [
-        f"{green}Application Name{white}",
-        f"{green}Package Name{white}"
-    ]
+    appTable = Table()
+    appTable.add_column("[bold green]Application Name", justify="center")
+    appTable.add_column("[bold green]Package Name", justify="center")
 
     # Parsing application informations
     try:
         applications = devices[int(index)-1].enumerate_applications()
         package_list = []
         for app in applications:
-            appTable.add_row([app.name, app.identifier])
+            appTable.add_row(str(app.name), str(app.identifier))
             package_list.append(app.identifier)
-        print(appTable)
+        r_console.print(appTable)
         return package_list
     except frida.ServerNotRunningError:
         print(f"{errorS} Unable to connect to remote frida-server.\n")
@@ -92,20 +92,18 @@ def GetPackages(index) -> list:
 
 def GetScripts() -> list:
     # Tables
-    scriptTable = PrettyTable()
-    scriptTable.field_names = [
-        f"{green}Description{white}",
-        f"{green}File Name{white}"
-    ]
+    scriptTable = Table()
+    scriptTable.add_column("[bold green]Description", justify="center")
+    scriptTable.add_column("[bold green]File Name", justify="center")
 
     # Gathering and parsing script files
     menu_content = os.listdir(f"{sc0pe_path}/Systems/Android/FridaScripts/")
     sc_list = []
     for sc in menu_content:
         scname = sc.replace("-", " ")
-        scriptTable.add_row([scname.replace(".js", "").upper(), sc.replace(".js", "")])
+        scriptTable.add_row(str(scname.replace(".js", "").upper()), str(sc.replace(".js", "")))
         sc_list.append(sc.replace(".js", ""))
-    print(scriptTable)
+    r_console.print(scriptTable)
     return sc_list
 
 def FridaMain():

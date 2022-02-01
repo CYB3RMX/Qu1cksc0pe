@@ -10,21 +10,27 @@ except:
     sys.exit(1)
 
 try:
+    from rich.console import Console
+except:
+    print("Error: >rich< module not found.")
+    sys.exit(1)
+
+try:
     from colorama import Fore, Style
 except:
     print("Error: >colorama< module not found.")
     sys.exit(1)
 
+# Rich console
+r_console = Console()
+
 # Colors
 red = Fore.LIGHTRED_EX
 cyan = Fore.LIGHTCYAN_EX
 white = Style.RESET_ALL
-green = Fore.LIGHTGREEN_EX
-magenta = Fore.LIGHTMAGENTA_EX
 
 # Legends
 infoS = f"{cyan}[{red}*{cyan}]{white}"
-errorS = f"{cyan}[{red}!{cyan}]{white}"
 
 def GetExif(mfile):
     print(f"{infoS} Extracting metadata from target file...\n")
@@ -40,7 +46,7 @@ def GetExif(mfile):
             if "ExifTool" in md or "Error" in md:
                 pass
             else:
-                print(f"{magenta}>>>{white} {md.split(':')[1]}: {green}{mdata[md]}{white}")
+                r_console.print(f"[magenta]>>>[white] {md.split(':')[1]}: [green][i]{mdata[md]}[/i]")
         except:
             continue
 
@@ -49,4 +55,4 @@ mfile = sys.argv[1]
 if os.path.isfile(mfile):
     GetExif(mfile)
 else:
-    print(f"{errorS} Target file not found.")
+    r_console.print("[blink bold white on red]Target file not found!")

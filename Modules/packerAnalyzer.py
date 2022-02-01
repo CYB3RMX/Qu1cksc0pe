@@ -2,10 +2,12 @@
 
 import os
 import sys
+
 try:
-    from prettytable import PrettyTable
+    from rich.table import Table
+    from rich.console import Console
 except:
-    print("Module: >prettytable< not found.")
+    print("Error: >rich< module not found.")
     sys.exit(1)
 
 try:
@@ -27,20 +29,20 @@ except:
     print("Module: >tqdm< not found.")
     sys.exit(1)
 
+# Rich console
+r_console = Console()
+
 # Colors
 red = Fore.LIGHTRED_EX
 cyan = Fore.LIGHTCYAN_EX
 white = Style.RESET_ALL
 green = Fore.LIGHTGREEN_EX
-magenta = Fore.LIGHTMAGENTA_EX
 
 # Path variable
 sc0pe_path = open(".path_handler", "r").read()
 
 # Legends
 infoS = f"{cyan}[{red}*{cyan}]{white}"
-foundS = f"{cyan}[{red}+{cyan}]{white}"
-errorS = f"{cyan}[{red}!{cyan}]{white}"
 
 # Target file
 targetFile = str(sys.argv[1])
@@ -58,9 +60,6 @@ def YaraBased(target_file):
     # Gathering all rules
     allRules = os.listdir(f"{sc0pe_path}/Systems/Multiple/Packer_Rules/")
 
-    # Tables!!
-    yaraTable = PrettyTable()
-
     # Parsing rule matches
     yara_matches = []
     for rul in allRules:
@@ -76,19 +75,20 @@ def YaraBased(target_file):
 
     # Printing area
     if yara_matches != []:
-        print(f"\n{foundS} Matched Rules for: {green}{target_file}{white}")
         yara_match_indicator += 1
         for rul in yara_matches:
-            print(f"{magenta}>>>>{white} {rul}")
-            yaraTable.field_names = [f"{green}Offset{white}", f"{green}Matched String/Byte{white}"]
+            yaraTable = Table()
+            r_console.print(f">>> Rule name: [i][bold magenta]{rul}[/i]")
+            yaraTable.add_column("[bold green]Offset", justify="center")
+            yaraTable.add_column("[bold green]Matched String/Byte", justify="center")
             for mm in rul.strings:
-                yaraTable.add_row([f"{hex(mm[0])}", f"{str(mm[2])}"])
-            print(f"{yaraTable}\n")
-            yaraTable.clear_rows()
+                yaraTable.add_row(f"{hex(mm[0])}", f"{str(mm[2])}")
+            r_console.print(yaraTable)
+            print(" ")
 
     # If there is no match
     if yara_match_indicator == 0:
-        print(f"{errorS} Not any rules matched for {green}{target_file}{white}.\n")
+        r_console.print(f"[bold white on red]Not any rules matched for {target_file}")
 
 # Simple analyzer function
 def Analyzer():
@@ -99,33 +99,38 @@ def Analyzer():
         else:
             pass
     except:
-        print(f"{errorS} An error occured while opening the file.")
+        r_console.print("[bold white on red]An error occured while opening the file.")
         sys.exit(1)
 
     # Creating table
-    packTable = PrettyTable()
-    packTable.field_names = [f"{green}Extracted Strings{white}", f"{green}Packer Type{white}"]
+    packTable = Table()
+    packTable.add_column("[bold green]Extracted Strings", justify="center")
+    packTable.add_column("[bold green]Packer Type", justify="center")
+
     # Scanning zone
     packed = 0
-    print(f"{infoS} Performing {green}strings{white} based scan...")
+    r_console.print("[bold magenta]>>>[white] Performing [bold green][blink]strings[/blink] [white]based scan...")
     for pack in file_sigs:
         if file_sigs[pack].encode() in data:
             packed += 1
-            packTable.add_row([f"{red}{file_sigs[pack]}{white}", f"{red}{pack}{white}"])
+            packTable.add_row(f"[bold red]{file_sigs[pack]}", f"[bold red]{pack}")
     # Printing all
     if packed == 0:
-        print(f"{errorS} Nothing found.\n")
+        r_console.print("\n[bold white on red]Nothing found.\n")
     else:
-        print(f"{packTable}\n")
+        r_console.print(packTable)
 
-    print(f"{infoS} Performing {green}YARA rule{white} based scan...")
+    r_console.print("[bold magenta]>>>[white] Performing [bold green][blink]YARA Rule[/blink] [white]based scan...")
     YaraBased(target_file=targetFile)
 
 # Multiple analyzer function
 def MultiAnalyzer():
     # Creating summary table
-    answers = PrettyTable()
-    answers.field_names = [f"{green}File Names{white}", f"{green}Extracted Strings{white}", f"{green}Packer Type{white}"]
+    answers = Table()
+    answers.add_column("[bold green]File Names", justify="center")
+    answers.add_column("[bold green]Extracted Strings", justify="center")
+    answers.add_column("[bold green]Packer Type", justify="center")
+
     # Handling folders
     if os.path.isdir(targetFile) == True:
         allFiles = os.listdir(targetFile)
@@ -135,7 +140,7 @@ def MultiAnalyzer():
             filNum += 1
         # Lets scan them!!
         multipack = 0
-        print(f"{infoS} Qu1cksc0pe scans that folder for packed files. Please wait...")
+        r_console.print("[bold red]>>>[white] Qu1cksc0pe scans everything under that folder for malicious things. [bold][blink]Please wait...[/blink]")
         for tf in tqdm(range(0, filNum), desc="Scanning..."):
             if allFiles[tf] != '':
                 scanme = f"{targetFile}/{allFiles[tf]}"
@@ -145,32 +150,34 @@ def MultiAnalyzer():
                     else:
                         pass
                 except:
-                    print(f"{errorS} An error occured while opening the file.")
+                    r_console.print("[bold white on red]An error occured while opening the file.")
                     sys.exit(1)
 
                 # Scanning!
                 for pack in file_sigs:
                     if file_sigs[pack].encode() in mulData:
                         multipack += 1
-                        answers.add_row([f"{red}{allFiles[tf]}{white}", f"{red}{file_sigs[pack]}{white}", f"{red}{pack}{white}"])
+                        answers.add_row(f"[bold red]{allFiles[tf]}", f"[bold red]{file_sigs[pack]}", f"[bold red]{pack}")
         # Print all
         if multipack == 0:
-            print(f"\n{errorS} Nothing found.\n")
+            r_console.print("\n[bold white on red]Nothing found.\n")
         else:
-            print(f"\n{answers}\n")
+            r_console.print(answers)
+            print(" ")
+
 # Execute and clean up
 if __name__ == '__main__':
     if str(sys.argv[2]) == '--single':
         try:
             Analyzer()
         except:
-            print(f"{errorS} Program terminated.")
+            r_console.print("\n[bold white on red]Program terminated!\n")
 
     elif str(sys.argv[2]) == '--multiscan':
         try:
             MultiAnalyzer()
         except:
-            print(f"{errorS} Program terminated.")
+            print("\n[bold white on red]Program terminated!\n")
 
     else:
         pass
