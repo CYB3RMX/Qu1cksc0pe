@@ -120,7 +120,9 @@
             "\"/proc/mounts\"",
             "\"/dev/block/vold/\"",
             "\"/system/etc/vold.fstab\"",
-            "\"dev_mount\""
+            "\"dev_mount\"",
+            "getPath",
+            "absolutePath"
         ]
     },
     {
@@ -200,7 +202,8 @@
             "loadClass",
             "getSystemClassLoader",
             "ClassLoader",
-            "\"patch.ring0.run\""
+            "\"patch.ring0.run\"",
+            "System.loadLibrary"
         ]
     },
     {

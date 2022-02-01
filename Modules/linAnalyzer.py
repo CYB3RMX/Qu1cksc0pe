@@ -3,36 +3,17 @@
 import os
 import sys
 try:
-    from prettytable import PrettyTable
+    from rich.table import Table
+    from rich.console import Console
 except:
-    print("Error: >prettytable< module not found.")
-    sys.exit(1)
-
-try:
-    import puremagic as pr
-except:
-    print("Error: >puremagic< module not found.")
-    sys.exit(1)
-
-try:
-    from colorama import Fore, Style
-except:
-    print("Error: >colorama< module not found.")
+    print("Error: >rich< module not found.")
     sys.exit(1)
 
 # Getting name of the file for statistics
 fileName = str(sys.argv[1])
 
-# Colors
-red = Fore.LIGHTRED_EX
-cyan = Fore.LIGHTCYAN_EX
-white = Style.RESET_ALL
-green = Fore.LIGHTGREEN_EX
-yellow = Fore.LIGHTYELLOW_EX
-
-# Legends
-errorS = f"{cyan}[{red}!{cyan}]{white}"
-infoS = f"{cyan}[{red}*{cyan}]{white}"
+# Rich console
+r_console = Console()
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
@@ -100,11 +81,6 @@ dictArr = {
 # Defining function
 def Analyzer():
     allFuncs = 0
-    tables = PrettyTable()
-    secTable = PrettyTable()
-    segTable = PrettyTable()
-    resTable = PrettyTable()
-    statistics = PrettyTable()
 
     for key in dictArr:
         for elem in dictArr[key]:
@@ -115,15 +91,17 @@ def Analyzer():
     for key in Categs:
         if Categs[key] != []:
             if key == "Information Gathering" or key == "System/Persistence" or key == "Cryptography":
-                print(f"\n{yellow}[{red}!{yellow}]__WARNING__[{red}!{yellow}]{white}")
+                tables = Table(title="* WARNING *", title_style="blink italic yellow", title_justify="center", style="yellow")
+            else:
+                tables = Table()
 
             # Printing zone
-            tables.field_names = [f"Functions or Strings about {green}{key}{white}"]
+            tables.add_column(f"Functions or Strings about [bold green]{key}", justify="center")
             for i in Categs[key]:
                 if i == "":
                     pass
                 else:
-                    tables.add_row([f"{red}{i}{white}"])
+                    tables.add_row(f"[bold red]{i}")
                     # Threat score
                     if key == "Networking":
                         scoreDict[key] += 1
@@ -143,52 +121,56 @@ def Analyzer():
                         scoreDict[key] += 1
                     else:
                         pass
-            print(tables)
-            tables.clear_rows()
+            r_console.print(tables)
 
     # Gathering sections and segments
-    secTable.field_names = [f"{green}Sections{white}"]
-    segTable.field_names = [f"{green}Segments{white}"]
+    secTable = Table()
+    segTable = Table()
+    secTable.add_column("[bold green]Sections")
+    segTable.add_column("[bold green]Segments")
 
     # Sections
     sec_indicator = 0
     for se1 in sections:
         if se1 in allThings:
             if se1 != "":
-                secTable.add_row([f"{red}{se1}{white}"])
+                secTable.add_row(f"[bold red]{se1}")
                 sec_indicator += 1
     if sec_indicator != 0:
-        print(secTable)
+        r_console.print(secTable)
     
     # Segments
     seg_indicator = 0
     for se2 in segments:
         if se2 in allThings:
             if se2 != "":
-                segTable.add_row([f"{red}{se2}{white}"])
+                segTable.add_row(f"[bold red]{se2}")
                 seg_indicator += 1
     if seg_indicator != 0:
-        print(segTable)
+        r_console.print(segTable)
 
     # Statistics zone
-    print(f"\n{green}->{white} Statistics for: {green}{fileName}{white}")
+    r_console.print(f"\n[bold green]->[white] Statistics for: [bold green][i]{fileName}[/i]")
 
     # Printing zone
-    statistics.field_names = ["Categories", "Number of Functions"]
-    statistics.add_row([f"{green}All Functions{white}", f"{green}{allFuncs}{white}"])
+    statistics = Table()
+    statistics.add_column("Categories", justify="center")
+    statistics.add_column("Number of Functions or Strings", justify="center")
+    statistics.add_row("[bold green][i]All Functions[/i]", f"[bold green]{allFuncs}")
     for key in scoreDict:
         if scoreDict[key] == 0:
             pass
         else:
             if key == "System/Persistence" or key == "Cryptography" or key == "Information Gathering":
-                statistics.add_row([f"{yellow}{key}{white}", f"{red}{scoreDict[key]}{white}"])
+                statistics.add_row(f"[blink bold yellow]{key}", f"[blink bold red]{scoreDict[key]}")
             else:
-                statistics.add_row([f"{white}{key}", f"{scoreDict[key]}{white}"])
-    print(statistics)
+                statistics.add_row(key, str(scoreDict[key]))
+    r_console.print(statistics)
 
     # Warning about obfuscated file
     if allFuncs < 10:
-        print(f"\n{errorS} This file might be obfuscated or encrypted. Try {green}--packer{white} to scan this file for packers.\n")
+        r_console.print("[blink bold white on red]This file might be obfuscated or encrypted. [white]Try [bold green][i]--packer[/i] [white]to scan this file for packers.")
+        r_console.print("[bold]You can also use [green][i]--hashscan[/i] [white]to scan this file.")
         sys.exit(0)
 
 # Execute

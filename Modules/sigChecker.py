@@ -6,9 +6,10 @@ import json
 import binascii
 
 try:
-    from prettytable import PrettyTable
+    from rich.table import Table
+    from rich.console import Console
 except:
-    print("Error: >prettytable< module not found.")
+    print("Error: >rich< module not found.")
     sys.exit(1)
 
 try:
@@ -16,6 +17,9 @@ try:
 except:
     print("Error: >colorama< module not found.")
     sys.exit(1)
+
+# Rich console
+r_console = Console()
 
 # Colors
 red = Fore.LIGHTRED_EX
@@ -38,8 +42,10 @@ def SigChecker(targetFile):
     fsigs = json.load(open(f"{sc0pe_path}/Systems/Multiple/file_sigs.json"))
 
     # Create tables
-    sigTable = PrettyTable()
-    sigTable.field_names = ["File Type", "Pattern", "Count"]
+    sigTable = Table()
+    sigTable.add_column("File Type", justify="center")
+    sigTable.add_column("Pattern", justify="center")
+    sigTable.add_column("Count", justify="center")
 
     # Lets scan!
     for index in range(0, len(fsigs)):
@@ -47,8 +53,8 @@ def SigChecker(targetFile):
             for sigs in fsigs[index][categ]:
                 regex = re.findall(binascii.unhexlify(sigs), getbins)
                 if regex != []:
-                    sigTable.add_row([categ, str(binascii.unhexlify(sigs)), len(regex)])
-    print(sigTable)
+                    sigTable.add_row(str(categ), f"[bold green]{str(binascii.unhexlify(sigs))}", str(len(regex)))
+    r_console.print(sigTable)
 
 targetBin = sys.argv[1]
 SigChecker(targetFile=targetBin)

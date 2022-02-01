@@ -22,10 +22,12 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>21/01/2022</b>
-- [X] ```HashScanner module``` is upgraded.
-- [X] ```Interactive Shell Mode``` is upgraded. Now you can specify your target files/folders faster with autocompletion.<br>
-![update_gif](.animations/update.gif)
+<b>01/02/2022</b>
+- [X] Added new ```YARA``` rules for malware detection to ```WindowsAnalyzer``` module.
+- [X] ```Interactive Shell Mode``` is upgraded.
+- [X] ```VirusTotal API Scanner``` module is upgraded.
+- [X] Added TUI to ```HashScanner```. Now folder scans are way more effective.<br>
+![update_gif](.animations/hashscan_tui.gif)
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
@@ -38,7 +40,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 - ```puremagic``` => <i>Analyzing target OS and magic numbers.</i>
 - ```androguard``` => <i>Analyzing APK files.</i>
 - ```apkid``` => <i>Check for Obfuscators, Anti-Disassembly, Anti-VM and Anti-Debug.</i>
-- ```prettytable``` => <i>Pretty outputs.</i>
+- ```rich``` => <i>Pretty outputs and TUI.</i>
 - ```tqdm``` => <i>Progressbar animation.</i>
 - ```colorama``` => <i>Colored outputs.</i>
 - ```oletools``` => <i>Analyzing VBA Macros.</i>
@@ -97,7 +99,7 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 - ```--packer```
 
 <b>Usage</b>: ```python3 qu1cksc0pe.py --folder FOLDER --hashscan```<br>
-![animation](.animations/hashscan.gif)
+![animation](.animations/hashscan_tui.gif)
 
 ## VirusTotal
 <b>Report Contents</b>:

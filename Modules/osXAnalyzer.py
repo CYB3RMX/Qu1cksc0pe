@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 
-import os
 import sys
+
 try:
-    from prettytable import PrettyTable
+    from rich.table import Table
+    from rich.console import Console
 except:
-    print("Error: >prettytable< module not found.")
+    print("Error: >rich< module not found.")
     sys.exit(1)
 
 try:
@@ -16,6 +17,9 @@ except:
 
 # Getting filename for statistics
 fileName = str(sys.argv[1])
+
+# Rich console
+r_console = Console()
 
 # Colors
 white = Style.RESET_ALL
@@ -80,14 +84,14 @@ scoreDict = {
 # Defining function
 def Analyzer():
     # Creating tables
-    lcom = PrettyTable()
-    fhead = PrettyTable()
-    shlib = PrettyTable()
+    lcom = Table()
+    fhead = Table()
+    shlib = Table()
 
     # Preparing tables
-    lcom.field_names = [f"{green}Load Commands{white}"]
-    fhead.field_names = [f"{green}File Headers{white}"]
-    shlib.field_names = [f"{green}Shared Libraries{white}"]
+    lcom.add_column("[bold green]Load Commands", justify="center")
+    fhead.add_column("[bold green]File Headers", justify="center")
+    shlib.add_column("[bold green]Shared Libraries", justify="center")
 
     # Analyzing strings for load commands
     for lc in loadCommands:
@@ -110,25 +114,23 @@ def Analyzer():
     # Print all
     if fHeaders != []:
         for i in fHeaders:
-            fhead.add_row([i])
-        print(fhead)
+            fhead.add_row(i)
+        r_console.print(fhead)
 
     if shLibs != []:
         for i in shLibs:
-            shlib.add_row([i])
-        print(shlib)
+            shlib.add_row(i)
+        r_console.print(shlib)
 
     if lCommands != []:
         for i in lCommands:
             lcom.add_row(i)
-        print(lcom)
+        r_console.print(lcom)
 
 # Defining categorized scanning
 def Categorized():
     # Necessary vars
     allFuncs = 0
-    tables = PrettyTable()
-    statistics = PrettyTable()
 
     # Categorizing extracted strings
     for key in regdict:
@@ -144,15 +146,17 @@ def Categorized():
 
             # More important categories
             if key == "Cryptography" or key == "Information Gathering":
-                print(f"\n{yellow}[{red}!{yellow}]__WARNING__[{red}!{yellow}]{white}")
+                tables = Table(title="* WARNING *", title_style="blink italic yellow", title_justify="center", style="yellow")
+            else:
+                tables = Table()
 
             # Printing area
-            tables.field_names = [f"Functions or Strings about {green}{key}{white}"]
+            tables.add_column(f"Functions or Strings about [bold green]{key}", justify="center")
             for i in dictCateg[key]:
                 if i == "":
                     pass
                 else:
-                    tables.add_row([f"{red}{i}{white}"])
+                    tables.add_row(f"[bold red]{i}")
                     if key == "Memory Management":
                         scoreDict[key] += 1
                     elif key == "Process":
@@ -165,22 +169,29 @@ def Categorized():
                         scoreDict[key] += 1
                     else:
                         pass
-            print(tables)
-            tables.clear_rows()
+            r_console.print(tables)
 
     # Statistics zone
-    print(f"\n{green}->{white} Statistics for: {green}{fileName}{white}")
-    statistics.field_names = ["Categories", "Number of Functions/Strings"]
-    statistics.add_row([f"{green}All Functions{white}", f"{green}{allFuncs}{white}"])
+    statistics = Table()
+    r_console.print(f"\n[bold green]->[white] Statistics for: [bold green][i]{fileName}[/i]")
+    statistics.add_column("Categories", justify="center")
+    statistics.add_column("Number of Functions or Strings", justify="center")
+    statistics.add_row("[bold green][i]All Functions[/i]", f"[bold green]{allFuncs}")
     for key in scoreDict:
         if scoreDict[key] == 0:
             pass
         else:
             if key == "Cryptography" or key == "Information Gathering":
-                statistics.add_row([f"{yellow}{key}{white}", f"{red}{scoreDict[key]}{white}"])
+                statistics.add_row(f"[blink bold yellow]{key}", f"[blink bold red]{scoreDict[key]}")
             else:
-                statistics.add_row([f"{white}{key}", f"{scoreDict[key]}{white}"])
-    print(statistics)
+                statistics.add_row(key, str(scoreDict[key]))
+    r_console.print(statistics)
+
+    # Warning about obfuscated file
+    if allFuncs < 10:
+        r_console.print("[blink bold white on red]This file might be obfuscated or encrypted. [white]Try [bold green][i]--packer[/i] [white]to scan this file for packers.")
+        r_console.print("[bold]You can also use [green][i]--hashscan[/i] [white]to scan this file.")
+        sys.exit(0)
 
 # Execution
 Analyzer()

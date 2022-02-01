@@ -31,7 +31,7 @@ if sys.platform == "darwin":
     homeD = "/Users"
 
 # Commit
-latest_commit = "21/01/2022"
+latest_commit = "01/02/2022"
 
 # Checking for latest commits
 print(f"{infoS} Checking for latest commit...")
@@ -69,9 +69,9 @@ for res in resource:
 
 # Python module checking zone
 print(f"\n{infoS} Checking for python modules...")
-requirements = ["puremagic", "androguard", "apkid", "prettytable", "tqdm",
+requirements = ["puremagic", "androguard", "apkid", "tqdm",
                 "oletools", "pefile", "quark", "pyaxmlparser", "yara",
-                "prompt_toolkit", "frida", "exiftool"]
+                "prompt_toolkit", "frida", "exiftool", "rich"]
 for mod in requirements:
     try:
         if importlib.util.find_spec(mod) is not None:

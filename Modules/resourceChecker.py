@@ -18,11 +18,12 @@ except:
     print("Error: >puremagic< module not found.")
     sys.exit(1)
 
-# Testing prettytable existence
+# Testing rich existence
 try:
-    from prettytable import PrettyTable
+    from rich.table import Table
+    from rich.console import Console
 except:
-    print("Error: >prettytable< module not found.")
+    print("Error: >rich< module not found.")
     sys.exit(1)
 
 # Testing colorama existence
@@ -35,16 +36,17 @@ except:
 # Disabling pyaxmlparser's logs
 pyaxmlparser.core.log.disabled = True
 
+# Rich console
+r_console = Console()
+
 # Colors
 red = Fore.LIGHTRED_EX
 cyan = Fore.LIGHTCYAN_EX
 white = Style.RESET_ALL
 green = Fore.LIGHTGREEN_EX
-yellow = Fore.LIGHTYELLOW_EX
 
 # Legends
 infoS = f"{cyan}[{red}*{cyan}]{white}"
-errorS = f"{cyan}[{red}!{cyan}]{white}"
 
 def CheckOS(targFile):
     print(f"{infoS} Analyzing: {green}{targFile}{white}")
@@ -81,12 +83,12 @@ def ParseAndroid(target):
     }
 
     # Tables!!
-    resTable = PrettyTable()
-    countTable = PrettyTable()
-    fileTable = PrettyTable()
-    resTable.field_names = ["Pattern", "File"]
-    countTable.field_names = ["File Type", "Count"]
-    fileTable.field_names = ["Interesting Files"]
+    countTable = Table()
+    countTable.add_column("File Type", justify="center")
+    countTable.add_column("Count", justify="center")
+    #
+    fileTable = Table()
+    fileTable.add_column("Interesting Files", justify="center")
 
     # Lets begin!
     print(f"{infoS} Parsing file contents...\n")
@@ -106,24 +108,24 @@ def ParseAndroid(target):
         if "image" in fl: # Just get rid of them
             pass
         elif "Dalvik" in fl or "C++ source" in fl or "C source" in fl or "ELF" in fl or "Bourne-Again shell" in fl or "executable" in fl or "JAR" in fl: # Worth to write on the table
-            countTable.add_row([f"{red}{fl}{white}", f"{red}{len(empty[fl])}{white}"])
+            countTable.add_row(f"[bold blink red]{fl}", f"[bold blink red]{len(empty[fl])}")
         elif "data" in fl:
-            countTable.add_row([f"{yellow}{fl}{white}", f"{yellow}{len(empty[fl])}{white}"])
+            countTable.add_row(f"[bold yellow]{fl}", f"[bold yellow]{len(empty[fl])}")
         else:
-            countTable.add_row([fl, len(empty[fl])])
-    print(f"{countTable}\n")
+            countTable.add_row(str(fl), str(len(empty[fl])))
+    r_console.print(countTable)
 
     # Finding .json .bin .dex files
     for fff in apk.get_files():
         if ".json" in fff:
-            fileTable.add_row([f"{yellow}{fff}{white}"])
+            fileTable.add_row(f"[bold yellow]{fff}")
         elif ".dex" in fff:
-            fileTable.add_row([f"{red}{fff}{white}"])
+            fileTable.add_row(f"[bold blink red]{fff}")
         elif ".bin" in fff:
-            fileTable.add_row([f"{cyan}{fff}{white}"])
+            fileTable.add_row(f"[bold blink cyan]{fff}")
         else:
             pass
-    print(f"{fileTable}\n")
+    r_console.print(fileTable)
 
     # Analyzing all files
     for key in empty:
@@ -142,14 +144,15 @@ def ParseAndroid(target):
     counter = 0
     for key in categs:
         if categs[key] != []:
-            print(f"{red}>>>{white} Data Type: {green}{key}{white}")
+            resTable = Table(title=f"* {key} *", title_style="bold green", title_justify="center")
+            resTable.add_column("Pattern", justify="center")
+            resTable.add_column("File", justify="center")
             for elements in categs[key]:
-                resTable.add_row([f"{yellow}{elements[0]}{white}", f"{cyan}{elements[1]}{white}"])
-            print(f"{resTable}\n")
+                resTable.add_row(f"[bold yellow]{elements[0]}", f"[bold cyan]{elements[1]}")
+            r_console.print(resTable)
             counter += 1
-            resTable.clear_rows()
     if counter == 0:
-        print(f"{errorS} There is no interesting things found.")
+        r_console.print("\n[bold white on red]There is no interesting things found!\n")
 
 # Execution zone
 targFile = sys.argv[1]
@@ -158,6 +161,6 @@ if os.path.isfile(targFile):
     if ostype == "Android":
         ParseAndroid(targFile)
     else:
-        print(f"{errorS} Target OS couldn\'t detected.")
+        r_console.print("\n[bold white on red]Target OS couldn\'t detected!\n")
 else:
-    print(f"{errorS} Target file not found.")
+    r_console.print("\n[bold white on red]Target file not found!\n")

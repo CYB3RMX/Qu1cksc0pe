@@ -105,11 +105,13 @@ console_commands = NestedCompleter.from_nested_dict({
     "language": None,
     "metadata": None,
     "packer": None,
+    "resource-scan": None,
     "sigcheck": None,
     "health": None,
     "hash-scan": None,
     "exit": None,
     "clear": None,
+    "key_init": None,
     "virustotal": None
 })
 
@@ -329,6 +331,31 @@ try:
             else:
                 print(f"{errorS} You must specify target folder with {green}set target-folder{white} command.")
 
+        # Packer Detection
+        elif con_command == "resource-scan":
+            if os.path.exists(".target-file.txt"):
+                filename = open(".target-file.txt", "r").read()
+                command = f"python3 {sc0pe_path}/Modules/resourceChecker.py {filename}"
+                os.system(command)
+            else:
+                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
+
+        # VirusTotal API Key import
+        elif con_command == "key_init":
+            try:
+                if os.path.exists(f"{homeD}/{username}/sc0pe_Base/"):
+                    pass
+                else:
+                    os.system(f"mkdir {homeD}/{username}/sc0pe_Base/")
+
+                apikey = str(input(f"{foundS} Enter your VirusTotal API key: "))
+                apifile = open(f"{homeD}/{username}/sc0pe_Base/sc0pe_VT_apikey.txt", "w")
+                apifile.write(apikey)
+                print(f"{foundS} Your VirusTotal API key saved. You must restart the program!")
+                sys.exit(0)
+            except KeyboardInterrupt:
+                print(f"{errorS} Program terminated by user.")
+
         # VirusTotal scan
         elif con_command == "virustotal":
             # if there is no key quit
@@ -340,6 +367,7 @@ try:
                 sys.exit(1)
             # if key is not valid quit
             if apik[0] == '' or apik[0] is None or len(apik[0]) != 64:
+                print(apik[0])
                 print(f"{errorS} Please get your API key from -> {green}https://www.virustotal.com/{white}")
                 sys.exit(1)
             else:
