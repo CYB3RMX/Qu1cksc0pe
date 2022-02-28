@@ -57,3 +57,10 @@ HMACSHA256
 HmacSha256Length
 RSACryptoServiceProvider
 SchUseStrongCrypto
+EncryptFileA
+CryptDeriveKey
+CryptSetKeyParam
+DecryptFileA
+FlushEfsCache
+CryptStringToBinary
+CryptBinaryToString

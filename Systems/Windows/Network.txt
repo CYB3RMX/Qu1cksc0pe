@@ -184,3 +184,12 @@ System.Data.SqlClient
 SqlConnection
 get_WebServices
 UseStrictIPv6AddressParsing
+FtpPutFileA
+InternetReadFileExA
+URLDownloadToCacheFile
+URLOpenBlockingStream
+URLOpenStream
+DnsQueryEx
+WNetOpenEnumA
+FindFirstUrlCacheEntryA
+FindNextUrlCacheEntryA

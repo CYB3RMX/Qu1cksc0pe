@@ -45,9 +45,6 @@ NtQueryDirectoryFile
 CreateFileMapping
 MapViewOfFile
 GetTempPath
-SetFileTime
-FindFirstFileA
-FindNextFileA
 SetFilePointer
 SetFilePointerEx
 GetXmlFile
@@ -97,9 +94,6 @@ UnmapViewOfFile
 ReplaceFileW
 FlushViewOfFile
 GetMappedFileNameW
-GetWindowsDirectoryW
-GetWindowsDirectoryA
-GetWindowsDirectory
 FtpPutFile
 GetSaveFileNameA
 GetOpenFileNameA
@@ -157,7 +151,6 @@ SetFileAttributesA
 FindExecutableW
 DragFinish
 DragQueryPoint
-GetSystemDirectoryA
 get_RootDirectory
 VarFileInfo
 FileAttributes
