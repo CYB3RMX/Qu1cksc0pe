@@ -14,7 +14,7 @@
 Qu1cksc0pe aims to get even more information about suspicious files and helps user realize what that file is capable of.
 
 # Usage
-```
+```bash
 python3 qu1cksc0pe.py --file suspicious_file --analyze
 ```
 
@@ -22,12 +22,10 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>01/02/2022</b>
-- [X] Added new ```YARA``` rules for malware detection to ```WindowsAnalyzer``` module.
-- [X] ```Interactive Shell Mode``` is upgraded.
-- [X] ```VirusTotal API Scanner``` module is upgraded.
-- [X] Added TUI to ```HashScanner```. Now folder scans are way more effective.<br>
-![update_gif](.animations/hashscan_tui.gif)
+<b>28/02/2022</b>
+- [X] Added new ```Database Update``` argument to ```HashScanner``` module. Now you can update your malware hash database whenever you want.
+<b>Usage:</b> ```python3 qu1cksc0pe.py --db_update```
+- [X] Added new ```Windows API' s``` to ```WindowsAnalyzer' s``` wordlists.
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)

@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
-from unicodedata import name
 import requests
 import os
+import re
 import hashlib
 import sys
 import math
@@ -41,9 +41,6 @@ except:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
-# File handling
-targetFile = str(sys.argv[1])
-
 # Parsing date
 today = date.today()
 dformat = today.strftime("%d-%m-%Y")
@@ -81,26 +78,29 @@ else:
 # Configurating installation directory
 install_dir = f"{homeD}/{username}/sc0pe_Base"
 
+def Downloader():
+    local_database = f"{install_dir}/HashDB"
+    dbUrl = "https://raw.githubusercontent.com/CYB3RMX/MalwareHashDB/main/HashDB"
+    req = requests.get(dbUrl, stream=True)
+    total_size = int(req.headers.get('content-length', 0))
+    block_size = 1024
+    wrote = 0
+    print(f"\n{infoS} Downloading signature database please wait...")
+    try:
+        with open(local_database, 'wb') as ff:
+            for data in tqdm(req.iter_content(block_size), total=math.ceil(total_size//block_size), unit='KB', unit_scale=True):
+                wrote = wrote + len(data)
+                ff.write(data)
+        sys.exit(0)
+    except:
+        sys.exit(0)
+
 def DatabaseCheck():
     if os.path.isfile(f"{install_dir}/HashDB") == False:
         r_console.print("[blink bold white on red]Local signature database not found!!")
         choose = str(input(f"{green}=>{white} Would you like to download it [Y/n]?: "))
         if choose == "Y" or choose == "y":
-            local_database = f"{install_dir}/HashDB"
-            dbUrl = "https://raw.githubusercontent.com/CYB3RMX/MalwareHashDB/main/HashDB"
-            req = requests.get(dbUrl, stream=True)
-            total_size = int(req.headers.get('content-length', 0))
-            block_size = 1024
-            wrote = 0
-            print(f"\n{infoS} Downloading signature database please wait...")
-            try:
-                with open(local_database, 'wb') as ff:
-                    for data in tqdm(req.iter_content(block_size), total=math.ceil(total_size//block_size), unit='KB', unit_scale=True):
-                        wrote = wrote + len(data)
-                        ff.write(data)
-                sys.exit(0)
-            except:
-                sys.exit(0)
+            Downloader()
         else:
             r_console.print("\n[bold white on red]Without local database [blink]--hashscan[/blink] [white]will not work!!\n")
             sys.exit(1)
@@ -122,6 +122,28 @@ if os.path.exists(f"{install_dir}/HashDB"):
     dbcursor = hashbase.cursor()
 else:
     DatabaseCheck()
+
+# Check for if database is up to date
+def UpToDate():
+    r_console.print("[bold]Checking for database state...")
+    try:
+        dbs = requests.get("https://raw.githubusercontent.com/CYB3RMX/MalwareHashDB/main/README.md")
+        database_content = dbcursor.execute(f"SELECT * FROM HashDB").fetchall()
+        match = re.findall(str(len(database_content)), str(dbs.text))
+        if match != []:
+            r_console.print("[bold]Database State: [bold green]Up to date.\n")
+        else:
+            r_console.print("[bold]Database State: [bold red]Outdated.")
+            r_console.print("[bold magenta]>>>[bold white] You should use [bold green]'--db_update' [bold white]argument to update your malware hash database.\n")
+    except:
+        r_console.print("[bold white on red]An error occured while connecting to Github!!")
+
+# Updating database
+def DatabaseUpdate():
+    r_console.print("[bold magenta]>>>[bold white] Removing old database...")
+    os.system(f"rm -rf {install_dir}/HashDB")
+    Downloader()
+    r_console.print("[bold green]>>>[bold white] New database has successfully downloaded.")
 
 # Handling single scans
 def NormalScan():
@@ -293,9 +315,18 @@ def MultipleScan():
         json.dump(scan_report, rp_file, indent=4)
 
 if __name__ == '__main__':
+    # File handling
+    if str(sys.argv[1]) == '--db_update':
+        DatabaseUpdate()
+    else:
+        targetFile = str(sys.argv[1])
+
+    # Argument side
     if str(sys.argv[2]) == '--normal':
+        UpToDate()
         NormalScan()
     elif str(sys.argv[2]) == '--multiscan':
+        UpToDate()
         MultipleScan()
     else:
         pass

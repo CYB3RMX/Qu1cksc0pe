@@ -13,7 +13,6 @@ GetModuleHandle
 GetModuleHandleA
 GetModuleHandleW
 GetProcAddress
-EnumProcessModules
 InitCommonControlsEx
 LoadTypeLib
 FreeLibrary
@@ -22,7 +21,6 @@ SizeofResource
 LoadLibraryWHook
 GetModuleHandleExW
 FreeLibraryAndExitThread
-Module32First
 DllCanUnloadNow
 DllGetClassObject
 DllRegisterServer

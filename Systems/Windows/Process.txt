@@ -5,16 +5,13 @@ CreateProcess
 GetProcessVersion
 CreateThread
 OpenProcess
-EnumProcesses
 CreateRemoteThread
 GetCurrentThread
 WriteProcessMemory
 AdjustTokenPrivileges
-IsWow64Process
 ExitProcess
 TerminateProcess
 CreateProcessA
-ReadProcessMemory
 OpenProcessToken
 CreateProcessW
 GetProcessWindowStation
@@ -65,10 +62,6 @@ OpenThread
 WaitForSingleObject
 WaitForSingleObjectEx
 WaitForMultipleObjects
-Process32FirstW
-Process32NextW
-Thread32Next
-Thread32First
 SuspendThread
 ThreadStart
 ThreadPriority
@@ -79,7 +72,6 @@ GetPriorityClass
 SetPriorityClass
 CreateEventW
 TlsSetValue
-SetEnvironmentVariableA
 SetThreadToken
 ImpersonateSelf
 CreatePipe
@@ -99,3 +91,4 @@ CreateSemaphore
 ReleaseSemaphore
 CreateMutexW
 TryEnterCriticalSection
+StartServiceCtrlDispatcher

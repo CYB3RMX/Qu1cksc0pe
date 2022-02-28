@@ -1,6 +1,3 @@
-StartServiceCtrlDispatcher
-IsNTAdmin
-IsUserAnAdmin
 CWinApp
 DeactivateActCtx
 ActivateActCtx
@@ -35,7 +32,6 @@ SetWindowTextA
 SetWindowLongA
 SetDlgItemTextA
 GetStockObject
-LockResource
 DeleteObject
 Sleep
 IsDBCSLeadByteEx
@@ -56,11 +52,9 @@ ReadConsoleInputA
 InterlockedIncrement
 InterlockedDecrement
 LCMapStringW
-CreateWindowExA
 SetEvent
 CreateAcceleratorTableW
 CreateAcceleratorTableA
-KeQueryPerformanceCounter
 KeQuerySystemTime
 RtlTimeToTimeFields
 ExAllocatePoolWithTag

@@ -102,6 +102,8 @@ parser.add_argument("--analyze", required=False,
                     help="Analyze target file.", action="store_true")
 parser.add_argument("--console", required=False,
                     help="Use Qu1cksc0pe on interactive shell.", action="store_true")
+parser.add_argument("--db_update", required=False,
+                    help="Update malware hash database.", action="store_true")
 parser.add_argument("--docs", required=False, help="Analyze document files.",
                     action="store_true")
 parser.add_argument("--domain", required=False,
@@ -339,6 +341,11 @@ def Qu1cksc0pe():
     # Dependency checker
     if args.health:
         command = f"python3 {sc0pe_path}/Modules/checkHealth.py"
+        os.system(command)
+
+    # Database update
+    if args.db_update:
+        command = f"python3 {sc0pe_path}/Modules/hashScanner.py --db_update"
         os.system(command)
 
     # entering VT API key
