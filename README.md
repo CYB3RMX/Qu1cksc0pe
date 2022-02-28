@@ -24,7 +24,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 # Updates
 <b>28/02/2022</b>
 - [X] Added new ```Database Update``` argument to ```HashScanner``` module. Now you can update your malware hash database whenever you want.
-<b>Usage:</b> ```python3 qu1cksc0pe.py --db_update```
+<br><b>Usage:</b> ```python3 qu1cksc0pe.py --db_update```
 - [X] Added new ```Windows API' s``` to ```WindowsAnalyzer' s``` wordlists.
 
 # Available On
