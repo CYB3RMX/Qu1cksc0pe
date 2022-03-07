@@ -5,23 +5,17 @@ import sys
 
 # Module for colors
 try:
-    from colorama import Fore, Style
+    from rich import print
 except:
-    print("Error: >colorama< module not found.")
+    print("Error: >rich< module not found.")
     sys.exit(1)
 
 # All strings
 allStrings = open("temp.txt", "r").read().split('\n')
 
-# Colors
-red = Fore.LIGHTRED_EX
-cyan = Fore.LIGHTCYAN_EX
-white = Style.RESET_ALL
-green = Fore.LIGHTGREEN_EX
-
 # Legends
-infoS = f"{cyan}[{red}*{cyan}]{white}"
-errorS = f"{cyan}[{red}!{cyan}]{white}"
+infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
+errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # Regex zone (Thanks to: https://github.com/dwisiswant0 for regex strings)
 regex_dict = {
@@ -53,7 +47,7 @@ def RegexScanner():
          try:
             match = re.search(str(regex_dict[key]), str(targ))
             if match != []:
-               print(f"{cyan}[{red}{key}{cyan}]>{white} {match[0]}")
+               print(f"[bold cyan][[bold red]{key}[bold cyan]]>[white] {match[0]}")
                counter += 1
          except:
             continue

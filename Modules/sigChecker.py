@@ -6,28 +6,14 @@ import json
 import binascii
 
 try:
+    from rich import print
     from rich.table import Table
-    from rich.console import Console
 except:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
-try:
-    from colorama import Fore, Style
-except:
-    print("Error: >colorama< module not found.")
-    sys.exit(1)
-
-# Rich console
-r_console = Console()
-
-# Colors
-red = Fore.LIGHTRED_EX
-cyan = Fore.LIGHTCYAN_EX
-white = Style.RESET_ALL
-
 # Legends
-infoS = f"{cyan}[{red}*{cyan}]{white}"
+infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
@@ -54,7 +40,7 @@ def SigChecker(targetFile):
                 regex = re.findall(binascii.unhexlify(sigs), getbins)
                 if regex != []:
                     sigTable.add_row(str(categ), f"[bold green]{str(binascii.unhexlify(sigs))}", str(len(regex)))
-    r_console.print(sigTable)
+    print(sigTable)
 
 targetBin = sys.argv[1]
 SigChecker(targetFile=targetBin)

@@ -9,17 +9,10 @@ except:
     print("Error: >puremagic< module not found.")
     sys.exit(1)
 
-# Checking for colorama
-try:
-    from colorama import Fore, Style
-except:
-    print("Error: >colorama< not found.")
-    sys.exit(1)
-
 # Checking for rich
 try:
+    from rich import print
     from rich.table import Table
-    from rich.console import Console
 except:
     print("Error: >rich< not found.")
     sys.exit(1)
@@ -35,20 +28,9 @@ except:
     print("Try 'sudo -H pip3 install -U oletools' command.")
     sys.exit(1)
 
-# Rich console
-r_console = Console()
-
-# Colors
-red = Fore.LIGHTRED_EX
-cyan = Fore.LIGHTCYAN_EX
-white = Style.RESET_ALL
-green = Fore.LIGHTGREEN_EX
-yellow = Fore.LIGHTYELLOW_EX
-magenta = Fore.LIGHTMAGENTA_EX
-
 # Legends
-infoS = f"{cyan}[{red}*{cyan}]{white}"
-errorS = f"{cyan}[{red}!{cyan}]{white}"
+infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
+errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # Target file
 targetFile = str(sys.argv[1])
@@ -82,7 +64,7 @@ def MacroHunter(targetFile):
                     answerTable.add_row(f"[bold red]{macroList[fi][0]}", f"{macroList[fi][1]}", f"{macroList[fi][2]}")
                 else:
                     answerTable.add_row(f"{macroList[fi][0]}", f"{macroList[fi][1]}", f"{macroList[fi][2]}")
-            r_console.print(answerTable)
+            print(answerTable)
         else:
             print(f"{errorS} Not any VBA macros found.")
     except:
@@ -92,15 +74,15 @@ def MacroHunter(targetFile):
 def BasicInfoGa(targetFile):
     # Check for ole structures
     if isOleFile(targetFile) == True:
-        print(f"{infoS} Ole File: {green}True{white}")
+        print(f"{infoS} Ole File: [bold green]True[white]")
     else:
-        print(f"{infoS} Ole File: {red}False{white}")
+        print(f"{infoS} Ole File: [bold red]False[white]")
 
     # Check for encryption
     if is_encrypted(targetFile) == True:
-        print(f"{infoS} Encrypted: {green}True{white}")
+        print(f"{infoS} Encrypted: [bold green]True[white]")
     else:
-        print(f"{infoS} Encrypted: {red}False{white}")
+        print(f"{infoS} Encrypted: [bold red]False[white]")
     
     # VBA_MACRO scanner
     vbascan = OleID(targetFile)
@@ -114,10 +96,10 @@ def BasicInfoGa(targetFile):
         for vb in vbascan.indicators:
             if vb.id == "vba_macros":
                 if vb.value == True:
-                    print(f"{infoS} VBA Macros: {green}Found{white}")
+                    print(f"{infoS} VBA Macros: [bold green]Found[white]")
                     MacroHunter(targetFile)
                 else:
-                    print(f"{infoS} VBA Macros: {red}Not Found{white}")
+                    print(f"{infoS} VBA Macros: [bold red]Not Found[white]")
     else:
         MacroHunter(targetFile)
 
@@ -144,7 +126,7 @@ def MagicParser(targetFile):
             else:
                 resTable.add_row(f"[bold red]{extrExt}", f"[bold red]{extrNam}", f"[bold red]{extrByt}", f"[bold red]{resourceList[res].confidence}")
     if len(resourceList) != 0:
-        r_console.print(resTable)
+        print(resTable)
 
 # Execution area
 try:

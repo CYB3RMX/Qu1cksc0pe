@@ -20,40 +20,24 @@ except:
 
 # Testing rich existence
 try:
+    from rich import print
     from rich.table import Table
-    from rich.console import Console
 except:
     print("Error: >rich< module not found.")
-    sys.exit(1)
-
-# Testing colorama existence
-try:
-    from colorama import Fore, Style
-except:
-    print("Error: >colorama< module not found.")
     sys.exit(1)
 
 # Disabling pyaxmlparser's logs
 pyaxmlparser.core.log.disabled = True
 
-# Rich console
-r_console = Console()
-
-# Colors
-red = Fore.LIGHTRED_EX
-cyan = Fore.LIGHTCYAN_EX
-white = Style.RESET_ALL
-green = Fore.LIGHTGREEN_EX
-
 # Legends
-infoS = f"{cyan}[{red}*{cyan}]{white}"
+infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 
 def CheckOS(targFile):
-    print(f"{infoS} Analyzing: {green}{targFile}{white}")
+    print(f"{infoS} Analyzing: [bold green]{targFile}[white]")
     fileType = str(pr.magic_file(targFile))
     # Android side
     if "PK" in fileType and "Java archive" in fileType:
-        print(f"{infoS} Target OS: {green}Android{white}\n")
+        print(f"{infoS} Target OS: [bold green]Android[white]\n")
         return "Android"
     else:
         return None
@@ -113,7 +97,7 @@ def ParseAndroid(target):
             countTable.add_row(f"[bold yellow]{fl}", f"[bold yellow]{len(empty[fl])}")
         else:
             countTable.add_row(str(fl), str(len(empty[fl])))
-    r_console.print(countTable)
+    print(countTable)
 
     # Finding .json .bin .dex files
     for fff in apk.get_files():
@@ -125,7 +109,7 @@ def ParseAndroid(target):
             fileTable.add_row(f"[bold blink cyan]{fff}")
         else:
             pass
-    r_console.print(fileTable)
+    print(fileTable)
 
     # Analyzing all files
     for key in empty:
@@ -149,10 +133,10 @@ def ParseAndroid(target):
             resTable.add_column("File", justify="center")
             for elements in categs[key]:
                 resTable.add_row(f"[bold yellow]{elements[0]}", f"[bold cyan]{elements[1]}")
-            r_console.print(resTable)
+            print(resTable)
             counter += 1
     if counter == 0:
-        r_console.print("\n[bold white on red]There is no interesting things found!\n")
+        print("\n[bold white on red]There is no interesting things found!\n")
 
 # Execution zone
 targFile = sys.argv[1]
@@ -161,6 +145,6 @@ if os.path.isfile(targFile):
     if ostype == "Android":
         ParseAndroid(targFile)
     else:
-        r_console.print("\n[bold white on red]Target OS couldn\'t detected!\n")
+        print("\n[bold white on red]Target OS couldn\'t detected!\n")
 else:
-    r_console.print("\n[bold white on red]Target file not found!\n")
+    print("\n[bold white on red]Target file not found!\n")

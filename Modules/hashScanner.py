@@ -24,14 +24,8 @@ except:
     sys.exit(1)
 
 try:
-    from colorama import Fore, Style
-except:
-    print("Error: >colorama< module not found.")
-    sys.exit(1)
-
-try:
+    from rich import print
     from rich.table import Table
-    from rich.console import Console
     from rich.live import Live
     from rich.progress import Progress, BarColumn, TextColumn, TimeRemainingColumn
     from rich.layout import Layout
@@ -41,22 +35,23 @@ except:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
+try:
+    from colorama import Fore, Style
+except:
+    print("Error: >colorama< module not found.")
+    sys.exit(1)
+
 # Parsing date
 today = date.today()
 dformat = today.strftime("%d-%m-%Y")
 
-# Rich console
-r_console = Console()
-
 # Colors
-red = Fore.LIGHTRED_EX
-cyan = Fore.LIGHTCYAN_EX
 white = Style.RESET_ALL
 green = Fore.LIGHTGREEN_EX
 
 # Legends
-infoS = f"{cyan}[{red}*{cyan}]{white}"
-errorS = f"{cyan}[{red}!{cyan}]{white}"
+infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
+errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # Gathering username
 username = getpass.getuser() # NOTE: If you run program as sudo your username will be "root" !!
@@ -97,12 +92,12 @@ def Downloader():
 
 def DatabaseCheck():
     if os.path.isfile(f"{install_dir}/HashDB") == False:
-        r_console.print("[blink bold white on red]Local signature database not found!!")
+        print("[blink bold white on red]Local signature database not found!!")
         choose = str(input(f"{green}=>{white} Would you like to download it [Y/n]?: "))
         if choose == "Y" or choose == "y":
             Downloader()
         else:
-            r_console.print("\n[bold white on red]Without local database [blink]--hashscan[/blink] [white]will not work!!\n")
+            print("\n[bold white on red]Without local database [blink]--hashscan[/blink] [white]will not work!!\n")
             sys.exit(1)
 
 # Hashing with md5
@@ -125,25 +120,25 @@ else:
 
 # Check for if database is up to date
 def UpToDate():
-    r_console.print("[bold]Checking for database state...")
+    print("[bold]Checking for database state...")
     try:
         dbs = requests.get("https://raw.githubusercontent.com/CYB3RMX/MalwareHashDB/main/README.md")
         database_content = dbcursor.execute(f"SELECT * FROM HashDB").fetchall()
         match = re.findall(str(len(database_content)), str(dbs.text))
         if match != []:
-            r_console.print("[bold]Database State: [bold green]Up to date.\n")
+            print("[bold]Database State: [bold green]Up to date.\n")
         else:
-            r_console.print("[bold]Database State: [bold red]Outdated.")
-            r_console.print("[bold magenta]>>>[bold white] You should use [bold green]'--db_update' [bold white]argument to update your malware hash database.\n")
+            print("[bold]Database State: [bold red]Outdated.")
+            print("[bold magenta]>>>[bold white] You should use [bold green]'--db_update' [bold white]argument to update your malware hash database.\n")
     except:
-        r_console.print("[bold white on red]An error occured while connecting to Github!!")
+        print("[bold white on red]An error occured while connecting to Github!!")
 
 # Updating database
 def DatabaseUpdate():
-    r_console.print("[bold magenta]>>>[bold white] Removing old database...")
+    print("[bold magenta]>>>[bold white] Removing old database...")
     os.system(f"rm -rf {install_dir}/HashDB")
     Downloader()
-    r_console.print("[bold green]>>>[bold white] New database has successfully downloaded.")
+    print("[bold green]>>>[bold white] New database has successfully downloaded.")
 
 # Handling single scans
 def NormalScan():
@@ -159,18 +154,18 @@ def NormalScan():
     database_content = dbcursor.execute(f"SELECT * FROM HashDB").fetchall()
 
     # Printing informations
-    r_console.print(f"[bold cyan]>>>[white] Total Hashes: [bold green]{len(database_content)}")
-    r_console.print(f"[bold cyan]>>>[white] File Name: [bold green]{targetFile}")
-    r_console.print(f"[bold cyan]>>>[white] Target Hash: [bold green]{targetHash}")
+    print(f"[bold cyan]>>>[white] Total Hashes: [bold green]{len(database_content)}")
+    print(f"[bold cyan]>>>[white] File Name: [bold green]{targetFile}")
+    print(f"[bold cyan]>>>[white] Target Hash: [bold green]{targetHash}")
 
     # Finding target hash in the database_content
     db_answer = dbcursor.execute(f"SELECT * FROM HashDB where hash=\"{targetHash}\"").fetchall()
     if db_answer != []:
         answTable.add_row(f"[bold red]{db_answer[0][0]}", f"[bold red]{db_answer[0][1]}")
-        r_console.print(answTable)
+        print(answTable)
     else:
-        r_console.print("\n[bold white on red]Target hash is not in our database!!")
-        r_console.print("[bold magenta]>>>[bold white] Try [green]--analyze[white] and [green]--vtFile[white] instead.\n")
+        print("\n[bold white on red]Target hash is not in our database!!")
+        print("[bold magenta]>>>[bold white] Try [green]--analyze[white] and [green]--vtFile[white] instead.\n")
     hashbase.close()
 
 # Handling multiple scans
@@ -204,7 +199,7 @@ def MultipleScan():
     # Handling folders
     if os.path.isdir(targetFile) == True:
         # Get all files under that directory recursively...
-        r_console.print("[bold red]>>>[bold white] Qu1cksc0pe gathering all files under that directory recursively. [bold blink]Please wait...")
+        print("[bold red]>>>[bold white] Qu1cksc0pe gathering all files under that directory recursively. [bold blink]Please wait...")
         scanfiles = Table()
         scanfiles.add_column("[bold green]Name", justify="center")
         scanfiles.add_column("[bold green]Count", justify="center")

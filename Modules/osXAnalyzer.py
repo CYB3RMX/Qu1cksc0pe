@@ -3,30 +3,14 @@
 import sys
 
 try:
+    from rich import print
     from rich.table import Table
-    from rich.console import Console
 except:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
-try:
-    from colorama import Fore, Style
-except:
-    print("Error: >colorama< module not found.")
-    sys.exit(1)
-
 # Getting filename for statistics
 fileName = str(sys.argv[1])
-
-# Rich console
-r_console = Console()
-
-# Colors
-white = Style.RESET_ALL
-red = Fore.LIGHTRED_EX
-green = Fore.LIGHTGREEN_EX
-yellow = Fore.LIGHTYELLOW_EX
-cyan = Fore.LIGHTCYAN_EX
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
@@ -115,17 +99,17 @@ def Analyzer():
     if fHeaders != []:
         for i in fHeaders:
             fhead.add_row(i)
-        r_console.print(fhead)
+        print(fhead)
 
     if shLibs != []:
         for i in shLibs:
             shlib.add_row(i)
-        r_console.print(shlib)
+        print(shlib)
 
     if lCommands != []:
         for i in lCommands:
             lcom.add_row(i)
-        r_console.print(lcom)
+        print(lcom)
 
 # Defining categorized scanning
 def Categorized():
@@ -169,11 +153,11 @@ def Categorized():
                         scoreDict[key] += 1
                     else:
                         pass
-            r_console.print(tables)
+            print(tables)
 
     # Statistics zone
     statistics = Table()
-    r_console.print(f"\n[bold green]->[white] Statistics for: [bold green][i]{fileName}[/i]")
+    print(f"\n[bold green]->[white] Statistics for: [bold green][i]{fileName}[/i]")
     statistics.add_column("Categories", justify="center")
     statistics.add_column("Number of Functions or Strings", justify="center")
     statistics.add_row("[bold green][i]All Functions[/i]", f"[bold green]{allFuncs}")
@@ -185,12 +169,12 @@ def Categorized():
                 statistics.add_row(f"[blink bold yellow]{key}", f"[blink bold red]{scoreDict[key]}")
             else:
                 statistics.add_row(key, str(scoreDict[key]))
-    r_console.print(statistics)
+    print(statistics)
 
     # Warning about obfuscated file
     if allFuncs < 10:
-        r_console.print("[blink bold white on red]This file might be obfuscated or encrypted. [white]Try [bold green][i]--packer[/i] [white]to scan this file for packers.")
-        r_console.print("[bold]You can also use [green][i]--hashscan[/i] [white]to scan this file.")
+        print("[blink bold white on red]This file might be obfuscated or encrypted. [white]Try [bold green][i]--packer[/i] [white]to scan this file for packers.")
+        print("[bold]You can also use [green][i]--hashscan[/i] [white]to scan this file.")
         sys.exit(0)
 
 # Execution

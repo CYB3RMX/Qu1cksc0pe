@@ -5,18 +5,18 @@ import random
 
 # Module for colors
 try:
-    from colorama import Fore, Style
+    from rich import print
 except:
-    print("Error: >colorama< module not found.")
+    print("Error: >rich< module not found.")
     sys.exit(1)
 
 # Colors
-re = Fore.LIGHTRED_EX
-cy = Fore.LIGHTCYAN_EX
-wh = Style.RESET_ALL
-gr = Fore.LIGHTGREEN_EX
-ma = Fore.LIGHTMAGENTA_EX
-ye = Fore.LIGHTYELLOW_EX
+re = "[bold red]"
+cy = "[bold cyan]"
+wh = "[white]"
+gr = "[bold green]"
+ma = "[bold magenta]"
+ye = "[bold yellow]"
 
 banner1=f"""
  {cy}_____ _   _  __  _____  _   __ _____ _____ ___________ _____         {gr}@
@@ -45,7 +45,7 @@ banner2=f"""
                                                          |||||||\n
 """
 banner3=f"""
-            ______
+           {wh} ______
          .--      --.
        ./             \\
       /                \\
@@ -68,7 +68,7 @@ banner3=f"""
 \/_/ \n
 """
 banner4=f"""
-                   <------------------------------------------>
+                   {wh}<------------------------------------------>
                    <  This tool is very dangerous. Be careful >
            {gr}__      {wh}<   while using it!!                       >
          {gr}_|  |_    {wh}<------------------------------------------>
