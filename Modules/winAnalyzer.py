@@ -2,19 +2,14 @@
 
 import os
 import sys
+import json
 import configparser
 
 try:
+    from rich import print
     from rich.table import Table
-    from rich.console import Console
 except:
     print("Error: >rich< module not found.")
-    sys.exit(1)
-
-try:
-    from colorama import Fore, Style
-except:
-    print("Error: >colorama< module not found.")
     sys.exit(1)
 
 try:
@@ -32,19 +27,8 @@ except:
 #--------------------------------------------- Getting name of the file for statistics
 fileName = str(sys.argv[1])
 
-#--------------------------------------------- Rich console
-r_console = Console()
-
-#--------------------------------------------- Colors
-red = Fore.LIGHTRED_EX
-cyan = Fore.LIGHTCYAN_EX
-white = Style.RESET_ALL
-green = Fore.LIGHTGREEN_EX
-yellow = Fore.LIGHTYELLOW_EX
-magenta = Fore.LIGHTMAGENTA_EX
-
 #--------------------------------------------- Legends
-infoS = f"{cyan}[{red}*{cyan}]{white}"
+infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 
 #--------------------------------------------- Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
@@ -60,7 +44,7 @@ try:
         except:
             continue
 except:
-    r_console.print("[blink bold white on red]Couldn\'t locate import entries. Quitting...")
+    print("[blink bold white on red]Couldn\'t locate import entries. Quitting...")
     sys.exit(1)
 
 #--------------------------------------------------------------------- Keywords for categorized scanning
@@ -138,6 +122,16 @@ regdict = {
     "Information Gathering": datarr, "Other/Unknown": otharr
 }
 
+#------------------------------------ Report structure
+winrep = {
+    "filename": "",
+    "timedatestamp": "",
+    "categories": {},
+    "matched_rules": [],
+    "linked_dll": [],
+    "sections": {}
+}
+
 #------------------------------------ Yara rule matcher
 def WindowsYara(target_file):
     yara_match_indicator = 0
@@ -166,16 +160,17 @@ def WindowsYara(target_file):
         yara_match_indicator += 1
         for rul in yara_matches:
             yaraTable = Table()
-            r_console.print(f">>> Rule name: [i][bold magenta]{rul}[/i]")
+            print(f">>> Rule name: [i][bold magenta]{rul}[/i]")
             yaraTable.add_column("Offset", style="bold green", justify="center")
             yaraTable.add_column("Matched String/Byte", style="bold green", justify="center")
+            winrep["matched_rules"].append(str(rul))
             for mm in rul.strings:
                 yaraTable.add_row(f"{hex(mm[0])}", f"{str(mm[2])}")
-            r_console.print(yaraTable)
+            print(yaraTable)
             print(" ")
 
     if yara_match_indicator == 0:
-        r_console.print(f"[blink bold white on red]Not any rules matched for {target_file}")
+        print(f"[blink bold white on red]Not any rules matched for {target_file}")
 
 #------------------------------------ Defining function
 def Analyzer():
@@ -204,11 +199,13 @@ def Analyzer():
             # Printing zone
             tables.add_column(f"Functions or Strings about [bold green]{key}", justify="center")
             tables.add_column("Address", justify="center")
+            winrep["categories"].update({key: []})
             for func in dictCateg[key]:
                 if func[0] == "":
                     pass
                 else:
                     tables.add_row(f"[bold red]{func[0]}", f"[bold red]{func[1]}")
+                    winrep["categories"][key].append(func[0])
                     import_indicator += 1
 
                     # Logging for summary table
@@ -240,12 +237,12 @@ def Analyzer():
                         scoreDict[key] += 1
                     else:
                         pass
-            r_console.print(tables)
+            print(tables)
 
     # If there is no function imported in target executable
     if import_indicator == 0:
-        r_console.print("[blink bold white on red]There is no function/API imports found.")
-        r_console.print("[magenta]>>[white] Try [bold green][i]--packer[/i] [white]or [bold green][i]--lang[/i] [white]to see additional info about target file.\n")
+        print("[blink bold white on red]There is no function/API imports found.")
+        print("[magenta]>>[white] Try [bold green][i]--packer[/i] [white]or [bold green][i]--lang[/i] [white]to see additional info about target file.\n")
 
     # gathering extracted dll files
     try:
@@ -254,7 +251,8 @@ def Analyzer():
         for items in binaryfile.DIRECTORY_ENTRY_IMPORT:
             dlStr = str(items.dll.decode())
             dllTable.add_row(f"{dlStr}", style="bold red")
-        r_console.print(dllTable)
+            winrep["linked_dll"].append(dlStr)
+        print(dllTable)
     except:
         pass
 
@@ -297,11 +295,25 @@ def Analyzer():
                 f"{hex(sect.PointerToRawData)}",
                 str(sect.get_entropy())
             )
-    r_console.print(peStatistics)
+        winrep["sections"].update(
+            {
+                str(sect.Name.decode().rstrip('\x00')):
+                {
+                    "virtualsize": hex(sect.Misc_VirtualSize),
+                    "virtualaddress": hex(sect.VirtualAddress),
+                    "sizeofrawdata": hex(sect.SizeOfRawData),
+                    "pointertorawdata": hex(sect.PointerToRawData),
+                    "entropy": str(sect.get_entropy())
+                }
+            }
+        )
+    print(peStatistics)
 
     # Statistics zone
-    r_console.print(f"\n[bold green]-> [white]Statistics for: [bold green][i]{fileName}[/i]")
-    r_console.print(f"[bold magenta]>>[white] Time Date Stamp: [bold green][i]{datestamp}[/i]")
+    print(f"\n[bold green]-> [white]Statistics for: [bold green][i]{fileName}[/i]")
+    print(f"[bold magenta]>>[white] Time Date Stamp: [bold green][i]{datestamp}[/i]")
+    winrep["filename"] = fileName
+    winrep["timedatestamp"] = datestamp
 
     # printing all function statistics
     statistics = Table()
@@ -316,13 +328,18 @@ def Analyzer():
                 statistics.add_row(f"[blink bold yellow]{key}", f"[blink bold red]{scoreDict[key]}")
             else:
                 statistics.add_row(key, str(scoreDict[key]))
-    r_console.print(statistics)
+    print(statistics)
 
     # Warning about obfuscated file
     if allFuncs < 20:
-        r_console.print("[blink bold white on red]This file might be obfuscated or encrypted. [white]Try [bold green][i]--packer[/i] [white]to scan this file for packers.")
-        r_console.print("[bold]You can also use [green][i]--hashscan[/i] [white]to scan this file.")
+        print("[blink bold white on red]This file might be obfuscated or encrypted. [white]Try [bold green][i]--packer[/i] [white]to scan this file for packers.")
+        print("[bold]You can also use [green][i]--hashscan[/i] [white]to scan this file.")
         sys.exit(0)
 
+    # Print reports
+    if sys.argv[2] == "True":
+        with open("sc0pe_windows_report.json", "w") as rp_file:
+            json.dump(winrep, rp_file, indent=4)
+        print("\n[bold magenta]>>>[bold white] Report file saved into: [bold blink yellow]sc0pe_windows_report.json\n")
 # Execute
 Analyzer()

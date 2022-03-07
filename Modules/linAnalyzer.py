@@ -2,18 +2,16 @@
 
 import os
 import sys
+import json
 try:
+    from rich import print
     from rich.table import Table
-    from rich.console import Console
 except:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
 # Getting name of the file for statistics
 fileName = str(sys.argv[1])
-
-# Rich console
-r_console = Console()
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
@@ -41,6 +39,14 @@ Information_Gathering = []
 System_Persistence = []
 Cryptography = []
 Other = []
+
+# Report structure
+linrep = {
+    "filename": "",
+    "categories": {},
+    "sections": [],
+    "segments": []
+}
 
 # Scores
 scoreDict = {
@@ -97,11 +103,13 @@ def Analyzer():
 
             # Printing zone
             tables.add_column(f"Functions or Strings about [bold green]{key}", justify="center")
+            linrep["categories"].update({key: []})
             for i in Categs[key]:
                 if i == "":
                     pass
                 else:
                     tables.add_row(f"[bold red]{i}")
+                    linrep["categories"][key].append(i)
                     # Threat score
                     if key == "Networking":
                         scoreDict[key] += 1
@@ -121,7 +129,7 @@ def Analyzer():
                         scoreDict[key] += 1
                     else:
                         pass
-            r_console.print(tables)
+            print(tables)
 
     # Gathering sections and segments
     secTable = Table()
@@ -135,9 +143,10 @@ def Analyzer():
         if se1 in allThings:
             if se1 != "":
                 secTable.add_row(f"[bold red]{se1}")
+                linrep["sections"].append(se1)
                 sec_indicator += 1
     if sec_indicator != 0:
-        r_console.print(secTable)
+        print(secTable)
     
     # Segments
     seg_indicator = 0
@@ -145,12 +154,14 @@ def Analyzer():
         if se2 in allThings:
             if se2 != "":
                 segTable.add_row(f"[bold red]{se2}")
+                linrep["segments"].append(se2)
                 seg_indicator += 1
     if seg_indicator != 0:
-        r_console.print(segTable)
+        print(segTable)
 
     # Statistics zone
-    r_console.print(f"\n[bold green]->[white] Statistics for: [bold green][i]{fileName}[/i]")
+    print(f"\n[bold green]->[white] Statistics for: [bold green][i]{fileName}[/i]")
+    linrep["filename"] = fileName
 
     # Printing zone
     statistics = Table()
@@ -165,13 +176,19 @@ def Analyzer():
                 statistics.add_row(f"[blink bold yellow]{key}", f"[blink bold red]{scoreDict[key]}")
             else:
                 statistics.add_row(key, str(scoreDict[key]))
-    r_console.print(statistics)
+    print(statistics)
 
     # Warning about obfuscated file
     if allFuncs < 10:
-        r_console.print("[blink bold white on red]This file might be obfuscated or encrypted. [white]Try [bold green][i]--packer[/i] [white]to scan this file for packers.")
-        r_console.print("[bold]You can also use [green][i]--hashscan[/i] [white]to scan this file.")
+        print("[blink bold white on red]This file might be obfuscated or encrypted. [white]Try [bold green][i]--packer[/i] [white]to scan this file for packers.")
+        print("[bold]You can also use [green][i]--hashscan[/i] [white]to scan this file.")
         sys.exit(0)
+
+    # Print reports
+    if sys.argv[2] == "True":
+        with open("sc0pe_linux_report.json", "w") as rp_file:
+            json.dump(linrep, rp_file, indent=4)
+        print("\n[bold magenta]>>>[bold white] Report file saved into: [bold blink yellow]sc0pe_linux_report.json\n")
 
 # Execute
 try:

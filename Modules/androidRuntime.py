@@ -12,8 +12,8 @@ except:
     sys.exit(1)
 
 try:
+    from rich import print
     from rich.table import Table
-    from rich.console import Console
 except:
     print("Error: >rich< not found.")
     sys.exit(1)
@@ -29,9 +29,6 @@ try:
 except:
     print("Error: >colorama< module not found.")
     sys.exit(1)
-
-# Rich console
-r_console = Console()
 
 # Colors
 red = Fore.LIGHTRED_EX
@@ -68,7 +65,7 @@ def GetDevices(devices) -> list:
             devTable.add_row(str(count+1), str(dd.id), str(dd.name), str(dd.type))
             count += 1
             numbers.append(str(count))
-        r_console.print(devTable)
+        print(devTable)
         return numbers
 
 def GetPackages(index) -> list:
@@ -84,7 +81,7 @@ def GetPackages(index) -> list:
         for app in applications:
             appTable.add_row(str(app.name), str(app.identifier))
             package_list.append(app.identifier)
-        r_console.print(appTable)
+        print(appTable)
         return package_list
     except frida.ServerNotRunningError:
         print(f"{errorS} Unable to connect to remote frida-server.\n")
@@ -103,7 +100,7 @@ def GetScripts() -> list:
         scname = sc.replace("-", " ")
         scriptTable.add_row(str(scname.replace(".js", "").upper()), str(sc.replace(".js", "")))
         sc_list.append(sc.replace(".js", ""))
-    r_console.print(scriptTable)
+    print(scriptTable)
     return sc_list
 
 def FridaMain():

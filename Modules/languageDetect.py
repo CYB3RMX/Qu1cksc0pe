@@ -9,25 +9,18 @@ except:
     sys.exit(1)
 
 try:
-    from colorama import Fore, Style
+    from rich import print
 except:
-    print("Error: >colorama< module not found.")
+    print("Error: >rich< module not found.")
     sys.exit(1)
 
 # Getting name of the file for executable checker function
 fileName = str(sys.argv[1])
 
-# Colors
-red = Fore.LIGHTRED_EX
-cyan = Fore.LIGHTCYAN_EX
-white = Style.RESET_ALL
-green = Fore.LIGHTGREEN_EX
-magenta = Fore.LIGHTMAGENTA_EX
-
 # Legends
-infoS = f"{cyan}[{red}*{cyan}]{white}"
-errorS = f"{cyan}[{red}!{cyan}]{white}"
-foundS = f"{cyan}[{red}+{cyan}]{white}"
+infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
+foundS = f"[bold cyan][[bold red]+[bold cyan]][white]"
+errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # All strings
 allStrings = open("temp.txt", "r").read().split("\n")
@@ -51,7 +44,7 @@ def LanguageDetect():
     for key in detector:
         for val in detector[key]:
             if val in allStrings:
-                print(f"{foundS} Possible programming language: {green}{key}{white}\n")
+                print(f"{foundS} Possible programming language: [bold green]{key}[white]\n")
                 indicator += 1
                 sys.exit(0)
     if indicator == 0:

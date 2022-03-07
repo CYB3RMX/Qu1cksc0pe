@@ -4,8 +4,10 @@ import json
 import sys
 import re
 import os
+import getpass
 import configparser
 import requests
+from datetime import date
 
 # Module handling
 try:
@@ -15,16 +17,10 @@ except:
     sys.exit(1)
 
 try:
+    from rich import print
     from rich.table import Table
-    from rich.console import Console
 except:
     print("Error: >rich< module not found.")
-    sys.exit(1)
-
-try:
-    from colorama import Fore, Style
-except:
-    print("Error: >colorama< module not found.")
     sys.exit(1)
 
 try:
@@ -45,22 +41,25 @@ except:
     print("Error: >yara< module not found.")
     sys.exit(1)
 
+try:
+    from colorama import Fore, Style
+except:
+    print("Error: >colorama< module not found.")
+    sys.exit(1)
+
 # Disabling pyaxmlparser's logs
 pyaxmlparser.core.log.disabled = True
-
-# Rich console
-r_console = Console()
 
 # Colors
 red = Fore.LIGHTRED_EX
 cyan = Fore.LIGHTCYAN_EX
 white = Style.RESET_ALL
-green = Fore.LIGHTGREEN_EX
 
 # Legends
-infoS = f"{cyan}[{red}*{cyan}]{white}"
-foundS = f"{cyan}[{red}+{cyan}]{white}"
-errorS = f"{cyan}[{red}!{cyan}]{white}"
+infoC = f"{cyan}[{red}*{cyan}]{white}"
+infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
+foundS = f"[bold cyan][[bold red]+[bold cyan]][white]"
+errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
@@ -91,49 +90,88 @@ scoreDict = {
     "SharkBot": 0
 }
 
+# Parsing date
+today = date.today()
+dformat = today.strftime("%d-%m-%Y")
+
+# Gathering username
+username = getpass.getuser()
+
+# Creating report structure
+reportz = {
+    "target_file": "",
+    "app_name": "",
+    "package_name": "",
+    "play_store": False,
+    "sdk_version": "",
+    "main_activity": "",
+    "features": [],
+    "activities": [],
+    "services": [],
+    "receivers": [],
+    "providers": [],
+    "libraries": [],
+    "signatures": [],
+    "permissions": [],
+    "malware_family": "",
+    "compiler_info": "",
+    "anti_vm": [],
+    "anti_debug": [],
+    "anti_disassembly": [],
+    "obfuscation": [],
+    "matched_rules": [],
+    "user": username,
+    "date": dformat,
+}
+
 # Function for parsing apkid tool's output
 def ApkidParser(apkid_output):
     print(f"\n{infoS} Performing APKID analysis...")
     for index in range(0, len(data["files"])):
-        r_console.print(f"[bold red]---->[white] File Name: [bold green]{data['files'][index]['filename']}")
+        print(f"[bold red]---->[white] File Name: [bold green]{data['files'][index]['filename']}")
 
         # Fetching compiler information
         try:
             compiler = data["files"][index]["matches"]["compiler"][0]
-            r_console.print(f"[bold red]-->[white] Compiler Information: [bold green]{compiler}\n")
+            print(f"[bold red]-->[white] Compiler Information: [bold green]{compiler}\n")
+            reportz["compiler_info"] = compiler
         except KeyError:
-            r_console.print("[bold white on red]There is no information about compiler!\n")
+            print("[bold white on red]There is no information about compiler!\n")
 
         # Fetching and parsing anti virtualization
         if "anti_vm" in data["files"][index]["matches"].keys():
-            r_console.print("[bold green]--->[magenta] Anti Virtualization Codes")
+            print("[bold green]--->[magenta] Anti Virtualization Codes")
             if data["files"][index]["matches"]["anti_vm"] != []:
                 for avm in data["files"][index]["matches"]["anti_vm"]:
-                    r_console.print(f"[bold green]>>[white] {avm}")
+                    print(f"[bold green]>>[white] {avm}")
+                    reportz["anti_vm"].append(avm)
                 print(" ")
         
         # Fetching and parsing anti debug codes
         if "anti_debug" in data["files"][index]["matches"].keys():
-            r_console.print("[bold green]--->[magenta] Anti Debug Codes")
+            print("[bold green]--->[magenta] Anti Debug Codes")
             if data["files"][index]["matches"]["anti_debug"] != []:
                 for adb in data["files"][index]["matches"]["anti_debug"]:
-                    r_console.print(f"[bold green]>>[white] {adb}")
+                    print(f"[bold green]>>[white] {adb}")
+                    reportz["anti_debug"].append(adb)
                 print(" ")
         
         # Fetching and parsing anti disassembly
         if "anti_disassembly" in data["files"][index]["matches"].keys():
-            r_console.print("[bold green]--->[magenta] Anti Disassembly")
+            print("[bold green]--->[magenta] Anti Disassembly")
             if data["files"][index]["matches"]["anti_disassembly"] != []:
                 for disas in data["files"][index]["matches"]["anti_disassembly"]:
-                    r_console.print(f"[bold green]>>[white] {disas}")
+                    print(f"[bold green]>>[white] {disas}")
+                    reportz["anti_disassembly"].append(disas)
                 print(" ")
 
         # Fetching and parsing obfuscators
         if "obfuscator" in data["files"][index]["matches"].keys():
-            r_console.print("[bold green]--->[magenta] Obfuscation")
+            print("[bold green]--->[magenta] Obfuscation")
             if data["files"][index]["matches"]["obfuscator"] != []:
                 for obf in data["files"][index]["matches"]["obfuscator"]:
-                    r_console.print(f"[bold green]>>[white] {obf}")
+                    print(f"[bold green]>>[white] {obf}")
+                    reportz["obfuscation"].append(obf)
                 print(" ")
 
 # Library Hunter
@@ -160,20 +198,21 @@ def AndroLibScanner(target_file):
 
     # Printing area
     if yara_matches != []:
-        r_console.print(f"[bold magenta]>>>>[white] Matched Rules for: [bold green]{target_file}\n")
-        print(f"{foundS} Matched Rules for: {green}{target_file}{white}\n")
+        print(f"[bold magenta]>>>>[white] Matched Rules for: [bold green]{target_file}\n")
+        print(f"{foundS} Matched Rules for: [bold green]{target_file}[white]\n")
         yara_match_indicator += 1
         for rul in yara_matches:
             yaraTable = Table(title=f"{rul}", title_justify="center", title_style="bold magenta")
             yaraTable.add_column("[bold green]Offset", justify="center")
             yaraTable.add_column("[bold green]Matched String/Byte", justify="center")
+            reportz["matched_rules"].append(rul)
             for mm in rul.strings:
                 yaraTable.add_row(str(hex(mm[0])), str(mm[2]))
-            r_console.print(yaraTable)
+            print(yaraTable)
             print(" ")
 
     if yara_match_indicator == 0:
-        r_console.print(f"\n[bold white on red]Not any rules matched for [blink]{target_file}[/blink]\n")
+        print(f"\n[bold white on red]Not any rules matched for [blink]{target_file}[/blink]\n")
 def MultiYaraScanner(targetAPK):
     lib_files_indicator = 0
     # Configurating decompiler...
@@ -200,9 +239,9 @@ def MultiYaraScanner(targetAPK):
                     AndroLibScanner(target_file=extens)
 
         if lib_files_indicator == 0:
-            r_console.print("\n[bold white on red]Not any library files found for analysis!\n")
+            print("\n[bold white on red]Not any library files found for analysis!\n")
     else:
-        r_console.print("[blink]Decompiler([bold green]JADX[white])[/blink] [white]not found. Skipping...")
+        print("[blink]Decompiler([bold green]JADX[white])[/blink] [white]not found. Skipping...")
 
 # Source code analysis TODO: look for better algorithm!!
 def ScanSource(targetAPK):
@@ -221,7 +260,7 @@ def ScanSource(targetAPK):
             for ff in f_names:
                 fnames.append(os.path.join(root, ff))
         if fnames != []:
-            question = input(f"{infoS} Do you want to analyze all packages [Y/n]?: ")
+            question = input(f"{infoC} Do you want to analyze all packages [Y/n]?: ")
             for sources in fnames:
                 for index in range(0, len(pattern_file)):
                     for elem in pattern_file[index]:
@@ -235,8 +274,8 @@ def ScanSource(targetAPK):
                                     categs[elem].append([str(item), sources.replace('TargetAPK/sources/', '')])
                                 
     else:
-        r_console.print("[bold white on red]Couldn\'t locate source codes. Did target file decompiled correctly?")
-        r_console.print(">>>[bold yellow] Hint: [white]Don\'t forget to specify decompiler path in [bold green]Systems/Android/libScanner.conf")
+        print("[bold white on red]Couldn\'t locate source codes. Did target file decompiled correctly?")
+        print(">>>[bold yellow] Hint: [white]Don\'t forget to specify decompiler path in [bold green]Systems/Android/libScanner.conf")
 
     # Printing report
     for cat in categs:
@@ -246,7 +285,7 @@ def ScanSource(targetAPK):
             sanalTable.add_column("File", justify="center")
             for element in categs[cat]:
                 sanalTable.add_row(f"[bold yellow]{element[0]}", f"[bold cyan]{element[1]}")
-            r_console.print(sanalTable)
+            print(sanalTable)
             print(" ")
    
 # Analyzer for malware family detection
@@ -288,7 +327,8 @@ def CheckFamily(targetApk):
     # Checking statistics
     sort_score = sorted(scoreDict.items(), key=lambda ff: ff[1], reverse=True)
     if sort_score[0][1] != 0:
-        print(f"{red}>>>{white} Possible Malware Family: {green}{sort_score[0][0]}{white}")
+        print(f"[bold red]>>>[white] Possible Malware Family: [bold green]{sort_score[0][0]}[white]")
+        reportz["malware_family"] = sort_score[0][0]
     else:
         print(f"{errorS} Couldn\'t detect malware family.")
 
@@ -321,7 +361,7 @@ def Quarked(targetAPK):
                         str(data.json()['proxy']),
                         str(data.json()['hosting'])
                     )
-        r_console.print(ipTables)
+        print(ipTables)
     else:
         not_found_indicator += 1
     
@@ -331,12 +371,12 @@ def Quarked(targetAPK):
     if len(forensic.get_url()) != 0:
         for urls in forensic.get_url():
             domainTable.add_row(str(urls))
-        r_console.print(domainTable)
+        print(domainTable)
     else:
         not_found_indicator += 1
 
     if not_found_indicator == 2:
-        r_console.print("\n[bold white on red]Not any Email or IP string found in target file!\n")
+        print("\n[bold white on red]Not any Email or IP string found in target file!\n")
 
 # Permission analyzer
 def Analyzer(parsed):
@@ -361,16 +401,18 @@ def Analyzer(parsed):
     for pp in apkPerms:
         if pp.split(".")[-1] in permArr:
             statistics.add_row(str(pp), "[bold red]Risky")
+            reportz["permissions"].append({str(pp): "Risky"})
             danger += 1
         else:
             statistics.add_row(str(pp), "[bold yellow]Info")
+            reportz["permissions"].append({str(pp): "Info"})
             normal += 1
 
     # If there is no permission:
     if danger == 0 and normal == 0:
-        r_console.print("\n[bold white on red]Not any permissions found!\n")
+        print("\n[bold white on red]Not any permissions found!\n")
     else:
-        r_console.print(statistics)
+        print(statistics)
 
 # Analyzing more deeply
 def DeepScan(parsed):
@@ -381,7 +423,8 @@ def DeepScan(parsed):
     if features != []:
         for ff in features:
             featStat.add_row(str(ff))
-        r_console.print(featStat)
+            reportz["features"].append(ff)
+        print(featStat)
     else:
         pass
 
@@ -392,7 +435,8 @@ def DeepScan(parsed):
     if actos != []:
         for aa in actos:
             activeStat.add_row(str(aa))
-        r_console.print(activeStat)
+            reportz["activities"].append(aa)
+        print(activeStat)
     else:
         pass
 
@@ -403,7 +447,8 @@ def DeepScan(parsed):
     if servv != []:
         for ss in servv:
             servStat.add_row(str(ss))
-        r_console.print(servStat)
+            reportz["services"].append(ss)
+        print(servStat)
     else:
         pass
 
@@ -414,7 +459,8 @@ def DeepScan(parsed):
     if receive != []:
         for rr in receive:
             recvStat.add_row(str(rr))
-        r_console.print(recvStat)
+            reportz["receivers"].append(rr)
+        print(recvStat)
     else:
         pass
 
@@ -425,43 +471,52 @@ def DeepScan(parsed):
     if provids != []:
         for pp in provids:
             provStat.add_row(str(pp))
-        r_console.print(provStat)
+            reportz["providers"].append(pp)
+        print(provStat)
     else:
         pass
 
 def GeneralInformation(targetAPK):
-    print(f"\n{infoS} General Informations about {green}{targetAPK}{white}")
+    print(f"\n{infoS} General Informations about [bold green]{targetAPK}[white]")
+    reportz["target_file"] = targetAPK
 
     # Parsing target apk file
     axmlTime = pyaxmlparser.APK(targetAPK)
 
     # Lets print!!
-    r_console.print(f"[bold red]>>>>[white] App Name: [bold green]{axmlTime.get_app_name()}")
-    r_console.print(f"[bold red]>>>>[white] Package Name: [bold green]{axmlTime.get_package()}")
+    print(f"[bold red]>>>>[white] App Name: [bold green]{axmlTime.get_app_name()}")
+    print(f"[bold red]>>>>[white] Package Name: [bold green]{axmlTime.get_package()}")
+    reportz["app_name"] = axmlTime.get_app_name()
+    reportz["package_name"] = axmlTime.get_package()
 
     # Gathering play store information
     try:
         playinf = requests.get(f"https://play.google.com/store/apps/details?id={axmlTime.get_package()}")
         if playinf.ok:
-            r_console.print("[bold red]>>>>[white] Google Play Store: [bold green]Found")
+            print("[bold red]>>>>[white] Google Play Store: [bold green]Found")
+            reportz["play_store"] = True
         else:
-            r_console.print("[bold red]>>>>[white] Google Play Store: [bold red]Not Found")
+            print("[bold red]>>>>[white] Google Play Store: [bold red]Not Found")
     except:
-        r_console.print("\n[bold white on red]An error occured while querying to play store!\n")
+        print("\n[bold white on red]An error occured while querying to play store!\n")
 
-    r_console.print(f"[bold red]>>>>[white] SDK Version: [bold green]{axmlTime.get_effective_target_sdk_version()}")
-    r_console.print(f"[bold red]>>>>[white] Main Activity: [bold green]{axmlTime.get_main_activity()}")
+    print(f"[bold red]>>>>[white] SDK Version: [bold green]{axmlTime.get_effective_target_sdk_version()}")
+    print(f"[bold red]>>>>[white] Main Activity: [bold green]{axmlTime.get_main_activity()}")
+    reportz["sdk_version"] = axmlTime.get_effective_target_sdk_version()
+    reportz["main_activity"] = axmlTime.get_main_activity()
     try:
         if axmlTime.get_libraries() != []:
-            r_console.print("[bold red]>>>>[white] Libraries:")
+            print("[bold red]>>>>[white] Libraries:")
             for libs in axmlTime.get_libraries():
-                r_console.print(f"[bold magenta]>>[white] {libs}")
+                print(f"[bold magenta]>>[white] {libs}")
+                reportz["libraries"].append(libs)
             print(" ")
 
         if axmlTime.get_signature_names() != []:
-            r_console.print("[bold red]>>>>[white] Signatures:")
+            print("[bold red]>>>>[white] Signatures:")
             for sigs in axmlTime.get_signature_names():
-                r_console.print(f"[bold magenta]>>[white] {sigs}")
+                print(f"[bold magenta]>>[white] {sigs}")
+                reportz["signatures"].append(sigs)
             print(" ")
     except:
         pass
@@ -497,8 +552,8 @@ if __name__ == '__main__':
         try:
             MultiYaraScanner(targetAPK)
         except:
-            r_console.print("\n[bold white on red]An error occured while decompiling the file. Please check configuration file and modify the [blink]Decompiler[/blink] option.")
-            r_console.print(f"[bold white]>>> Configuration file path: [bold green]{sc0pe_path}/Systems/Android/libScanner.conf")
+            print("\n[bold white on red]An error occured while decompiling the file. Please check configuration file and modify the [blink]Decompiler[/blink] option.")
+            print(f"[bold white]>>> Configuration file path: [bold green]{sc0pe_path}/Systems/Android/libScanner.conf")
 
         # Source code analysis zone
         print(f"\n{infoS} Performing source code analysis...")
@@ -509,5 +564,11 @@ if __name__ == '__main__':
 
         # Quark scanner
         Quarked(targetAPK)
+
+        # Print reports
+        if sys.argv[2] == "True":
+            with open("sc0pe_android_report.json", "w") as rp_file:
+                json.dump(reportz, rp_file, indent=4)
+            print("\n[bold magenta]>>>[bold white] Report file saved into: [bold blink yellow]sc0pe_android_report.json\n")
     except KeyboardInterrupt:
-        r_console.print("\n[bold white on red]An error occured. Press [blink]CTRL+C[/blink] to exit.\n")
+        print("\n[bold white on red]An error occured. Press [blink]CTRL+C[/blink] to exit.\n")

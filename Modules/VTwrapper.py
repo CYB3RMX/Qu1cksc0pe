@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-from ipaddress import ip_address
 import re
 import sys
 import hashlib
@@ -8,44 +7,26 @@ import requests
 
 # Checking for rich existence
 try:
+    from rich import print
     from rich.table import Table
-    from rich.console import Console
 except:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
-# Checking for colorama existence
-try:
-    from colorama import Fore, Style
-except:
-    print("Error: >colorama< module not found.")
-    sys.exit(1)
-
-# Rich console
-r_console = Console()
-
-# Colors
-yellow = Fore.LIGHTYELLOW_EX
-green = Fore.LIGHTGREEN_EX
-red = Fore.LIGHTRED_EX
-white = Style.RESET_ALL
-cyan = Fore.LIGHTCYAN_EX
-magenta = Fore.LIGHTMAGENTA_EX
-
 # Legends
-errorS = f"{cyan}[{red}!{cyan}]{white}"
-infoS = f"{cyan}[{red}*{cyan}]{white}"
+errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
+infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 
 # Arguments
 try:
     apikey = str(sys.argv[1])
 except:
-    r_console.print("[blink bold white on red]Please get your API key from [white]-> [bold green][a]https://www.virustotal.com/[/a]")
+    print("[blink bold white on red]Please get your API key from [white]-> [bold green][a]https://www.virustotal.com/[/a]")
     sys.exit(1)
 try:
     targetFile = str(sys.argv[2])
 except:
-    r_console.print("\n[bold white on red]Please enter your file!!\n")
+    print("\n[bold white on red]Please enter your file!!\n")
     sys.exit(1)
 
 # An array for AV names
@@ -96,7 +77,7 @@ def ReportParser(reportStr):
         if "data" in reportStr.keys():
             if "popular_threat_classification" in reportStr["data"]["attributes"].keys():
                 if "suggested_threat_label" in reportStr["data"]["attributes"]["popular_threat_classification"].keys():
-                    print(f"\n{infoS} Potential Threat Label: " + f'{red}{reportStr["data"]["attributes"]["popular_threat_classification"]["suggested_threat_label"]}{white}')
+                    print(f"\n{infoS} Potential Threat Label: " + f'[bold red]{reportStr["data"]["attributes"]["popular_threat_classification"]["suggested_threat_label"]}[white]')
 
                 # Counting threat category
                 if "popular_threat_category" in reportStr["data"]["attributes"]["popular_threat_classification"].keys():
@@ -105,7 +86,7 @@ def ReportParser(reportStr):
                             f"[bold red]{reportStr['data']['attributes']['popular_threat_classification']['popular_threat_category'][th]['value']}",
                             f"[bold red]{reportStr['data']['attributes']['popular_threat_classification']['popular_threat_category'][th]['count']}"
                         )
-                r_console.print(threatTable)
+                print(threatTable)
 
                 # Counting threat names
                 nameTable = Table()
@@ -117,7 +98,7 @@ def ReportParser(reportStr):
                             f"[bold red]{reportStr['data']['attributes']['popular_threat_classification']['popular_threat_name'][th]['value']}",
                             f"[bold red]{reportStr['data']['attributes']['popular_threat_classification']['popular_threat_name'][th]['count']}"
                         )
-                r_console.print(nameTable)
+                print(nameTable)
         
         # Detections
         detect = 0
@@ -133,8 +114,8 @@ def ReportParser(reportStr):
             else:
                 print(f"\n{errorS} Nothing found harmfull about that file.")
                 sys.exit(0)
-        print(f"\n{infoS} Detection: {red}{detect}{white}/{red}{len(avArray)}{white}")
-        r_console.print(antiTable)
+        print(f"\n{infoS} Detection: [bold red]{detect}[white]/[bold red]{len(avArray)}[white]")
+        print(antiTable)
 
         # Behavior analysis
         if "data" in reportStr.keys():
@@ -192,10 +173,10 @@ def ReportParser(reportStr):
                     except:
                         continue
                 # Print results
-                r_console.print(idsTable)
+                print(idsTable)
 
                 if "crowdsourced_ids_stats" in reportStr["data"]["attributes"].keys():
-                    print(f"\n{infoS} Alert Summary: {green}{targetFile}{white}")
+                    print(f"\n{infoS} Alert Summary: [bold green]{targetFile}[white]")
                     crowdTable = Table()
                     crowdTable.add_column("[bold green]Alert Level", justify="center")
                     crowdTable.add_column("[bold green]Number of Alerts", justify="center")
@@ -209,10 +190,10 @@ def ReportParser(reportStr):
                             crowdTable.add_row(f"[bold cyan]{sant}", f"[bold cyan]{reportStr['data']['attributes']['crowdsourced_ids_stats'][alrtlvl]}")
                         else:
                             crowdTable.add_row(str(sant), f'{reportStr["data"]["attributes"]["crowdsourced_ids_stats"][alrtlvl]}')
-                    r_console.print(crowdTable)
+                    print(crowdTable)
                     print(" ")
             else:
-                r_console.print("\n[bold white on red]There is no IDS reports for target file.\n")
+                print("\n[bold white on red]There is no IDS reports for target file.\n")
 
 # Execution area
 reportstr = DoRequest(targetFile)

@@ -13,8 +13,8 @@ except:
 
 # Testing rich existence
 try:
+    from rich import print
     from rich.table import Table
-    from rich.console import Console
 except:
     print("Error: >rich< module not found.")
     sys.exit(1)
@@ -33,7 +33,6 @@ except:
     print("Error: >pyaxmlparser< module not found.")
     sys.exit(1)
 
-# Testing colorama existence
 try:
     from colorama import Fore, Style
 except:
@@ -43,9 +42,6 @@ except:
 # Disabling pyaxmlparser's logs
 pyaxmlparser.core.log.disabled = True
 
-# Rich console
-r_console = Console()
-
 # Colors
 red = Fore.LIGHTRED_EX
 cyan = Fore.LIGHTCYAN_EX
@@ -53,9 +49,10 @@ white = Style.RESET_ALL
 green = Fore.LIGHTGREEN_EX
 
 # Legends
-infoS = f"{cyan}[{red}*{cyan}]{white}"
-foundS = f"{cyan}[{red}+{cyan}]{white}"
-errorS = f"{cyan}[{red}!{cyan}]{white}"
+infoC = f"{cyan}[{red}*{cyan}]{white}"
+infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
+foundS = f"[bold cyan][[bold red]+[bold cyan]][white]"
+errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # Gathering username
 username = getpass.getuser()
@@ -130,6 +127,8 @@ parser.add_argument("--packer", required=False,
                     action="store_true")
 parser.add_argument("--resource", required=False,
                     help="Analyze resources in target file", action="store_true")
+parser.add_argument("--report", required=False,
+                    help="Export analysis reports into a file (JSON Format for now).", action="store_true")
 parser.add_argument("--runtime", required=False,
                     help="Analyze APK files dynamically.", action="store_true")
 parser.add_argument("--sigcheck", required=False,
@@ -141,25 +140,31 @@ args = parser.parse_args()
 
 # Basic analyzer function that handles single and multiple scans
 def BasicAnalyzer(analyzeFile):
-    print(f"{infoS} Analyzing: {green}{analyzeFile}{white}")
+    print(f"{infoS} Analyzing: [bold green]{analyzeFile}[white]")
     fileType = str(pr.magic_file(analyzeFile))
     # Windows Analysis
     if "Windows Executable" in fileType or ".msi" in fileType or ".dll" in fileType or ".exe" in fileType:
-        print(f"{infoS} Target OS: {green}Windows{white}\n")
-        command = f"python3 {sc0pe_path}/Modules/winAnalyzer.py {analyzeFile}"
+        print(f"{infoS} Target OS: [bold green]Windows[white]\n")
+        if args.report:
+            command = f"python3 {sc0pe_path}/Modules/winAnalyzer.py {analyzeFile} True"
+        else:
+            command = f"python3 {sc0pe_path}/Modules/winAnalyzer.py {analyzeFile} False"
         os.system(command)
 
     # Linux Analysis
     elif "ELF" in fileType:
-        print(f"{infoS} Target OS: {green}Linux{white}\n")
+        print(f"{infoS} Target OS: [bold green]Linux[white]\n")
         command = f"readelf -a {analyzeFile} > elves.txt"
         os.system(command)
-        command = f"python3 {sc0pe_path}/Modules/linAnalyzer.py {analyzeFile}"
+        if args.report:
+            command = f"python3 {sc0pe_path}/Modules/linAnalyzer.py {analyzeFile} True"
+        else:
+            command = f"python3 {sc0pe_path}/Modules/linAnalyzer.py {analyzeFile} False"
         os.system(command)
 
     # MacOSX Analysis
     elif "Mach-O" in fileType:
-        print(f"{infoS} Target OS: {green}OSX{white}\n")
+        print(f"{infoS} Target OS: [bold green]OSX[white]\n")
         command = f"python3 {sc0pe_path}/Modules/osXAnalyzer.py {analyzeFile}"
         os.system(command)
 
@@ -167,25 +172,28 @@ def BasicAnalyzer(analyzeFile):
     elif "PK" in fileType and "Java archive" in fileType:
         look = pyaxmlparser.APK(analyzeFile)
         if look.is_valid_APK() == True:
-            print(f"{infoS} Target OS: {green}Android{white}")
+            print(f"{infoS} Target OS: [bold green]Android[white]")
             command = f"apkid -j {args.file} > apkid.json"
             os.system(command)
-            command = f"python3 {sc0pe_path}/Modules/apkAnalyzer.py {analyzeFile}"
+            if args.report:
+                command = f"python3 {sc0pe_path}/Modules/apkAnalyzer.py {analyzeFile} True"
+            else:
+                command = f"python3 {sc0pe_path}/Modules/apkAnalyzer.py {analyzeFile} False"
             os.system(command)
             if os.path.exists("apkid.json"):
                 os.remove("apkid.json")
             # APP Security
-            choice = str(input(f"\n{infoS} Do you want to check target app\'s security? This process will take a while.[Y/n]: "))
+            choice = str(input(f"\n{infoC} Do you want to check target app\'s security? This process will take a while.[Y/n]: "))
             if choice == "Y" or choice == "y":
                 os.system(f"python3 {sc0pe_path}/Modules/apkSecCheck.py")
             else:
                 pass
         else:
-            r_console.print("\n[bold white on red]Qu1cksc0pe doesn\'t support archive analysis for now ;)\n")
+            print("\n[bold white on red]Qu1cksc0pe doesn\'t support archive analysis for now ;)\n")
             sys.exit(1)
     else:
-        r_console.print("\n[bold white on red]File type not supported. Make sure you are analyze executable files or document files.")
-        r_console.print("[bold]>>> If you want to scan document files try [bold green][i]--docs[/i] [white]argument.")
+        print("\n[bold white on red]File type not supported. Make sure you are analyze executable files or document files.")
+        print("[bold]>>> If you want to scan document files try [bold green][i]--docs[/i] [white]argument.")
         sys.exit(1)
 
 # Main function
@@ -200,10 +208,10 @@ def Qu1cksc0pe():
                 command = f"strings {allA} {args.file} > temp.txt"
                 os.system(command)
             else:
-                r_console.print("[bold white on red][blink]strings[/blink] command not found. You need to install it.")
+                print("[bold white on red][blink]strings[/blink] command not found. You need to install it.")
                 sys.exit(1)
         else:
-            r_console.print("[bold white on red]Target file not found!\n")
+            print("[bold white on red]Target file not found!\n")
             sys.exit(1)
 
     # Analyze the target file
@@ -213,19 +221,19 @@ def Qu1cksc0pe():
             BasicAnalyzer(analyzeFile=args.file)
         # Handling --folder argument
         if args.folder is not None:
-            r_console.print("[bold white on red][blink]--analyze[/blink] argument is not supported for folder analyzing!\n")
+            print("[bold white on red][blink]--analyze[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
 
     # Analyze document files
     if args.docs:
         # Handling --file argument
         if args.file is not None:
-            print(f"{infoS} Analyzing: {green}{args.file}{white}")
+            print(f"{infoS} Analyzing: [bold green]{args.file}[white]")
             command = f"python3 {sc0pe_path}/Modules/nonExecAnalyzer.py {args.file}"
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            r_console.print("[bold white on red][blink]--docs[/blink] argument is not supported for folder analyzing!\n")
+            print("[bold white on red][blink]--docs[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
 
     # Hash Scanning
@@ -247,7 +255,7 @@ def Qu1cksc0pe():
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            r_console.print("[bold white on red][blink]--sigcheck[/blink] argument is not supported for folder analyzing!\n")
+            print("[bold white on red][blink]--sigcheck[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
 
     # Resource analyzer
@@ -258,7 +266,7 @@ def Qu1cksc0pe():
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            r_console.print("[bold white on red][blink]--resource[/blink] argument is not supported for folder analyzing!\n")
+            print("[bold white on red][blink]--resource[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
 
     # metadata
@@ -269,7 +277,7 @@ def Qu1cksc0pe():
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            r_console.print("[bold white on red][blink]--metadata[/blink] argument is not supported for folder analyzing!\n")
+            print("[bold white on red][blink]--metadata[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
 
     # Language detection
@@ -280,7 +288,7 @@ def Qu1cksc0pe():
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            r_console.print("[bold white on red][blink]--lang[/blink] argument is not supported for folder analyzing!\n")
+            print("[bold white on red][blink]--lang[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
 
     # VT File scanner
@@ -292,18 +300,18 @@ def Qu1cksc0pe():
                 directory = f"{homeD}/{username}/sc0pe_Base/sc0pe_VT_apikey.txt"
                 apik = open(directory, "r").read().split("\n")
             except:
-                r_console.print("[bold white on red]Use [blink]--key_init[/blink] to enter your key!\n")
+                print("[bold white on red]Use [blink]--key_init[/blink] to enter your key!\n")
                 sys.exit(1)
             # if key is not valid quit
             if apik[0] == '' or apik[0] is None or len(apik[0]) != 64:
-                r_console.print("[bold]Please get your API key from -> [bold green][a]https://www.virustotal.com/[/a]\n")
+                print("[bold]Please get your API key from -> [bold green][a]https://www.virustotal.com/[/a]\n")
                 sys.exit(1)
             else:
                 command = f"python3 {sc0pe_path}/Modules/VTwrapper.py {apik[0]} {args.file}"
                 os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            r_console.print("[bold white on red]If you want to get banned from VirusTotal then do that :).\n")
+            print("[bold white on red]If you want to get banned from VirusTotal then do that :).\n")
             sys.exit(1)
 
     # packer detection
@@ -325,7 +333,7 @@ def Qu1cksc0pe():
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            r_console.print("[bold white on red][blink]--domain[/blink] argument is not supported for folder analyzing!\n")
+            print("[bold white on red][blink]--domain[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
 
     # Dynamic APK analyzer
@@ -356,26 +364,26 @@ def Qu1cksc0pe():
             else:
                 os.system(f"mkdir {homeD}/{username}/sc0pe_Base/")
 
-            apikey = str(input(f"{foundS} Enter your VirusTotal API key: "))
+            apikey = str(input(f"{infoC} Enter your VirusTotal API key: "))
             apifile = open(f"{homeD}/{username}/sc0pe_Base/sc0pe_VT_apikey.txt", "w")
             apifile.write(apikey)
             print(f"{foundS} Your VirusTotal API key saved.")
         except KeyboardInterrupt:
-            r_console.print("\n[bold white on red]Program terminated by user.\n")
+            print("\n[bold white on red]Program terminated by user.\n")
 
     # Install Qu1cksc0pe on your system!!
     if args.install:
         print(f"{infoS} Checking permissions...")
         if os.getuid() == 0:
-            print(f"{infoS} User: {green}root{white}\n")
-            print(f"{cyan}[{red}1{cyan}]{white} Install Qu1cksc0pe.")
-            print(f"{cyan}[{red}2{cyan}]{white} Uninstall Qu1cksc0pe")
+            print(f"{infoS} User: [bold green]root[white]\n")
+            print(f"[bold cyan][[bold red]1[bold cyan]][white] Install Qu1cksc0pe.")
+            print(f"[bold cyan][[bold red]2[bold cyan]][white] Uninstall Qu1cksc0pe")
             choose = int(input(f"\n{green}>>>>{white} "))
             if choose == 1:
                 print(f"\n{infoS} Looks like we have permission to install. Let\'s begin...")
 
                 # Configurating Qu1cksc0pe's config file
-                print(f"{infoS} Creating configuration file in {green}/etc{white} directory")
+                print(f"{infoS} Creating configuration file in [bold green]/etc[white] directory")
                 conFile = configparser.ConfigParser()
                 conFile["Qu1cksc0pe_PATH"] = {"sc0pe": "/opt/Qu1cksc0pe"}
                 with open (f"/etc/qu1cksc0pe.conf", "w") as cfile:
@@ -383,12 +391,12 @@ def Qu1cksc0pe():
                 os.system(f"chown {username}:{username} /etc/qu1cksc0pe.conf")
 
                 # Copying Qu1cksc0pe's to /opt directory
-                print(f"{infoS} Copying files to {green}/opt{white} directory.")
+                print(f"{infoS} Copying files to [bold green]/opt[white] directory.")
                 os.system("cd ../ && cp -r Qu1cksc0pe /opt/")
                 os.system(f"chown {username}:{username} /opt/Qu1cksc0pe")
 
                 # Configurating ApkAnalyzer module's config file
-                print(f"{infoS} Configurating {green}libScanner.conf{white} file.")
+                print(f"{infoS} Configurating [bold green]libScanner.conf[white] file.")
                 libscan = configparser.ConfigParser()
                 libscan.read("/opt/Qu1cksc0pe/Systems/Android/libScanner.conf")
                 libscan["Rule_PATH"]["rulepath"] = f"/opt/Qu1cksc0pe/Systems/Android/YaraRules/"
@@ -396,23 +404,23 @@ def Qu1cksc0pe():
                     libscan.write(ff)
 
                 # Copying qu1cksc0pe.py file into /usr/bin/
-                print(f"{infoS} Copying {green}qu1cksc0pe.py{white} to {green}/usr/bin/{white} directory.")
+                print(f"{infoS} Copying [bold green]qu1cksc0pe.py[white] to [bold green]/usr/bin/[white] directory.")
                 os.system("cp qu1cksc0pe.py /usr/bin/qu1cksc0pe && chmod +x /usr/bin/qu1cksc0pe")
                 print(f"{infoS} Installation completed.")
             elif choose == 2:
                 print(f"\n{infoS} Looks like we have permission to uninstall. Let\'s begin...")
-                print(f"{infoS} Removing {green}/usr/bin/qu1cksc0pe{white} file.")
+                print(f"{infoS} Removing [bold green]/usr/bin/qu1cksc0pe[white] file.")
                 os.system("rm -rf /usr/bin/qu1cksc0pe")
-                print(f"{infoS} Removing {green}/etc/qu1cksc0pe.conf{white} file.")
+                print(f"{infoS} Removing [bold green]/etc/qu1cksc0pe.conf[white] file.")
                 os.system("rm -rf /etc/qu1cksc0pe.conf")
-                print(f"{infoS} Removing {green}/opt/Qu1cksc0pe{white} directory.")
+                print(f"{infoS} Removing [bold green]/opt/Qu1cksc0pe[white] directory.")
                 os.system("rm -rf /opt/Qu1cksc0pe")
                 print(f"{infoS} Uninstallation completed.")
             else:
-                r_console.print("\n[bold white on red]Wrong option. Quitting!!\n")
+                print("\n[bold white on red]Wrong option. Quitting!!\n")
                 sys.exit(1)
         else:
-            r_console.print("\n[bold white on red]Please use this argument as [blink]root[/blink]!!\n")
+            print("\n[bold white on red]Please use this argument as [blink]root[/blink]!!\n")
             sys.exit(1)
 
 # Exectuion area

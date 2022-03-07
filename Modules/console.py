@@ -29,24 +29,28 @@ except:
     print("Error: >pyaxmlparser< module not found.")
     sys.exit(1)
 
-# Colorama
 try:
-    import colorama
+    from rich import print
+except:
+    print("Error: >rich< module not found.")
+    sys.exit(1)
+
+try:
+    from colorama import Fore, Style
 except:
     print("Error: >colorama< module not found.")
     sys.exit(1)
 
 # Colors
-red = colorama.Fore.LIGHTRED_EX
-cyan = colorama.Fore.LIGHTCYAN_EX
-green = colorama.Fore.LIGHTGREEN_EX
-white = colorama.Style.RESET_ALL
-yellow = colorama.Fore.LIGHTYELLOW_EX
+red = Fore.LIGHTRED_EX
+cyan = Fore.LIGHTCYAN_EX
+white = Style.RESET_ALL
 
 # Legends
-infoS = f"{cyan}[{red}*{cyan}]{white}"
-foundS = f"{cyan}[{red}+{cyan}]{white}"
-errorS = f"{cyan}[{red}!{cyan}]{white}"
+infoC = f"{cyan}[{red}*{cyan}]{white}"
+infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
+foundS = f"[bold cyan][[bold red]+[bold cyan]][white]"
+errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # Path variable
 sc0pe_path = open(".path_handler", "r").read()
@@ -122,15 +126,15 @@ try:
             targ_file = open(".target-file.txt", "r").read()
             con_targ1 = os.path.split(targ_file)[1]
         else:
-            con_targ1 = f"{red}Not specified{white}."
+            con_targ1 = f"[red]Not specified[white]."
 
         if os.path.exists(".target-folder.txt"):
             targ_fold = open(".target-folder.txt", "r").read()
         else:
-            targ_fold = f"{red}Not specified{white}."
+            targ_fold = f"[red]Not specified[white]."
 
         # Console output
-        print(f"\n{cyan}[{white}Target File: {green}{con_targ1}{white} {yellow}|{white} Target Folder: {green}{targ_fold}{cyan}]")
+        print(f"\n[bold cyan][[white]Target File: [bold green]{con_targ1}[white] {yellow}|[white] Target Folder: [bold green]{targ_fold}[bold cyan]]")
         con_command = prompt(console_output, style=console_style, completer=console_commands)
 
         # Exit and clear everything
@@ -148,7 +152,7 @@ try:
 
         # Specifying target file
         elif con_command == "set target-file":
-            filename = str(input(f"{foundS} Enter full path of target file: "))
+            filename = str(input(f"{infoC} Enter full path of target file: "))
             if os.path.isfile(filename):
                 with open(".target-file.txt", "w") as tfile:
                     tfile.write(filename)
@@ -157,7 +161,7 @@ try:
 
         # Specifying target folder
         elif con_command == "set target-folder":
-            foldername = str(input(f"{foundS} Enter full path of target folder: "))
+            foldername = str(input(f"{infoC} Enter full path of target folder: "))
             if os.path.isdir(foldername):
                 with open(".target-folder.txt", "w") as tfolder:
                     tfolder.write(foldername)
@@ -168,62 +172,62 @@ try:
         elif con_command == "analyze windows":
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
-                print(f"\n{infoS} Analyzing: {green}{filename}{white}")
+                print(f"\n{infoS} Analyzing: [bold green]{filename}[white]")
                 fileType = str(pr.magic_file(filename))
                 if "Windows Executable" in fileType or ".msi" in fileType or ".dll" in fileType or ".exe" in fileType:
-                    print(f"{infoS} Target OS: {green}Windows{white}\n")
+                    print(f"{infoS} Target OS: [bold green]Windows[white]\n")
                     command = f"python3 {sc0pe_path}/Modules/winAnalyzer.py {filename}"
                     os.system(command)
             else:
-                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
+                print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
 
         # Linux Analysis
         elif con_command == "analyze linux":
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
-                print(f"\n{infoS} Analyzing: {green}{filename}{white}")
+                print(f"\n{infoS} Analyzing: [bold green]{filename}[white]")
                 fileType = str(pr.magic_file(filename))
                 if "ELF" in fileType:
                     if os.path.exists("/usr/bin/strings"):
                         command = f"strings --all {filename} > temp.txt"
                         os.system(command)
-                        print(f"{infoS} Target OS: {green}Linux{white}\n")
+                        print(f"{infoS} Target OS: [bold green]Linux[white]\n")
                         command = f"readelf -a {filename} > elves.txt"
                         os.system(command)
                         command = f"python3 {sc0pe_path}/Modules/linAnalyzer.py {filename}"
                         os.system(command)
                         os.remove(f"{sc0pe_path}/temp.txt")
                     else:
-                        print(f"{errorS} {green}strings{white} command not found. You need to install it.")
+                        print(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
                         sys.exit(1)
             else:
-                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
+                print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
 
         # MacOSX Analysis
         elif con_command == "analyze osx":
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
-                print(f"\n{infoS} Analyzing: {green}{filename}{white}")
+                print(f"\n{infoS} Analyzing: [bold green]{filename}[white]")
                 fileType = str(pr.magic_file(filename))
                 if "Mach-O" in fileType:
                     if os.path.exists("/usr/bin/strings"):
                         command = f"strings --all {filename} > temp.txt"
                         os.system(command)
-                        print(f"{infoS} Target OS: {green}OSX{white}\n")
+                        print(f"{infoS} Target OS: [bold green]OSX[white]\n")
                         command = f"python3 {sc0pe_path}/Modules/osXAnalyzer.py {filename}"
                         os.system(command)
                         os.remove(f"{sc0pe_path}/temp.txt")
                     else:
-                        print(f"{errorS} {green}strings{white} command not found. You need to install it.")
+                        print(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
                         sys.exit(1)
             else:
-                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
+                print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
 
         # Android Analysis
         elif con_command == "analyze android":
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
-                print(f"\n{infoS} Analyzing: {green}{filename}{white}")
+                print(f"\n{infoS} Analyzing: [bold green]{filename}[white]")
                 fileType = str(pr.magic_file(filename))
                 if "PK" in fileType and "Java archive" in fileType:
                     look = pyaxmlparser.APK(filename)
@@ -231,7 +235,7 @@ try:
                         if os.path.exists("/usr/bin/strings"):
                             command = f"strings --all {filename} > temp.txt"
                             os.system(command)
-                            print(f"{infoS} Target OS: {green}Android{white}")
+                            print(f"{infoS} Target OS: [bold green]Android[white]")
                             command = f"apkid -j {filename} > apkid.json"
                             os.system(command)
                             command = f"python3 {sc0pe_path}/Modules/apkAnalyzer.py {filename}"
@@ -240,23 +244,23 @@ try:
                                 os.remove("apkid.json")
                             os.remove(f"{sc0pe_path}/temp.txt")
                         else:
-                            print(f"{errorS} {green}strings{white} command not found. You need to install it.")
+                            print(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
                             sys.exit(1)
                 else:
                     print(f"{errorS} Qu1cksc0pe doesn\'t support archive analysis for now ;)")
                     sys.exit(1)
             else:
-                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
+                print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
 
         # Document Analysis
         elif con_command == "document":
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
-                print(f"{infoS} Analyzing: {green}{filename}{white}")
+                print(f"{infoS} Analyzing: [bold green]{filename}[white]")
                 command = f"python3 {sc0pe_path}/Modules/nonExecAnalyzer.py {filename}"
                 os.system(command)
             else:
-                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
+                print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
 
         # Domain extractor
         elif con_command == "domain":
@@ -269,10 +273,10 @@ try:
                     os.system(command)
                     os.remove(f"{sc0pe_path}/temp.txt")
                 else:
-                    print(f"{errorS} {green}strings{white} command not found. You need to install it.")
+                    print(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
                     sys.exit(1)
             else:
-                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
+                print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
 
         # Language Detection
         elif con_command == "language":
@@ -285,10 +289,10 @@ try:
                     os.system(command)
                     os.remove(f"{sc0pe_path}/temp.txt")
                 else:
-                    print(f"{errorS} {green}strings{white} command not found. You need to install it.")
+                    print(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
                     sys.exit(1)
             else:
-                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
+                print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
 
         # Packer Detection
         elif con_command == "packer":
@@ -297,7 +301,7 @@ try:
                 command = f"python3 {sc0pe_path}/Modules/packerAnalyzer.py {filename} --single"
                 os.system(command)
             else:
-                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
+                print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
 
         # Hash Scanner
         elif con_command == "hash-scan":
@@ -306,7 +310,7 @@ try:
                 command = f"python3 {sc0pe_path}/Modules/hashScanner.py {foldername} --multiscan"
                 os.system(command)
             else:
-                print(f"{errorS} You must specify target folder with {green}set target-folder{white} command.")
+                print(f"{errorS} You must specify target folder with [bold green]set target-folder[white] command.")
 
          # File signature analysis
         elif con_command == "sigcheck":
@@ -315,7 +319,7 @@ try:
                 command = f"python3 {sc0pe_path}/Modules/sigChecker.py {filename}"
                 os.system(command)
             else:
-                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
+                print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
 
         # Setup health checker
         elif con_command == "health":
@@ -329,7 +333,7 @@ try:
                 command = f"python3 {sc0pe_path}/Modules/metadata.py {filename}"
                 os.system(command)
             else:
-                print(f"{errorS} You must specify target folder with {green}set target-folder{white} command.")
+                print(f"{errorS} You must specify target folder with [bold green]set target-folder[white] command.")
 
         # Packer Detection
         elif con_command == "resource-scan":
@@ -338,7 +342,7 @@ try:
                 command = f"python3 {sc0pe_path}/Modules/resourceChecker.py {filename}"
                 os.system(command)
             else:
-                print(f"{errorS} You must specify target file with {green}set target-file{white} command.")
+                print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
 
         # VirusTotal API Key import
         elif con_command == "key_init":
@@ -348,7 +352,7 @@ try:
                 else:
                     os.system(f"mkdir {homeD}/{username}/sc0pe_Base/")
 
-                apikey = str(input(f"{foundS} Enter your VirusTotal API key: "))
+                apikey = str(input(f"{infoC} Enter your VirusTotal API key: "))
                 apifile = open(f"{homeD}/{username}/sc0pe_Base/sc0pe_VT_apikey.txt", "w")
                 apifile.write(apikey)
                 print(f"{foundS} Your VirusTotal API key saved. You must restart the program!")
@@ -368,7 +372,7 @@ try:
             # if key is not valid quit
             if apik[0] == '' or apik[0] is None or len(apik[0]) != 64:
                 print(apik[0])
-                print(f"{errorS} Please get your API key from -> {green}https://www.virustotal.com/{white}")
+                print(f"{errorS} Please get your API key from -> [bold green]https://www.virustotal.com/[white]")
                 sys.exit(1)
             else:
                 command = f"python3 {sc0pe_path}/Modules/VTwrapper.py {apik[0]} {filename}"

@@ -22,13 +22,14 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>28/02/2022</b>
-- [X] Added new ```Database Update``` argument to ```HashScanner``` module. Now you can update your malware hash database whenever you want.
-<br><b>Usage:</b> ```python3 qu1cksc0pe.py --db_update```
-- [X] Added new ```Windows API' s``` to ```WindowsAnalyzer' s``` wordlists.
+<b>07/03/2022</b>
+- [X] Bug fixes.
+- [X] Added analysis report exporting. Now you can get your analysis reports on json files.<br>
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --analyze --report```
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
+![tsurugi_banner](.animations/tsurugi.jpeg)
 
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
