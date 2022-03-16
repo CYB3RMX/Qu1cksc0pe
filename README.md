@@ -22,10 +22,10 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>07/03/2022</b>
-- [X] Bug fixes.
-- [X] Added analysis report exporting. Now you can get your analysis reports on json files.<br>
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --analyze --report```
+<b>16/03/2022</b>
+- [X] ```LinuxAnalyzer``` module is significantly improved.
+- [X] Added ```Mirai Detection``` capability to ```LinuxAnalyzer``` module.<br>
+![update_gif](.animations/linan.gif)
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
@@ -49,13 +49,13 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 - ```yara-python``` => <i>Android library scanning with Yara rules.</i>
 - ```prompt_toolkit``` => <i>Interactive shell.</i>
 - ```frida``` => <i>Performing dynamic analysis against android applications.</i>
-- ```PyExifTool``` => <i>Metadata extraction and analysis.</i>
+- ```lief``` => <i>ELF binary parsing and analysis.</i>
 
 <br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
 <b>Gathering other dependencies</b>:
 - <i>VirusTotal API Key</i>: ```https://virustotal.com```
-- <i>Binutils</i>: ```sudo apt-get install binutils```
 - <i>Strings</i>: ```sudo apt-get install strings```
+- <i>PyExifTool</i>: ```git clone git://github.com/smarnach/pyexiftool.git``` then ```cd pyexiftool && sudo python3 setup.py install```
 
 **Alert**
 > **You must specify jadx binary path in Systems/Android/libScanner.conf**

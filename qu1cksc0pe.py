@@ -154,8 +154,6 @@ def BasicAnalyzer(analyzeFile):
     # Linux Analysis
     elif "ELF" in fileType:
         print(f"{infoS} Target OS: [bold green]Linux[white]\n")
-        command = f"readelf -a {analyzeFile} > elves.txt"
-        os.system(command)
         if args.report:
             command = f"python3 {sc0pe_path}/Modules/linAnalyzer.py {analyzeFile} True"
         else:
@@ -427,7 +425,7 @@ def Qu1cksc0pe():
 try:
     Qu1cksc0pe()
     # Cleaning up...
-    junkFiles = ["temp.txt", ".path_handler", "elves.txt", ".target-file.txt", ".target-folder.txt"]
+    junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt"]
     for junk in junkFiles:
         if os.path.exists(junk):
             os.remove(junk)
@@ -435,7 +433,7 @@ try:
     if os.path.exists("TargetAPK/"):
         os.system("rm -rf TargetAPK/")
 except:
-    junkFiles = ["temp.txt", ".path_handler", "elves.txt", ".target-file.txt", ".target-folder.txt"]
+    junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt"]
     for junk in junkFiles:
         if os.path.exists(junk):
             os.remove(junk)

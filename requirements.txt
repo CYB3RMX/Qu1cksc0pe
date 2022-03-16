@@ -11,4 +11,4 @@ pyaxmlparser
 yara-python
 prompt_toolkit==3.0.19
 frida
-PyExifTool
+lief

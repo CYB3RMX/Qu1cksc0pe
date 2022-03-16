@@ -1,0 +1,3 @@
+anti_gdb_entry
+nanosleep
+__syscall_nanosleep

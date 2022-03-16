@@ -43,3 +43,13 @@ __mmap
 __sys_mmap
 __libc_sigaction
 _getpid
+sigprocmask
+raise
+abort
+__errno_location
+_exit
+sigaction
+__pthread_return_0
+init_static_tls
+fork_handler_pool
+__pthread_mutex_lock

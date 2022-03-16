@@ -192,3 +192,4 @@ Thread32Next
 GetSystemDirectoryA
 GetProcessIdOfThread
 CountClipboardFormats
+DsRoleGetPrimaryDomainInformation

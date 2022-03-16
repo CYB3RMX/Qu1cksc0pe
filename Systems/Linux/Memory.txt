@@ -6,3 +6,6 @@ memset
 memcpy
 memrchr
 memchr
+freecon
+__malloc_largebin_index
+__malloc_trim

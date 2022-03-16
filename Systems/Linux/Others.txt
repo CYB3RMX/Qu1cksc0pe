@@ -117,3 +117,11 @@ mbedtls_ecp_point_init
 mbedtls_asn1_get_bitstring_null
 mbedtls_mpi_grow
 mbedtls_ctr_drbg_set_prediction_resistance
+iswcntrl
+wcswidth
+mbstowcs
+textdomain
+dcgettext
+__ctype_get_mb_cur_max
+getopt_long
+mbrtowc
