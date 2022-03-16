@@ -141,7 +141,8 @@
             "\"run_admin_device\"",
             "android.app.admin.DevicePolicyManager",
             "\"device_policy\"",
-            "removeActiveAdmin"
+            "removeActiveAdmin",
+            "doInBackground"
         ]
     },
     {
@@ -181,7 +182,12 @@
             "\"run_socks5\"",
             "\"stop_socks5\"",
             "\"rat_connect\"",
-            "\"change_url_connect\""
+            "\"change_url_connect\"",
+            "HttpHandler",
+            "android.webkit.WebChromeClient",
+            "DisWebChromeClient",
+            "WebChromeClient",
+            "HttpURLConnection"
         ]
     },
     {

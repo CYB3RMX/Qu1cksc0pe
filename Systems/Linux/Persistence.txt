@@ -24,7 +24,6 @@ setfsgid
 sched_setparam
 sched_setscheduler
 sched_yield
-nanosleep
 setresuid
 nfsservctl
 setresgid

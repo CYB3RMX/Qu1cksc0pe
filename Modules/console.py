@@ -139,7 +139,7 @@ try:
 
         # Exit and clear everything
         if con_command == "exit":
-            junkFiles = ["temp.txt", ".path_handler", "elves.txt", ".target-file.txt", ".target-folder.txt"]
+            junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt"]
             for junk in junkFiles:
                 if os.path.exists(junk):
                     os.remove(junk)
@@ -192,8 +192,6 @@ try:
                         command = f"strings --all {filename} > temp.txt"
                         os.system(command)
                         print(f"{infoS} Target OS: [bold green]Linux[white]\n")
-                        command = f"readelf -a {filename} > elves.txt"
-                        os.system(command)
                         command = f"python3 {sc0pe_path}/Modules/linAnalyzer.py {filename}"
                         os.system(command)
                         os.remove(f"{sc0pe_path}/temp.txt")

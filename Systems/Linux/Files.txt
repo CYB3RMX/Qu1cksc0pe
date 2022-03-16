@@ -82,3 +82,10 @@ ftello64
 _pread
 _pwrite
 _freebsd6_pwrite
+fgetfilecon
+getfilecon
+__fpending
+bindtextdomain
+__fxstatat
+dirfd
+fd_to_DIR
