@@ -22,10 +22,9 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>16/03/2022</b>
-- [X] ```LinuxAnalyzer``` module is significantly improved.
-- [X] Added ```Mirai Detection``` capability to ```LinuxAnalyzer``` module.<br>
-![update_gif](.animations/linan.gif)
+<b>23/03/2022</b>
+- [X] Both ```LinuxAnalyzer``` and ```WindowsAnalyzer``` modules are improved.
+- [X] Added new ```Mirai, IsaacWiper, HermeticWiper``` rules and much more detection rules.
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
@@ -50,6 +49,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 - ```prompt_toolkit``` => <i>Interactive shell.</i>
 - ```frida``` => <i>Performing dynamic analysis against android applications.</i>
 - ```lief``` => <i>ELF binary parsing and analysis.</i>
+- ```zepu1chr3``` => <i>Analyzing binaries via radare2.</i>
 
 <br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
 <b>Gathering other dependencies</b>:

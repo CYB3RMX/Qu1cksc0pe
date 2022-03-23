@@ -12,3 +12,5 @@ yara-python
 prompt_toolkit==3.0.19
 frida
 lief
+zepu1chr3
+r2pipe
