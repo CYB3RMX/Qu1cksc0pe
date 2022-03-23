@@ -3,6 +3,7 @@
 import os
 import sys
 import json
+import hashlib
 import configparser
 try:
     from rich import print
@@ -61,7 +62,13 @@ Other = []
 linrep = {
     "filename": "",
     "machine_type": "",
+    "hash_md5": "",
+    "hash_sha1": "",
+    "hash_sha256": "",
     "binary_entrypoint": "",
+    "interpreter": "",
+    "categorized_functions": 0,
+    "number_of_functions": 0,
     "number_of_sections": 0,
     "number_of_segments": 0,
     "categories": {},
@@ -116,6 +123,40 @@ allStrings = []
 for ssym in binary.symbols:
     allStrings.append(ssym.name)
 
+# Hash calculator
+def HashCalculator():
+    hashmd5 = hashlib.md5()
+    hashsha1 = hashlib.sha1()
+    hashsha256 = hashlib.sha256()
+    try:
+        with open(fileName, "rb") as ff:
+            for chunk in iter(lambda: ff.read(4096), b""):
+                hashmd5.update(chunk)
+        ff.close()
+        with open(fileName, "rb") as ff:
+            for chunk in iter(lambda: ff.read(4096), b""):
+                hashsha1.update(chunk)
+        ff.close()
+        with open(fileName, "rb") as ff:
+            for chunk in iter(lambda: ff.read(4096), b""):
+                hashsha256.update(chunk)
+        ff.close()
+    except:
+        pass
+    print(f"[bold red]>>>>[white] MD5: [bold green]{hashmd5.hexdigest()}")
+    print(f"[bold red]>>>>[white] SHA1: [bold green]{hashsha1.hexdigest()}")
+    print(f"[bold red]>>>>[white] SHA256: [bold green]{hashsha256.hexdigest()}")
+    linrep["hash_md5"] = hashmd5.hexdigest()
+    linrep["hash_sha1"] = hashsha1.hexdigest()
+    linrep["hash_sha256"] = hashsha256.hexdigest()
+
+# Section content parser
+def ContentParser(sec_name, content_array):
+    cont = ""
+    for text in content_array:
+        cont += chr(text)
+    print(f"[bold magenta]>>[white] Section: [bold yellow]{sec_name}[white] | Content: [bold cyan]{cont}")
+
 # Binary security checker
 def SecCheck():
     chksec = Table(title_justify="center", title="* Security *", title_style="bold italic cyan")
@@ -155,7 +196,8 @@ def LinuxYara(target_file):
             if tempmatch != []:
                 for matched in tempmatch:
                     if matched.strings != []:
-                        yara_matches.append(matched)
+                        if matched not in yara_matches:
+                            yara_matches.append(matched)
         except:
             continue
 
@@ -167,9 +209,10 @@ def LinuxYara(target_file):
             print(f">>> Rule name: [i][bold magenta]{rul}[/i]")
             yaraTable.add_column("Offset", style="bold green", justify="center")
             yaraTable.add_column("Matched String/Byte", style="bold green", justify="center")
-            linrep["matched_rules"].append(str(rul))
+            linrep["matched_rules"].append({str(rul): []})
             for mm in rul.strings:
                 yaraTable.add_row(f"{hex(mm[0])}", f"{str(mm[2])}")
+                linrep["matched_rules"][-1][str(rul)].append({"offset": hex(mm[0]) ,"matched_pattern": mm[2].decode("ascii")})
             print(yaraTable)
             print(" ")
 
@@ -181,12 +224,20 @@ def GeneralInformation():
     print(f"{infoS} General Informations about [bold green]{fileName}")
     print(f"[bold red]>>>>[white] Machine Type: [bold green]{binary.header.machine_type.name}")
     print(f"[bold red]>>>>[white] Binary Entrypoint: [bold green]{hex(binary.entrypoint)}")
+    if binary.has_section(".interp"):
+        data = binary.get_section(".interp")
+        interpreter = ""
+        for c in data.content:
+            interpreter += chr(c)
+        print(f"[bold red]>>>>[white] Interpreter: [bold green]{interpreter}")
+        linrep["interpreter"] = interpreter
     print(f"[bold red]>>>>[white] Number of Sections: [bold green]{len(binary.sections)}")
     print(f"[bold red]>>>>[white] Number of Segments: [bold green]{len(binary.segments)}")
     linrep["machine_type"] = binary.header.machine_type.name
     linrep["binary_entrypoint"] = str(hex(binary.entrypoint))
     linrep["number_of_sections"] = len(binary.sections)
     linrep["number_of_segments"] = len(binary.segments)
+    HashCalculator()
     SecCheck()
 
 # Gathering sections
@@ -297,6 +348,23 @@ def Analyzer():
             linrep["libraries"].append(x)
         print(libs)
 
+    # Hunting for debug sections
+    print(f"\n{infoS} Performing debug section hunt...")
+    debugs = []
+    for sss in binary.sections:
+        if ".debug_" in sss.name:
+            print(f"[bold red]>>>>[white] {sss.name}")
+            debugs.append(sss.name)
+    if debugs != []:
+        quest = str(input(f"\n>> Do you want to analyze debug sections?[Y/n]: "))
+        if quest == "Y" or quest == "y":
+            print()
+            for ddd in debugs:
+                data = binary.get_section(ddd)
+                ContentParser(data.name, data.content)
+    else:
+        print("[bold white on red]There is no debug sections in this binary!!")
+
     # Statistics zone
     print(f"\n[bold green]->[white] Statistics for: [bold green][i]{fileName}[/i]")
     linrep["filename"] = fileName
@@ -305,7 +373,10 @@ def Analyzer():
     statistics = Table()
     statistics.add_column("Categories", justify="center")
     statistics.add_column("Number of Functions or Strings", justify="center")
-    statistics.add_row("[bold green][i]All Functions[/i]", f"[bold green]{allFuncs}")
+    statistics.add_row("[bold green][i]All Functions[/i]", f"[bold green]{len(allStrings)}")
+    statistics.add_row("[bold green][i]Categorized Functions[/i]", f"[bold green]{allFuncs}")
+    linrep["categorized_functions"] = allFuncs
+    linrep["number_of_functions"] = len(allStrings)
     for key in scoreDict:
         if scoreDict[key] == 0:
             pass

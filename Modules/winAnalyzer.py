@@ -3,6 +3,7 @@
 import os
 import sys
 import json
+import hashlib
 import configparser
 
 try:
@@ -16,6 +17,12 @@ try:
     import pefile as pf
 except:
     print("Error: >pefile< module not found.")
+    sys.exit(1)
+
+try:
+    import zepu1chr3
+except:
+    print("Error: >zepu1chr3< module not found.")
     sys.exit(1)
 
 try:
@@ -46,6 +53,11 @@ try:
 except:
     print("[blink bold white on red]Couldn\'t locate import entries. Quitting...")
     sys.exit(1)
+
+# Get number of functions via radare2
+zep = zepu1chr3.Binary()
+tfl = zep.File(fileName)
+num_of_funcs = len(zep.GetFunctions(tfl))
 
 #--------------------------------------------------------------------- Keywords for categorized scanning
 regarr = open(f"{sc0pe_path}/Systems/Windows/Registry.txt", "r").read().split("\n")
@@ -126,11 +138,44 @@ regdict = {
 winrep = {
     "filename": "",
     "timedatestamp": "",
+    "hash_md5": "",
+    "hash_sha1": "",
+    "hash_sha256": "",
+    "all_imports": 0,
+    "categorized_imports": 0,
+    "number_of_functions": 0,    
     "categories": {},
     "matched_rules": [],
     "linked_dll": [],
     "sections": {}
 }
+
+# Hash calculator
+def HashCalculator():
+    hashmd5 = hashlib.md5()
+    hashsha1 = hashlib.sha1()
+    hashsha256 = hashlib.sha256()
+    try:
+        with open(fileName, "rb") as ff:
+            for chunk in iter(lambda: ff.read(4096), b""):
+                hashmd5.update(chunk)
+        ff.close()
+        with open(fileName, "rb") as ff:
+            for chunk in iter(lambda: ff.read(4096), b""):
+                hashsha1.update(chunk)
+        ff.close()
+        with open(fileName, "rb") as ff:
+            for chunk in iter(lambda: ff.read(4096), b""):
+                hashsha256.update(chunk)
+        ff.close()
+    except:
+        pass
+    print(f"[bold magenta]>>[white] MD5: [bold green]{hashmd5.hexdigest()}")
+    print(f"[bold magenta]>>[white] SHA1: [bold green]{hashsha1.hexdigest()}")
+    print(f"[bold magenta]>>[white] SHA256: [bold green]{hashsha256.hexdigest()}")
+    winrep["hash_md5"] = hashmd5.hexdigest()
+    winrep["hash_sha1"] = hashsha1.hexdigest()
+    winrep["hash_sha256"] = hashsha256.hexdigest()
 
 #------------------------------------ Yara rule matcher
 def WindowsYara(target_file):
@@ -151,7 +196,8 @@ def WindowsYara(target_file):
             if tempmatch != []:
                 for matched in tempmatch:
                     if matched.strings != []:
-                        yara_matches.append(matched)
+                        if matched not in yara_matches:
+                            yara_matches.append(matched)
         except:
             continue
 
@@ -163,9 +209,10 @@ def WindowsYara(target_file):
             print(f">>> Rule name: [i][bold magenta]{rul}[/i]")
             yaraTable.add_column("Offset", style="bold green", justify="center")
             yaraTable.add_column("Matched String/Byte", style="bold green", justify="center")
-            winrep["matched_rules"].append(str(rul))
+            winrep["matched_rules"].append({str(rul): []})
             for mm in rul.strings:
                 yaraTable.add_row(f"{hex(mm[0])}", f"{str(mm[2])}")
+                winrep["matched_rules"][-1][str(rul)].append({"offset": hex(mm[0]) ,"matched_pattern": mm[2].decode("ascii")})
             print(yaraTable)
             print(" ")
 
@@ -314,12 +361,18 @@ def Analyzer():
     print(f"[bold magenta]>>[white] Time Date Stamp: [bold green][i]{datestamp}[/i]")
     winrep["filename"] = fileName
     winrep["timedatestamp"] = datestamp
+    HashCalculator()
 
     # printing all function statistics
     statistics = Table()
     statistics.add_column("Categories", justify="center")
     statistics.add_column("Number of Functions or Strings", justify="center")
-    statistics.add_row("[bold green][i]All Functions[/i]", f"[bold green]{allFuncs}")
+    statistics.add_row("[bold green][i]All Imports[/i]", f"[bold green]{len(allStrings)}")
+    statistics.add_row("[bold green][i]Categorized Imports[/i]", f"[bold green]{allFuncs}")
+    statistics.add_row("[bold green][i]Number of Functions[/i]", f"[bold green]{num_of_funcs}")
+    winrep["all_imports"] = len(allStrings)
+    winrep["categorized_imports"] = allFuncs
+    winrep["number_of_functions"] = num_of_funcs
     for key in scoreDict:
         if scoreDict[key] == 0:
             pass
