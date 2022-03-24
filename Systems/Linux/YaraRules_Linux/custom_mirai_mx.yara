@@ -54,7 +54,7 @@ rule Linux_ARM_Mirai_Weirdo_Variant_2022_03_16 {
 
 rule Linux_ARCH68K_Mirai_Variant_2022_03_15 {
     meta:
-        description = "Detects new ARM Mirai variant"
+        description = "Detects new ARCH68K Mirai variant"
         author = "Mehmet Ali Kerimoglu a.k.a. CYB3RMX"
         date = "2022-03-15"
         hash1 = "0519f412cb9932cb961d9707d19a8cdeb61955a4587bd98d3de9b8be1059f7f1"
@@ -118,7 +118,7 @@ rule Linux_ARM_Mirai_Variant_2022_03_17 {
 
 rule Linux_x86_64_Mirai_shellcode_Variant_2022_03_17 {
     meta:
-        description = "Detects new ARM Mirai variant"
+        description = "Detects new x86_64 Mirai variant"
         author = "Mehmet Ali Kerimoglu a.k.a. CYB3RMX"
         date = "2022-03-17"
         hash1 = "220935a9c5f6de63ef0d7c63e6f9ba3033e962854ca1911e770de2578d3d7e35"
