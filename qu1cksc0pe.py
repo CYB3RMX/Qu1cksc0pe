@@ -380,6 +380,10 @@ def Qu1cksc0pe():
             if choose == 1:
                 print(f"\n{infoS} Looks like we have permission to install. Let\'s begin...")
 
+                # Installing python dependencies...
+                print(f"{infoS} Installing Python dependencies...")
+                os.system("pip3 install -r requirements.txt")
+
                 # Configurating Qu1cksc0pe's config file
                 print(f"{infoS} Creating configuration file in [bold green]/etc[white] directory")
                 conFile = configparser.ConfigParser()

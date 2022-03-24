@@ -356,12 +356,13 @@ def Analyzer():
             print(f"[bold red]>>>>[white] {sss.name}")
             debugs.append(sss.name)
     if debugs != []:
-        quest = str(input(f"\n>> Do you want to analyze debug sections?[Y/n]: "))
+        quest = str(input(f"\n>> Do you want to analyze debug strings?[Y/n]: "))
         if quest == "Y" or quest == "y":
             print()
             for ddd in debugs:
-                data = binary.get_section(ddd)
-                ContentParser(data.name, data.content)
+                if ddd == ".debug_str":
+                    data = binary.get_section(ddd)
+                    ContentParser(data.name, data.content)
     else:
         print("[bold white on red]There is no debug sections in this binary!!")
 
