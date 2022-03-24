@@ -41,6 +41,8 @@ infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 sc0pe_path = open(".path_handler", "r").read()
 
 #--------------------------------------------- Gathering all function imports from binary
+zep = zepu1chr3.Binary()
+tfl = zep.File(fileName)
 allStrings = []
 try:
     binaryfile = pf.PE(fileName)
@@ -51,13 +53,17 @@ try:
         except:
             continue
 except:
-    print("[blink bold white on red]Couldn\'t locate import entries. Quitting...")
-    sys.exit(1)
+    for imps in zep.GetImports(tfl):
+        try:
+            allStrings.append(imps["realname"], imps["offset"])
+        except:
+            continue
 
 # Get number of functions via radare2
-zep = zepu1chr3.Binary()
-tfl = zep.File(fileName)
-num_of_funcs = len(zep.GetFunctions(tfl))
+try:
+    num_of_funcs = len(zep.GetFunctions(tfl))
+except:
+    num_of_funcs = None
 
 #--------------------------------------------------------------------- Keywords for categorized scanning
 regarr = open(f"{sc0pe_path}/Systems/Windows/Registry.txt", "r").read().split("\n")
@@ -212,7 +218,10 @@ def WindowsYara(target_file):
             winrep["matched_rules"].append({str(rul): []})
             for mm in rul.strings:
                 yaraTable.add_row(f"{hex(mm[0])}", f"{str(mm[2])}")
-                winrep["matched_rules"][-1][str(rul)].append({"offset": hex(mm[0]) ,"matched_pattern": mm[2].decode("ascii")})
+                try:
+                    winrep["matched_rules"][-1][str(rul)].append({"offset": hex(mm[0]) ,"matched_pattern": mm[2].decode("ascii")})
+                except:
+                    winrep["matched_rules"][-1][str(rul)].append({"offset": hex(mm[0]) ,"matched_pattern": str(mm[2])})
             print(yaraTable)
             print(" ")
 
