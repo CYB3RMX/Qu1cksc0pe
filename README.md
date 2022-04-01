@@ -22,9 +22,11 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>23/03/2022</b>
-- [X] Both ```LinuxAnalyzer``` and ```WindowsAnalyzer``` modules are improved.
-- [X] Added new ```Mirai, IsaacWiper, HermeticWiper``` rules and much more detection rules.
+<b>01/04/2022</b>
+- [X] Fixed bugs on ```DocumentAnalyzer``` module.
+- [X] Added ```MITRE ATT&CK``` module. Now Qu1ckcsc0pe can analyze techniques used on malware.<br>
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file malware.exe --mitre```<br>
+![update_png](.animations/mitre.gif)
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
@@ -116,6 +118,10 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 ## File signature analyzer
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --sigcheck```<br>
 ![animation](.animations/sigcheck.gif)
+
+## MITRE ATT&CK Technique Extraction
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --mitre```<br>
+![animation](.animations/mitre.gif)
 
 ## Programming language detection
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_executable --lang```<br>
