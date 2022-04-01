@@ -24,7 +24,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 # Updates
 <b>01/04/2022</b>
 - [X] Fixed bugs on ```DocumentAnalyzer``` module.
-- [X] Added ```MITRE ATT&CK``` module. Now Qu1ckcsc0pe can analyze techniques used on malware.<br>
+- [X] Added ```MITRE ATT&CK``` module. Now Qu1cksc0pe can analyze techniques used on malware.<br>
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file malware.exe --mitre```<br>
 ![update_png](.animations/mitre.gif)
 
