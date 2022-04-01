@@ -333,36 +333,39 @@ def Analyzer():
 
     # Parsing sections
     for sect in pe.sections:
-        if sect.get_entropy() >= 7:
-            peStatistics.add_row(
-                str(sect.Name.decode().rstrip('\x00')),
-                f"{hex(sect.Misc_VirtualSize)}",
-                f"{hex(sect.VirtualAddress)}",
-                f"{hex(sect.SizeOfRawData)}",
-                f"{hex(sect.PointerToRawData)}",
-                f"[bold red]{sect.get_entropy()} [blink][i]Possible obfuscation!![/i][/blink]"
-            )
-        else:
-            peStatistics.add_row(
-                str(sect.Name.decode().rstrip('\x00')),
-                f"{hex(sect.Misc_VirtualSize)}",
-                f"{hex(sect.VirtualAddress)}",
-                f"{hex(sect.SizeOfRawData)}",
-                f"{hex(sect.PointerToRawData)}",
-                str(sect.get_entropy())
-            )
-        winrep["sections"].update(
-            {
-                str(sect.Name.decode().rstrip('\x00')):
+        try:
+            if sect.get_entropy() >= 7:
+                peStatistics.add_row(
+                    str(sect.Name.decode().rstrip('\x00')),
+                    f"{hex(sect.Misc_VirtualSize)}",
+                    f"{hex(sect.VirtualAddress)}",
+                    f"{hex(sect.SizeOfRawData)}",
+                    f"{hex(sect.PointerToRawData)}",
+                    f"[bold red]{sect.get_entropy()} [blink][i]Possible obfuscation!![/i][/blink]"
+                )
+            else:
+                peStatistics.add_row(
+                    str(sect.Name.decode().rstrip('\x00')),
+                    f"{hex(sect.Misc_VirtualSize)}",
+                    f"{hex(sect.VirtualAddress)}",
+                    f"{hex(sect.SizeOfRawData)}",
+                    f"{hex(sect.PointerToRawData)}",
+                    str(sect.get_entropy())
+                )
+            winrep["sections"].update(
                 {
-                    "virtualsize": hex(sect.Misc_VirtualSize),
-                    "virtualaddress": hex(sect.VirtualAddress),
-                    "sizeofrawdata": hex(sect.SizeOfRawData),
-                    "pointertorawdata": hex(sect.PointerToRawData),
-                    "entropy": str(sect.get_entropy())
+                    str(sect.Name.decode().rstrip('\x00')):
+                    {
+                        "virtualsize": hex(sect.Misc_VirtualSize),
+                        "virtualaddress": hex(sect.VirtualAddress),
+                        "sizeofrawdata": hex(sect.SizeOfRawData),
+                        "pointertorawdata": hex(sect.PointerToRawData),
+                        "entropy": str(sect.get_entropy())
+                    }
                 }
-            }
-        )
+            )
+        except:
+            continue
     print(peStatistics)
 
     # Statistics zone

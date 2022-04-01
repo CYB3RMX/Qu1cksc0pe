@@ -122,6 +122,9 @@ parser.add_argument("--lang", required=False,
 parser.add_argument("--metadata", required=False,
                     help="Get exif/metadata information.",
                     action="store_true")
+parser.add_argument("--mitre", required=False,
+                    help="Generate MITRE ATT&CK table for target sample (Windows samples for now.).",
+                    action="store_true")
 parser.add_argument("--packer", required=False,
                     help="Check if your file is packed with common packers.",
                     action="store_true")
@@ -276,6 +279,17 @@ def Qu1cksc0pe():
         # Handling --folder argument
         if args.folder is not None:
             print("[bold white on red][blink]--metadata[/blink] argument is not supported for folder analyzing!\n")
+            sys.exit(1)
+
+    # MITRE ATT&CK
+    if args.mitre:
+        # Handling --file argument
+        if args.file is not None:
+            command = f"python3 {sc0pe_path}/Modules/mitre.py {args.file}"
+            os.system(command)
+        # Handling --folder argument
+        if args.folder is not None:
+            print("[bold white on red][blink]--mitre[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
 
     # Language detection

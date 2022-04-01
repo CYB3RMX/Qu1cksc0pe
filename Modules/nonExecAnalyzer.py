@@ -47,7 +47,7 @@ def MacroHunter(targetFile):
         fileData = open(targetFile, "rb").read()
         vbaparser = VBA_Parser(targetFile, fileData)
         macroList = list(vbaparser.analyze_macros())
-        if vbaparser.contains_macros == True:
+        if vbaparser.contains_vba_macros == True:
             for fi in range(0, len(macroList)):
                 if macroList[fi][0] == 'Suspicious':
                     if "(use option --deobf to deobfuscate)" in macroList[fi][2]:
