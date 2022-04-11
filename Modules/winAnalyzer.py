@@ -147,6 +147,7 @@ winrep = {
     "hash_md5": "",
     "hash_sha1": "",
     "hash_sha256": "",
+    "imphash": "",
     "all_imports": 0,
     "categorized_imports": 0,
     "number_of_functions": 0,    
@@ -179,9 +180,11 @@ def HashCalculator():
     print(f"[bold magenta]>>[white] MD5: [bold green]{hashmd5.hexdigest()}")
     print(f"[bold magenta]>>[white] SHA1: [bold green]{hashsha1.hexdigest()}")
     print(f"[bold magenta]>>[white] SHA256: [bold green]{hashsha256.hexdigest()}")
+    print(f"[bold magenta]>>[white] IMPHASH: [bold green]{binaryfile.get_imphash()}")
     winrep["hash_md5"] = hashmd5.hexdigest()
     winrep["hash_sha1"] = hashsha1.hexdigest()
     winrep["hash_sha256"] = hashsha256.hexdigest()
+    winrep["imphash"] = binaryfile.get_imphash()
 
 #------------------------------------ Yara rule matcher
 def WindowsYara(target_file):
