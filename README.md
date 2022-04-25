@@ -22,9 +22,9 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>11/04/2022</b>
-- [X] Added ```File Carving``` capability to ```SignatureAnalyzer``` module. Now Qu1cksc0pe can carve executable files from binaries.<br>
-![update_png](.animations/carving.gif)
+<b>25/04/2022</b>
+- [X] ```DocumentAnalyzer``` module is upgraded. Now you can extract macros from malicious documents.<br>
+![update_png](.animations/docs.gif)
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)

@@ -86,7 +86,7 @@ for mod in requirements:
 
 # Binary checking zone
 print(f"\n{infoS} Checking for binaries... (/usr/bin/)")
-binary = ["/usr/bin/strings", "/usr/bin/readelf", "/usr/bin/jadx"]
+binary = ["/usr/bin/strings", "/usr/bin/readelf", "/usr/bin/jadx", "/usr/bin/r2"]
 for bb in binary:
     if os.path.exists(bb):
         print(f"[bold cyan][[bold green] FOUND[bold cyan] ][white] {bb.split('/')[3]}")
