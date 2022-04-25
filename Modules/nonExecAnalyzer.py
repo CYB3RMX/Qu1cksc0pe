@@ -93,15 +93,15 @@ def MacroHunter(targetFile):
         # If there is macro we can extract it!
         if macro_state_vba != 0 or macro_state_xlm != 0:
             choice = str(input("\n>>> Do you want to extract macros [Y/n]?: "))
-            print(f"{infoS} Attempting to extraction...\n")
             if choice == "Y" or choice == "y":
+                print(f"{infoS} Attempting to extraction...\n")
                 if macro_state_vba != 0:
                     for mac in vbaparser.extract_all_macros()[1]:
                         print(mac.strip("\r\n"))
                 else:
                     for mac in vbaparser.xlm_macros:
                         print(mac)
-            print(f"\n{infoS} Extraction completed.")
+                print(f"\n{infoS} Extraction completed.")
 
     except:
         print(f"{errorS} An error occured while parsing that file for macro scan.")
