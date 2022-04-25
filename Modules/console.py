@@ -10,7 +10,7 @@ import getpass
 try:
     from prompt_toolkit.shortcuts import prompt
     from prompt_toolkit.completion import NestedCompleter
-    from prompt_toolkit.styles import Style
+    from prompt_toolkit.styles import Style as prstyle
 except:
     print("Error: >prompt_toolkit< module not found.")
     sys.exit(1)
@@ -63,7 +63,7 @@ homeD = "/home"
 if sys.platform == "darwin":
     homeD = "/Users"
 
-console_style = Style.from_dict({
+console_style = prstyle.from_dict({
     # User input (default text).
     'input':          '#ff0066',
 
@@ -134,7 +134,7 @@ try:
             targ_fold = f"[red]Not specified[white]."
 
         # Console output
-        print(f"\n[bold cyan][[white]Target File: [bold green]{con_targ1}[white] {yellow}|[white] Target Folder: [bold green]{targ_fold}[bold cyan]]")
+        print(f"\n[bold cyan][[white]Target File: [bold green]{con_targ1}[white] |[white] Target Folder: [bold green]{targ_fold}[bold cyan]]")
         con_command = prompt(console_output, style=console_style, completer=console_commands)
 
         # Exit and clear everything

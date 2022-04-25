@@ -35,38 +35,74 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 # Target file
 targetFile = str(sys.argv[1])
 
-# A function that finds VBA Macros
-def MacroHunter(targetFile):
+# Macro parser function
+def MacroParser(macroList):
     answerTable = Table()
     answerTable.add_column("[bold green]Threat Levels", justify="center")
     answerTable.add_column("[bold green]Macros", justify="center")
     answerTable.add_column("[bold green]Descriptions", justify="center")
 
-    print(f"\n{infoS} Looking for VBA Macros...")
+    for fi in range(0, len(macroList)):
+        if macroList[fi][0] == 'Suspicious':
+            if "(use option --deobf to deobfuscate)" in macroList[fi][2]:
+                sanitized = f"{macroList[fi][2]}".replace("(use option --deobf to deobfuscate)", "")
+                answerTable.add_row(f"[bold yellow]{macroList[fi][0]}", f"{macroList[fi][1]}", f"{sanitized}")
+            elif "(option --decode to see all)" in macroList[fi][2]:
+                sanitized = f"{macroList[fi][2]}".replace("(option --decode to see all)", "")
+                answerTable.add_row(f"[bold yellow]{macroList[fi][0]}", f"{macroList[fi][1]}", f"{sanitized}")
+            else:
+                answerTable.add_row(f"[bold yellow]{macroList[fi][0]}", f"{macroList[fi][1]}", f"{macroList[fi][2]}")
+        elif macroList[fi][0] == 'IOC':
+            answerTable.add_row(f"[bold magenta]{macroList[fi][0]}", f"{macroList[fi][1]}", f"{macroList[fi][2]}")
+        elif macroList[fi][0] == 'AutoExec':
+            answerTable.add_row(f"[bold red]{macroList[fi][0]}", f"{macroList[fi][1]}", f"{macroList[fi][2]}")
+        else:
+            answerTable.add_row(f"{macroList[fi][0]}", f"{macroList[fi][1]}", f"{macroList[fi][2]}")
+    print(answerTable)
+
+# A function that finds VBA Macros
+def MacroHunter(targetFile):
+    print(f"\n{infoS} Looking for Macros...")
     try:
         fileData = open(targetFile, "rb").read()
         vbaparser = VBA_Parser(targetFile, fileData)
         macroList = list(vbaparser.analyze_macros())
+        macro_state_vba = 0
+        macro_state_xlm = 0
+        # Checking vba macros
         if vbaparser.contains_vba_macros == True:
-            for fi in range(0, len(macroList)):
-                if macroList[fi][0] == 'Suspicious':
-                    if "(use option --deobf to deobfuscate)" in macroList[fi][2]:
-                        sanitized = f"{macroList[fi][2]}".replace("(use option --deobf to deobfuscate)", "")
-                        answerTable.add_row(f"[bold yellow]{macroList[fi][0]}", f"{macroList[fi][1]}", f"{sanitized}")
-                    elif "(option --decode to see all)" in macroList[fi][2]:
-                        sanitized = f"{macroList[fi][2]}".replace("(option --decode to see all)", "")
-                        answerTable.add_row(f"[bold yellow]{macroList[fi][0]}", f"{macroList[fi][1]}", f"{sanitized}")
-                    else:
-                        answerTable.add_row(f"[bold yellow]{macroList[fi][0]}", f"{macroList[fi][1]}", f"{macroList[fi][2]}")
-                elif macroList[fi][0] == 'IOC':
-                    answerTable.add_row(f"[bold magenta]{macroList[fi][0]}", f"{macroList[fi][1]}", f"{macroList[fi][2]}")
-                elif macroList[fi][0] == 'AutoExec':
-                    answerTable.add_row(f"[bold red]{macroList[fi][0]}", f"{macroList[fi][1]}", f"{macroList[fi][2]}")
-                else:
-                    answerTable.add_row(f"{macroList[fi][0]}", f"{macroList[fi][1]}", f"{macroList[fi][2]}")
-            print(answerTable)
+            print(f"[bold red]>>>[white] VBA MACRO: [bold green]Found.")
+            if vbaparser.detect_vba_stomping() == True:
+                print(f"[bold red]>>>[white] VBA Stomping: [bold green]Found.")
+
+            else:
+                print(f"[bold red]>>>[white] VBA Stomping: [bold red]Not found.")
+            MacroParser(macroList)
+            macro_state_vba += 1
         else:
-            print(f"{errorS} Not any VBA macros found.")
+            print(f"[bold red]>>>[white] VBA MACRO: [bold red]Not found.\n")
+
+        # Checking for xlm macros
+        if vbaparser.contains_xlm_macros == True:
+            print(f"\n[bold red]>>>[white] XLM MACRO: [bold green]Found.")
+            MacroParser(macroList)
+            macro_state_xlm += 1
+        else:
+            print(f"\n[bold red]>>>[white] XLM MACRO: [bold red]Not found.")
+
+        # If there is macro we can extract it!
+        if macro_state_vba != 0 or macro_state_xlm != 0:
+            choice = str(input("\n>>> Do you want to extract macros [Y/n]?: "))
+            print(f"{infoS} Attempting to extraction...\n")
+            if choice == "Y" or choice == "y":
+                if macro_state_vba != 0:
+                    for mac in vbaparser.extract_all_macros()[1]:
+                        print(mac.strip("\r\n"))
+                else:
+                    for mac in vbaparser.xlm_macros:
+                        print(mac)
+            print(f"\n{infoS} Extraction completed.")
+
     except:
         print(f"{errorS} An error occured while parsing that file for macro scan.")
 
@@ -103,36 +139,9 @@ def BasicInfoGa(targetFile):
     else:
         MacroHunter(targetFile)
 
-# A function that handles file types, extensions etc.
-def MagicParser(targetFile):
-    # Defining table
-    resTable = Table()
-    resTable.add_column("File Extension", justify="center")
-    resTable.add_column("Names", justify="center")
-    resTable.add_column("Byte Matches", justify="center")
-    resTable.add_column("Confidence", justify="center")
-
-    # Magic byte parsing
-    resCounter = 0
-    resourceList = list(pr.magic_file(targetFile))
-    for res in range(0, len(resourceList)):
-        extrExt = str(resourceList[res].extension)
-        extrNam = str(resourceList[res].name)
-        extrByt = str(resourceList[res].byte_match)
-        if resourceList[res].confidence >= 0.8:
-            resCounter += 1
-            if extrExt == '':
-                resTable.add_row("[bold red]No Extension", f"[bold red]{extrNam}", f"[bold red]{extrByt}", f"[bold red]{resourceList[res].confidence}")
-            else:
-                resTable.add_row(f"[bold red]{extrExt}", f"[bold red]{extrNam}", f"[bold red]{extrByt}", f"[bold red]{resourceList[res].confidence}")
-    if len(resourceList) != 0:
-        print(resTable)
-
 # Execution area
 try:
     BasicInfoGa(targetFile)
-    print(f"\n{infoS} Performing magic number analysis...")
-    MagicParser(targetFile)
 except:
     print(f"{errorS} An error occured while analyzing that file.")
     sys.exit(1)
