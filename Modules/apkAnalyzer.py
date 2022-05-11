@@ -287,7 +287,14 @@ def ScanSource(targetAPK):
                 sanalTable.add_row(f"[bold yellow]{element[0]}", f"[bold cyan]{element[1]}")
             print(sanalTable)
             print(" ")
-   
+
+def ParseFlu(arrayz):
+    counter = 0
+    for el in arrayz:
+        if el[0:2] == ".p" and len(el) == 10:
+            counter += 1
+    return counter
+
 # Analyzer for malware family detection
 def CheckFamily(targetApk):
     # Parsing target apk file
@@ -313,15 +320,15 @@ def CheckFamily(targetApk):
     # Family: FluBot
         # Checking activity name patterns
     act = re.findall(r".p[a-z0-9]{0,9}", str(checktarg.get_activities()))
-    if len(act) == len(checktarg.get_activities()):
+    if ParseFlu(act) != 0 and ParseFlu(act) == len(checktarg.get_activities()):
         scoreDict["FluBot"] += 1
         # Checking service name patterns
     ser = re.findall(r".p[a-z0-9]{0,9}", str(checktarg.get_services()))
-    if len(ser) == len(checktarg.get_services()):
+    if ParseFlu(ser) != 0 and ParseFlu(ser) == len(checktarg.get_services()):
         scoreDict["FluBot"] += 1
         # Checking receiver name patterns
     rec = re.findall(r".p[a-z0-9]{0,9}", str(checktarg.get_receivers()))
-    if len(rec) == len(checktarg.get_receivers()):
+    if ParseFlu(rec) != 0 and ParseFlu(rec) == len(checktarg.get_receivers()):
         scoreDict["FluBot"] += 1
 
     # Checking statistics

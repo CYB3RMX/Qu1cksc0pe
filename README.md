@@ -22,9 +22,8 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>25/04/2022</b>
-- [X] ```DocumentAnalyzer``` module is upgraded. Now you can extract macros from malicious documents.<br>
-![update_png](.animations/docs.gif)
+<b>11/05/2022</b>
+- [X] ```APKAnalyzer``` module is improved. Now it has better detection capability.
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
