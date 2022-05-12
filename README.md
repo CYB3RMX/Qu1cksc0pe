@@ -22,8 +22,9 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>11/05/2022</b>
-- [X] ```APKAnalyzer``` module is improved. Now it has better detection capability.
+<b>12/05/2022</b>
+- [X] Fixed bugs on ```DocumentAnalyzer``` module.
+- [X] Added new YARA rules.
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)

@@ -96,8 +96,9 @@ def MacroHunter(targetFile):
             if choice == "Y" or choice == "y":
                 print(f"{infoS} Attempting to extraction...\n")
                 if macro_state_vba != 0:
-                    for mac in vbaparser.extract_all_macros()[1]:
-                        print(mac.strip("\r\n"))
+                    for mac in vbaparser.extract_all_macros():
+                        for xxx in mac:
+                            print(xxx.strip("\r\n"))
                 else:
                     for mac in vbaparser.xlm_macros:
                         print(mac)
