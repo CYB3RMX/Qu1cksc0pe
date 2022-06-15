@@ -60,3 +60,7 @@ QueryPerformanceFrequency
 QueryPerformanceCounter
 KeQueryPerformanceCounter
 CountClipboardFormats
+NtGlobalFlags
+QueryInformationProcess
+SetInformationThread
+DebugActiveProcess

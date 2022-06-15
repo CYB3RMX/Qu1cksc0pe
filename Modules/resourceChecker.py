@@ -69,7 +69,7 @@ def ParseAndroid(target):
     # Tables!!
     countTable = Table()
     countTable.add_column("File Type", justify="center")
-    countTable.add_column("Count", justify="center")
+    countTable.add_column("File Name", justify="center")
     #
     fileTable = Table()
     fileTable.add_column("Interesting Files", justify="center")
@@ -92,11 +92,14 @@ def ParseAndroid(target):
         if "image" in fl: # Just get rid of them
             pass
         elif "Dalvik" in fl or "C++ source" in fl or "C source" in fl or "ELF" in fl or "Bourne-Again shell" in fl or "executable" in fl or "JAR" in fl: # Worth to write on the table
-            countTable.add_row(f"[bold blink red]{fl}", f"[bold blink red]{len(empty[fl])}")
+            for fname in empty[fl]:
+                countTable.add_row(f"[bold blink red]{fl}", f"[bold blink red]{fname}")
         elif "data" in fl:
-            countTable.add_row(f"[bold yellow]{fl}", f"[bold yellow]{len(empty[fl])}")
+            for fname in empty[fl]:
+                countTable.add_row(f"[bold yellow]{fl}", f"[bold yellow]{fname}")
         else:
-            countTable.add_row(str(fl), str(len(empty[fl])))
+            for fname in empty[fl]:
+                countTable.add_row(str(fl), str(fname))
     print(countTable)
 
     # Finding .json .bin .dex files

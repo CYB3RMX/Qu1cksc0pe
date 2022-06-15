@@ -159,6 +159,43 @@
         ]
     },
     {
+        "Camera": [
+            "android.hardware.camera",
+            "Camera.getNumberOfCameras",
+            "CameraInfo",
+            "Camera.open",
+            "CameraManager.this.releaseCamera",
+            "CameraManager.this.sendPhoto"
+        ]
+    },
+    {
+        "Phone Calls": [
+            "CallsManager",
+            "content://call_log/calls",
+            "callsList",
+            "phoneNo",
+            "contactsList",
+            "contact.put",
+            "ContactsManager"
+        ]
+    },
+    {
+        "Microphone Interaction": [
+            "android.media.MediaRecorder",
+            "MicManager",
+            "MediaRecorder recorder;",
+            "stopRecording",
+            "startRecording",
+            ".mp3",
+            "setAudioSource",
+            "setAudioEncoder",
+            "MicManager.recorder.stop",
+            "MicManager.recorder.release",
+            "MicManager.sendVoice",
+            "MicManager.audiofile.delete"
+        ]
+    },
+    {
         "Information Gathering": [
             "telephonyManager.getNetworkCountryIso",
             "getActiveNetworkInfo",
@@ -172,8 +209,6 @@
             "getInterface",
             "getInetAddresses",
             "getActiveNetworkList",
-            "getSystemService(\"wifi\")",
-            "WifiManager",
             "getLine1Number",
             "getNetworkOperator",
             "getCellLocation",
@@ -185,7 +220,9 @@
             "getIpAddress",
             "isConnected",
             "getWifiData",
-            "getLastKnownLocation"
+            "getLastKnownLocation",
+            "android.net.wifi.ScanResult",
+            "isWifiEnabled"
         ]
     },
     {
@@ -309,7 +346,13 @@
             "DisWebChromeClient",
             "WebChromeClient",
             "HttpURLConnection",
-            "ProxySelector"
+            "ProxySelector",
+            "\"ping -c 2 -W 10 -v google.com\"",
+            "getSystemService(\"wifi\")",
+            "android.net.wifi.WifiManager",
+            "WifiScanner",
+            "\"BSSID\"",
+            "\"SSID\""
         ]
     },
     {

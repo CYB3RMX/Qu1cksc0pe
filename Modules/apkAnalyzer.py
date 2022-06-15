@@ -76,11 +76,14 @@ apkid_output = open("apkid.json", "r")
 data = json.load(apkid_output)
 
 # Categories
-categs = {"Banker": [], "SMS Bot": [], "Base64": [],
-          "Information Gathering": [], "Database": [], "File Operations": [],
-          "Persistence/Managing": [], "Network/Internet": [], "SSL Pining/Certificate Handling": [],
-          "Dynamic Class/Dex Loading": [], "Java Reflection": [], "Root Detection": [],
-          "Cryptography": [], "Command Execution": []}
+categs = {
+    "Banker": [], "SMS Bot": [], "Base64": [],
+    "Camera": [], "Phone Calls": [], "Microphone Interaction": [],
+    "Information Gathering": [], "Database": [], "File Operations": [],
+    "Persistence/Managing": [], "Network/Internet": [], "SSL Pining/Certificate Handling": [],
+    "Dynamic Class/Dex Loading": [], "Java Reflection": [], "Root Detection": [],
+    "Cryptography": [], "Command Execution": []
+}
 
 # Scores
 scoreDict = {
