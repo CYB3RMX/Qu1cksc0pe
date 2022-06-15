@@ -1,6 +1,6 @@
 # Qu1cksc0pe
 <img src="https://img.shields.io/badge/-Linux-black?style=for-the-badge&logo=Linux&logoColor=white"> <img src="https://img.shields.io/badge/-Python-black?style=for-the-badge&logo=python&logoColor=white"> <img src="https://img.shields.io/badge/-Terminal-black?style=for-the-badge&logo=GNU%20Bash&logoColor=white"> <img src="https://img.shields.io/badge/-Apache%202.0-black?style=for-the-badge&Color=white">
-<br>This tool allows you to statically analyze Windows, Linux, OSX executables and APK files.<br>
+<br>All-in-One malware analysis tool for analyze Windows, Linux, OSX binaries, Document files and APK files.<br>
 
 *You can get*: 
 - What DLL files are used.
@@ -22,9 +22,8 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>12/05/2022</b>
-- [X] Fixed bugs on ```DocumentAnalyzer``` module.
-- [X] Added new YARA rules.
+<b>15/06/2022</b>
+- [X] ```ApkAnalyzer``` module is improved.
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
