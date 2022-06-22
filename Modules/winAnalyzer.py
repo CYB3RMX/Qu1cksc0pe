@@ -49,7 +49,7 @@ try:
     for imps in binaryfile.DIRECTORY_ENTRY_IMPORT:
         try:
             for im in imps.imports:
-                allStrings.append([im.name.decode("ascii"), hex(im.address)])
+                allStrings.append([im.name.decode("ascii"), hex(binaryfile.OPTIONAL_HEADER.ImageBase + im.address)]) # For full address and not only offset
         except:
             continue
 except:
@@ -58,6 +58,18 @@ except:
             allStrings.append(imps["realname"], imps["offset"])
         except:
             continue
+
+# Get exports
+try:
+    binaryfile = pf.PE(fileName)
+    for exp in binaryfile.DIRECTORY_ENTRY_EXPORT.symbols:
+        try:
+            allStrings.append([exp.name.decode('utf-8'), hex(binaryfile.OPTIONAL_HEADER.ImageBase + exp.address)]) # For full address and not only offset
+
+        except:
+            continue
+except:
+    pass
 
 # Get number of functions via radare2
 try:
@@ -382,10 +394,10 @@ def Analyzer():
     statistics = Table()
     statistics.add_column("Categories", justify="center")
     statistics.add_column("Number of Functions or Strings", justify="center")
-    statistics.add_row("[bold green][i]All Imports[/i]", f"[bold green]{len(allStrings)}")
+    statistics.add_row("[bold green][i]All Imports,Exports[/i]", f"[bold green]{len(allStrings)}")
     statistics.add_row("[bold green][i]Categorized Imports[/i]", f"[bold green]{allFuncs}")
     statistics.add_row("[bold green][i]Number of Functions[/i]", f"[bold green]{num_of_funcs}")
-    winrep["all_imports"] = len(allStrings)
+    winrep["all_imports_exports"] = len(allStrings)
     winrep["categorized_imports"] = allFuncs
     winrep["number_of_functions"] = num_of_funcs
     for key in scoreDict:
