@@ -24,6 +24,12 @@ except:
     print("Error: >yara< module not found.")
     sys.exit(1)
 
+try:
+    import pygore
+except:
+    print("Error: >pygore< module not found.")
+    sys.exit(1)
+
 # Getting name of the file for statistics
 fileName = str(sys.argv[1])
 
@@ -37,6 +43,8 @@ infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 sc0pe_path = open(".path_handler", "r").read()
 
 # Wordlists
+# All strings
+getStrings = open("temp.txt", "r").read().split("\n")
 networkz = open(f"{sc0pe_path}/Systems/Linux/Networking.txt", "r").read().split("\n")
 filez = open(f"{sc0pe_path}/Systems/Linux/Files.txt", "r").read().split("\n")
 procesz = open(f"{sc0pe_path}/Systems/Linux/Processes.txt", "r").read().split("\n")
@@ -282,6 +290,66 @@ def SegmentParser():
             linrep["segments"].append(seg.type.name)
     print(segTable)
 
+# Analysis of Golang binaries
+def AnalyzeGolang():
+    go_file = pygore.GoFile(fileName)
+    print(f"\n{infoS} Analyzing [bold green]Golang [white]binary...")
+
+    # Parsing compiler information
+    comp = go_file.get_compiler_version()
+    print(f"\n{infoS} Parsing compiler information...")
+    print(f"[bold magenta]>>>[white] Compiler Version: [bold green]{comp.name}")
+    print(f"[bold magenta]>>>[white] Timestamp: [bold green]{comp.timestamp}")
+
+    # Parsing..
+    go_pkgs = go_file.get_packages()
+    go_imps = go_file.get_std_lib_packages()
+
+    # Package info table
+    print(f"\n{infoS} Performing deep inspection against target binary...")
+    pkg_table = Table(title="* Information About Packages *", title_justify="center", title_style="bold italic cyan")
+    pkg_table.add_column("[bold green] Name", justify="center")
+    pkg_table.add_column("[bold green] FilePath", justify="center")
+    for pk in go_pkgs:
+        pkg_table.add_row(pk.name, pk.filepath) # Parsing package name etc.
+    print(pkg_table)
+
+    # Parse area
+    for pk in go_pkgs:
+        # Perform deep inspection for packages
+            # Parsing methods
+        meth_table = Table(title="* Methods *", title_justify="center", title_style="bold italic cyan")
+        meth_table.add_column("[bold green] Name", justify="center")
+        meth_table.add_column("[bold green] Receiver", justify="center")
+        meth_table.add_column("[bold green] Offset", justify="center")
+        if pk.methods != []:
+            for meth in pk.methods:
+                meth_table.add_row(meth.name, meth.receiver, hex(meth.offset))
+            print(meth_table)
+        else:
+            print(f"\n[bold red]>>>[white] No methods found in {pk.name}\n")
+
+            # Parsing functions
+        fun_table = Table(title="* Functions *", title_justify="center", title_style="bold italic cyan")
+        fun_table.add_column("[bold green] Name", justify="center")
+        fun_table.add_column("[bold green] Offset", justify="center")
+        if pk.functions != []:
+            for func in pk.functions:
+                fun_table.add_row(func.name, hex(func.offset))
+            print(fun_table)
+        else:
+            print(f"\n[bold red]>>>[white] No functions found in {pk.name}\n")
+
+    # Parsing imported libraries
+    imp_table = Table(title="* Imported Libraries *", title_justify="center", title_style="bold italic cyan")
+    imp_table.add_column("[bold green] Name", justify="center")
+    if go_imps != []:
+        for imp in go_imps:
+            imp_table.add_row(imp.name)
+        print(imp_table)
+    else:
+        print(f"\n[bold red]>>>[white] No imported libraries found\n")
+
 # Defining function
 def Analyzer():
     allFuncs = 0
@@ -399,6 +467,13 @@ def Analyzer():
         with open("sc0pe_linux_report.json", "w") as rp_file:
             json.dump(linrep, rp_file, indent=4)
         print("\n[bold magenta]>>>[bold white] Report file saved into: [bold blink yellow]sc0pe_linux_report.json\n")
+
+    # Look for interesting things
+    if "runtime.goexit" in getStrings and "runtime.gopanic" in getStrings:
+        print(f"\n{infoS} Qu1cksc0pe was identified this binary as [bold green]Golang[white] binary.")
+        chc = str(input(">>> Do you want to perform special analysis[Y/n]?: "))
+        if chc == "Y" or chc == "y":
+            AnalyzeGolang()
 
 # Execute
 try:

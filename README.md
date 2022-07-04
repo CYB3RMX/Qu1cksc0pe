@@ -22,8 +22,9 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>15/06/2022</b>
-- [X] ```ApkAnalyzer``` module is improved.
+<b>04/07/2022</b>
+- [X] ```LinuxAnalyzer``` module is improved. Now Qu1cksc0pe can also analyze Golang binaries.<br>
+![update_png](.animations/golang.gif)
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
@@ -49,6 +50,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 - ```frida``` => <i>Performing dynamic analysis against android applications.</i>
 - ```lief``` => <i>ELF binary parsing and analysis.</i>
 - ```zepu1chr3``` => <i>Analyzing binaries via radare2.</i>
+- ```pygore``` => <i>Analyzing golang binaries```</i>
 
 <br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
 <b>Gathering other dependencies</b>:
