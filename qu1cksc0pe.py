@@ -134,6 +134,8 @@ parser.add_argument("--report", required=False,
                     help="Export analysis reports into a file (JSON Format for now).", action="store_true")
 parser.add_argument("--runtime", required=False,
                     help="Analyze APK files dynamically.", action="store_true")
+parser.add_argument("--watch", required=False,
+                    help="Watch system calls via STRACE (CAUTION: It will execute the file!!!).", action="store_true")
 parser.add_argument("--sigcheck", required=False,
                     help="Scan file signatures in target file.", action="store_true")
 parser.add_argument("--vtFile", required=False,
@@ -352,6 +354,17 @@ def Qu1cksc0pe():
     if args.runtime:
         command = f"python3 {sc0pe_path}/Modules/androidRuntime.py"
         os.system(command)
+
+    # Strace
+    if args.watch:
+        # Handling --file argument
+        if args.file is not None:
+            command = f"python3 {sc0pe_path}/Modules/strace.py {args.file}"
+            os.system(command)
+        # Handling --folder argument
+        if args.folder is not None:
+            print("[bold white on red][blink]--watch[/blink] argument is not supported for folder analyzing!\n")
+            sys.exit(1)
 
     # Interactive shell
     if args.console:
