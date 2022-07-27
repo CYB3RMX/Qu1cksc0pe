@@ -22,9 +22,10 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>04/07/2022</b>
-- [X] ```LinuxAnalyzer``` module is improved. Now Qu1cksc0pe can also analyze Golang binaries.<br>
-![update_png](.animations/golang.gif)
+<b>28/07/2022</b>
+- [X] PE file emulation coming soon.
+- [X] Now Qu1cksc0pe can analyze ELF binary syscalls via STRACE.<br>
+![update_png](.animations/swatch.gif)
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
@@ -56,6 +57,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 <b>Gathering other dependencies</b>:
 - <i>VirusTotal API Key</i>: ```https://virustotal.com```
 - <i>Strings</i>: ```sudo apt-get install strings```
+- <i>Strace</i>: ```sudo apt-get install strace```
 - <i>PyExifTool</i>: ```git clone git://github.com/smarnach/pyexiftool.git``` then ```cd pyexiftool && sudo python3 setup.py install```
 
 **Alert**
@@ -73,7 +75,7 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 <b>Command 0</b>: ```sudo pip3 install -r requirements.txt```<br>
 <b>Command 1</b>: ```sudo python3 qu1cksc0pe.py --install```
 
-# Scan arguments
+# Static Analysis
 ## Normal analysis
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --analyze```<br>
 ![animation](.animations/analyze.gif)
@@ -81,13 +83,6 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 ## Resource analysis
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --resource```<br>
 ![animation](.animations/resource.gif)
-
-## Dynamic instrumentation with FRIDA scripts (for android applications)
-**Alert**
-> **You must connect a virtual device or physical device to your computer.**
-
-<br><b>Usage</b>: ```python3 qu1cksc0pe.py --runtime```<br>
-![animation](.animations/dynamic.gif)
 
 ## Hash scan
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --hashscan```<br>
@@ -133,8 +128,17 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 <b>Usage</b>: ```python3 qu1cksc0pe.py --console```<br>
 ![animation](.animations/console.gif)
 
-## Domain
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --domain```<br><br>
+# Dynamic Analysis
+## Dynamic instrumentation with FRIDA scripts (for android applications)
+**Alert**
+> **You must connect a virtual device or physical device to your computer.**
+
+<br><b>Usage</b>: ```python3 qu1cksc0pe.py --runtime```<br>
+![animation](.animations/dynamic.gif)
+
+## Watch syscalls via STRACE (Recommended: ELF binaries)
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --watch```<br>
+![animation](.animations/swatch.gif)
 
 # Informations about categories
 ## Registry
