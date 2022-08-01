@@ -22,10 +22,9 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>28/07/2022</b>
-- [X] PE file emulation coming soon.
-- [X] Now Qu1cksc0pe can analyze ELF binary syscalls via STRACE.<br>
-![update_png](.animations/swatch.gif)
+<b>01/07/2022</b>
+- [X] Now Qu1cksc0pe can analyze both Linux and Windows executables via emulation.<br>
+![update_png](.animations/emulate.gif)
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
@@ -52,12 +51,12 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 - ```lief``` => <i>ELF binary parsing and analysis.</i>
 - ```zepu1chr3``` => <i>Analyzing binaries via radare2.</i>
 - ```pygore``` => <i>Analyzing golang binaries```</i>
+- ```qiling``` => <i>Dynamic analysis of binaries.</i>
 
 <br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
 <b>Gathering other dependencies</b>:
 - <i>VirusTotal API Key</i>: ```https://virustotal.com```
 - <i>Strings</i>: ```sudo apt-get install strings```
-- <i>Strace</i>: ```sudo apt-get install strace```
 - <i>PyExifTool</i>: ```git clone git://github.com/smarnach/pyexiftool.git``` then ```cd pyexiftool && sudo python3 setup.py install```
 
 **Alert**
@@ -136,9 +135,12 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 <br><b>Usage</b>: ```python3 qu1cksc0pe.py --runtime```<br>
 ![animation](.animations/dynamic.gif)
 
-## Watch syscalls via STRACE (Recommended: ELF binaries)
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --watch```<br>
-![animation](.animations/swatch.gif)
+## Binary Emulation
+**Alert**
+> **Binary emulator is not recommended for .NET analysis.**
+
+<br><b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --watch```<br>
+![animation](.animations/emulate.gif)
 
 # Informations about categories
 ## Registry

@@ -135,7 +135,7 @@ parser.add_argument("--report", required=False,
 parser.add_argument("--runtime", required=False,
                     help="Analyze APK files dynamically.", action="store_true")
 parser.add_argument("--watch", required=False,
-                    help="Watch system calls via STRACE (CAUTION: It will execute the file!!!).", action="store_true")
+                    help="Perform emulation against executable files.", action="store_true")
 parser.add_argument("--sigcheck", required=False,
                     help="Scan file signatures in target file.", action="store_true")
 parser.add_argument("--vtFile", required=False,
@@ -359,7 +359,7 @@ def Qu1cksc0pe():
     if args.watch:
         # Handling --file argument
         if args.file is not None:
-            command = f"python3 {sc0pe_path}/Modules/strace.py {args.file}"
+            command = f"python3 {sc0pe_path}/Modules/emulator.py {args.file}"
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
