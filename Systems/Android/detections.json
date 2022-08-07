@@ -352,7 +352,11 @@
             "android.net.wifi.WifiManager",
             "WifiScanner",
             "\"BSSID\"",
-            "\"SSID\""
+            "\"SSID\"",
+            "/proc/net/ip_tables_names",
+            "/proc/net/ip_tables_matches",
+            "/proc/net/ip_tables_targets",
+            "/proc/net/netfilter/nfnetlink_queue"
         ]
     },
     {

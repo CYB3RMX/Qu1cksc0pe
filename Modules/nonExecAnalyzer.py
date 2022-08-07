@@ -1,13 +1,11 @@
 #!/usr/bin/python3
 
+import re
+import os
 import sys
-
-# Checking for puremagic
-try:
-    import puremagic as pr
-except:
-    print("Error: >puremagic< module not found.")
-    sys.exit(1)
+import shutil
+import configparser
+from subprocess import Popen, PIPE
 
 # Checking for rich
 try:
@@ -15,6 +13,12 @@ try:
     from rich.table import Table
 except:
     print("Error: >rich< not found.")
+    sys.exit(1)
+
+try:
+    import yara
+except:
+    print("Error: >yara< module not found.")
     sys.exit(1)
 
 # Checking for oletools
@@ -34,6 +38,93 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # Target file
 targetFile = str(sys.argv[1])
+
+# Gathering Qu1cksc0pe path variable
+sc0pe_path = open(".path_handler", "r").read()
+
+# Recursive file explorer
+def FileExp(targetFolder):
+    if os.path.exists(targetFolder):
+        fnames = []
+        for root, d_names, f_names in os.walk(targetFolder):
+            for ff in f_names:
+                fnames.append(os.path.join(root, ff))
+        return fnames
+
+def DocumentYara(target_file):
+    yara_match_indicator = 0
+    # Parsing config file to get rule path
+    conf = configparser.ConfigParser()
+    conf.read(f"{sc0pe_path}/Systems/Multiple/multiple.conf")
+    rule_path = conf["Rule_PATH"]["rulepath"]
+    finalpath = f"{sc0pe_path}/{rule_path}"
+    allRules = os.listdir(finalpath)
+
+    # This array for holding and parsing easily matched rules
+    yara_matches = []
+    for rul in allRules:
+        try:
+            rules = yara.compile(f"{finalpath}{rul}")
+            tempmatch = rules.match(target_file)
+            if tempmatch != []:
+                for matched in tempmatch:
+                    if matched.strings != []:
+                        if matched not in yara_matches:
+                            yara_matches.append(matched)
+        except:
+            continue
+
+    # Printing area
+    if yara_matches != []:
+        yara_match_indicator += 1
+        for rul in yara_matches:
+            yaraTable = Table()
+            print(f">>> Rule name: [i][bold magenta]{rul}[/i]")
+            yaraTable.add_column("Offset", style="bold green", justify="center")
+            yaraTable.add_column("Matched String/Byte", style="bold green", justify="center")
+            for mm in rul.strings:
+                yaraTable.add_row(f"{hex(mm[0])}", f"{str(mm[2])}")
+            print(yaraTable)
+            print(" ")
+
+    if yara_match_indicator == 0:
+        print(f"[blink bold white on red]Not any rules matched for {target_file}")
+
+# Perform analysis against embedded binaries
+def BinaryAnalysis(targetFile):
+    print(f"{infoS} Analyzing: [bold red]{targetFile.replace('.sc0pe_Doc/', '')}")
+
+    # Check if file is an JAR file (for .jar based attacks)
+    bin_data = open(targetFile, "rb").read()
+    if len(re.findall(r"JAR", str(bin_data))) > 1 or (len(re.findall(r".class", str(bin_data))) >= 2 and len(re.findall(r"META-INF", str(bin_data))) >= 1):
+        print(f"[bold magenta]>>>[white] Binary Type: [bold green]JAR[white]")
+
+# Function for perform file structure analysis
+def Structure(targetFile):
+    # We need to unzip the file and check for interesting files
+    print(f"\n{infoS} Analyzing file structure...")
+    unz = Popen(["unzip", targetFile, "-d", ".sc0pe_Doc"], stdout=PIPE, stderr=PIPE)
+    unz.wait()
+    if unz.returncode != 0:
+        print(f"{errorS} Error: Unable to unzip file.")
+    else:
+        fconts = FileExp(".sc0pe_Doc/")
+        bins = []
+        # Parsing the files
+        docTable = Table(title="* Document Structure *", title_style="bold italic cyan", title_justify="center")
+        docTable.add_column("[bold green]File Name", justify="center")
+        for df in fconts:
+            if ".bin" in df:
+                docTable.add_row(f"[bold red]{df.replace('.sc0pe_Doc/', '')}")
+                bins.append(df)
+            else:
+                docTable.add_row(df.replace(".sc0pe_Doc/", ""))
+        print(docTable)
+
+        # Perform analysis against binaries
+        print(f"\n{infoS} Analyzing binaries...")
+        for b in bins:
+            BinaryAnalysis(b)
 
 # Macro parser function
 def MacroParser(macroList):
@@ -120,7 +211,14 @@ def BasicInfoGa(targetFile):
         print(f"{infoS} Encrypted: [bold green]True[white]")
     else:
         print(f"{infoS} Encrypted: [bold red]False[white]")
-    
+
+    # Perform file structure analysis
+    Structure(targetFile)
+
+    # Perform Yara scan
+    print(f"\n{infoS} Performing YARA rule matching...")
+    DocumentYara(targetFile)
+
     # VBA_MACRO scanner
     vbascan = OleID(targetFile)
     vbascan.check()

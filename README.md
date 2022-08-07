@@ -22,9 +22,8 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>01/07/2022</b>
-- [X] Now Qu1cksc0pe can analyze both Linux and Windows executables via emulation.<br>
-![update_png](.animations/emulate.gif)
+<b>07/08/2022</b>
+- [X] ```DocumentAnalyzer``` module is upgraded. Now it can perform also embedded binary analysis and Yara scan!!
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
