@@ -464,8 +464,6 @@ try:
     if os.path.exists("TargetAPK/"):
         os.system("rm -rf TargetAPK/")
 
-    if os.path.exists(".sc0pe_Doc/"):
-        os.system("rm -rf .sc0pe_Doc/")
 except:
     junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt"]
     for junk in junkFiles:
@@ -474,6 +472,3 @@ except:
 
     if os.path.exists("TargetAPK/"):
         os.system("rm -rf TargetAPK/")
-
-    if os.path.exists(".sc0pe_Doc/"):
-        os.system("rm -rf .sc0pe_Doc/")

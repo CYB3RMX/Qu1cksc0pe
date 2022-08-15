@@ -22,8 +22,8 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>07/08/2022</b>
-- [X] ```DocumentAnalyzer``` module is upgraded. Now it can perform also embedded binary analysis and Yara scan!!
+<b>15/08/2022</b>
+- [X] ```DocumentAnalyzer``` module is upgraded. Now you can extract possible C2 domains from suspicious documents. (.doc and .docx)
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)

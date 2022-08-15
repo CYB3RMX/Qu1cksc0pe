@@ -3,9 +3,8 @@
 import re
 import os
 import sys
-import shutil
+import zipfile
 import configparser
-from subprocess import Popen, PIPE
 
 # Checking for rich
 try:
@@ -41,15 +40,6 @@ targetFile = str(sys.argv[1])
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
-
-# Recursive file explorer
-def FileExp(targetFolder):
-    if os.path.exists(targetFolder):
-        fnames = []
-        for root, d_names, f_names in os.walk(targetFolder):
-            for ff in f_names:
-                fnames.append(os.path.join(root, ff))
-        return fnames
 
 def DocumentYara(target_file):
     yara_match_indicator = 0
@@ -91,40 +81,65 @@ def DocumentYara(target_file):
         print(f"[blink bold white on red]Not any rules matched for {target_file}")
 
 # Perform analysis against embedded binaries
-def BinaryAnalysis(targetFile):
-    print(f"{infoS} Analyzing: [bold red]{targetFile.replace('.sc0pe_Doc/', '')}")
+def BinaryAnalysis(component, binarydata):
+    print(f"\n{infoS} Analyzing: [bold red]{component}")
 
-    # Check if file is an JAR file (for .jar based attacks)
-    bin_data = open(targetFile, "rb").read()
-    if len(re.findall(r"JAR", str(bin_data))) > 1 or (len(re.findall(r".class", str(bin_data))) >= 2 and len(re.findall(r"META-INF", str(bin_data))) >= 1):
+    # Check if file is an JAR file (for embedded .jar based attacks)
+    jstr = re.findall(r"JAR", str(binarydata))
+    cstr = re.findall(r".class", str(binarydata))
+    mstr = re.findall(r"META-INF", str(binarydata))
+    jTable = Table(title="* Matches *", title_style="bold italic cyan", title_justify="center")
+    jTable.add_column("[bold green]Pattern", justify="center")
+    jTable.add_column("[bold green]Count", justify="center")
+    jTable.add_row("JAR", str(len(jstr)))
+    jTable.add_row(".class", str(len(cstr)))
+    jTable.add_row("META-INF", str(len(mstr)))
+    if len(jstr) > 1 or (len(cstr) >= 2 and len(mstr) >= 1):
         print(f"[bold magenta]>>>[white] Binary Type: [bold green]JAR[white]")
+        print(jTable)
 
 # Function for perform file structure analysis
 def Structure(targetFile):
     # We need to unzip the file and check for interesting files
     print(f"\n{infoS} Analyzing file structure...")
-    unz = Popen(["unzip", targetFile, "-d", ".sc0pe_Doc"], stdout=PIPE, stderr=PIPE)
-    unz.wait()
-    if unz.returncode != 0:
-        print(f"{errorS} Error: Unable to unzip file.")
-    else:
-        fconts = FileExp(".sc0pe_Doc/")
+    try:
+        document = zipfile.ZipFile(targetFile)
         bins = []
+
         # Parsing the files
         docTable = Table(title="* Document Structure *", title_style="bold italic cyan", title_justify="center")
         docTable.add_column("[bold green]File Name", justify="center")
-        for df in fconts:
+        for df in document.namelist():
             if ".bin" in df:
-                docTable.add_row(f"[bold red]{df.replace('.sc0pe_Doc/', '')}")
+                docTable.add_row(f"[bold red]{df}")
                 bins.append(df)
             else:
-                docTable.add_row(df.replace(".sc0pe_Doc/", ""))
+                docTable.add_row(df)
         print(docTable)
 
         # Perform analysis against binaries
-        print(f"\n{infoS} Analyzing binaries...")
-        for b in bins:
-            BinaryAnalysis(b)
+        if bins != []:
+            for b in bins:
+                bdata = document.read(b)
+                BinaryAnalysis(b, bdata)
+
+        # Check for insteresting external links (against follina related samples and IoC extraction)
+        if "word/_rels/document.xml.rels" in document.namelist():
+            print(f"\n{infoS} Searching for interesting links...")
+            exlinks = Table(title="* Interesting Links *", title_style="bold italic cyan", title_justify="center")
+            exlinks.add_column("[bold green]Link", justify="center")
+            ddd = document.read("word/_rels/document.xml.rels").decode()
+            linkz = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", ddd)
+            for lnk in linkz:
+                if "schemas.openxmlformats.org" not in lnk and "schemas.microsoft.com" not in lnk:
+                    exlinks.add_row(lnk)
+            
+            if exlinks.rows != []:
+                print(exlinks)
+            else:
+                print(f"[blink bold white on red]Not any interesting links found.")
+    except:
+        print(f"{errorS} Error: Unable to unzip file.")
 
 # Macro parser function
 def MacroParser(macroList):
