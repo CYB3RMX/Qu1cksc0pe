@@ -19,15 +19,16 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ```
 
 # Screenshot
-![Screen](.animations/Screenshot.png)
+![Screenshot](https://user-images.githubusercontent.com/42123683/189416059-339b4a6c-57e0-4c8c-a2a3-380161f89d55.png)
+
 
 # Updates
 <b>09/09/2022</b>
 - [X] ```DocumentAnalyzer``` module is upgraded. Now Qu1cksc0pe can analyze also PDF files.(EXPERIMENTAL!!)
 
 # Available On
-![blackarch_banner](.animations/blackarch.png)
-![tsurugi_banner](.animations/tsurugi.jpeg)
+![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
+![tsurugi](https://user-images.githubusercontent.com/42123683/189416193-a709291f-be8f-469c-b649-c6201fa86677.jpeg)
 
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
@@ -77,15 +78,15 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 # Static Analysis
 ## Normal analysis
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --analyze```<br>
-![animation](.animations/analyze.gif)
+![analyze](https://user-images.githubusercontent.com/42123683/189416371-5815062d-09d9-49aa-82c9-e9961203a642.gif)
 
 ## Resource analysis
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --resource```<br>
-![animation](.animations/resource.gif)
+![resource](https://user-images.githubusercontent.com/42123683/189416431-de08337f-8d46-4c9c-a635-59a5faca28ff.gif)
 
 ## Hash scan
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --hashscan```<br>
-![animation](.animations/hash.gif)
+![hash](https://user-images.githubusercontent.com/42123683/189416516-8268817c-f186-4ee9-971e-adcccfcb45eb.gif)
 
 ## Folder scan
 <b>Supported Arguments</b>:
@@ -93,7 +94,7 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 - ```--packer```
 
 <b>Usage</b>: ```python3 qu1cksc0pe.py --folder FOLDER --hashscan```<br>
-![animation](.animations/hashscan_tui.gif)
+![hashscan_tui](https://user-images.githubusercontent.com/42123683/189416636-494f8d0b-4692-4b81-b133-8bd5eb0f5683.gif)
 
 ## VirusTotal
 <b>Report Contents</b>:
@@ -102,30 +103,30 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 - ```CrowdSourced IDS Reports```
 
 <b>Usage for --vtFile</b>: ```python3 qu1cksc0pe.py --file suspicious_file --vtFile```<br>
-![animation](.animations/total.gif)
+![total](https://user-images.githubusercontent.com/42123683/189416676-06216d52-4882-492d-9ee4-4ff7c04b6358.gif)
 
 ## Document scan
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_document --docs```<br>
-![animation](.animations/docs.gif)
+![docs](https://user-images.githubusercontent.com/42123683/189416778-f7f93d49-7ff0-4eb5-9898-53e63e5833a1.gif)
 
 ## File signature analyzer
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --sigcheck```<br>
-![animation](.animations/sigcheck.gif)
+![sigcheck](https://user-images.githubusercontent.com/42123683/189416864-0e3e3be0-a7bf-4d35-bd9d-403afc38bb96.gif)
 
 ### File Carving
-![animation](.animations/carving.gif)
+![carving](https://user-images.githubusercontent.com/42123683/189416908-31a06ac7-778a-48bd-a5f7-26708a255340.gif)
 
 ## MITRE ATT&CK Technique Extraction
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --mitre```<br>
-![animation](.animations/mitre.gif)
+![mitre](https://user-images.githubusercontent.com/42123683/189416941-46e8be6b-2eec-4145-b0b8-b0da78d6611e.gif)
 
 ## Programming language detection
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_executable --lang```<br>
-![animation](.animations/langDet.gif)
+![langDet](https://user-images.githubusercontent.com/42123683/189416982-75ea308d-2590-4bc7-baf0-10c034878ed7.gif)
 
 ## Interactive shell
 <b>Usage</b>: ```python3 qu1cksc0pe.py --console```<br>
-![animation](.animations/console.gif)
+![console](https://user-images.githubusercontent.com/42123683/189417009-dec6a91b-228c-4c7e-9579-66c4aa9f4036.gif)
 
 # Dynamic Analysis
 ## Dynamic instrumentation with FRIDA scripts (for android applications)
@@ -133,7 +134,7 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 > **You must connect a virtual device or physical device to your computer.**
 
 <br><b>Usage</b>: ```python3 qu1cksc0pe.py --runtime```<br>
-![animation](.animations/dynamic.gif)
+![dynamic](https://user-images.githubusercontent.com/42123683/189417071-7c23e5c7-77c1-419a-b563-7820751e4ae6.gif)
 
 ## Binary Emulation
 **Alert**
