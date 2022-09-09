@@ -31,6 +31,15 @@ except:
     print("Try 'sudo -H pip3 install -U oletools' command.")
     sys.exit(1)
 
+# Checking for pdfminer
+try:
+    from pdfminer.pdfparser import PDFParser
+    from pdfminer.pdfdocument import PDFDocument
+    from pdfminer.pdftypes import resolve1
+except:
+    print("Error: >pdfminer< module not found.")
+    sys.exit(1)
+
 # Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
@@ -41,221 +50,334 @@ targetFile = str(sys.argv[1])
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
-def DocumentYara(target_file):
-    yara_match_indicator = 0
-    # Parsing config file to get rule path
-    conf = configparser.ConfigParser()
-    conf.read(f"{sc0pe_path}/Systems/Multiple/multiple.conf")
-    rule_path = conf["Rule_PATH"]["rulepath"]
-    finalpath = f"{sc0pe_path}/{rule_path}"
-    allRules = os.listdir(finalpath)
+class DocumentAnalyzer:
+    def __init__(self, targetFile):
+        self.targetFile = targetFile
 
-    # This array for holding and parsing easily matched rules
-    yara_matches = []
-    for rul in allRules:
+    # Checking for file extension
+    def CheckExt(self):
+        if self.targetFile.endswith(".doc") or self.targetFile.endswith(".docx") or self.targetFile.endswith(".xls") or self.targetFile.endswith(".xlsx"):
+            return "docscan"
+        elif self.targetFile.endswith(".pdf"):
+            return "pdfscan"
+        else:
+            return "unknown"
+
+    # Yara Scanner
+    def DocumentYara(self):
+        yara_match_indicator = 0
+        # Parsing config file to get rule path
+        conf = configparser.ConfigParser()
+        conf.read(f"{sc0pe_path}/Systems/Multiple/multiple.conf")
+        rule_path = conf["Rule_PATH"]["rulepath"]
+        finalpath = f"{sc0pe_path}/{rule_path}"
+        allRules = os.listdir(finalpath)
+
+        # This array for holding and parsing easily matched rules
+        yara_matches = []
+        for rul in allRules:
+            try:
+                rules = yara.compile(f"{finalpath}{rul}")
+                tempmatch = rules.match(self.targetFile)
+                if tempmatch != []:
+                    for matched in tempmatch:
+                        if matched.strings != []:
+                            if matched not in yara_matches:
+                                yara_matches.append(matched)
+            except:
+                continue
+
+        # Printing area
+        if yara_matches != []:
+            yara_match_indicator += 1
+            for rul in yara_matches:
+                yaraTable = Table()
+                print(f">>> Rule name: [i][bold magenta]{rul}[/i]")
+                yaraTable.add_column("Offset", style="bold green", justify="center")
+                yaraTable.add_column("Matched String/Byte", style="bold green", justify="center")
+                for mm in rul.strings:
+                    yaraTable.add_row(f"{hex(mm[0])}", f"{str(mm[2])}")
+                print(yaraTable)
+                print(" ")
+
+        if yara_match_indicator == 0:
+            print(f"[blink bold white on red]Not any rules matched for {self.targetFile}")
+
+    # Perform analysis against embedded binaries
+    def JARCheck(self):
+        # Data for JAR analysis
+        jar_chek = {}
+
+        # Check if file is an JAR file (for embedded .jar based attacks)
+        keywordz = ["JAR", ".class", "META-INF"]
+        jTable = Table(title="* Matches *", title_style="bold italic cyan", title_justify="center")
+        jTable.add_column("[bold green]Pattern", justify="center")
+        jTable.add_column("[bold green]Count", justify="center")
+        for key in keywordz:
+            jstr = re.findall(key, str(self.binarydata))
+            jTable.add_row(key, str(len(jstr)))
+            jar_chek.update({key: len(jstr)})
+
+        # Condition for JAR file
+        if jar_chek["JAR"] >= 1 or jar_chek[".class"] >= 2 or jar_chek["META-INF"] >= 1:
+            print(f"[bold magenta]>>>[white] Binary Type: [bold green]JAR[white]")
+            print(jTable)
+
+    def VBasicCheck(self):
+        # Data for VBA analysis
+        vba_chek = {}
+
+        # Check if file is an VBA file
+        keywordz = ["Function", "Sub", "Dim", "End", "Document"]
+        vbaTable = Table(title="* Matches *", title_style="bold italic cyan", title_justify="center")
+        vbaTable.add_column("[bold green]Pattern", justify="center")
+        vbaTable.add_column("[bold green]Count", justify="center")
+        for key in keywordz:
+            vbastr = re.findall(key, str(self.binarydata))
+            vbaTable.add_row(key, str(len(vbastr)))
+            vba_chek.update({key: len(vbastr)})
+
+        # Condition for VBA file
+        if vba_chek["Function"] >= 1 or vba_chek["Sub"] >= 1 or vba_chek["Dim"] >= 1 or vba_chek["End"] >= 1 or vba_chek["Document"] >= 1:
+            print(f"[bold magenta]>>>[white] Binary Type: [bold green]Composite Document File V2 Document (Contains possible VBA code!!)[white]")
+            print(vbaTable)
+
+    def BinaryAnalysis(self, component, binarydata):
+        self.component = component
+        self.binarydata = binarydata
+
+        print(f"\n{infoS} Analyzing: [bold red]{self.component}")
+        # Check if file is an JAR file (for embedded .jar based attacks)
+        self.JARCheck()
+        # Check if file is an VBA file
+        self.VBasicCheck()
+        
+    # Function for perform file structure analysis
+    def Structure(self):
+        # We need to unzip the file and check for interesting files
+        print(f"\n{infoS} Analyzing file structure...")
         try:
-            rules = yara.compile(f"{finalpath}{rul}")
-            tempmatch = rules.match(target_file)
-            if tempmatch != []:
-                for matched in tempmatch:
-                    if matched.strings != []:
-                        if matched not in yara_matches:
-                            yara_matches.append(matched)
-        except:
-            continue
+            document = zipfile.ZipFile(self.targetFile)
+            bins = []
 
-    # Printing area
-    if yara_matches != []:
-        yara_match_indicator += 1
-        for rul in yara_matches:
-            yaraTable = Table()
-            print(f">>> Rule name: [i][bold magenta]{rul}[/i]")
-            yaraTable.add_column("Offset", style="bold green", justify="center")
-            yaraTable.add_column("Matched String/Byte", style="bold green", justify="center")
-            for mm in rul.strings:
-                yaraTable.add_row(f"{hex(mm[0])}", f"{str(mm[2])}")
-            print(yaraTable)
-            print(" ")
+            # Parsing the files
+            docTable = Table(title="* Document Structure *", title_style="bold italic cyan", title_justify="center")
+            docTable.add_column("[bold green]File Name", justify="center")
+            for df in document.namelist():
+                if ".bin" in df:
+                    docTable.add_row(f"[bold red]{df}")
+                    bins.append(df)
+                else:
+                    docTable.add_row(df)
+            print(docTable)
 
-    if yara_match_indicator == 0:
-        print(f"[blink bold white on red]Not any rules matched for {target_file}")
+            # Perform analysis against binaries
+            if bins != []:
+                for b in bins:
+                    bdata = document.read(b)
+                    self.BinaryAnalysis(b, bdata)
 
-# Perform analysis against embedded binaries
-def BinaryAnalysis(component, binarydata):
-    print(f"\n{infoS} Analyzing: [bold red]{component}")
-
-    # Check if file is an JAR file (for embedded .jar based attacks)
-    jstr = re.findall(r"JAR", str(binarydata))
-    cstr = re.findall(r".class", str(binarydata))
-    mstr = re.findall(r"META-INF", str(binarydata))
-    jTable = Table(title="* Matches *", title_style="bold italic cyan", title_justify="center")
-    jTable.add_column("[bold green]Pattern", justify="center")
-    jTable.add_column("[bold green]Count", justify="center")
-    jTable.add_row("JAR", str(len(jstr)))
-    jTable.add_row(".class", str(len(cstr)))
-    jTable.add_row("META-INF", str(len(mstr)))
-    if len(jstr) > 1 or (len(cstr) >= 2 and len(mstr) >= 1):
-        print(f"[bold magenta]>>>[white] Binary Type: [bold green]JAR[white]")
-        print(jTable)
-
-# Function for perform file structure analysis
-def Structure(targetFile):
-    # We need to unzip the file and check for interesting files
-    print(f"\n{infoS} Analyzing file structure...")
-    try:
-        document = zipfile.ZipFile(targetFile)
-        bins = []
-
-        # Parsing the files
-        docTable = Table(title="* Document Structure *", title_style="bold italic cyan", title_justify="center")
-        docTable.add_column("[bold green]File Name", justify="center")
-        for df in document.namelist():
-            if ".bin" in df:
-                docTable.add_row(f"[bold red]{df}")
-                bins.append(df)
-            else:
-                docTable.add_row(df)
-        print(docTable)
-
-        # Perform analysis against binaries
-        if bins != []:
-            for b in bins:
-                bdata = document.read(b)
-                BinaryAnalysis(b, bdata)
-
-        # Check for insteresting external links (against follina related samples and IoC extraction)
-        if "word/_rels/document.xml.rels" in document.namelist():
+            # Check for insteresting external links (effective against follina related samples and IoC extraction)
             print(f"\n{infoS} Searching for interesting links...")
             exlinks = Table(title="* Interesting Links *", title_style="bold italic cyan", title_justify="center")
             exlinks.add_column("[bold green]Link", justify="center")
-            ddd = document.read("word/_rels/document.xml.rels").decode()
-            linkz = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", ddd)
-            for lnk in linkz:
-                if "schemas.openxmlformats.org" not in lnk and "schemas.microsoft.com" not in lnk:
-                    exlinks.add_row(lnk)
+            for fff in document.namelist():
+                try:
+                    ddd = document.read(fff).decode()
+                    linkz = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", ddd)
+                    for lnk in linkz:
+                        if "schemas.openxmlformats.org" not in lnk and "schemas.microsoft.com" not in lnk and "purl.org" not in lnk and "www.w3.org" not in lnk and "go.microsoft.com" not in lnk:
+                            exlinks.add_row(lnk)
+                except:
+                    continue
             
             if exlinks.rows != []:
                 print(exlinks)
             else:
                 print(f"[blink bold white on red]Not any interesting links found.")
-    except:
-        print(f"{errorS} Error: Unable to unzip file.")
+        except:
+            print(f"{errorS} Error: Unable to unzip file.")
 
-# Macro parser function
-def MacroParser(macroList):
-    answerTable = Table()
-    answerTable.add_column("[bold green]Threat Levels", justify="center")
-    answerTable.add_column("[bold green]Macros", justify="center")
-    answerTable.add_column("[bold green]Descriptions", justify="center")
+    # Macro parser function
+    def MacroParser(self, macroList):
+        self.macroList = macroList
 
-    for fi in range(0, len(macroList)):
-        if macroList[fi][0] == 'Suspicious':
-            if "(use option --deobf to deobfuscate)" in macroList[fi][2]:
-                sanitized = f"{macroList[fi][2]}".replace("(use option --deobf to deobfuscate)", "")
-                answerTable.add_row(f"[bold yellow]{macroList[fi][0]}", f"{macroList[fi][1]}", f"{sanitized}")
-            elif "(option --decode to see all)" in macroList[fi][2]:
-                sanitized = f"{macroList[fi][2]}".replace("(option --decode to see all)", "")
-                answerTable.add_row(f"[bold yellow]{macroList[fi][0]}", f"{macroList[fi][1]}", f"{sanitized}")
-            else:
-                answerTable.add_row(f"[bold yellow]{macroList[fi][0]}", f"{macroList[fi][1]}", f"{macroList[fi][2]}")
-        elif macroList[fi][0] == 'IOC':
-            answerTable.add_row(f"[bold magenta]{macroList[fi][0]}", f"{macroList[fi][1]}", f"{macroList[fi][2]}")
-        elif macroList[fi][0] == 'AutoExec':
-            answerTable.add_row(f"[bold red]{macroList[fi][0]}", f"{macroList[fi][1]}", f"{macroList[fi][2]}")
-        else:
-            answerTable.add_row(f"{macroList[fi][0]}", f"{macroList[fi][1]}", f"{macroList[fi][2]}")
-    print(answerTable)
+        answerTable = Table()
+        answerTable.add_column("[bold green]Threat Levels", justify="center")
+        answerTable.add_column("[bold green]Macros", justify="center")
+        answerTable.add_column("[bold green]Descriptions", justify="center")
 
-# A function that finds VBA Macros
-def MacroHunter(targetFile):
-    print(f"\n{infoS} Looking for Macros...")
-    try:
-        fileData = open(targetFile, "rb").read()
-        vbaparser = VBA_Parser(targetFile, fileData)
-        macroList = list(vbaparser.analyze_macros())
-        macro_state_vba = 0
-        macro_state_xlm = 0
-        # Checking vba macros
-        if vbaparser.contains_vba_macros == True:
-            print(f"[bold red]>>>[white] VBA MACRO: [bold green]Found.")
-            if vbaparser.detect_vba_stomping() == True:
-                print(f"[bold red]>>>[white] VBA Stomping: [bold green]Found.")
-
-            else:
-                print(f"[bold red]>>>[white] VBA Stomping: [bold red]Not found.")
-            MacroParser(macroList)
-            macro_state_vba += 1
-        else:
-            print(f"[bold red]>>>[white] VBA MACRO: [bold red]Not found.\n")
-
-        # Checking for xlm macros
-        if vbaparser.contains_xlm_macros == True:
-            print(f"\n[bold red]>>>[white] XLM MACRO: [bold green]Found.")
-            MacroParser(macroList)
-            macro_state_xlm += 1
-        else:
-            print(f"\n[bold red]>>>[white] XLM MACRO: [bold red]Not found.")
-
-        # If there is macro we can extract it!
-        if macro_state_vba != 0 or macro_state_xlm != 0:
-            choice = str(input("\n>>> Do you want to extract macros [Y/n]?: "))
-            if choice == "Y" or choice == "y":
-                print(f"{infoS} Attempting to extraction...\n")
-                if macro_state_vba != 0:
-                    for mac in vbaparser.extract_all_macros():
-                        for xxx in mac:
-                            print(xxx.strip("\r\n"))
+        for fi in range(0, len(self.macroList)):
+            if self.macroList[fi][0] == 'Suspicious':
+                if "(use option --deobf to deobfuscate)" in self.macroList[fi][2]:
+                    sanitized = f"{self.macroList[fi][2]}".replace("(use option --deobf to deobfuscate)", "")
+                    answerTable.add_row(f"[bold yellow]{self.macroList[fi][0]}", f"{self.macroList[fi][1]}", f"{sanitized}")
+                elif "(option --decode to see all)" in self.macroList[fi][2]:
+                    sanitized = f"{self.macroList[fi][2]}".replace("(option --decode to see all)", "")
+                    answerTable.add_row(f"[bold yellow]{self.macroList[fi][0]}", f"{self.macroList[fi][1]}", f"{sanitized}")
                 else:
-                    for mac in vbaparser.xlm_macros:
-                        print(mac)
-                print(f"\n{infoS} Extraction completed.")
+                    answerTable.add_row(f"[bold yellow]{self.macroList[fi][0]}", f"{self.macroList[fi][1]}", f"{self.macroList[fi][2]}")
+            elif self.macroList[fi][0] == 'IOC':
+                answerTable.add_row(f"[bold magenta]{self.macroList[fi][0]}", f"{self.macroList[fi][1]}", f"{self.macroList[fi][2]}")
+            elif self.macroList[fi][0] == 'AutoExec':
+                answerTable.add_row(f"[bold red]{self.macroList[fi][0]}", f"{self.macroList[fi][1]}", f"{self.macroList[fi][2]}")
+            else:
+                answerTable.add_row(f"{self.macroList[fi][0]}", f"{self.macroList[fi][1]}", f"{self.macroList[fi][2]}")
+        print(answerTable)
 
-    except:
-        print(f"{errorS} An error occured while parsing that file for macro scan.")
+    # A function that finds VBA Macros
+    def MacroHunter(self):
+        print(f"\n{infoS} Looking for Macros...")
+        try:
+            fileData = open(self.targetFile, "rb").read()
+            vbaparser = VBA_Parser(self.targetFile, fileData)
+            try:
+                macroList = list(vbaparser.analyze_macros())
+            except:
+                pass
+            macro_state_vba = 0
+            macro_state_xlm = 0
+            # Checking vba macros
+            if vbaparser.contains_vba_macros == True:
+                print(f"[bold red]>>>[white] VBA MACRO: [bold green]Found.")
+                if vbaparser.detect_vba_stomping() == True:
+                    print(f"[bold red]>>>[white] VBA Stomping: [bold green]Found.")
 
-# Gathering basic informations
-def BasicInfoGa(targetFile):
-    # Check for ole structures
-    if isOleFile(targetFile) == True:
-        print(f"{infoS} Ole File: [bold green]True[white]")
-    else:
-        print(f"{infoS} Ole File: [bold red]False[white]")
+                else:
+                    print(f"[bold red]>>>[white] VBA Stomping: [bold red]Not found.")
+                self.MacroParser(macroList)
+                macro_state_vba += 1
+            else:
+                print(f"[bold red]>>>[white] VBA MACRO: [bold red]Not found.\n")
 
-    # Check for encryption
-    if is_encrypted(targetFile) == True:
-        print(f"{infoS} Encrypted: [bold green]True[white]")
-    else:
-        print(f"{infoS} Encrypted: [bold red]False[white]")
+            # Checking for xlm macros
+            if vbaparser.contains_xlm_macros == True:
+                print(f"\n[bold red]>>>[white] XLM MACRO: [bold green]Found.")
+                self.MacroParser(macroList)
+                macro_state_xlm += 1
+            else:
+                print(f"\n[bold red]>>>[white] XLM MACRO: [bold red]Not found.")
 
-    # Perform file structure analysis
-    Structure(targetFile)
+            # If there is macro we can extract it!
+            if macro_state_vba != 0 or macro_state_xlm != 0:
+                choice = str(input("\n>>> Do you want to extract macros [Y/n]?: "))
+                if choice == "Y" or choice == "y":
+                    print(f"{infoS} Attempting to extraction...\n")
+                    if macro_state_vba != 0:
+                        for mac in vbaparser.extract_all_macros():
+                            for xxx in mac:
+                                print(xxx.strip("\r\n"))
+                    else:
+                        for mac in vbaparser.xlm_macros:
+                            print(mac)
+                    print(f"\n{infoS} Extraction completed.")
 
-    # Perform Yara scan
-    print(f"\n{infoS} Performing YARA rule matching...")
-    DocumentYara(targetFile)
+        except:
+            print(f"{errorS} An error occured while parsing that file for macro scan.")
 
-    # VBA_MACRO scanner
-    vbascan = OleID(targetFile)
-    vbascan.check()
-    # Sanitizing the array
-    vba_params = []
-    for vb in vbascan.indicators:
-        vba_params.append(vb.id)
+    # Gathering basic informations
+    def BasicInfoGa(self):
+        # Check for ole structures
+        if isOleFile(self.targetFile) == True:
+            print(f"{infoS} Ole File: [bold green]True[white]")
+        else:
+            print(f"{infoS} Ole File: [bold red]False[white]")
 
-    if "vba_macros" in vba_params:
+        # Check for encryption
+        if is_encrypted(self.targetFile) == True:
+            print(f"{infoS} Encrypted: [bold green]True[white]")
+        else:
+            print(f"{infoS} Encrypted: [bold red]False[white]")
+
+        # Perform file structure analysis
+        self.Structure()
+
+        # Perform Yara scan
+        print(f"\n{infoS} Performing YARA rule matching...")
+        self.DocumentYara()
+
+        # VBA_MACRO scanner
+        vbascan = OleID(self.targetFile)
+        vbascan.check()
+        # Sanitizing the array
+        vba_params = []
         for vb in vbascan.indicators:
-            if vb.id == "vba_macros":
-                if vb.value == True:
-                    print(f"{infoS} VBA Macros: [bold green]Found[white]")
-                    MacroHunter(targetFile)
-                else:
-                    print(f"{infoS} VBA Macros: [bold red]Not Found[white]")
-    else:
-        MacroHunter(targetFile)
+            vba_params.append(vb.id)
+
+        if "vba_macros" in vba_params:
+            for vb in vbascan.indicators:
+                if vb.id == "vba_macros":
+                    if vb.value == True:
+                        print(f"{infoS} VBA Macros: [bold green]Found[white]")
+                        self.MacroHunter()
+                    else:
+                        print(f"{infoS} VBA Macros: [bold red]Not Found[white]")
+        else:
+            self.MacroHunter()
+
+    # PDF analysis
+    def PDFAnalysis(self):
+        print(f"{infoS} Performing PDF analysis...")
+
+        # Parsing the PDF
+        pdata = open(self.targetFile, "rb")
+        pdf = PDFParser(pdata)
+        doc = PDFDocument(pdf)
+
+        # Gathering meta information
+        print(f"\n{infoS} Gathering meta information...")
+        metaTable = Table(title="* Meta Information *", title_style="bold italic cyan", title_justify="center")
+        metaTable.add_column("[bold green]Key", justify="center")
+        metaTable.add_column("[bold green]Value", justify="center")
+        if doc.info[0] != {}:
+            for vals in doc.info[0]:
+                metaTable.add_row(f"[bold yellow]{vals}", f"{doc.info[0][vals]}")
+            print(metaTable)
+        else:
+            print(f"{errorS} No meta information found.")
+
+        # Gathering PDF catalog
+        print(f"\n{infoS} Gathering PDF catalog...")
+        suspicious_keys = []
+        catalogTable = Table(title="* PDF Catalog *", title_style="bold italic cyan", title_justify="center")
+        catalogTable.add_column("[bold green]Key", justify="center")
+        for vals in doc.catalog:
+            if "Type" in vals:
+                pass
+            elif "AcroForm" in vals or "JavaScript" in vals or "OpenAction" in vals or "JS" in vals or "EmbeddedFile" in vals:
+                catalogTable.add_row(f"[bold red]{vals}") # Highlighting suspicious keys
+                suspicious_keys.append(vals)
+            else:
+                catalogTable.add_row(vals)
+        print(catalogTable)
+
+        # Gathering PDF objects
+        if len(suspicious_keys) != 0:
+            print(f"\n{infoS} Analyzing dangerous PDF objects...")
+            for sk in suspicious_keys:
+                print(f"\n[bold red]>>>[white] Analyzing {sk} object:")
+                obTable = Table(title=f"* {sk} *", title_style="bold italic cyan", title_justify="center")
+                obTable.add_column("[bold green]Key", justify="center")
+                obTable.add_column("[bold green]Value", justify="center")
+                for obj in doc.catalog[sk].resolve():
+                    if obj == "Type":
+                        pass
+                    else:
+                        obTable.add_row(f"[bold yellow]{obj}", f"{doc.catalog[sk].resolve()[obj]}")
+                print(obTable)
 
 # Execution area
 try:
-    BasicInfoGa(targetFile)
+    docObj = DocumentAnalyzer(targetFile)
+    ext = docObj.CheckExt()
+    if ext == "docscan":
+        docObj.BasicInfoGa()
+    elif ext == "pdfscan":
+        docObj.PDFAnalysis()
+    elif ext == "unknown":
+        print(f"{errorS} Analysis tecnique is not implemented for now. Please send the file to the developer for further analysis.")
+    else:
+        print(f"{errorS} File format is not supported.")
 except:
     print(f"{errorS} An error occured while analyzing that file.")
     sys.exit(1)
