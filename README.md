@@ -22,8 +22,8 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screen](.animations/Screenshot.png)
 
 # Updates
-<b>15/08/2022</b>
-- [X] ```DocumentAnalyzer``` module is upgraded. Now you can extract possible C2 domains from suspicious documents. (.doc and .docx)
+<b>09/09/2022</b>
+- [X] ```DocumentAnalyzer``` module is upgraded. Now Qu1cksc0pe can analyze also PDF files.(EXPERIMENTAL!!)
 
 # Available On
 ![blackarch_banner](.animations/blackarch.png)
@@ -51,6 +51,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 - ```zepu1chr3``` => <i>Analyzing binaries via radare2.</i>
 - ```pygore``` => <i>Analyzing golang binaries```</i>
 - ```qiling``` => <i>Dynamic analysis of binaries.</i>
+- ```pdfminer.six``` => <i>PDF analysis.</i>
 
 <br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
 <b>Gathering other dependencies</b>:

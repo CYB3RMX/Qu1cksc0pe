@@ -16,3 +16,4 @@ zepu1chr3
 r2pipe
 pygore
 qiling
+pdfminer.six
