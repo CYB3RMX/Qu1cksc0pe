@@ -24,7 +24,8 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 
 # Updates
 <b>12/09/2022</b>
-- [X] ```DocumentAnalyzer``` module is upgraded. Now Qu1cksc0pe can extract embedded files/exploits from PDF files!!
+- [X] ```DocumentAnalyzer``` module is upgraded. Now Qu1cksc0pe can extract embedded files/exploits from PDF files!!<br>
+![exploit](https://user-images.githubusercontent.com/42123683/189676266-d2b6f502-b254-4de1-ad6e-bbc03740febc.gif)
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
@@ -110,6 +111,7 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 ![docs](https://user-images.githubusercontent.com/42123683/189416778-f7f93d49-7ff0-4eb5-9898-53e63e5833a1.gif)
 
 ### Embedded File/Exploit Extraction
+![exploit](https://user-images.githubusercontent.com/42123683/189676461-86565ff2-3a0c-426a-a66b-80a9462489b7.gif)
 
 ## File signature analyzer
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --sigcheck```<br>
