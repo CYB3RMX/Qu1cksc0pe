@@ -50,6 +50,9 @@ targetFile = str(sys.argv[1])
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
+# All strings
+allstr = open("temp.txt", "r").read()
+
 class DocumentAnalyzer:
     def __init__(self, targetFile):
         self.targetFile = targetFile
@@ -365,6 +368,61 @@ class DocumentAnalyzer:
                     else:
                         obTable.add_row(f"[bold yellow]{obj}", f"{doc.catalog[sk].resolve()[obj]}")
                 print(obTable)
+
+        # Suspicous PDF strings
+        print(f"\n{infoS} Searching for suspicious strings...")
+        embedded_switch = 0
+        suspicious = [
+            "/JavaScript", "/JS", "/AcroForm", "/OpenAction", 
+            "/Launch", "/LaunchUrl", "/EmbeddedFile", "/URI", 
+            "/Action", "cmd.exe", "system32", "%HOMEDRIVE%"
+        ]
+        sTable = Table(title="* Suspicious Strings *", title_style="bold italic cyan", title_justify="center")
+        sTable.add_column("[bold green]String", justify="center")
+        sTable.add_column("[bold green]Count", justify="center")
+        for s in suspicious:
+            occur = re.findall(s, allstr)
+            if len(occur) != 0:
+                if s == "/EmbeddedFile":
+                    embedded_switch += 1
+                sTable.add_row(f"[bold red]{s}", f"{len(occur)}")
+        print(sTable)
+
+
+        # Looking for embedded links
+        print(f"\n{infoS} Looking for embedded URL\'s...")
+        urlTable = Table(title="* Embedded URL\'s *", title_style="bold italic cyan", title_justify="center")
+        urlTable.add_column("[bold green]URL", justify="center")
+        linkz = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", str(pdata.read()))
+        if len(linkz) != 0:
+            for l in linkz:
+                urlTable.add_row(f"[bold yellow]{l}")
+            print(urlTable)
+        else:
+            print(f"{errorS} No URL\'s found.")
+
+        # Embedded file extraction Method 1
+        if embedded_switch != 0:
+            print(f"\n{infoS} Performing embedded file extraction...")
+            print(f"{infoS} Locating embedded file streams...")
+            for obid in range(100):
+                try:
+                    tmp = doc.getobj(obid)
+                    if "EmbeddedFiles" in str(tmp):
+                        print(f"{infoS} Found embedded file stream at object ID: [bold yellow]{obid}")
+                        print(f"{infoS} Locating data stream...")
+                        if "Names" in str(tmp["EmbeddedFiles"].resolve()) and len(tmp["EmbeddedFiles"].resolve()["Names"]) == 2:
+                            if "EF" in str(tmp["EmbeddedFiles"].resolve()["Names"][1].resolve()):
+                                if "F" in str(tmp["EmbeddedFiles"].resolve()["Names"][1].resolve()["EF"].resolve()):
+                                    print(f"{infoS} Data stream found. Extracting...")
+                                    emb = tmp["EmbeddedFiles"].resolve()["Names"][1].resolve()["EF"].resolve()["F"].resolve().get_data()
+                                    outfile = open(f"sc0pe_embedded_data.bin", "wb")
+                                    outfile.write(emb)
+                                    outfile.close()
+                                    print(f"{infoS} Embedded file extracted to [bold yellow]sc0pe_embedded_data.bin[white]")
+                                    break
+                except:
+                    continue
 
 # Execution area
 try:
