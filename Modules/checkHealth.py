@@ -25,7 +25,7 @@ if sys.platform == "darwin":
     homeD = "/Users"
 
 # Commit
-latest_commit = "01/02/2022"
+latest_commit = "14/09/2022"
 
 # Checking for latest commits
 print(f"{infoS} Checking for latest commit...")
@@ -63,11 +63,17 @@ for res in resource:
 
 # Python module checking zone
 print(f"\n{infoS} Checking for python modules...")
-requirements = ["puremagic", "androguard", "apkid", "tqdm",
-                "oletools", "pefile", "quark", "pyaxmlparser", "yara",
-                "prompt_toolkit", "frida", "exiftool", "rich"]
+requirements = open("requirements.txt", "r").read().split()
 for mod in requirements:
     try:
+        # Check for yara module
+        if mod == "yara-python":
+            mod = "yara"
+
+        # Check for pdfminer
+        if mod == "pdfminer.six":
+            mod = "pdfminer"
+
         if importlib.util.find_spec(mod) is not None:
             if mod == "androguard" and importlib_metadata.version("androguard") != "3.4.0a1":
                 print(f"[bold cyan][[bold red] INCOMPATIBLE VERSION[bold cyan] ][white] androguard\t|  Needed: [bold green]3.4.0a1[white]")
