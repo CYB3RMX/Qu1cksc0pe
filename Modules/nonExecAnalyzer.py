@@ -354,24 +354,10 @@ class DocumentAnalyzer:
                 catalogTable.add_row(vals)
         print(catalogTable)
 
-        # Gathering PDF objects
-        if len(suspicious_keys) != 0:
-            print(f"\n{infoS} Analyzing dangerous PDF objects...")
-            for sk in suspicious_keys:
-                print(f"\n[bold red]>>>[white] Analyzing {sk} object:")
-                obTable = Table(title=f"* {sk} *", title_style="bold italic cyan", title_justify="center")
-                obTable.add_column("[bold green]Key", justify="center")
-                obTable.add_column("[bold green]Value", justify="center")
-                for obj in doc.catalog[sk].resolve():
-                    if obj == "Type":
-                        pass
-                    else:
-                        obTable.add_row(f"[bold yellow]{obj}", f"{doc.catalog[sk].resolve()[obj]}")
-                print(obTable)
-
         # Suspicous PDF strings
         print(f"\n{infoS} Searching for suspicious strings...")
         embedded_switch = 0
+        sstr = 0
         suspicious = [
             "/JavaScript", "/JS", "/AcroForm", "/OpenAction", 
             "/Launch", "/LaunchUrl", "/EmbeddedFile", "/URI", 
@@ -386,18 +372,28 @@ class DocumentAnalyzer:
                 if s == "/EmbeddedFile":
                     embedded_switch += 1
                 sTable.add_row(f"[bold red]{s}", f"{len(occur)}")
-        print(sTable)
+                sstr += 1
 
+        if sstr != 0:
+            print(sTable)
+        else:
+            print(f"{infoS} No suspicious strings found.")
 
         # Looking for embedded links
         print(f"\n{infoS} Looking for embedded URL\'s...")
         urlTable = Table(title="* Embedded URL\'s *", title_style="bold italic cyan", title_justify="center")
         urlTable.add_column("[bold green]URL", justify="center")
-        linkz = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", str(pdata.read()))
+        uustr = 0
+        linkz = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", allstr)
         if len(linkz) != 0:
             for l in linkz:
-                urlTable.add_row(f"[bold yellow]{l}")
-            print(urlTable)
+                if "schemas.openxmlformats.org" not in l and "schemas.microsoft.com" not in l and "purl.org" not in l and "www.w3.org" not in l and "go.microsoft.com" not in l and "ns.adobe.com" not in l and "www.adobe.com" not in l and "www.microsoft.com" not in l:
+                    urlTable.add_row(f"[bold yellow]{l}")
+                    uustr += 1
+            if uustr != 0:
+                print(urlTable)
+            else:
+                print(f"{infoS} No interesting URL\'s found.")
         else:
             print(f"{errorS} No URL\'s found.")
 
