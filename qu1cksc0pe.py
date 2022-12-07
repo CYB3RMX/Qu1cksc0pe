@@ -133,7 +133,7 @@ parser.add_argument("--resource", required=False,
 parser.add_argument("--report", required=False,
                     help="Export analysis reports into a file (JSON Format for now).", action="store_true")
 parser.add_argument("--runtime", required=False,
-                    help="Analyze APK files dynamically.", action="store_true")
+                    help="Analyze APK files dynamically. (With FRIDA scripts!!)", action="store_true")
 parser.add_argument("--watch", required=False,
                     help="Perform emulation against executable files.", action="store_true")
 parser.add_argument("--sigcheck", required=False,

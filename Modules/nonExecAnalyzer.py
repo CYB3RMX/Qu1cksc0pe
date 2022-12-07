@@ -386,10 +386,13 @@ class DocumentAnalyzer:
         uustr = 0
         linkz = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", allstr)
         if len(linkz) != 0:
+            lcontrol = []
             for l in linkz:
                 if "schemas.openxmlformats.org" not in l and "schemas.microsoft.com" not in l and "purl.org" not in l and "www.w3.org" not in l and "go.microsoft.com" not in l and "ns.adobe.com" not in l and "www.adobe.com" not in l and "www.microsoft.com" not in l:
-                    urlTable.add_row(f"[bold yellow]{l}")
-                    uustr += 1
+                    if l not in lcontrol:
+                        urlTable.add_row(f"[bold yellow]{l}")
+                        uustr += 1
+                        lcontrol.append(l)
             if uustr != 0:
                 print(urlTable)
             else:
