@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 
 import os
+import re
 import sys
 import time
 import math
 import requests
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, check_output
 
 try:
     from qiling import *
@@ -43,6 +44,13 @@ except:
     print("Module: >tqdm< not found.")
     sys.exit(1)
 
+# Testing pyaxmlparser existence
+try:
+    import pyaxmlparser
+except:
+    print("Error: >pyaxmlparser< module not found.")
+    sys.exit(1)
+
 # Legends
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
@@ -52,6 +60,9 @@ targetFile = str(sys.argv[1])
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
+
+# Disabling pyaxmlparser's logs
+pyaxmlparser.core.log.disabled = True
 
 def Downloader(target_os, target_arch):
     local_database = f"{sc0pe_path}/Systems/{target_os}/{target_arch}_{target_os.lower()}.tar.gz"
@@ -85,8 +96,8 @@ def DetectOS():
         return "Windows"
     elif "ELF" in ftype:
         return "Linux"
-    elif "Mach-O" in ftype:
-        return "MacOS"
+    elif "PK" in ftype and "Java archive" in ftype:
+        return "Android"
     else:
         return "Unsupported OS"
 
@@ -97,6 +108,93 @@ def InitQil(target_file, target_os, target_arch):
     print(f"\n{infoS} Executing emulator...")
     time.sleep(2)
     ql.run()
+
+def SearchPackageName(package_name, device):
+    print(f"{infoS} Searching for existing installation...")
+    exist_install = check_output("adb shell pm list packages", shell=True).decode().split("\n")
+    matchh = re.findall(rf"{package_name}", str(exist_install))
+    if len(matchh) > 0:
+        print(f"{infoS} Package found.")
+        return True
+    else:
+        print(f"{infoS} Package not found.")
+        return False
+
+def ProgramTracer(package_name, device):
+    print(f"{infoS} Now you can launch the app from your device. So you can see method class/calls etc.")
+    temp = ""
+    try:
+        while True:
+            logcat_output = check_output(["adb", "-s", f"{device}", "logcat", "-d", package_name + ":D"])
+            
+            # Thanks for the regex to @Auskren
+            method_calls = re.findall(rf"{package_name}[/\.][a-zA-Z0-9_-]+[/\.][/\.a-zA-Z0-9_-]+|{package_name}[/\.]\.[/\.a-zA-Z0-9_-]+.", logcat_output.decode())
+            if len(method_calls) > 0 and method_calls[-1] != temp:
+                print(f"[bold blue][CALL] [bold green]{method_calls[-1]}")
+                temp = method_calls[-1]
+            time.sleep(0.5)
+    except:
+        print(f"{infoS} Closing tracer...")
+        sys.exit(0)
+
+
+def AnalyzeAPK(target_file):
+    device_index = []
+    apk = pyaxmlparser.APK(target_file)
+    if apk.is_valid_APK():
+        package_name = apk.get_package()
+        print(f"[bold magenta]>>>[white] Package name: [bold green]{package_name}\n")
+        # Gathering devices
+        print(f"{infoS} Searching for devices...")
+        get_dev_cmd = ["adb", "devices"]
+        get_dev_cmdl = Popen(get_dev_cmd, stdout=PIPE, stderr=PIPE).communicate()
+        get_dev_cmdl = str(get_dev_cmdl[0]).split("\\n")
+        get_dev_cmdl = get_dev_cmdl[1:-1]
+        dindex = 0
+        for device in get_dev_cmdl:
+            if device.split("\\t")[0] != "":
+                device_index.append(
+                    {
+                        dindex: device.split("\\t")[0]
+                    }
+                )
+                dindex += 1
+
+        # Print devices
+        if len(device_index) == 0:
+            print(f"{errorS} No devices found. Try to connect a device and try again.\n{infoS} You can use [bold cyan]\"adb connect <device_ip>:<device_port>\"[white] to connect a device.")
+            sys.exit(0)
+        else:
+            print(f"{infoS} Available devices:")
+            for device in device_index:
+                print(f"[bold magenta]>>>[white] [bold yellow]{list(device.keys())[0]} [white]| [bold green]{list(device.values())[0]}")
+
+            # Select device
+            dnum = int(input("\n>>> Select device: "))
+            if dnum > len(device_index) - 1:
+                print(f"{errorS} Invalid device number.")
+                sys.exit(0)
+            else:
+                mbool = SearchPackageName(package_name, list(device_index[dnum].values())[0])
+                if not mbool:
+                    print(f"{infoS} Installing [bold yellow]{package_name} [white]on [bold yellow]{list(device_index[dnum].values())[0]}")
+                    install_cmd = ["adb", "-s", f"{list(device_index[dnum].values())[0]}", "install", f"{target_file}"]
+                    install_cmdl = Popen(install_cmd, stdout=PIPE, stderr=PIPE)
+                    install_cmdl.wait()
+                    if "Success" in str(install_cmdl.communicate()):
+                        print(f"{infoS} [bold yellow]{package_name} [white]installed successfully.\n")
+                        ProgramTracer(package_name, list(device_index[dnum].values())[0])
+                    else:
+                        print(f"{errorS} Installation failed.")
+                        print(f"\n{infoS} Trying to uninstall the existing app...\n")
+                        uninstall_cmd = ["adb", "-s", f"{list(device_index[dnum].values())[0]}", "uninstall", f"{package_name}"]
+                        uninstall_cmdl = Popen(uninstall_cmd, stdout=PIPE, stderr=PIPE)
+                        uninstall_cmdl.wait()
+                        if "Success" in str(uninstall_cmdl.communicate()):
+                            print(f"{infoS} [bold yellow]{package_name} [white]uninstalled successfully.")
+                            AnalyzeAPK(target_file)
+                else:
+                    ProgramTracer(package_name, list(device_index[dnum].values())[0])
 
 def Emulator():
     print(f"{infoS} Performing emulation of: [bold green]{targetFile}")
@@ -157,6 +255,10 @@ def Emulator():
             except:
                 print(f"{errorS} An error occurred while performing x86_64 emulation.")
                 sys.exit(1)
+    # ------Android emulation side-------
+    elif target_os == "Android":
+        AnalyzeAPK(targetFile)
+
     else:
         print(f"{errorS} Unsupported OS.")
         sys.exit(1)
