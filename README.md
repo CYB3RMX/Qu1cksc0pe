@@ -24,6 +24,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 # Updates
 <b>07/12/2022</b>
 - [X] ```Emulator``` module is improved. Now Qu1cksc0pe can scrape target applications activity/method etc. calls from ```Logcat```.<br>
+
 https://user-images.githubusercontent.com/42123683/206153248-801eef87-b383-4ee2-8977-0a48c2e3b738.mp4
 
 # Available On
