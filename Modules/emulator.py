@@ -122,16 +122,24 @@ def SearchPackageName(package_name, device):
 
 def ProgramTracer(package_name, device):
     print(f"{infoS} Now you can launch the app from your device. So you can see method class/calls etc.")
-    temp = ""
+    temp = 0
+    sanitizer = ["{", "}", "(", ")", "#", "\"", ":"]
+    san_co = 0
     try:
         while True:
             logcat_output = check_output(["adb", "-s", f"{device}", "logcat", "-d", package_name + ":D"])
-            
-            # Thanks for the regex to @Auskren
-            method_calls = re.findall(rf"{package_name}[/\.][a-zA-Z0-9_-]+[/\.][/\.a-zA-Z0-9_-]+|{package_name}[/\.]\.[/\.a-zA-Z0-9_-]+.", logcat_output.decode())
-            if len(method_calls) > 0 and method_calls[-1] != temp:
-                print(f"[bold blue][CALL] [bold green]{method_calls[-1]}")
-                temp = method_calls[-1]
+            m_calls = re.findall(rf"{package_name}.*", logcat_output.decode())
+            if len(m_calls) != temp:
+                for mk in m_calls[-1].split(" "):
+                    if package_name in mk:
+                        for san in sanitizer:
+                            if san in mk:
+                                print(f"[bold blue][CALL] [bold green]{mk.split(san)[0]}")
+                                san_co += 1
+                                break
+                        if san_co == 0:
+                            print(f"[bold blue][CALL] [bold green]{mk}")
+            temp = len(m_calls)
             time.sleep(0.5)
     except:
         print(f"{infoS} Closing tracer...")
