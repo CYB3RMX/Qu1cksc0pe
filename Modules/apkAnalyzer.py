@@ -72,14 +72,16 @@ normal = 0
 allStrings = open("temp.txt", "r").read().split('\n')
 
 # Gathering apkid tools output
-apkid_output = open("apkid.json", "r")
-data = json.load(apkid_output)
+if sys.argv[3] != "JAR":
+    apkid_output = open("apkid.json", "r")
+    data = json.load(apkid_output)
 
 # Categories
 categs = {
-    "Banker": [], "SMS Bot": [], "Base64": [],
+    "Banker": [], "SMS Bot": [], "Base64": [], "Keylogging": [],
     "Camera": [], "Phone Calls": [], "Microphone Interaction": [],
     "Information Gathering": [], "Database": [], "File Operations": [],
+    "Windows Operations": [],
     "Persistence/Managing": [], "Network/Internet": [], "SSL Pining/Certificate Handling": [],
     "Dynamic Class/Dex Loading": [], "Java Reflection": [], "Root Detection": [],
     "Cryptography": [], "Command Execution": []
@@ -99,6 +101,9 @@ dformat = today.strftime("%d-%m-%Y")
 
 # Gathering username
 username = getpass.getuser()
+
+# Gathering code patterns
+pattern_file = json.load(open(f"{sc0pe_path}/Systems/Android/detections.json"))
 
 # Creating report structure
 reportz = {
@@ -126,6 +131,13 @@ reportz = {
     "user": username,
     "date": dformat,
 }
+
+def RecursiveDirScan(targetDir):
+    fnames = []
+    for root, d_names, f_names in os.walk(targetDir):
+        for ff in f_names:
+            fnames.append(os.path.join(root, ff))
+    return fnames
 
 # Function for parsing apkid tool's output
 def ApkidParser(apkid_output):
@@ -231,10 +243,7 @@ def MultiYaraScanner(targetAPK):
 
         # Scan for library files and analyze them
         path = "TargetAPK/resources/"
-        fnames = []
-        for root, d_names, f_names in os.walk(path):
-            for ff in f_names:
-                fnames.append(os.path.join(root, ff))
+        fnames = RecursiveDirScan(path)
         if fnames != []:
             for extens in fnames:
                 if os.path.splitext(extens)[1] == ".so":
@@ -246,22 +255,27 @@ def MultiYaraScanner(targetAPK):
     else:
         print("[blink]Decompiler([bold green]JADX[white])[/blink] [white]not found. Skipping...")
 
+def PrintCategs():
+    for cat in categs:
+        if categs[cat] != []:
+            sanalTable = Table(title=f"* {cat} *", title_style="bold green", title_justify="center")
+            sanalTable.add_column("Code/Pattern", justify="center")
+            sanalTable.add_column("File", justify="center")
+            for element in categs[cat]:
+                sanalTable.add_row(f"[bold yellow]{element[0]}", f"[bold cyan]{element[1]}")
+            print(sanalTable)
+            print(" ")
+
 # Source code analysis TODO: look for better algorithm!!
 def ScanSource(targetAPK):
     # Parsing main activity
     fhandler = pyaxmlparser.APK(targetAPK)
     parsed_package = fhandler.get_package().split(".")
 
-    # Gathering code patterns
-    pattern_file = json.load(open(f"{sc0pe_path}/Systems/Android/detections.json"))
-
     # Check for decompiled source
     if os.path.exists("TargetAPK/"):
         path = "TargetAPK/sources/"
-        fnames = []
-        for root, d_names, f_names in os.walk(path):
-            for ff in f_names:
-                fnames.append(os.path.join(root, ff))
+        fnames = RecursiveDirScan(path)
         if fnames != []:
             question = input(f"{infoC} Do you want to analyze all packages [Y/n]?: ")
             for sources in fnames:
@@ -281,15 +295,53 @@ def ScanSource(targetAPK):
         print(">>>[bold yellow] Hint: [white]Don\'t forget to specify decompiler path in [bold green]Systems/Android/libScanner.conf")
 
     # Printing report
-    for cat in categs:
-        if categs[cat] != []:
-            sanalTable = Table(title=f"* {cat} *", title_style="bold green", title_justify="center")
-            sanalTable.add_column("Code/Pattern", justify="center")
-            sanalTable.add_column("File", justify="center")
-            for element in categs[cat]:
-                sanalTable.add_row(f"[bold yellow]{element[0]}", f"[bold cyan]{element[1]}")
-            print(sanalTable)
-            print(" ")
+    PrintCategs()
+
+# Following function will perform JAR file analysis
+def PerformJAR(targetAPK):
+    # First we need to check if there is a META-INF file
+    fbuf = open(targetAPK, "rb").read()
+    chek = re.findall("META-INF", str(fbuf))
+    if chek != []:
+        print(f"{infoS} File Type: [bold green]JAR")
+        chek = re.findall(".class", str(fbuf))
+        if chek != []:
+            # Configurating decompiler...
+            conf = configparser.ConfigParser()
+            conf.read(f"{sc0pe_path}/Systems/Android/libScanner.conf")
+            decompiler_path = conf["Decompiler"]["decompiler"]
+
+            # Check if the decompiler exist on system
+            if os.path.exists(decompiler_path):
+                # Executing decompiler...
+                print(f"{infoS} Decompiling target file...")
+                os.system(f"{decompiler_path} -q -d TargetSource {targetAPK}")
+
+                # If we successfully decompiled the target file
+                if os.path.exists("TargetSource"):
+                    # Reading MANIFEST file
+                    print(f"\n{infoS} MANIFEST file found. Fetching data...")
+                    data = open("TargetSource/resources/META-INF/MANIFEST.MF").read()
+                    print(data)
+                    fnames = RecursiveDirScan("TargetSource/sources/")
+                    for sources in fnames:
+                        for index in range(0, len(pattern_file)):
+                            for elem in pattern_file[index]:
+                                for item in pattern_file[index][elem]:
+                                    regx = re.findall(item, open(sources, "r").read())
+                                    if regx != [] and '' not in regx:
+                                        sanit1 = sources.replace('TargetSource/sources/', '')
+                                        if "defpackage/" in sanit1:
+                                            sanit2 = sanit1.replace("defpackage/", "")
+                                            categs[elem].append([str(item), sanit2])
+                                        else:
+                                            categs[elem].append([str(item), sanit1])
+                else:
+                    print("[bold white on red]Couldn\'t locate source codes. Did target file decompiled correctly?")
+                    print(">>>[bold yellow] Hint: [white]Don\'t forget to specify decompiler path in [bold green]Systems/Android/libScanner.conf")
+
+            # Print area
+            PrintCategs()
 
 def ParseFlu(arrayz):
     counter = 0
@@ -536,6 +588,11 @@ if __name__ == '__main__':
     try:
         # Getting target APK
         targetAPK = str(sys.argv[1])
+
+        # Check for JAR file
+        if sys.argv[3] == "JAR":
+            PerformJAR(targetAPK)
+            sys.exit(0)
 
         # General informations
         GeneralInformation(targetAPK)

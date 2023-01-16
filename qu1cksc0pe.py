@@ -89,7 +89,6 @@ if sys.platform == "darwin":
     homeD = "/Users"
 
 # Argument crating, parsing and handling
-args = []
 parser = argparse.ArgumentParser()
 parser.add_argument("--file", required=False,
                     help="Specify a file to scan or analyze.")
@@ -173,15 +172,17 @@ def BasicAnalyzer(analyzeFile):
 
     # Android Analysis
     elif "PK" in fileType and "Java archive" in fileType:
+
+        # If given file is an APK file then run APK analysis
         look = pyaxmlparser.APK(analyzeFile)
         if look.is_valid_APK() == True:
             print(f"{infoS} Target OS: [bold green]Android[white]")
             command = f"apkid -j {args.file} > apkid.json"
             os.system(command)
             if args.report:
-                command = f"python3 {sc0pe_path}/Modules/apkAnalyzer.py {analyzeFile} True"
+                command = f"python3 {sc0pe_path}/Modules/apkAnalyzer.py {analyzeFile} True APK"
             else:
-                command = f"python3 {sc0pe_path}/Modules/apkAnalyzer.py {analyzeFile} False"
+                command = f"python3 {sc0pe_path}/Modules/apkAnalyzer.py {analyzeFile} False APK"
             os.system(command)
             if os.path.exists("apkid.json"):
                 os.remove("apkid.json")
@@ -192,8 +193,9 @@ def BasicAnalyzer(analyzeFile):
             else:
                 pass
         else:
-            print("\n[bold white on red]Qu1cksc0pe doesn\'t support archive analysis for now ;)\n")
-            sys.exit(1)
+            # If given file is a JAR file then run JAR file analysis
+            command = f"python3 {sc0pe_path}/Modules/apkAnalyzer.py {analyzeFile} False JAR"
+            os.system(command)
     else:
         print("\n[bold white on red]File type not supported. Make sure you are analyze executable files or document files.")
         print("[bold]>>> If you want to scan document files try [bold green][i]--docs[/i] [white]argument.")
@@ -456,19 +458,12 @@ def Qu1cksc0pe():
 try:
     Qu1cksc0pe()
     # Cleaning up...
-    junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt"]
+    junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt", "TargetAPK/", "TargetSource/"]
     for junk in junkFiles:
         if os.path.exists(junk):
-            os.remove(junk)
-
-    if os.path.exists("TargetAPK/"):
-        os.system("rm -rf TargetAPK/")
-
+            os.system(f"rm -rf {junk}")
 except:
-    junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt"]
+    junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt", "TargetAPK/", "TargetSource/"]
     for junk in junkFiles:
         if os.path.exists(junk):
-            os.remove(junk)
-
-    if os.path.exists("TargetAPK/"):
-        os.system("rm -rf TargetAPK/")
+            os.system(f"rm -rf {junk}")
