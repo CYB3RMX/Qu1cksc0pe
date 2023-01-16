@@ -159,6 +159,15 @@
         ]
     },
     {
+        "Keylogging": [
+            "lc.kra.system.keyboard.GlobalKeyboardHook",
+            "addKeyListener",
+            "GlobalKeyboardHook",
+            "org.jnativehook.keyboard.NativeKeyEvent",
+            "org.jnativehook.keyboard.NativeKeyListener"
+        ]
+    },
+    {
         "Camera": [
             "android.hardware.camera",
             "Camera.getNumberOfCameras",
@@ -192,7 +201,9 @@
             "MicManager.recorder.stop",
             "MicManager.recorder.release",
             "MicManager.sendVoice",
-            "MicManager.audiofile.delete"
+            "MicManager.audiofile.delete",
+            "VoiceRecorder",
+            "javax.sound.sampled.TargetDataLine"
         ]
     },
     {
@@ -239,7 +250,9 @@
             "SELECT \\* FROM",
             "INSERT OR REPLACE INTO",
             "DELETE FROM",
-            "INSERT OR IGNORE INTO"
+            "INSERT OR IGNORE INTO",
+            "java.sql.Connection",
+            "java.sql.DriverManager"
         ]
     },
     {
@@ -280,7 +293,21 @@
             "\"/system/etc/vold.fstab\"",
             "\"dev_mount\"",
             "getPath",
-            "absolutePath"
+            "absolutePath",
+            "getResourceAsStream"
+        ]
+    },
+    {
+        "Windows Operations": [
+            "com.sun.jna.platform.win32.WinNT",
+            "Wow64DisableWow64FsRedirection",
+            "com.sun.jna.platform.win32.Kernel32",
+            "W32APIOptions",
+            "User32.INSTANCE",
+            "GDI32.INSTANCE",
+            "Shell32.INSTANCE",
+            "Advapi32Util",
+            "WinReg.HKEY_CURRENT_USER"
         ]
     },
     {
@@ -356,7 +383,10 @@
             "/proc/net/ip_tables_names",
             "/proc/net/ip_tables_matches",
             "/proc/net/ip_tables_targets",
-            "/proc/net/netfilter/nfnetlink_queue"
+            "/proc/net/netfilter/nfnetlink_queue",
+            "JarURLConnection",
+            "URLClassLoader",
+            "URLConnection"
         ]
     },
     {
@@ -416,7 +446,8 @@
             "AES",
             "HmacSHA256",
             "AES/CBC/PKCS5Padding",
-            "\"AESUtils\""
+            "\"AESUtils\"",
+            "SecureRandom"
         ]
     },
     {

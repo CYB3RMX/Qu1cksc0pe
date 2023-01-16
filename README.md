@@ -13,6 +13,16 @@
 
 Qu1cksc0pe aims to get even more information about suspicious files and helps user realize what that file is capable of.
 
+# Qu1cksc0pe Can Analyze Currently
+| Files | Analysis Type |
+| :--- | :--- |
+| Windows Executables (.exe, .dll, .msi, .bin) | Static, Dynamic |
+| Linux Executables (.elf, .bin) | Static, Dynamic |
+| MacOS Executables (mach-o) | Static |
+| Android Files (.apk, .jar) | Static, Dynamic(for now .apk only) |
+| Golang Binaries | Static |
+| Document Files (.doc, .docx, .pdf, .xls, .xlsx) | Static |
+
 # Usage
 ```bash
 python3 qu1cksc0pe.py --file suspicious_file --analyze
@@ -22,8 +32,8 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![2022-12-07_12-37](https://user-images.githubusercontent.com/42123683/206153096-859f2102-f8ec-44fb-bd97-5f135478c098.png)
 
 # Updates
-<b>15/12/2022</b>
-- [X] Improvements on ```Emulator``` module for android application analysis.<br>
+<b>16/01/2023</b>
+- [X] Added JAR file analysis. Now Qu1cksc0pe can perform source code analysis on JAR files.<br>
 
 https://user-images.githubusercontent.com/42123683/206153248-801eef87-b383-4ee2-8977-0a48c2e3b738.mp4
 
