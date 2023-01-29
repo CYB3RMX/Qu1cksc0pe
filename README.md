@@ -35,6 +35,8 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 <b>29/01/2023</b>
 - [X] Dynamic analysis capability of APK files are improved. Now you can also get file, intent, provider calls etc.<br>
 
+https://user-images.githubusercontent.com/42123683/215355436-c6306798-d5c3-4f06-853b-5b1cacaf1a0b.mp4
+
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
 ![tsurugi](https://user-images.githubusercontent.com/42123683/189416193-a709291f-be8f-469c-b649-c6201fa86677.jpeg)
