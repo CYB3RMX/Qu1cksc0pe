@@ -6,6 +6,7 @@ import sys
 import time
 import math
 import requests
+import threading
 from subprocess import Popen, PIPE, check_output
 
 try:
@@ -22,6 +23,7 @@ except:
 
 try:
     from rich import print
+    from rich.table import Table
 except:
     print("Error: >rich< module not found.")
     sys.exit(1)
@@ -63,6 +65,29 @@ sc0pe_path = open(".path_handler", "r").read()
 
 # Disabling pyaxmlparser's logs
 pyaxmlparser.core.log.disabled = True
+
+# Initialize a dictionary to store the current state of the folders
+previous_states = {
+    "/files": {
+        "contents": [],
+        "changes": 0
+    },
+    "/shared_prefs": {
+        "contents": [],
+        "changes": 0
+    },
+    "/app_DynamicOptDex": {
+        "contents": [],
+        "changes": 0
+    }
+}
+
+def RecursiveDirScan(targetDir):
+    fnames = []
+    for root, d_names, f_names in os.walk(targetDir):
+        for ff in f_names:
+            fnames.append(os.path.join(root, ff))
+    return fnames
 
 def Downloader(target_os, target_arch):
     local_database = f"{sc0pe_path}/Systems/{target_os}/{target_arch}_{target_os.lower()}.tar.gz"
@@ -122,29 +147,111 @@ def SearchPackageName(package_name, device):
 
 def ProgramTracer(package_name, device):
     print(f"{infoS} Now you can launch the app from your device. So you can see method class/calls etc.")
-    temp = 0
-    sanitizer = ["{", "}", "(", ")", "#", "\"", ":"]
-    san_co = 0
+    temp_act = ""
+    tmp_file = ""
+    tmp_file2 = ""
+    tmp_int = ""
+    tmp_p = ""
+    tmp_role = ""
     try:
         while True:
             logcat_output = check_output(["adb", "-s", f"{device}", "logcat", "-d", package_name + ":D"])
-            m_calls = re.findall(rf"{package_name}.*", logcat_output.decode())
-            if len(m_calls) != temp:
-                for mk in m_calls[-1].split(" "):
-                    if package_name in mk:
-                        for san in sanitizer:
-                            if san in mk:
-                                print(f"[bold blue][CALL] [bold green]{mk.split(san)[0]}")
-                                san_co += 1
-                                break
-                        if san_co == 0:
-                            print(f"[bold blue][CALL] [bold green]{mk}")
-            temp = len(m_calls)
+            payload = logcat_output.decode()
+
+            # File calls for /data/user/0/
+            f_calls = re.findall(r"(/data/user/0/{}[a-zA-Z0-9_\-/]+)".format(package_name), payload)
+            if len(f_calls) != 0:
+                if tmp_file != f_calls[-1]:
+                    print(f"[bold red][FILE CALL] [bold green]{f_calls[-1]}")
+                    tmp_file = f_calls[-1]
+
+            # File calls for /data/data/
+            f_calls = re.findall(r"(/data/data/{}[a-zA-Z0-9_\-/]+)".format(package_name), payload)
+            if len(f_calls) != 0:
+                if tmp_file2 != f_calls[-1]:
+                    print(f"[bold red][FILE CALL] [bold green]{f_calls[-1]}")
+                    tmp_file2 = f_calls[-1]
+
+            # Intent calls
+            i_calls = re.findall(r"android.intent.*", payload)
+            if len(i_calls) != 0:
+                if tmp_int != i_calls[-1]:
+                    print(f"[bold yellow][INTENT CALL] [bold green]{i_calls[-1]}")
+                    tmp_int = i_calls[-1]
+
+            # Provider calls
+            p_calls = re.findall(r"android.provider.*", payload)
+            if len(p_calls) != 0:
+                if tmp_p != p_calls[-1]:
+                    print(f"[bold magenta][PROVIDER CALL] [bold green]{p_calls[-1]}")
+                    tmp_p = p_calls[-1]
+
+            # APP role calls
+            a_calls = re.findall(r"android.app.role.*", payload)
+            if len(a_calls) != 0:
+                if tmp_role != a_calls[-1]:
+                    print(f"[bold pink][APP ROLE CALL] [bold green]{a_calls[-1]}")
+                    tmp_role = a_calls[-1]
+
+            # Method calls
+            m_calls = re.findall(r"ActivityManager:.*cmp={}/.*".format(package_name), payload)
+            if len(m_calls) != 0:
+                if temp_act != m_calls[-1]:
+                    print(f"[bold blue][METHOD CALL] [bold green]{m_calls[-1]}")
+                    temp_act = m_calls[-1]
             time.sleep(0.5)
     except:
         print(f"{infoS} Closing tracer...")
         sys.exit(0)
 
+def Crawler1(target_directory):
+    if os.path.exists(f"{sc0pe_path}/{target_directory}"):
+        # Create a simple table for better view
+        dirTable = Table(title=f"* {target_directory} Directory *", title_justify="center", title_style="bold magenta")
+        dirTable.add_column("File Name", justify="center", style="bold green")
+        dirTable.add_column("Type", justify="center", style="bold green")
+
+        # Crawl the directory
+        dircontent = RecursiveDirScan(f"{sc0pe_path}/{target_directory}")
+        if dircontent != []:
+            print(f"\n[bold cyan][INFO][white] Crawling [bold green]{target_directory} [white]directory.")
+            for file in dircontent:
+                # Checking file types using "file" command
+                file_type = check_output(f"file {file}", shell=True).decode().split(":")[1].strip()
+                dirTable.add_row(file.split(sc0pe_path)[1].split("//")[1], file_type)
+
+            # Print the table
+            print(dirTable)
+
+def CrawlTargetApp(package_name, device):
+    time.sleep(3)
+    target_dirs = ["/files", "/shared_prefs", "/app_DynamicOptDex"]
+
+    # First we need to fetch the directories
+    for di in target_dirs:
+        try:
+            adb_output = check_output(["adb", "-s", f"{device}", "pull", f"/data/data/{package_name}{di}"])
+            if "No such file" in adb_output.decode():
+                continue
+            else:
+                # Get the current state of the folder
+                current_state = os.listdir(os.path.join(f"{sc0pe_path}", di.replace("/", "")))
+                if previous_states[di]['contents'] != current_state:
+                    print(f"[bold cyan][INFO][white] {di} directory fetched.")
+                    previous_states[di]['contents'] = current_state
+                    previous_states[di]['changes'] += 1
+                else:
+                    previous_states[di]['changes'] = 0
+        except:
+            pass
+
+    # Now we can crawl the directories
+    for di in target_dirs:
+        if previous_states[di]['changes'] != 0:
+            Crawler1(di)
+
+    # There is a recursion so we fetch these directories every time
+    CrawlTargetApp(package_name, device)
 
 def AnalyzeAPK(target_file):
     device_index = []
@@ -191,7 +298,12 @@ def AnalyzeAPK(target_file):
                     install_cmdl.wait()
                     if "Success" in str(install_cmdl.communicate()):
                         print(f"{infoS} [bold yellow]{package_name} [white]installed successfully.\n")
-                        ProgramTracer(package_name, list(device_index[dnum].values())[0])
+                        tracer_thread = threading.Thread(target=ProgramTracer, args=(package_name, list(device_index[dnum].values())[0],))
+                        crawler_thread = threading.Thread(target=CrawlTargetApp, args=(package_name, list(device_index[dnum].values())[0],))
+                        tracer_thread.start()
+                        crawler_thread.start()
+                        tracer_thread.join()
+                        crawler_thread.join()
                     else:
                         print(f"{errorS} Installation failed.")
                         print(f"\n{infoS} Trying to uninstall the existing app...\n")
@@ -202,7 +314,12 @@ def AnalyzeAPK(target_file):
                             print(f"{infoS} [bold yellow]{package_name} [white]uninstalled successfully.")
                             AnalyzeAPK(target_file)
                 else:
-                    ProgramTracer(package_name, list(device_index[dnum].values())[0])
+                    tracer_thread = threading.Thread(target=ProgramTracer, args=(package_name, list(device_index[dnum].values())[0],))
+                    crawler_thread = threading.Thread(target=CrawlTargetApp, args=(package_name, list(device_index[dnum].values())[0],))
+                    tracer_thread.start()
+                    crawler_thread.start()
+                    tracer_thread.join()
+                    crawler_thread.join()
 
 def Emulator():
     print(f"{infoS} Performing emulation of: [bold green]{targetFile}")

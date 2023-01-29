@@ -93,7 +93,7 @@ def ParseAndroid(target):
             pass
         elif "Dalvik" in fl or "C++ source" in fl or "C source" in fl or "ELF" in fl or "Bourne-Again shell" in fl or "executable" in fl or "JAR" in fl: # Worth to write on the table
             for fname in empty[fl]:
-                countTable.add_row(f"[bold blink red]{fl}", f"[bold blink red]{fname}")
+                countTable.add_row(f"[bold red]{fl}", f"[bold red]{fname}")
         elif "data" in fl:
             for fname in empty[fl]:
                 countTable.add_row(f"[bold yellow]{fl}", f"[bold yellow]{fname}")
@@ -107,9 +107,9 @@ def ParseAndroid(target):
         if ".json" in fff:
             fileTable.add_row(f"[bold yellow]{fff}")
         elif ".dex" in fff:
-            fileTable.add_row(f"[bold blink red]{fff}")
+            fileTable.add_row(f"[bold red]{fff}")
         elif ".bin" in fff:
-            fileTable.add_row(f"[bold blink cyan]{fff}")
+            fileTable.add_row(f"[bold cyan]{fff}")
         else:
             pass
     print(fileTable)

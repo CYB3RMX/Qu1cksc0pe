@@ -32,10 +32,8 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![2022-12-07_12-37](https://user-images.githubusercontent.com/42123683/206153096-859f2102-f8ec-44fb-bd97-5f135478c098.png)
 
 # Updates
-<b>16/01/2023</b>
-- [X] Added JAR file analysis. Now Qu1cksc0pe can perform source code analysis on JAR files.<br>
-
-https://user-images.githubusercontent.com/42123683/206153248-801eef87-b383-4ee2-8977-0a48c2e3b738.mp4
+<b>29/01/2023</b>
+- [X] Dynamic analysis capability of APK files are improved. Now you can also get file, intent, provider calls etc.<br>
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
