@@ -157,65 +157,9 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 <br><b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --watch```<br>
 ![animation](.animations/emulate.gif)
 
-# Informations about categories
-## Registry
-<b>This category contains functions and strings about:</b>
-- Creating or destroying registry keys.
-- Changing registry keys and logs.
-
-## File
-<b>This category contains functions and strings about:</b>
-- Creating/modifying/infecting/deleting files.
-- Getting information about file contents and filesystems.
-
-## Networking/Web
-<b>This category contains functions and strings about:</b>
-- Communicating with malicious hosts.
-- Downloading malicious files.
-- Sending informations about infected machine and its user.
-
-## Process
-<b>This category contains functions and strings about:</b>
-- Creating/infecting/terminating processes.
-- Manipulating processes.
-
-## Dll/Resource Handling
-<b>This category contains functions and strings about:</b>
-- Handling DLL files and another malware's resource files.
-- Infecting and manipulating DLL files.
-
-## Evasion/Bypassing
-<b>This category contains functions and strings about:</b>
-- Manipulating Windows security policies and bypassing restrictions.
-- Detecting debuggers and doing evasive tricks.
-
-## System/Persistence
-<b>This category contains functions and strings about:</b>
-- Executing system commands.
-- Manipulating system files and system options to get persistence in target systems.
-
-## COMObject
-<b>This category contains functions and strings about:</b>
-- Microsoft's Component Object Model system.
-
-## Cryptography
-<b>This category contains functions and strings about:</b>
-- Encrypting and decrypting files.
-- Creating and destroying hashes.
-
-## Information Gathering
-<b>This category contains functions and strings about:</b>
-- Gathering informations from target hosts like process states, network devices etc.
-
-## Keyboard/Keylogging
-<b>This category contains functions and strings about:</b>
-- Tracking infected machine's keyboard.
-- Gathering information about targets keyboard.
-- Managing input methods etc.
-
-## Memory Management
-<b>This category contains functions and strings about:</b>
-- Manipulating and using target machines memory.
+# References
+- <a href="https://www.linkedin.com/posts/mehmetalikerimoglu_qu1cksc0pe-all-in-one-static-malware-analysis-activity-6853239604439523328-B9dN/?trk=public_profile_like_view&originalSubdomain=tr">The Cyber Security Hub</a>
+- <a href="https://www.kitploit.com/2021/12/top-20-most-popular-hacking-tools-in.html">Kitploit - Top 20 Most Popular Hacking Tools in 2021</a>
 
 # Thanks to
 For most of FRIDA scripts: <i>https://github.com/Ch0pin/</i><br>
