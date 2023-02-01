@@ -160,6 +160,8 @@ decompiler = JADX_BINARY_PATH <-- You must specify this.
 # References
 - <a href="https://www.linkedin.com/posts/mehmetalikerimoglu_qu1cksc0pe-all-in-one-static-malware-analysis-activity-6853239604439523328-B9dN/?trk=public_profile_like_view&originalSubdomain=tr">The Cyber Security Hub</a>
 - <a href="https://www.kitploit.com/2021/12/top-20-most-popular-hacking-tools-in.html">Kitploit - Top 20 Most Popular Hacking Tools in 2021</a>
+- <a href="https://www.csirt.rnsi.mai.gov.pt/content/infosec-news-20211011">CSIRT.MAI</a>
+- <a href="https://vulners.com/kitploit/KITPLOIT:8846405132281597137">Vulners</a>
 
 # Thanks to
 For most of FRIDA scripts: <i>https://github.com/Ch0pin/</i><br>
