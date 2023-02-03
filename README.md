@@ -163,6 +163,7 @@ bash setup.sh
 - <a href="https://www.csirt.rnsi.mai.gov.pt/content/infosec-news-20211011">CSIRT.MAI</a>
 - <a href="https://vulners.com/kitploit/KITPLOIT:8846405132281597137">Vulners</a>
 - <a href="https://www.redpacketsecurity.com/qu1cksc0pe-all-in-one-static-malware-analysis-tool/">RedPacket Security</a>
+- <a href="https://cert.bournemouth.ac.uk/qu1cksc0pe-all-in-one-static-malware-analysis-tool/">Bournemouth University - CERT</a>
 
 # Thanks to
 For most of FRIDA scripts: <i>https://github.com/Ch0pin/</i><br>
