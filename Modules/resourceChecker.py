@@ -110,6 +110,8 @@ def ParseAndroid(target):
             fileTable.add_row(f"[bold red]{fff}")
         elif ".bin" in fff:
             fileTable.add_row(f"[bold cyan]{fff}")
+        elif ".sh" in fff:
+            fileTable.add_row(f"[bold red]{fff}")
         else:
             pass
     print(fileTable)
