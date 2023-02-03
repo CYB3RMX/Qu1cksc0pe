@@ -552,15 +552,16 @@ def GeneralInformation(targetAPK):
     reportz["package_name"] = axmlTime.get_package()
 
     # Gathering play store information
+    print(f"\n{infoS} Sending query to Google Play Store about target application.")
     try:
         playinf = requests.get(f"https://play.google.com/store/apps/details?id={axmlTime.get_package()}")
         if playinf.ok:
-            print("[bold red]>>>>[white] Google Play Store: [bold green]Found")
+            print("[bold red]>>>>[white] Google Play Store: [bold green]Found\n")
             reportz["play_store"] = True
         else:
-            print("[bold red]>>>>[white] Google Play Store: [bold red]Not Found")
+            print("[bold red]>>>>[white] Google Play Store: [bold red]Not Found\n")
     except:
-        print("\n[bold white on red]An error occured while querying to play store!\n")
+        print("\n[bold white on red]An error occured while querying to Google Play Store!\n")
 
     print(f"[bold red]>>>>[white] SDK Version: [bold green]{axmlTime.get_effective_target_sdk_version()}")
     print(f"[bold red]>>>>[white] Main Activity: [bold green]{axmlTime.get_main_activity()}")
