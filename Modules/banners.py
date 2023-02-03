@@ -26,9 +26,9 @@ banner1=f"""
 {cy}\  \/ / |_| |_| || \__/\| |\  \/\__/ / \__/\ |_/ / |   | |___      {gr}@@ {re}@ {gr}@@
 {cy} \_/\_|\___/ \___/\____/\_| \_/\____/ \____/\___/\_|   \____/       {gr}@ @ @
                                                                       @
-                                          {ye}|             |
-  {wh}All in One static malware analysis tool.{ye}| {wh}By CYB3RMX_ {ye}| {wh}Version: {gr}1.7.9
-  {ye}----------------------------------------|             |{wh}\n
+                                   {ye}|             |
+  {wh}All in One malware analysis tool.{ye}| {wh}By CYB3RMX_ {ye}| {wh}Version: {gr}1.7.9
+  {ye}---------------------------------|             |{wh}\n
 """
 banner2=f"""
         {ma}:ooooo/        /ooooo:
@@ -37,7 +37,7 @@ banner2=f"""
      /oodMMdooyMMMMMMMMyoodMMdoo/      {wh}+-----------------------------------------+
    {ma}..dMMMMMy. :MMMMMMMM/  sMMMMMm..    {wh}|              {gr}Qu1cksc0pe                 {wh}|
   {ma}dmmMMMMMMNmmNMMMMMMMMNmmNMMMMMMmmm   {wh}|                                         |
-  {ma}NMMyoodMMMMMMMMMMMMMMMMMMMMdoosMMM   {wh}| {gr}All in One static malware analysis tool.{wh}|
+  {ma}NMMyoodMMMMMMMMMMMMMMMMMMMMdoosMMM   {wh}|    {gr}All in One malware analysis tool.    {wh}|
   {ma}NMM-  sMMMNNNNNNNNNNNNNNNMMy  .MMM   {wh}|                                         |
   {ma}NMM-  sMMyvvvvvvvvvvvvvvsMMy  .MMM   {wh}|             {gr}Version{wh}: {ye}1.7.9              {wh}|
   {ma}ooo.  :ooooooo+    +ooooooo/   ooo   {wh}+-----------------|||||||-----------------+

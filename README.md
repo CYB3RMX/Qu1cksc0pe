@@ -32,6 +32,9 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![2022-12-07_12-37](https://user-images.githubusercontent.com/42123683/206153096-859f2102-f8ec-44fb-bd97-5f135478c098.png)
 
 # Updates
+<b>03/02/2023</b>
+- [X] Added setup script. So now you can setup and install dependencies easily than before.
+
 <b>29/01/2023</b>
 - [X] Dynamic analysis capability of APK files are improved. Now you can also get file, intent, provider calls etc.<br>
 
@@ -65,20 +68,16 @@ https://user-images.githubusercontent.com/42123683/215355436-c6306798-d5c3-4f06-
 - ```qiling``` => <i>Dynamic analysis of binaries.</i>
 - ```pdfminer.six``` => <i>PDF analysis.</i>
 
-<br><b>Installation of python modules</b>: ```pip3 install -r requirements.txt```<br>
-<b>Gathering other dependencies</b>:
-- <i>VirusTotal API Key</i>: ```https://virustotal.com```
-- <i>Strings</i>: ```sudo apt-get install strings```
-- <i>PyExifTool</i>: ```git clone git://github.com/smarnach/pyexiftool.git``` then ```cd pyexiftool && sudo python3 setup.py install```
+<br><b>Other dependencies</b>:
+- ```VirusTotal API Key``` => <i>Performing VirusTotal based analysis.</i>
+- ```Strings``` => <i>Necessary for static analysis.</i>
+- ```PyExifTool``` => <i>Metadata extraction.</i>
+- ```Jadx``` => <i>Performing source code and resource analysis.</i>
 
-**Alert**
-> **You must specify jadx binary path in Systems/Android/libScanner.conf**
-```ini
-[Rule_PATH]
-rulepath = /Systems/Android/YaraRules/
+```bash
+# Just execute the following command to install dependencies. Also it can setup the decompiler for you!!
 
-[Decompiler]
-decompiler = JADX_BINARY_PATH <-- You must specify this.
+bash setup.sh
 ```
 
 # Installation
