@@ -327,7 +327,8 @@
             "android.app.admin.DevicePolicyManager",
             "\"device_policy\"",
             "removeActiveAdmin",
-            "doInBackground"
+            "doInBackground",
+            "android.settings.ACCESSIBILITY_SETTINGS"
         ]
     },
     {
@@ -335,6 +336,7 @@
             "java.net.URL",
             "java.net.URLConnection",
             "loadUrl",
+            "java.net.Socket",
             "javax.net.ssl.HttpsURLConnection",
             "java.net.HttpURLConnection",
             "url.openConnection",
