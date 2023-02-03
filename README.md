@@ -29,7 +29,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ```
 
 # Screenshot
-![2022-12-07_12-37](https://user-images.githubusercontent.com/42123683/206153096-859f2102-f8ec-44fb-bd97-5f135478c098.png)
+![2022-12-07_12-37](https://user-images.githubusercontent.com/42123683/216623521-adb21916-93cd-4c1f-82f2-f9f0a3832f7d.png)
 
 # Updates
 <b>03/02/2023</b>
