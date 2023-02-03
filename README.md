@@ -34,6 +34,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 # Updates
 <b>03/02/2023</b>
 - [X] Added setup script. So now you can setup and install dependencies easily than before.
+- [X] Added ```VNC Implementation``` checking capability to android source code analyzer.
 
 <b>29/01/2023</b>
 - [X] Dynamic analysis capability of APK files are improved. Now you can also get file, intent, provider calls etc.<br>

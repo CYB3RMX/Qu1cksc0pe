@@ -159,6 +159,20 @@
         ]
     },
     {
+        "VNC Implementation": [
+            "vncConnectReverse",
+            "vncGetFramebufferHeight",
+            "vncGetFramebufferWidth",
+            "vncNewFramebuffer",
+            "vncStartServer",
+            "vncStopServer",
+            "vncUpdateFramebuffer",
+            "vncConnectReverse",
+            "VncIsOn",
+            "vnc_permission"
+        ]
+    },
+    {
         "Keylogging": [
             "lc.kra.system.keyboard.GlobalKeyboardHook",
             "addKeyListener",
@@ -174,7 +188,9 @@
             "CameraInfo",
             "Camera.open",
             "CameraManager.this.releaseCamera",
-            "CameraManager.this.sendPhoto"
+            "CameraManager.this.sendPhoto",
+            "video_recorders",
+            "VideoRecordIsOn"
         ]
     },
     {
@@ -185,7 +201,9 @@
             "phoneNo",
             "contactsList",
             "contact.put",
-            "ContactsManager"
+            "ContactsManager",
+            "ContactsContract.CommonDataKinds.Phone.CONTENT_URI",
+            "android.provider.ContactsContract"
         ]
     },
     {
@@ -207,7 +225,7 @@
         ]
     },
     {
-        "Information Gathering": [
+        "Information Gathering/Stealing": [
             "telephonyManager.getNetworkCountryIso",
             "getActiveNetworkInfo",
             "getAllCellInfo",
@@ -233,7 +251,10 @@
             "getWifiData",
             "getLastKnownLocation",
             "android.net.wifi.ScanResult",
-            "isWifiEnabled"
+            "isWifiEnabled",
+            "getAllNetworkInfo",
+            "android.app.KeyguardManager",
+            "inKeyguardRestrictedInputMode"
         ]
     },
     {

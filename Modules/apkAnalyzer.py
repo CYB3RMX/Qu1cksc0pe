@@ -78,9 +78,9 @@ if sys.argv[3] != "JAR":
 
 # Categories
 categs = {
-    "Banker": [], "SMS Bot": [], "Base64": [], "Keylogging": [],
+    "Banker": [], "SMS Bot": [], "Base64": [], "VNC Implementation": [], "Keylogging": [],
     "Camera": [], "Phone Calls": [], "Microphone Interaction": [],
-    "Information Gathering": [], "Database": [], "File Operations": [],
+    "Information Gathering/Stealing": [], "Database": [], "File Operations": [],
     "Windows Operations": [],
     "Persistence/Managing": [], "Network/Internet": [], "SSL Pining/Certificate Handling": [],
     "Dynamic Class/Dex Loading": [], "Java Reflection": [], "Root Detection": [],
