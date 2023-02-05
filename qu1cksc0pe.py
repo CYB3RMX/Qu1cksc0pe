@@ -458,12 +458,12 @@ def Qu1cksc0pe():
 try:
     Qu1cksc0pe()
     # Cleaning up...
-    junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt", "TargetAPK/", "TargetSource/", "files/", "shared_prefs/", "app_DynamicOptDex/"]
+    junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt", "TargetAPK/", "TargetSource/"]
     for junk in junkFiles:
         if os.path.exists(junk):
             os.system(f"rm -rf {junk}")
 except:
-    junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt", "TargetAPK/", "TargetSource/", "files/", "shared_prefs/", "app_DynamicOptDex/"]
+    junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt", "TargetAPK/", "TargetSource/"]
     for junk in junkFiles:
         if os.path.exists(junk):
             os.system(f"rm -rf {junk}")

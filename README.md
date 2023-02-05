@@ -35,14 +35,14 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![2022-12-07_12-37](https://user-images.githubusercontent.com/42123683/216623521-adb21916-93cd-4c1f-82f2-f9f0a3832f7d.png)
 
 # Updates
+<b>05/02/2023</b>
+- [X] Added statistics table to android source code analyzer.
+
+https://user-images.githubusercontent.com/42123683/216818740-ce8596f0-6cef-4d0b-adbb-0b584fe6b806.mp4
+
 <b>03/02/2023</b>
 - [X] Added setup script. So now you can setup and install dependencies easily than before.
 - [X] Added ```VNC Implementation``` checking capability to android source code analyzer.
-
-<b>29/01/2023</b>
-- [X] Dynamic analysis capability of APK files are improved. Now you can also get file, intent, provider calls etc.<br>
-
-https://user-images.githubusercontent.com/42123683/215355436-c6306798-d5c3-4f06-853b-5b1cacaf1a0b.mp4
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
