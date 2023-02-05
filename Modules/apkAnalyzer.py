@@ -256,15 +256,29 @@ def MultiYaraScanner(targetAPK):
         print("[blink]Decompiler([bold green]JADX[white])[/blink] [white]not found. Skipping...")
 
 def PrintCategs():
+    # Table for statistics about categories and components
+    statTable = Table(title="* Statistics About Categories and Components *", title_style="bold magenta", title_justify="center")
+    statTable.add_column("[bold red]Category", justify="center")
+    statTable.add_column("[bold red]Number of Found Patterns", justify="center")
+    statTable.add_column("[bold red]Number of Files", justify="center")
+
+    # Parsing area
     for cat in categs:
         if categs[cat] != []:
+            file_holder = []
             sanalTable = Table(title=f"* {cat} *", title_style="bold green", title_justify="center")
             sanalTable.add_column("Code/Pattern", justify="center")
             sanalTable.add_column("File", justify="center")
             for element in categs[cat]:
                 sanalTable.add_row(f"[bold yellow]{element[0]}", f"[bold cyan]{element[1]}")
+                if element[1] not in file_holder:
+                    file_holder.append(element[1])
             print(sanalTable)
+            statTable.add_row(cat, str(len(categs[cat])), str(len(file_holder)))
             print(" ")
+
+    # Print statistics table
+    print(statTable)
 
 # Source code analysis TODO: look for better algorithm!!
 def ScanSource(targetAPK):
