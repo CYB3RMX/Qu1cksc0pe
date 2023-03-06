@@ -190,7 +190,8 @@
             "CameraManager.this.releaseCamera",
             "CameraManager.this.sendPhoto",
             "video_recorders",
-            "VideoRecordIsOn"
+            "VideoRecordIsOn",
+            "android.permission.CAMERA"
         ]
     },
     {
@@ -203,7 +204,12 @@
             "contact.put",
             "ContactsManager",
             "ContactsContract.CommonDataKinds.Phone.CONTENT_URI",
-            "android.provider.ContactsContract"
+            "android.provider.ContactsContract",
+            "android.intent.action.NEW_OUTGOING_CALL",
+            "android.intent.extra.PHONE_NUMBER",
+            "incoming_number",
+            "android.permission.PROCESS_OUTGOING_CALLS",
+            "android.permission.CALL_PHONE"
         ]
     },
     {
@@ -221,7 +227,8 @@
             "MicManager.sendVoice",
             "MicManager.audiofile.delete",
             "VoiceRecorder",
-            "javax.sound.sampled.TargetDataLine"
+            "javax.sound.sampled.TargetDataLine",
+            "android.permission.RECORD_AUDIO"
         ]
     },
     {
@@ -349,7 +356,10 @@
             "\"device_policy\"",
             "removeActiveAdmin",
             "doInBackground",
-            "android.settings.ACCESSIBILITY_SETTINGS"
+            "android.settings.ACCESSIBILITY_SETTINGS",
+            "android.app.action.ADD_DEVICE_ADMIN",
+            "android.app.extra.DEVICE_ADMIN",
+            "enabled_accessibility_services"
         ]
     },
     {
@@ -480,7 +490,8 @@
             "\"sh\"",
             "\"ps\"",
             "{\"sh\", \"-c\",",
-            "\"tar -czvf /sdcard/\""
+            "\"tar -czvf /sdcard/\"",
+            "pm install -r"
         ]
     }
 ]
