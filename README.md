@@ -36,7 +36,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 
 # Updates
 <b>07/03/2023</b>
-- [X] ```Android Malware Family``` detection module is improved. Now Qu1cksc0pe can detect possible ```SpyNote``` malware samples.
+- [X] ```Android Malware Family``` detection module is improved. Now Qu1cksc0pe can detect possible ```SpyNote``` malware samples.<br>
 ![spynote](https://user-images.githubusercontent.com/42123683/223282923-4d8d8060-47a1-4899-bbc5-637e195047a3.png)
 
 
