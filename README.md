@@ -23,7 +23,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps us
 | Linux Executables (.elf, .bin) | Static, Dynamic |
 | MacOS Executables (mach-o) | Static |
 | Android Files (.apk, .jar) | Static, Dynamic(for now .apk only) |
-| Golang Binaries | Static |
+| Golang Binaries (Linux) | Static |
 | Document Files (.doc, .docx, .pdf, .xls, .xlsx) | Static |
 
 # Usage
@@ -35,14 +35,15 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![2022-12-07_12-37](https://user-images.githubusercontent.com/42123683/216623521-adb21916-93cd-4c1f-82f2-f9f0a3832f7d.png)
 
 # Updates
+<b>07/03/2023</b>
+- [X] ```Android Malware Family``` detection module is improved. Now Qu1cksc0pe can detect possible ```SpyNote``` malware samples.
+![spynote](https://user-images.githubusercontent.com/42123683/223282923-4d8d8060-47a1-4899-bbc5-637e195047a3.png)
+
+
 <b>05/02/2023</b>
 - [X] Added statistics table to android source code analyzer.
 
 https://user-images.githubusercontent.com/42123683/216818740-ce8596f0-6cef-4d0b-adbb-0b584fe6b806.mp4
-
-<b>03/02/2023</b>
-- [X] Added setup script. So now you can setup and install dependencies easily than before.
-- [X] Added ```VNC Implementation``` checking capability to android source code analyzer.
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)

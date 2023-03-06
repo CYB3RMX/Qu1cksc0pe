@@ -87,14 +87,6 @@ categs = {
     "Cryptography": [], "Command Execution": []
 }
 
-# Scores
-scoreDict = {
-    "Hydra": 0,
-    "FluBot": 0,
-    "MoqHao": 0,
-    "SharkBot": 0
-}
-
 # Parsing date
 today = date.today()
 dformat = today.strftime("%d-%m-%Y")
@@ -121,7 +113,6 @@ reportz = {
     "libraries": [],
     "signatures": [],
     "permissions": [],
-    "malware_family": "",
     "compiler_info": "",
     "anti_vm": [],
     "anti_debug": [],
@@ -357,57 +348,6 @@ def PerformJAR(targetAPK):
             # Print area
             PrintCategs()
 
-def ParseFlu(arrayz):
-    counter = 0
-    for el in arrayz:
-        if el[0:2] == ".p" and len(el) == 10:
-            counter += 1
-    return counter
-
-# Analyzer for malware family detection
-def CheckFamily(targetApk):
-    # Parsing target apk file
-    checktarg = pyaxmlparser.APK(targetApk)
-    content = checktarg.get_activities()
-    content += checktarg.get_services()
-    content += checktarg.get_receivers()
-
-    # Gathering data
-    fam_data = json.load(open(f"{sc0pe_path}/Systems/Android/family.json"))
-
-    # Family: Hydra, MoqHao, SharkBot
-    for key in fam_data:
-        try:
-            for act_key in fam_data[key]:
-                for dat in fam_data[key][act_key]:
-                    actreg = re.findall(dat, str(content))
-                    if actreg != []:
-                        scoreDict[key] += 1
-        except:
-            continue
-
-    # Family: FluBot
-        # Checking activity name patterns
-    act = re.findall(r".p[a-z0-9]{0,9}", str(checktarg.get_activities()))
-    if ParseFlu(act) != 0 and ParseFlu(act) == len(checktarg.get_activities()):
-        scoreDict["FluBot"] += 1
-        # Checking service name patterns
-    ser = re.findall(r".p[a-z0-9]{0,9}", str(checktarg.get_services()))
-    if ParseFlu(ser) != 0 and ParseFlu(ser) == len(checktarg.get_services()):
-        scoreDict["FluBot"] += 1
-        # Checking receiver name patterns
-    rec = re.findall(r".p[a-z0-9]{0,9}", str(checktarg.get_receivers()))
-    if ParseFlu(rec) != 0 and ParseFlu(rec) == len(checktarg.get_receivers()):
-        scoreDict["FluBot"] += 1
-
-    # Checking statistics
-    sort_score = sorted(scoreDict.items(), key=lambda ff: ff[1], reverse=True)
-    if sort_score[0][1] != 0:
-        print(f"[bold red]>>>[white] Possible Malware Family: [bold green]{sort_score[0][0]}[white]")
-        reportz["malware_family"] = sort_score[0][0]
-    else:
-        print(f"{errorS} Couldn\'t detect malware family.")
-
 # Scan files with quark-engine
 def Quarked(targetAPK):
     not_found_indicator = 0
@@ -621,10 +561,6 @@ if __name__ == '__main__':
         # Deep scanner
         DeepScan(parsed)
 
-        # Malware family detection
-        print(f"\n{infoS} Performing malware family detection...")
-        CheckFamily(targetApk=targetAPK)
-
         # Yara matches
         print(f"\n{infoS} Performing YARA rule matching...")
         AndroLibScanner(target_file=targetAPK)
@@ -636,6 +572,11 @@ if __name__ == '__main__':
         except:
             print("\n[bold white on red]An error occured while decompiling the file. Please check configuration file and modify the [blink]Decompiler[/blink] option.")
             print(f"[bold white]>>> Configuration file path: [bold green]{sc0pe_path}/Systems/Android/libScanner.conf")
+
+        # Malware family detection
+        print(f"\n{infoS} Performing malware family detection. Please wait!!")
+        command = f"python3 {sc0pe_path}/Modules/andro_familydetect.py {targetAPK}"
+        os.system(command)
 
         # Source code analysis zone
         print(f"\n{infoS} Performing source code analysis...")
