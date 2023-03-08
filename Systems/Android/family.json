@@ -55,5 +55,24 @@
                 ".MyReceiverMMS",
                 ".aaBootReceiver"
             ]
+        },
+        "Sova": {
+            "Activities": [
+                ".XiaomiLoadActivity",
+                ".AdminActivity",
+                ".AccessibilityActivity"
+            ],
+            "Services": [
+                ".HeadlessSmsSendService",
+                ".OverlayService",
+                ".AppAccessibilityService",
+                ".WorkerService",
+                ".EncryptorService"
+            ],
+            "Receivers": [
+                ".MyAdminReceiver",
+                ".SmsReceiver",
+                ".MmsReceiver"
+            ]
         }
 }

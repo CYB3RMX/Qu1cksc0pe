@@ -35,15 +35,13 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![2022-12-07_12-37](https://user-images.githubusercontent.com/42123683/216623521-adb21916-93cd-4c1f-82f2-f9f0a3832f7d.png)
 
 # Updates
+<b>08/03/2023</b>
+- [X] Qu1cksc0pe can detect ```Sova``` malware family samples.<br>
+![sova](https://user-images.githubusercontent.com/42123683/223711590-79da50fc-f36e-4478-8831-8f5e261c006f.png)
+
 <b>07/03/2023</b>
 - [X] ```Android Malware Family``` detection module is improved. Now Qu1cksc0pe can detect possible ```SpyNote``` malware samples.<br>
 ![spynote](https://user-images.githubusercontent.com/42123683/223282923-4d8d8060-47a1-4899-bbc5-637e195047a3.png)
-
-
-<b>05/02/2023</b>
-- [X] Added statistics table to android source code analyzer.
-
-https://user-images.githubusercontent.com/42123683/216818740-ce8596f0-6cef-4d0b-adbb-0b584fe6b806.mp4
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)

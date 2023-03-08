@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import json
+import hashlib
 
 try:
     from rich import print
@@ -29,7 +30,8 @@ scoreDict = {
     "FluBot": 0,
     "MoqHao": 0,
     "SharkBot": 0,
-    "SpyNote": 0
+    "SpyNote": 0,
+    "Sova": 0
 }
 
 # Gathering Qu1cksc0pe path variable
@@ -54,6 +56,15 @@ def RecursiveDirScan(targetDir):
         for ff in f_names:
             fnames.append(os.path.join(root, ff))
     return fnames
+
+# Function for computing hashes
+def GetSHA256(file_name):
+    hash_256 = hashlib.sha256()
+    with open(file_name, "rb") as ff:
+        for chunk in iter(lambda: ff.read(4096), b""):
+            hash_256.update(chunk)
+    ff.close()
+    return str(hash_256.hexdigest())
 
 # Function for detecting: Hydra MoqHao SharkBot families
 def HyMoqShark():
@@ -128,6 +139,38 @@ def SpyNote():
     if occount != 0:
         scoreDict["SpyNote"] += 1
 
+# Fnction for detecting: Sova family
+def Sova():
+    # Analyzing resources
+    resource_data = {
+        "nointernet.html": "9d647b7f81404d0744ebd1ead58bf8a6f3b6beb0a98583a907a00b38ff9843c2",
+        "unique.html": "1b5f986ddee68791fffe37baa4c551feae8016a1b3964ede7e49ec697c3ce26b"
+    }
+
+    # Checking for existence
+    ex_count = 0
+    expected = ["TargetAPK/resources/assets/nointernet.html", "TargetAPK/resources/assets/unique.html"]
+    for fl in expected:
+        if os.path.exists(fl):
+            target_hash = GetSHA256(fl)
+            if target_hash == resource_data[fl.split("/")[3]]:
+                ex_count += 1
+    if ex_count == 2:
+        scoreDict["Sova"] += 1
+
+    # After that we also must checking the activities, services, receivers etc.
+    name_count = 0
+    for act_key in fam_data["Sova"]:
+        try:
+            for value in fam_data["Sova"][act_key]:
+                chk = re.findall(value, str(content))
+                if chk != []:
+                    name_count += 1
+        except:
+            continue
+    if name_count == 11:
+        scoreDict["Sova"] += 1
+
 
 # Analyzer for malware family detection
 def CheckFamily():
@@ -138,8 +181,10 @@ def CheckFamily():
     FluBot()
 
     # Detect: SpyNote
-    if os.path.exists("TargetAPK/"):
-        SpyNote()
+    SpyNote()
+
+    # Detect: Sova
+    Sova()
 
     # Checking statistics
     sort_score = sorted(scoreDict.items(), key=lambda ff: ff[1], reverse=True)
@@ -149,4 +194,5 @@ def CheckFamily():
         print(f"{errorS} Couldn\'t detect malware family.")
 
 # Execute
-CheckFamily()
+if os.path.exists("TargetAPK/"):
+    CheckFamily()
