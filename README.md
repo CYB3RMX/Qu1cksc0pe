@@ -35,13 +35,13 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![2022-12-07_12-37](https://user-images.githubusercontent.com/42123683/216623521-adb21916-93cd-4c1f-82f2-f9f0a3832f7d.png)
 
 # Updates
+<b>21/03/2023</b>
+- [X] Qu1cksc0pe now works in python virtual environment. This update is for prevent module conflict and version issues.
+- [X] Added new YARA rules.
+
 <b>08/03/2023</b>
 - [X] Qu1cksc0pe can detect ```Sova``` malware family samples.<br>
 ![sova](https://user-images.githubusercontent.com/42123683/223711590-79da50fc-f36e-4478-8831-8f5e261c006f.png)
-
-<b>07/03/2023</b>
-- [X] ```Android Malware Family``` detection module is improved. Now Qu1cksc0pe can detect possible ```SpyNote``` malware samples.<br>
-![spynote](https://user-images.githubusercontent.com/42123683/223282923-4d8d8060-47a1-4899-bbc5-637e195047a3.png)
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
@@ -78,8 +78,15 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 - ```Jadx``` => <i>Performing source code and resource analysis.</i>
 
 ```bash
-# Just execute the following command to install dependencies. Also it can setup the decompiler for you!!
+# First: You need to setup a virtual environment. Don't worry Qu1cksc0pe will handle this :)
+python3 qu1cksc0pe.py # This command will setup virtual environment automatically.
 
+# Second: Activating virtual environment. Qu1cksc0pe will tell you how to activating it
+# In case of you can use these commands:
+source sc0pe_venv/bin/activate.fish # This command is for Fish shell users
+source sc0pe_venv/bin/activate # This command is for Bash/Zsh shell users
+
+# Run setup.sh in virtual environment
 bash setup.sh
 ```
 
