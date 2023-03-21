@@ -100,10 +100,18 @@ else:
             sys.exit(1)
     else:
         print(f"{infoS} Creating a virtual environment...")
-        os.system("virtualenv -p python3 sc0pe_venv")
-        print(f"{foundS} Virtual environment created.")
-        os.system("python3 qu1cksc0pe.py")
-        sys.exit(0)
+        if os.path.exists(f"/home/{username}/.local/bin/virtualenv"):
+            os.system("virtualenv -p python3 sc0pe_venv")
+            print(f"{foundS} Virtual environment created.")
+            os.system("python3 qu1cksc0pe.py")
+            sys.exit(0)
+        else:
+            print(f"{errorS} Error: >virtualenv< not found. Downloading it for you...")
+            os.system("pip3 install virtualenv")
+            os.system("virtualenv -p python3 sc0pe_venv")
+            print(f"{foundS} Virtual environment created.")
+            os.system("python3 qu1cksc0pe.py")
+            sys.exit(0)
 
 # Banner
 os.system(f"python3 {sc0pe_path}/Modules/banners.py")
