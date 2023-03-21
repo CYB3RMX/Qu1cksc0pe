@@ -14,7 +14,6 @@ except:
 # Testing rich existence
 try:
     from rich import print
-    from rich.table import Table
 except:
     print("Error: >rich< module not found.")
     sys.exit(1)
@@ -79,6 +78,32 @@ else:
     libscan["Rule_PATH"]["rulepath"] = f"{sc0pe_path}/Systems/Android/YaraRules/"
     with open("Systems/Android/libScanner.conf", "w") as ff:
         libscan.write(ff)
+
+# Check if Qu1cksc0pe running in virtualenv
+print(f"{infoS} Checking if Qu1cksc0pe is running in virtual environment...")
+if sys.prefix != sys.base_prefix:
+    print(f"{foundS} Virtual environment detected. Here you go!\n")
+else:
+    print(f"{errorS} Virtual environment not detected. Don\'t worry I will handle it...")
+    if os.path.exists("sc0pe_venv"):
+        # Activating virtual environment
+        if os.environ["SHELL"] == "/usr/bin/fish":
+            print(f"\n{infoS} Execute the following command to activate virtual environment. And then run Qu1cksc0pe!")
+            print("[bold magenta]>>>[white] Command: [bold green]source sc0pe_venv/bin/activate.fish")
+            sys.exit(0)
+        elif os.environ["SHELL"] == "/usr/bin/bash" or os.environ["SHELL"] == "/bin/bash" or os.environ["SHELL"] == "/usr/bin/zsh":
+            print(f"\n{infoS} Execute the following command to activate virtual environment. And then run Qu1cksc0pe!")
+            print("[bold magenta]>>>[white] Command: [bold green]source sc0pe_venv/bin/activate")
+            sys.exit(0)
+        else:
+            print(f"{errorS} Shell type not detected!")
+            sys.exit(1)
+    else:
+        print(f"{infoS} Creating a virtual environment...")
+        os.system("virtualenv -p python3 sc0pe_venv")
+        print(f"{foundS} Virtual environment created.")
+        os.system("python3 qu1cksc0pe.py")
+        sys.exit(0)
 
 # Banner
 os.system(f"python3 {sc0pe_path}/Modules/banners.py")
