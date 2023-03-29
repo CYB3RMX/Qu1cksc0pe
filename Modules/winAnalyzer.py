@@ -36,12 +36,17 @@ fileName = str(sys.argv[1])
 
 #--------------------------------------------- Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
+errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 #--------------------------------------------- Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 # Using helper library
-from lib.sc0pe_helper import Sc0peHelper
-sc0pehelper = Sc0peHelper(sc0pe_path)
+if os.path.exists("/usr/lib/python3/dist-packages/sc0pe_helper.py"):
+    from sc0pe_helper import Sc0peHelper
+    sc0pehelper = Sc0peHelper(sc0pe_path)
+else:
+    print(f"{errorS} [bold green]sc0pe_helper[white] library not installed. You need to execute [bold green]setup.sh[white] script!")
+    sys.exit(1)
 
 #--------------------------------------------- Gathering all function imports from binary
 zep = zepu1chr3.Binary()
@@ -258,7 +263,7 @@ def Analyzer():
 
     # Yara rule match
     print(f"\n{infoS} Performing YARA rule matching...")
-    sc0pehelper.yara_rule_scanner(fileName, config_path=f"{sc0pe_path}/Systems/Windows/windows.conf", report_object=winrep)
+    sc0pehelper.yara_rule_scanner("windows", fileName, config_path=f"{sc0pe_path}/Systems/Windows/windows.conf", report_object=winrep)
 
     # Gathering information about sections
     peStatistics = Table(title="* Informations About Sections *", title_style="bold italic cyan", title_justify="center")

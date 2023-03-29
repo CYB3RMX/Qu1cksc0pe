@@ -38,6 +38,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 <b>29/03/2023</b>
 - [X] Python virtual environment usage is now optional. You can simply execute: ```python3 qu1cksc0pe.py --setup_venv``` command to use.
 - [X] Bugs fixed and code refactored.
+- [X] Fixed bugs about installation.
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)

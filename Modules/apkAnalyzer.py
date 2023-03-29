@@ -64,8 +64,12 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 # Using helper library
-from lib.sc0pe_helper import Sc0peHelper
-sc0pehelper = Sc0peHelper(sc0pe_path)
+if os.path.exists("/usr/lib/python3/dist-packages/sc0pe_helper.py"):
+    from sc0pe_helper import Sc0peHelper
+    sc0pehelper = Sc0peHelper(sc0pe_path)
+else:
+    print(f"{errorS} [bold green]sc0pe_helper[white] library not installed. You need to execute [bold green]setup.sh[white] script!")
+    sys.exit(1)
 
 # necessary variables
 danger = 0
@@ -196,7 +200,7 @@ def MultiYaraScanner(targetAPK):
             for extens in fnames:
                 if os.path.splitext(extens)[1] == ".so":
                     lib_files_indicator += 1
-                    sc0pehelper.yara_rule_scanner(extens, config_path=f"{sc0pe_path}/Systems/Android/libScanner.conf", report_object=reportz)
+                    sc0pehelper.yara_rule_scanner("android", extens, config_path=f"{sc0pe_path}/Systems/Android/libScanner.conf", report_object=reportz)
 
         if lib_files_indicator == 0:
             print("\n[bold white on red]Not any library files found for analysis!\n")
@@ -520,7 +524,7 @@ if __name__ == '__main__':
 
         # Yara matches
         print(f"\n{infoS} Performing YARA rule matching...")
-        sc0pehelper.yara_rule_scanner(targetAPK, config_path=f"{sc0pe_path}/Systems/Android/libScanner.conf", report_object=reportz)
+        sc0pehelper.yara_rule_scanner("android", targetAPK, config_path=f"{sc0pe_path}/Systems/Android/libScanner.conf", report_object=reportz)
 
         # Decompiling and scanning libraries
         print(f"\n{infoS} Performing library analysis...")
