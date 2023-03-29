@@ -30,6 +30,13 @@ except:
     print("Error: >pygore< module not found.")
     sys.exit(1)
 
+# Gathering Qu1cksc0pe path variable
+sc0pe_path = open(".path_handler", "r").read()
+
+# Using helper library
+from lib.sc0pe_helper import Sc0peHelper
+sc0pehelper = Sc0peHelper(sc0pe_path)
+
 # Getting name of the file for statistics
 fileName = str(sys.argv[1])
 
@@ -38,9 +45,6 @@ binary = lief.parse(fileName)
 
 #--------------------------------------------- Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
-
-# Gathering Qu1cksc0pe path variable
-sc0pe_path = open(".path_handler", "r").read()
 
 # Wordlists
 # All strings
@@ -131,33 +135,6 @@ allStrings = []
 for ssym in binary.symbols:
     allStrings.append(ssym.name)
 
-# Hash calculator
-def HashCalculator():
-    hashmd5 = hashlib.md5()
-    hashsha1 = hashlib.sha1()
-    hashsha256 = hashlib.sha256()
-    try:
-        with open(fileName, "rb") as ff:
-            for chunk in iter(lambda: ff.read(4096), b""):
-                hashmd5.update(chunk)
-        ff.close()
-        with open(fileName, "rb") as ff:
-            for chunk in iter(lambda: ff.read(4096), b""):
-                hashsha1.update(chunk)
-        ff.close()
-        with open(fileName, "rb") as ff:
-            for chunk in iter(lambda: ff.read(4096), b""):
-                hashsha256.update(chunk)
-        ff.close()
-    except:
-        pass
-    print(f"[bold red]>>>>[white] MD5: [bold green]{hashmd5.hexdigest()}")
-    print(f"[bold red]>>>>[white] SHA1: [bold green]{hashsha1.hexdigest()}")
-    print(f"[bold red]>>>>[white] SHA256: [bold green]{hashsha256.hexdigest()}")
-    linrep["hash_md5"] = hashmd5.hexdigest()
-    linrep["hash_sha1"] = hashsha1.hexdigest()
-    linrep["hash_sha256"] = hashsha256.hexdigest()
-
 # Section content parser
 def ContentParser(sec_name, content_array):
     cont = ""
@@ -186,47 +163,6 @@ def SecCheck():
     linrep["security"]["NX"] = binary.has_nx
     linrep["security"]["PIE"] = binary.is_pie
 
-def LinuxYara(target_file):
-    yara_match_indicator = 0
-    # Parsing config file to get rule path
-    conf = configparser.ConfigParser()
-    conf.read(f"{sc0pe_path}/Systems/Linux/linux.conf")
-    rule_path = conf["Rule_PATH"]["rulepath"]
-    finalpath = f"{sc0pe_path}/{rule_path}"
-    allRules = os.listdir(finalpath)
-
-    # This array for holding and parsing easily matched rules
-    yara_matches = []
-    for rul in allRules:
-        try:
-            rules = yara.compile(f"{finalpath}{rul}")
-            tempmatch = rules.match(target_file)
-            if tempmatch != []:
-                for matched in tempmatch:
-                    if matched.strings != []:
-                        if matched not in yara_matches:
-                            yara_matches.append(matched)
-        except:
-            continue
-
-    # Printing area
-    if yara_matches != []:
-        yara_match_indicator += 1
-        for rul in yara_matches:
-            yaraTable = Table()
-            print(f">>> Rule name: [i][bold magenta]{rul}[/i]")
-            yaraTable.add_column("Offset", style="bold green", justify="center")
-            yaraTable.add_column("Matched String/Byte", style="bold green", justify="center")
-            linrep["matched_rules"].append({str(rul): []})
-            for mm in rul.strings:
-                yaraTable.add_row(f"{hex(mm[0])}", f"{str(mm[2])}")
-                linrep["matched_rules"][-1][str(rul)].append({"offset": hex(mm[0]) ,"matched_pattern": mm[2].decode("ascii")})
-            print(yaraTable)
-            print(" ")
-
-    if yara_match_indicator == 0:
-        print(f"[blink bold white on red]Not any rules matched for {target_file}")
-
 # General information
 def GeneralInformation():
     print(f"{infoS} General Informations about [bold green]{fileName}")
@@ -245,7 +181,7 @@ def GeneralInformation():
     linrep["binary_entrypoint"] = str(hex(binary.entrypoint))
     linrep["number_of_sections"] = len(binary.sections)
     linrep["number_of_segments"] = len(binary.segments)
-    HashCalculator()
+    sc0pehelper.hash_calculator(fileName, linrep)
     SecCheck()
 
 # Gathering sections
@@ -399,7 +335,7 @@ def Analyzer():
 
     # Perform YARA scan
     print(f"\n{infoS} Performing YARA rule matching...")
-    LinuxYara(fileName)
+    sc0pehelper.yara_rule_scanner(fileName, config_path=f"{sc0pe_path}/Systems/Linux/linux.conf", report_object=linrep)
 
     # Get sections
     SectionParser()
@@ -464,9 +400,7 @@ def Analyzer():
 
     # Print reports
     if sys.argv[2] == "True":
-        with open("sc0pe_linux_report.json", "w") as rp_file:
-            json.dump(linrep, rp_file, indent=4)
-        print("\n[bold magenta]>>>[bold white] Report file saved into: [bold blink yellow]sc0pe_linux_report.json\n")
+        sc0pehelper.report_writer("linux", linrep)
 
     # Look for interesting things
     if "runtime.goexit" in getStrings and "runtime.gopanic" in getStrings:

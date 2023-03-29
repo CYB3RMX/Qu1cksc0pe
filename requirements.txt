@@ -8,7 +8,7 @@ oletools
 pefile
 quark-engine==21.8.1
 pyaxmlparser
-yara-python
+yara-python==3.11.0
 prompt_toolkit==3.0.19
 frida
 lief

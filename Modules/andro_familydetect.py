@@ -36,6 +36,9 @@ scoreDict = {
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
+# Using helper library
+from lib.sc0pe_helper import Sc0peHelper
+sc0pehelper = Sc0peHelper(sc0pe_path)
 
 # Gathering data
 fam_data = json.load(open(f"{sc0pe_path}/Systems/Android/family.json"))
@@ -48,14 +51,6 @@ checktarg = pyaxmlparser.APK(targetApk)
 content = checktarg.get_activities()
 content += checktarg.get_services()
 content += checktarg.get_receivers()
-
-# Helper function for code analyzer
-def RecursiveDirScan(targetDir):
-    fnames = []
-    for root, d_names, f_names in os.walk(targetDir):
-        for ff in f_names:
-            fnames.append(os.path.join(root, ff))
-    return fnames
 
 # Function for computing hashes
 def GetSHA256(file_name):
@@ -107,7 +102,7 @@ def FluBot():
 # Function for detecting: SpyNote family
 def SpyNote():
     # Checking for file names
-    source_files = RecursiveDirScan("TargetAPK/sources/")
+    source_files = sc0pehelper.recursive_dir_scan(target_directory="TargetAPK/sources/")
     occur1 = re.findall(r"SensorRestarterBroadcastReceiver", str(source_files))
     occur2 = re.findall(r"_ask_remove_", str(source_files))
     occur3 = re.findall(r"SimpleIME", str(source_files))

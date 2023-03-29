@@ -35,7 +35,6 @@ except:
 try:
     from pdfminer.pdfparser import PDFParser
     from pdfminer.pdfdocument import PDFDocument
-    from pdfminer.pdftypes import resolve1
 except:
     print("Error: >pdfminer< module not found.")
     sys.exit(1)
@@ -59,7 +58,7 @@ class DocumentAnalyzer:
 
     # Checking for file extension
     def CheckExt(self):
-        if self.targetFile.endswith(".doc") or self.targetFile.endswith(".docx") or self.targetFile.endswith(".xls") or self.targetFile.endswith(".xlsx"):
+        if self.targetFile.endswith(".doc") or self.targetFile.endswith(".docx") or self.targetFile.endswith(".xls") or self.targetFile.endswith(".xlsx") or self.targetFile.endswith(".docm") or self.targetFile.endswith(".xlsm"):
             return "docscan"
         elif self.targetFile.endswith(".pdf"):
             return "pdfscan"

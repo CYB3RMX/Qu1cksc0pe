@@ -73,45 +73,9 @@ else:
     path_handler.close()
     libscan = configparser.ConfigParser()
 
-    # Parsing android libscanner configuration file
-    libscan.read("Systems/Android/libScanner.conf")
-    libscan["Rule_PATH"]["rulepath"] = f"{sc0pe_path}/Systems/Android/YaraRules/"
-    with open("Systems/Android/libScanner.conf", "w") as ff:
-        libscan.write(ff)
-
-# Check if Qu1cksc0pe running in virtualenv
-print(f"{infoS} Checking if Qu1cksc0pe is running in virtual environment...")
-if sys.prefix != sys.base_prefix:
-    print(f"{foundS} Virtual environment detected. Here you go!\n")
-else:
-    print(f"{errorS} Virtual environment not detected. Don\'t worry I will handle it...")
-    if os.path.exists("sc0pe_venv"):
-        # Activating virtual environment
-        if os.environ["SHELL"] == "/usr/bin/fish":
-            print(f"\n{infoS} Execute the following command to activate virtual environment. And then run Qu1cksc0pe!")
-            print("[bold magenta]>>>[white] Command: [bold green]source sc0pe_venv/bin/activate.fish")
-            sys.exit(0)
-        elif os.environ["SHELL"] == "/usr/bin/bash" or os.environ["SHELL"] == "/bin/bash" or os.environ["SHELL"] == "/usr/bin/zsh":
-            print(f"\n{infoS} Execute the following command to activate virtual environment. And then run Qu1cksc0pe!")
-            print("[bold magenta]>>>[white] Command: [bold green]source sc0pe_venv/bin/activate")
-            sys.exit(0)
-        else:
-            print(f"{errorS} Shell type not detected!")
-            sys.exit(1)
-    else:
-        print(f"{infoS} Creating a virtual environment...")
-        if os.path.exists(f"/home/{username}/.local/bin/virtualenv"):
-            os.system("virtualenv -p python3 sc0pe_venv")
-            print(f"{foundS} Virtual environment created.")
-            os.system("python3 qu1cksc0pe.py")
-            sys.exit(0)
-        else:
-            print(f"{errorS} Error: >virtualenv< not found. Downloading it for you...")
-            os.system("pip3 install virtualenv")
-            os.system("virtualenv -p python3 sc0pe_venv")
-            print(f"{foundS} Virtual environment created.")
-            os.system("python3 qu1cksc0pe.py")
-            sys.exit(0)
+# Using helper library
+from Modules.lib.sc0pe_helper import Sc0peHelper
+sc0pehelper = Sc0peHelper(sc0pe_path)
 
 # Banner
 os.system(f"python3 {sc0pe_path}/Modules/banners.py")
@@ -144,6 +108,8 @@ parser.add_argument("--hashscan", required=False,
 parser.add_argument("--health", required=False,
                     help="Check for dependencies and configurations.",
                     action="store_true")
+parser.add_argument("--setup_venv", required=False,
+                    help="Setup Python virtual environment automatically.", action="store_true")
 parser.add_argument("--install", required=False,
                     help="Install or Uninstall Qu1cksc0pe.", action="store_true")
 parser.add_argument("--key_init", required=False,
@@ -411,6 +377,10 @@ def Qu1cksc0pe():
         command = f"python3 {sc0pe_path}/Modules/checkHealth.py"
         os.system(command)
 
+    # Virtual environment setup
+    if args.setup_venv:
+        sc0pehelper.setup_virtual_environment()
+
     # Database update
     if args.db_update:
         command = f"python3 {sc0pe_path}/Modules/hashScanner.py --db_update"
@@ -491,12 +461,6 @@ def Qu1cksc0pe():
 try:
     Qu1cksc0pe()
     # Cleaning up...
-    junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt", "TargetAPK/", "TargetSource/"]
-    for junk in junkFiles:
-        if os.path.exists(junk):
-            os.system(f"rm -rf {junk}")
+    sc0pehelper.cleanup_junks()
 except:
-    junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt", "TargetAPK/", "TargetSource/"]
-    for junk in junkFiles:
-        if os.path.exists(junk):
-            os.system(f"rm -rf {junk}")
+    sc0pehelper.cleanup_junks()

@@ -72,3 +72,5 @@ cd pyexiftool
 sudo python3 setup.py install
 cd ..
 sudo rm -rf pyexiftool
+
+echo -en "\n${info} All done.\n"
