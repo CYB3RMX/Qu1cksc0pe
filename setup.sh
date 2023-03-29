@@ -72,6 +72,7 @@ cd pyexiftool
 sudo python3 setup.py install
 cd ..
 sudo rm -rf pyexiftool
-cp Modules/lib/sc0pe_helper.py /usr/lib/python3/dist-packages/
+echo -en "${yellow}>>> ${default}Just one more...\n"
+sudo cp Modules/lib/sc0pe_helper.py /usr/lib/python3/dist-packages/
 
 echo -en "\n${info} All done.\n"
