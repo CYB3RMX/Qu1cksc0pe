@@ -62,6 +62,9 @@ targetFile = str(sys.argv[1])
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
+# Using helper library
+from lib.sc0pe_helper import Sc0peHelper
+sc0pehelper = Sc0peHelper(sc0pe_path)
 
 # Disabling pyaxmlparser's logs
 pyaxmlparser.core.log.disabled = True
@@ -81,13 +84,6 @@ previous_states = {
         "changes": 0
     }
 }
-
-def RecursiveDirScan(targetDir):
-    fnames = []
-    for root, d_names, f_names in os.walk(targetDir):
-        for ff in f_names:
-            fnames.append(os.path.join(root, ff))
-    return fnames
 
 def Downloader(target_os, target_arch):
     local_database = f"{sc0pe_path}/Systems/{target_os}/{target_arch}_{target_os.lower()}.tar.gz"
@@ -212,7 +208,7 @@ def Crawler1(target_directory):
         dirTable.add_column("Type", justify="center", style="bold green")
 
         # Crawl the directory
-        dircontent = RecursiveDirScan(f"{sc0pe_path}/{target_directory}")
+        dircontent = sc0pehelper.recursive_dir_scan(target_directory=f"{sc0pe_path}/{target_directory}")
         if dircontent != []:
             print(f"\n[bold cyan][INFO][white] Crawling [bold green]{target_directory} [white]directory.")
             for file in dircontent:

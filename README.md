@@ -32,16 +32,12 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ```
 
 # Screenshot
-![2022-12-07_12-37](https://user-images.githubusercontent.com/42123683/216623521-adb21916-93cd-4c1f-82f2-f9f0a3832f7d.png)
+![2023-03-29_16-23](https://user-images.githubusercontent.com/42123683/228553763-6a2ef241-803d-4430-bbee-c0a29850046f.png)
 
 # Updates
-<b>21/03/2023</b>
-- [X] Qu1cksc0pe now works in python virtual environment. This update is for prevent module conflict and version issues.
-- [X] Added new YARA rules.
-
-<b>08/03/2023</b>
-- [X] Qu1cksc0pe can detect ```Sova``` malware family samples.<br>
-![sova](https://user-images.githubusercontent.com/42123683/223711590-79da50fc-f36e-4478-8831-8f5e261c006f.png)
+<b>29/03/2023</b>
+- [X] Python virtual environment usage is now optional. You can simply execute: ```python3 qu1cksc0pe.py --setup_venv``` command to use.
+- [X] Bugs fixed and code refactored.
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)

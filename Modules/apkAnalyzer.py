@@ -63,6 +63,9 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
+# Using helper library
+from lib.sc0pe_helper import Sc0peHelper
+sc0pehelper = Sc0peHelper(sc0pe_path)
 
 # necessary variables
 danger = 0
@@ -123,13 +126,6 @@ reportz = {
     "date": dformat,
 }
 
-def RecursiveDirScan(targetDir):
-    fnames = []
-    for root, d_names, f_names in os.walk(targetDir):
-        for ff in f_names:
-            fnames.append(os.path.join(root, ff))
-    return fnames
-
 # Function for parsing apkid tool's output
 def ApkidParser(apkid_output):
     print(f"\n{infoS} Performing APKID analysis...")
@@ -180,45 +176,6 @@ def ApkidParser(apkid_output):
                     reportz["obfuscation"].append(obf)
                 print(" ")
 
-# Library Hunter
-def AndroLibScanner(target_file):
-    yara_match_indicator = 0
-    # Parsing config file to get rule path
-    conf = configparser.ConfigParser()
-    conf.read(f"{sc0pe_path}/Systems/Android/libScanner.conf")
-    rule_path = conf["Rule_PATH"]["rulepath"]
-    allRules = os.listdir(rule_path)
-
-    # This array for holding and parsing easily matched rules
-    yara_matches = []
-    for rul in allRules:
-        try:
-            rules = yara.compile(f"{rule_path}{rul}")
-            tempmatch = rules.match(target_file)
-            if tempmatch != []:
-                for matched in tempmatch:
-                    if matched.strings != []:
-                        yara_matches.append(matched)
-        except:
-            continue
-
-    # Printing area
-    if yara_matches != []:
-        print(f"[bold magenta]>>>>[white] Matched Rules for: [bold green]{target_file}\n")
-        print(f"{foundS} Matched Rules for: [bold green]{target_file}[white]\n")
-        yara_match_indicator += 1
-        for rul in yara_matches:
-            yaraTable = Table(title=f"{rul}", title_justify="center", title_style="bold magenta")
-            yaraTable.add_column("[bold green]Offset", justify="center")
-            yaraTable.add_column("[bold green]Matched String/Byte", justify="center")
-            reportz["matched_rules"].append(rul)
-            for mm in rul.strings:
-                yaraTable.add_row(str(hex(mm[0])), str(mm[2]))
-            print(yaraTable)
-            print(" ")
-
-    if yara_match_indicator == 0:
-        print(f"\n[bold white on red]Not any rules matched for [blink]{target_file}[/blink]\n")
 def MultiYaraScanner(targetAPK):
     lib_files_indicator = 0
     # Configurating decompiler...
@@ -234,12 +191,12 @@ def MultiYaraScanner(targetAPK):
 
         # Scan for library files and analyze them
         path = "TargetAPK/resources/"
-        fnames = RecursiveDirScan(path)
+        fnames = sc0pehelper.recursive_dir_scan(path)
         if fnames != []:
             for extens in fnames:
                 if os.path.splitext(extens)[1] == ".so":
                     lib_files_indicator += 1
-                    AndroLibScanner(target_file=extens)
+                    sc0pehelper.yara_rule_scanner(extens, config_path=f"{sc0pe_path}/Systems/Android/libScanner.conf", report_object=reportz)
 
         if lib_files_indicator == 0:
             print("\n[bold white on red]Not any library files found for analysis!\n")
@@ -280,7 +237,7 @@ def ScanSource(targetAPK):
     # Check for decompiled source
     if os.path.exists("TargetAPK/"):
         path = "TargetAPK/sources/"
-        fnames = RecursiveDirScan(path)
+        fnames = sc0pehelper.recursive_dir_scan(path)
         if fnames != []:
             question = input(f"{infoC} Do you want to analyze all packages [Y/n]?: ")
             for sources in fnames:
@@ -328,7 +285,7 @@ def PerformJAR(targetAPK):
                     print(f"\n{infoS} MANIFEST file found. Fetching data...")
                     data = open("TargetSource/resources/META-INF/MANIFEST.MF").read()
                     print(data)
-                    fnames = RecursiveDirScan("TargetSource/sources/")
+                    fnames = sc0pehelper.recursive_dir_scan(target_directory="TargetSource/sources/")
                     for sources in fnames:
                         for index in range(0, len(pattern_file)):
                             for elem in pattern_file[index]:
@@ -563,7 +520,7 @@ if __name__ == '__main__':
 
         # Yara matches
         print(f"\n{infoS} Performing YARA rule matching...")
-        AndroLibScanner(target_file=targetAPK)
+        sc0pehelper.yara_rule_scanner(targetAPK, config_path=f"{sc0pe_path}/Systems/Android/libScanner.conf", report_object=reportz)
 
         # Decompiling and scanning libraries
         print(f"\n{infoS} Performing library analysis...")
@@ -590,8 +547,6 @@ if __name__ == '__main__':
 
         # Print reports
         if sys.argv[2] == "True":
-            with open("sc0pe_android_report.json", "w") as rp_file:
-                json.dump(reportz, rp_file, indent=4)
-            print("\n[bold magenta]>>>[bold white] Report file saved into: [bold blink yellow]sc0pe_android_report.json\n")
+            sc0pehelper.report_writer("android", reportz)
     except KeyboardInterrupt:
         print("\n[bold white on red]An error occured. Press [blink]CTRL+C[/blink] to exit.\n")
