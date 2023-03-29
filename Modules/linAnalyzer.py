@@ -30,21 +30,26 @@ except:
     print("Error: >pygore< module not found.")
     sys.exit(1)
 
+#--------------------------------------------- Legends
+infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
+errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
+
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
 # Using helper library
-from lib.sc0pe_helper import Sc0peHelper
-sc0pehelper = Sc0peHelper(sc0pe_path)
+if os.path.exists("/usr/lib/python3/dist-packages/sc0pe_helper.py"):
+    from sc0pe_helper import Sc0peHelper
+    sc0pehelper = Sc0peHelper(sc0pe_path)
+else:
+    print(f"{errorS} [bold green]sc0pe_helper[white] library not installed. You need to execute [bold green]setup.sh[white] script!")
+    sys.exit(1)
 
 # Getting name of the file for statistics
 fileName = str(sys.argv[1])
 
 # Elf parsing
 binary = lief.parse(fileName)
-
-#--------------------------------------------- Legends
-infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 
 # Wordlists
 # All strings
@@ -335,7 +340,7 @@ def Analyzer():
 
     # Perform YARA scan
     print(f"\n{infoS} Performing YARA rule matching...")
-    sc0pehelper.yara_rule_scanner(fileName, config_path=f"{sc0pe_path}/Systems/Linux/linux.conf", report_object=linrep)
+    sc0pehelper.yara_rule_scanner("linux", fileName, config_path=f"{sc0pe_path}/Systems/Linux/linux.conf", report_object=linrep)
 
     # Get sections
     SectionParser()

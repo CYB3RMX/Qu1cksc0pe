@@ -95,7 +95,8 @@ class Sc0peHelper:
             json.dump(self.report_object, rp_file, indent=4)
         print(f"\n[bold magenta]>>>[bold white] Report file saved into: [bold blink yellow]sc0pe_{self.target_os}_report.json\n")
 
-    def yara_rule_scanner(self, filename, config_path, report_object):
+    def yara_rule_scanner(self, target_os, filename, config_path, report_object):
+        self.target_os = target_os
         self.filename = filename
         self.config_path = config_path
         self.report_object = report_object
@@ -105,8 +106,15 @@ class Sc0peHelper:
         conf = configparser.ConfigParser()
         conf.read(self.config_path)
         rule_path = conf["Rule_PATH"]["rulepath"]
-        finalpath = f"{self.sc0pe_path}/{rule_path}"
-        allRules = os.listdir(finalpath)
+        if self.target_os == "android":
+            try:
+                allRules = os.listdir(rule_path)
+            except:
+                finalpath = f"{self.sc0pe_path}/{rule_path}"
+                allRules = os.listdir(finalpath)
+        else:
+            finalpath = f"{self.sc0pe_path}/{rule_path}"
+            allRules = os.listdir(finalpath)
 
         # This array for holding and parsing easily matched rules
         yara_matches = []

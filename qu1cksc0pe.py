@@ -74,8 +74,12 @@ else:
     libscan = configparser.ConfigParser()
 
 # Using helper library
-from Modules.lib.sc0pe_helper import Sc0peHelper
-sc0pehelper = Sc0peHelper(sc0pe_path)
+if os.path.exists("/usr/lib/python3/dist-packages/sc0pe_helper.py"):
+    from sc0pe_helper import Sc0peHelper
+    sc0pehelper = Sc0peHelper(sc0pe_path)
+else:
+    print(f"{errorS} [bold green]sc0pe_helper[white] library not installed. You need to execute [bold green]setup.sh[white] script!")
+    sys.exit(1)
 
 # Banner
 os.system(f"python3 {sc0pe_path}/Modules/banners.py")
@@ -440,6 +444,10 @@ def Qu1cksc0pe():
                 # Copying qu1cksc0pe.py file into /usr/bin/
                 print(f"{infoS} Copying [bold green]qu1cksc0pe.py[white] to [bold green]/usr/bin/[white] directory.")
                 os.system("cp qu1cksc0pe.py /usr/bin/qu1cksc0pe && chmod +x /usr/bin/qu1cksc0pe")
+
+                # Copying sc0pe_helper module to /usr/lib/python3/dist-packages/
+                print(f"{infoS} Copying [bold green]sc0pe_helper.py[white] to [bold green]/usr/lib/python3/dist-packages/[white] directory.")
+                os.system("cp Modules/lib/sc0pe_helper.py /usr/lib/python3/dist-packages/")
                 print(f"{infoS} Installation completed.")
             elif choose == 2:
                 print(f"\n{infoS} Looks like we have permission to uninstall. Let\'s begin...")
@@ -449,6 +457,8 @@ def Qu1cksc0pe():
                 os.system("rm -rf /etc/qu1cksc0pe.conf")
                 print(f"{infoS} Removing [bold green]/opt/Qu1cksc0pe[white] directory.")
                 os.system("rm -rf /opt/Qu1cksc0pe")
+                print(f"{infoS} Removing [bold green]sc0pe_helper[white] library.")
+                os.system("rm -rf /usr/lib/python3/dist-packages/sc0pe_helper.py")
                 print(f"{infoS} Uninstallation completed.")
             else:
                 print("\n[bold white on red]Wrong option. Quitting!!\n")
