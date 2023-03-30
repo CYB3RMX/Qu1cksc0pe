@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import re
 import sys
 
 try:
@@ -10,6 +11,7 @@ except:
 
 try:
     from rich import print
+    from rich.table import Table
 except:
     print("Error: >rich< module not found.")
     sys.exit(1)
@@ -26,27 +28,71 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 allStrings = open("temp.txt", "r").read().split("\n")
 
 # Strings for identifying programming language
-detector = {"Golang": ["GODEBUG", "runtime.goexit", "runtime.gopanic"],
-            "Nim": ["echoBinSafe", "nimFrame", "stdlib_system.nim.c", "nimToCStringConv"],
-            "Python": ["_PYI_PROCNAME", "Py_BuildValue", "Py_Initialize", "__main__", "pydata", "libpython3.9.so.1.0", "py_compile"],
-            "Zig": ["ZIG_DEBUG_COLOR", "__zig_probe_stack", "__zig_return_error", "ZIG"],
-            "C#": ["#GUID", "</requestedPrivileges>", "<security>", "mscoree.dll", "System.Runtime", "</assembly>", ".NET4.0E", "_CorExeMain"],
-            "C++": ["std::", "libstdc++.so.6", "GLIBCXX_3.4.9", "CXXABI_1.3.9"],
-            "C": ["__libc_start_main", "GLIBC_2.2.5", "libc.so.6", "__cxa_finalize", ".text"]
-} # TODO: Look for better solutions instead of strings!!
+language_dict = {
+    "Golang": {
+        "patterns": ["GODEBUG", "runtime.goexit", "runtime.gopanic", ".gosymtab", ".gopclntab", ".go.buildinfo", ".note.go.buildid", "go:build", "CGO_ENABLED", "CGO_CFLAGS", "GOARCH", "_cgo_gotypes.go"],
+        "occurence": 0
+    },
+    "Nim": {
+        "patterns": ["echoBinSafe", "nimFrame", "stdlib_system.nim.c", "nimToCStringConv", "nim_compiler", "nim.cfg", "main.nim", "nimBetterRun", "nimble", "nim command"],
+        "occurence": 0
+    },
+    "Python": {
+        "patterns": ["_PYI_PROCNAME", "Py_BuildValue", "Py_Initialize", "__main__", "pydata", "libpython3.9.so.1.0", "py_compile"],
+        "occurence": 0
+    },
+    "Zig": {
+        "patterns": ["ZIG_DEBUG_COLOR", "__zig_probe_stack", "__zig_return_error", "ZIG"],
+        "occurence": 0
+    },
+    "C#": {
+        "patterns": ["#GUID", "</requestedPrivileges>", "<security>", "mscoree.dll", "System.Runtime", "</assembly>", ".NET4.0E", "_CorExeMain"],
+        "occurence": 0
+    },
+    "C++": {
+        "patterns": ["std::", "libstdc++.so.6", "GLIBCXX_3.4.9", "CXXABI_1.3.9"],
+        "occurence": 0
+    },
+    "C": {
+        "patterns": ["__libc_start_main", "GLIBC_2.2.5", "libc.so.6", "__cxa_finalize", ".text"],
+        "occurence": 0
+    }
+}
 
 # This function scans special strings in binary files
 def LanguageDetect():
     print(f"{infoS} Performing language detection. Please wait!!")
+    langTable = Table()
+    langTable.add_column("Programming Language", justify="center")
+    langTable.add_column("Probability", justify="center")
+    langTable.add_column("Pattern Occurences", justify="center")
 
     # Basic string scan :)
     indicator = 0
-    for key in detector:
-        for val in detector[key]:
-            if val in allStrings:
-                print(f"{foundS} Possible programming language: [bold green]{key}[white]\n")
-                indicator += 1
-                sys.exit(0)
+    for key in language_dict:
+        for pat in language_dict[key]["patterns"]:
+            try:
+                matches = re.findall(pat, str(allStrings))
+                if matches != []:
+                    language_dict[key]["occurence"] += 1
+                    indicator += 1
+            except:
+                continue
+
+    # Scoring system: Calculating total occurence
+    total_occurences = 0
+    for key in language_dict:
+        total_occurences += language_dict[key]["occurence"]
+
+    # Calculating probability
+    for key in language_dict:
+        if language_dict[key]["occurence"] == 0:
+            pass
+        else:
+            calc = (language_dict[key]["occurence"] * 100) / total_occurences
+            langTable.add_row(f"[bold green]{key}[white]", f"[bold green]{str(calc)}[white]", f"[bold green]{str(language_dict[key]['occurence'])}[white]")
+    print(langTable)
+
     if indicator == 0:
         print(f"{errorS} Programming language couldn\'t detected :(\n")
         sys.exit(1)
