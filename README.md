@@ -35,6 +35,10 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![2023-03-29_16-23](https://user-images.githubusercontent.com/42123683/228553763-6a2ef241-803d-4430-bbee-c0a29850046f.png)
 
 # Updates
+<b>30/03/2023</b>
+- [X] ```Programming Language Detection``` module is improved.<br>
+![langdetect](https://user-images.githubusercontent.com/42123683/228696312-1362cc48-f978-40c9-a0f0-22a216b83f6f.gif)
+
 <b>29/03/2023</b>
 - [X] Python virtual environment usage is now optional. You can simply execute: ```python3 qu1cksc0pe.py --setup_venv``` command to use.
 - [X] Bugs fixed and code refactored.
@@ -142,7 +146,7 @@ bash setup.sh
 
 ## Programming language detection
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_executable --lang```<br>
-![langDet](https://user-images.githubusercontent.com/42123683/189416982-75ea308d-2590-4bc7-baf0-10c034878ed7.gif)
+![langdetect](https://user-images.githubusercontent.com/42123683/228696312-1362cc48-f978-40c9-a0f0-22a216b83f6f.gif)
 
 ## Interactive shell
 <b>Usage</b>: ```python3 qu1cksc0pe.py --console```<br>
