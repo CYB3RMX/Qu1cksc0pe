@@ -24,7 +24,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps us
 | MacOS Executables (mach-o) | Static |
 | Android Files (.apk, .jar) | Static, Dynamic(for now .apk only) |
 | Golang Binaries (Linux) | Static |
-| Document Files (.doc, .docx, .pdf, .xls, .xlsx) | Static |
+| Document Files | Static |
 
 # Usage
 ```bash
@@ -32,17 +32,16 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ```
 
 # Screenshot
-![2023-03-29_16-23](https://user-images.githubusercontent.com/42123683/228553763-6a2ef241-803d-4430-bbee-c0a29850046f.png)
+![2023-04-02_02-49](https://user-images.githubusercontent.com/42123683/229323204-cd8cac5a-8eb8-4c2f-a97f-631634878532.png)
 
 # Updates
+<b>02/04/2023</b>
+- [X] ```Document Analyzer``` module is improved. Now Qu1cksc0pe can analyze ```OneNote``` documents.
+![onenote](https://user-images.githubusercontent.com/42123683/229323261-bbbe4353-1cc1-4d90-8064-f5d6764235b3.gif)
+
 <b>30/03/2023</b>
 - [X] ```Programming Language Detection``` module is improved.<br>
 ![langdetect](https://user-images.githubusercontent.com/42123683/228696312-1362cc48-f978-40c9-a0f0-22a216b83f6f.gif)
-
-<b>29/03/2023</b>
-- [X] Python virtual environment usage is now optional. You can simply execute: ```python3 qu1cksc0pe.py --setup_venv``` command to use.
-- [X] Bugs fixed and code refactored.
-- [X] Fixed bugs about installation.
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
@@ -77,6 +76,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 - ```Strings``` => <i>Necessary for static analysis.</i>
 - ```PyExifTool``` => <i>Metadata extraction.</i>
 - ```Jadx``` => <i>Performing source code and resource analysis.</i>
+- ```PyOneNote``` => <i>OneNote document analysis.</i>
 
 ```bash
 # First: You need to setup a virtual environment. Don't worry Qu1cksc0pe will handle this :)
