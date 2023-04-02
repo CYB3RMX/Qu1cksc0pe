@@ -39,6 +39,15 @@ except:
     print("Error: >pdfminer< module not found.")
     sys.exit(1)
 
+# Checking for pyOneNote module
+try:
+    from pyOneNote.Main import OneDocment
+except:
+    print("Error: >pyOneNote< module not found. Don\'t worry I can handle it...")
+    os.system("pip install -U https://github.com/DissectMalware/pyOneNote/archive/master.zip --force")
+    print("[bold yellow]Now try to re-execute program again!")
+    sys.exit(0)
+
 # Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
@@ -62,6 +71,8 @@ class DocumentAnalyzer:
             return "docscan"
         elif self.targetFile.endswith(".pdf"):
             return "pdfscan"
+        elif self.targetFile.endswith(".one"):
+            return "onenote"
         else:
             return "unknown"
 
@@ -317,6 +328,53 @@ class DocumentAnalyzer:
         else:
             self.MacroHunter()
 
+    # Onenote analysis
+    def OneNoteAnalysis(self):
+        print(f"{infoS} Performing OneNote analysis...")
+
+        # Looking for embedded urls
+        print(f"\n{infoS} Searching for interesting links...")
+        url_match = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", allstr)
+        if url_match != []:
+            for lnk in url_match:
+                if "schemas.openxmlformats.org" not in lnk and "schemas.microsoft.com" not in lnk and "purl.org" not in lnk and "www.w3.org" not in lnk and "go.microsoft.com" not in lnk:
+                    print(f"[bold magenta]>>>[white] {lnk}")
+
+        # Read and parse
+        print(f"\n{infoS} Searching for embedded data/files...")
+        if "keyData" in allstr and "encryptedKey" in allstr:
+            print(f"\n{infoS} [bold yellow]WARNING![white]: This document seems contain encrypted data. Trying to analyze it anyway...")
+
+        try:
+            doc_buffer = open(self.targetFile, "rb")
+            onenote_obj = OneDocment(doc_buffer)
+        except:
+            print(f"{errorS} An exception occured while reading data.")
+            sys.exit(1)
+
+        # Analysis of embedded file
+        embedTable = Table(title="* Embedded Files *", title_style="bold italic cyan", title_justify="center")
+        embedTable.add_column("[bold green]File Identity", justify="center")
+        embedTable.add_column("[bold green]File Extension", justify="center")
+
+        # Add table
+        efs = onenote_obj.get_files()
+        for key in efs.keys():
+            embedTable.add_row(efs[key]["identity"], efs[key]["extension"])
+        print(embedTable)
+
+        # Extract embedded files
+        print(f"\n{infoS} Performing embedded file extraction...")
+        for key in efs.keys():
+            with open(f"sc0pe_carved-{key}{efs[key]['extension']}", "wb") as binfile:
+                binfile.write(efs[key]["content"])
+            binfile.close()
+            print(f"[bold magenta]>>>[white] Embedded file saved as: [bold green]sc0pe_carved-{key}{efs[key]['extension']}[white]")
+
+        # Perform Yara scan
+        print(f"\n{infoS} Performing YARA rule matching...")
+        self.DocumentYara()
+
     # PDF analysis
     def PDFAnalysis(self):
         print(f"{infoS} Performing PDF analysis...")
@@ -422,6 +480,10 @@ class DocumentAnalyzer:
                 except:
                     continue
 
+        # Perform Yara scan
+        print(f"\n{infoS} Performing YARA rule matching...")
+        self.DocumentYara()
+
 # Execution area
 try:
     docObj = DocumentAnalyzer(targetFile)
@@ -430,6 +492,8 @@ try:
         docObj.BasicInfoGa()
     elif ext == "pdfscan":
         docObj.PDFAnalysis()
+    elif ext == "onenote":
+        docObj.OneNoteAnalysis()
     elif ext == "unknown":
         print(f"{errorS} Analysis tecnique is not implemented for now. Please send the file to the developer for further analysis.")
     else:

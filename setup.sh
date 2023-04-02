@@ -65,6 +65,15 @@ else
     echo -en "${info} ${green}exiftool${default} command is already exist...\n"
 fi
 
+# Check for pyOneNote
+if [ ! -f "/home/$USER/.local/bin/pyonenote" ]; then
+    echo -en "${info} Cloning ${green}pyOneNote${default}...\n"
+    pip install -U https://github.com/DissectMalware/pyOneNote/archive/master.zip --force
+else
+    echo -en "${info} ${green}pyOneNote${default} is already exist...\n"
+fi
+
+# Cloning and installing pyexiftool 
 echo -en "${info} Cloning ${green}PyExifTool${default}...\n"
 git clone https://github.com/smarnach/pyexiftool.git
 echo -en "${yellow}>>> ${default}Using sudo again...\n"
@@ -72,6 +81,8 @@ cd pyexiftool
 sudo python3 setup.py install
 cd ..
 sudo rm -rf pyexiftool
+
+# Setting up sc0pe_helper module
 echo -en "${yellow}>>> ${default}Just one more...\n"
 sudo cp Modules/lib/sc0pe_helper.py /usr/lib/python3/dist-packages/
 
