@@ -37,6 +37,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 # Updates
 <b>02/04/2023</b>
 - [X] ```Document Analyzer``` module is improved. Now Qu1cksc0pe can analyze ```OneNote``` documents.
+- [X] Added new YARA rules.
 ![onenote](https://user-images.githubusercontent.com/42123683/229323261-bbbe4353-1cc1-4d90-8064-f5d6764235b3.gif)
 
 <b>30/03/2023</b>

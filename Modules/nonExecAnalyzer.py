@@ -333,12 +333,17 @@ class DocumentAnalyzer:
         print(f"{infoS} Performing OneNote analysis...")
 
         # Looking for embedded urls
+        urlswitch = 0
         print(f"\n{infoS} Searching for interesting links...")
         url_match = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", allstr)
         if url_match != []:
             for lnk in url_match:
-                if "schemas.openxmlformats.org" not in lnk and "schemas.microsoft.com" not in lnk and "purl.org" not in lnk and "www.w3.org" not in lnk and "go.microsoft.com" not in lnk:
+                if "schemas.openxmlformats.org" not in lnk and "schemas.microsoft.com" not in lnk and "purl.org" not in lnk and "www.w3.org" not in lnk and "go.microsoft.com" not in lnk and "ns.adobe.com" not in lnk:
                     print(f"[bold magenta]>>>[white] {lnk}")
+                    urlswitch += 1
+        
+        if urlswitch == 0:
+            print(f"[bold white on red]Not any interesting links found.")
 
         # Read and parse
         print(f"\n{infoS} Searching for embedded data/files...")
