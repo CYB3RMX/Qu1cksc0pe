@@ -3,7 +3,7 @@
 <p align="center">
     <img width="400" src="https://user-images.githubusercontent.com/42123683/216772963-0b035e5a-c9db-4a6e-ac32-ebca22921405.png" alt="logo">
 </p>
-<br>All-in-One malware analysis tool for analyze Windows, Linux, OSX binaries, Document files and APK files.<br>
+<br>All-in-One malware analysis tool for analyze Windows, Linux, OSX binaries, Document files, APK files and Archive files.<br>
 
 *You can get*: 
 - What DLL files are used.
@@ -25,6 +25,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps us
 | Android Files (.apk, .jar) | Static, Dynamic(for now .apk only) |
 | Golang Binaries (Linux) | Static |
 | Document Files | Static |
+| Archive Files (.zip, .rar, .ace) | Static |
 
 # Usage
 ```bash
@@ -32,17 +33,18 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ```
 
 # Screenshot
-![2023-04-02_02-49](https://user-images.githubusercontent.com/42123683/229323204-cd8cac5a-8eb8-4c2f-a97f-631634878532.png)
+![2023-04-06_03-47](https://user-images.githubusercontent.com/42123683/230245219-2ed5fc0c-5da2-4ac0-ae77-bf4d2e83704d.png)
 
 # Updates
+<b>06/04/2023</b>
+- [X] <b>New feature</b>: ```Archive Analysis``` <b><i>Now Qu1cksc0pe can analyze archive files too!!</i></b>
+- <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_archive_file --archive```
+![archiveanalysis](https://user-images.githubusercontent.com/42123683/230241452-0d93d2ca-69a2-42d9-aa99-c9c7cfe637bf.gif)
+
 <b>02/04/2023</b>
 - [X] ```Document Analyzer``` module is improved. Now Qu1cksc0pe can analyze ```OneNote``` documents.
 - [X] Added new YARA rules.
 ![onenote](https://user-images.githubusercontent.com/42123683/229323261-bbbe4353-1cc1-4d90-8064-f5d6764235b3.gif)
-
-<b>30/03/2023</b>
-- [X] ```Programming Language Detection``` module is improved.<br>
-![langdetect](https://user-images.githubusercontent.com/42123683/228696312-1362cc48-f978-40c9-a0f0-22a216b83f6f.gif)
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
@@ -71,6 +73,8 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 - ```pygore``` => <i>Analyzing golang binaries```</i>
 - ```qiling``` => <i>Dynamic analysis of binaries.</i>
 - ```pdfminer.six``` => <i>PDF analysis.</i>
+- ```rarfile``` => <i>Rar analysis.</i>
+- ```acefile``` => <i>Ace analysis.</i>
 
 <br><b>Other dependencies</b>:
 - ```VirusTotal API Key``` => <i>Performing VirusTotal based analysis.</i>
@@ -80,15 +84,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 - ```PyOneNote``` => <i>OneNote document analysis.</i>
 
 ```bash
-# First: You need to setup a virtual environment. Don't worry Qu1cksc0pe will handle this :)
-python3 qu1cksc0pe.py # This command will setup virtual environment automatically.
-
-# Second: Activating virtual environment. Qu1cksc0pe will tell you how to activating it
-# In case of you can use these commands:
-source sc0pe_venv/bin/activate.fish # This command is for Fish shell users
-source sc0pe_venv/bin/activate # This command is for Bash/Zsh shell users
-
-# Run setup.sh in virtual environment
+# You can simply execute the following command!
 bash setup.sh
 ```
 
@@ -133,6 +129,10 @@ bash setup.sh
 
 ### Embedded File/Exploit Extraction
 ![exploit](https://user-images.githubusercontent.com/42123683/189676461-86565ff2-3a0c-426a-a66b-80a9462489b7.gif)
+
+## Archive File Scan
+<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_archive_file --archive```
+![archiveanalysis](https://user-images.githubusercontent.com/42123683/230241452-0d93d2ca-69a2-42d9-aa99-c9c7cfe637bf.gif)
 
 ## File signature analyzer
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --sigcheck```<br>
