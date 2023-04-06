@@ -97,6 +97,8 @@ parser.add_argument("--folder", required=False,
                     help="Specify a folder to scan or analyze.")
 parser.add_argument("--analyze", required=False,
                     help="Analyze target file.", action="store_true")
+parser.add_argument("--archive", required=False, help="Analyze archive files.",
+                    action="store_true")
 parser.add_argument("--console", required=False,
                     help="Use Qu1cksc0pe on interactive shell.", action="store_true")
 parser.add_argument("--db_update", required=False,
@@ -230,6 +232,18 @@ def Qu1cksc0pe():
         # Handling --folder argument
         if args.folder is not None:
             print("[bold white on red][blink]--analyze[/blink] argument is not supported for folder analyzing!\n")
+            sys.exit(1)
+
+    # Analyze archive files
+    if args.archive:
+        # Handling --file argument
+        if args.file is not None:
+            print(f"{infoS} Analyzing: [bold green]{args.file}[white]")
+            command = f"python3 {sc0pe_path}/Modules/archiveAnalyzer.py {args.file}"
+            os.system(command)
+        # Handling --folder argument
+        if args.folder is not None:
+            print("[bold white on red][blink]--docs[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
 
     # Analyze document files

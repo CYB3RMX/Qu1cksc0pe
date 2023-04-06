@@ -18,3 +18,5 @@ pygore
 qiling
 pdfminer.six
 requests
+rarfile
+acefile
