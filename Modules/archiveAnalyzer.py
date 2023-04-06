@@ -119,6 +119,9 @@ class ArchiveAnalyzer:
                 elif "ELF" in detect_os.stdout.decode():
                     print(f"\n{infoS} Performing YARA scan against: [bold green]{af}[white]")
                     self.perform_yara_scan(af, config_file=f"{sc0pe_path}/Systems/Linux/linux.conf")
+                elif "Word" in detect_os.stdout.decode() or "Excel" in detect_os.stdout.decode() or "PDF" in detect_os.stdout.decode() or "Rich Text" in detect_os.stdout.decode():
+                    print(f"\n{infoS} Performing YARA scan against: [bold green]{af}[white]")
+                    self.perform_yara_scan(af, config_file=f"{sc0pe_path}/Systems/Multiple/multiple.conf")
                 else:
                     pass
 
