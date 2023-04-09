@@ -36,6 +36,10 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![2023-04-06_03-47](https://user-images.githubusercontent.com/42123683/230245219-2ed5fc0c-5da2-4ac0-ae77-bf4d2e83704d.png)
 
 # Updates
+<b>09/04/2023</b>
+- [X] ```sc0pe_helper``` module is changed. You need to execute following command in project directory to update it: ```sudo cp Modules/lib/sc0pe_helper.py /usr/lib/python3/dist-packages/```
+- [X] Bug fixes.
+
 <b>06/04/2023</b>
 - [X] <b>New feature</b>: ```Archive Analysis``` <b><i>Now Qu1cksc0pe can analyze archive files too!!</i></b>
 - <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_archive_file --archive```
@@ -70,7 +74,7 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 - ```frida``` => <i>Performing dynamic analysis against android applications.</i>
 - ```lief``` => <i>ELF binary parsing and analysis.</i>
 - ```zepu1chr3``` => <i>Analyzing binaries via radare2.</i>
-- ```pygore``` => <i>Analyzing golang binaries```</i>
+- ```pygore``` => <i>Analyzing golang binaries.</i>
 - ```qiling``` => <i>Dynamic analysis of binaries.</i>
 - ```pdfminer.six``` => <i>PDF analysis.</i>
 - ```rarfile``` => <i>Rar analysis.</i>

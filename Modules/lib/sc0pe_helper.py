@@ -141,7 +141,10 @@ class Sc0peHelper:
                 self.report_object["matched_rules"].append({str(rul): []})
                 for mm in rul.strings:
                     yaraTable.add_row(f"{hex(mm[0])}", f"{str(mm[2])}")
-                    self.report_object["matched_rules"][-1][str(rul)].append({"offset": hex(mm[0]) ,"matched_pattern": mm[2].decode("ascii")})
+                    try:
+                        self.report_object["matched_rules"][-1][str(rul)].append({"offset": hex(mm[0]) ,"matched_pattern": mm[2].decode("ascii")})
+                    except:
+                        self.report_object["matched_rules"][-1][str(rul)].append({"offset": hex(mm[0]) ,"matched_pattern": str(mm[2])})
                 print(yaraTable)
                 print(" ")
 
