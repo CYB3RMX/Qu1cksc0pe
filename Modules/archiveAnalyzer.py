@@ -86,7 +86,7 @@ class ArchiveAnalyzer:
             namelist_arr = self.arch_object.getnames()
         else:
             enumerate_arr = self.arch_object.infolist()
-            namelist_arr = self.arch_object.namelist()
+            namelist_arr = []
 
         # Enumerating zip file contents
         print(f"\n{infoS} Analyzing archive file contents...")
@@ -98,14 +98,28 @@ class ArchiveAnalyzer:
                 contentTable.add_row(zf.filename, str(zf.size))
             else:
                 contentTable.add_row(zf.filename, str(zf.file_size))
+
+            # Check if target content is a directory
+            if zf.is_dir():
+                pass
+            else:
+                namelist_arr.append(zf.filename)
+
         print(contentTable)
 
         # Extract data and analyze it
         for af in namelist_arr:
             try:
+                # Gather file buffer/data
+                file_data = self.arch_object.read(af)
+
+                # Sanitize file name
+                if "/" in af:
+                    af = af.split("/")[-1]
+
                 # Write file content into another file for further analysis
                 with open(af, "wb") as fc:
-                    fc.write(self.arch_object.read(af))
+                    fc.write(file_data)
 
                 # Extract embedded URL's
                 print(f"\n{infoS} Looking for embedded URL\'s in: [bold green]{af}[white]")
