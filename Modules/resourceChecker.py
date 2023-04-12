@@ -174,6 +174,11 @@ class ResourceScanner:
                 "patterns": [
                     r"~~~9A5D4"
                 ]
+            },
+            "method_4": {
+                "patterns": [
+                    r"09}A5}D4"
+                ]
             }
         }
         strings_data = subprocess.run(["strings", strings_param, self.target_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -207,6 +212,10 @@ class ResourceScanner:
             elif target_method == "method_3":
                 if target_pattern == r"~~~9A5D4":
                     self.method_3_reverse_and_replace(r1="~", r2="0", executable_buffer=executable_buffer)
+            # Using method 4: Reverse and double replace
+            elif target_method == "method_4":
+                if target_pattern == r"09}A5}D4":
+                    self.method_4_reverse_and_double_replace(r1="Q", r2="00", r3="}", r4="", executable_buffer=executable_buffer)
             else:
                 print(f"{errorS} There is no method implemented for that data type!")
         else:
@@ -266,15 +275,28 @@ class ResourceScanner:
         with open("sc0pe_carved_deobfuscated.exe", "wb") as cf:
             cf.write(binascii.unhexlify(sanitized_data))
         print(f"{infoS} Data saved into: [bold green]sc0pe_carved_deobfuscated.exe[white]")
+    def method_4_reverse_and_double_replace(self, r1, r2, r3, r4, executable_buffer):
+        self.r1 = r1 # Replace 1
+        self.r2 = r2 # Replace 2
+        self.r3 = r3 # Replace 3
+        self.r4 = r4 # Replace 4
+        self.executable_buffer = executable_buffer
+
+        # Deobfuscation
+        self.executable_buffer = self.executable_buffer[::-1].replace(self.r1, self.r2).replace(self.r3, self.r4)
+
+        # Data sanitization
+        sanitized_data = self.buffer_sanitizer(executable_buffer=self.executable_buffer)
+
+        # Finally save data into file
+        with open("sc0pe_carved_deobfuscated.exe", "wb") as cf:
+            cf.write(binascii.unhexlify(sanitized_data))
+        print(f"{infoS} Data saved into: [bold green]sc0pe_carved_deobfuscated.exe[white]")
     def buffer_sanitizer(self, executable_buffer):
         self.executable_buffer = executable_buffer
 
-        # Data sanitization
-        if '\t' in self.executable_buffer:
-            self.executable_buffer = self.executable_buffer.lstrip("\t")
-
         # Unwanted characters
-        unwanted = ['@']
+        unwanted = ['@', '\t', '\n']
         for uc in unwanted:
             if uc in self.executable_buffer:
                 self.executable_buffer = self.executable_buffer.replace(uc, "")
