@@ -36,14 +36,14 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![2023-04-06_03-47](https://user-images.githubusercontent.com/42123683/230245219-2ed5fc0c-5da2-4ac0-ae77-bf4d2e83704d.png)
 
 # Updates
+<b>13/04/2023</b>
+- [X] New detection and carve methods implemented to ```ResourceAnalyzer``` module.
+![newupdate](https://user-images.githubusercontent.com/42123683/231849768-a31086d4-f584-4e52-b7c6-d5d7f5209ffa.gif)
+
 <b>12/04/2023</b>
 - [X] <b>New feature</b>: Now Qu1cksc0pe can detect and extract possible hidden/embedded PE files in .NET executables. (Effective against ```AgentTesla``` and similar malware family samples.)
 - <b>Usage</b>: ```python3 qu1cksc0pe.py --file malware.exe --resource```
 ![dotnetfilecarver](https://user-images.githubusercontent.com/42123683/231505529-8a261ce4-e879-417f-89f7-ca9cf1eeeaf1.gif)
-
-<b>09/04/2023</b>
-- [X] ```sc0pe_helper``` module is changed. You need to execute following command in project directory to update it: ```sudo cp Modules/lib/sc0pe_helper.py /usr/lib/python3/dist-packages/```
-- [X] Bug fixes.
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
