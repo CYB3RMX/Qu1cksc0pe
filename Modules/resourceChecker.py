@@ -156,7 +156,8 @@ class ResourceScanner:
         if counter == 0:
             print("\n[bold white on red]There is no interesting things found!\n")
 
-    def windows_resource_scanner(self):
+    def windows_resource_scanner_strings_method(self):
+        print(f"{infoS} Using Method 1: [bold yellow]Hidden PE signature scan via strings[white]")
         # Scan strings and find potential embedded PE executables
         possible_patterns = {
             "method_1": {
@@ -172,12 +173,14 @@ class ResourceScanner:
             },
             "method_3": {
                 "patterns": [
-                    r"~~~9A5D4"
+                    r"~~~9A5D4",
+                    r"09~A5~D4"
                 ]
             },
             "method_4": {
                 "patterns": [
-                    r"09}A5}D4"
+                    r"09}A5}D4",
+                    r"WP09PA5PD4"
                 ]
             }
         }
@@ -203,23 +206,34 @@ class ResourceScanner:
                 elif target_pattern == r"4D-5A-90O":
                     self.method_1_replace_split(r1="O", r2="-00", sp1='-', executable_buffer=executable_buffer)
                 else:
-                    print("Pattern not found!")
+                    pass
+
             # Using method 2: Double replace
             elif target_method == "method_2":
                 if target_pattern == r"4D5A9ZZZ":
                     self.method_2_double_replace(r1="ZZ", r2="0", r3="YY", r4="F", executable_buffer=executable_buffer)
+
             # Using method 3: Reverse replace
             elif target_method == "method_3":
                 if target_pattern == r"~~~9A5D4":
                     self.method_3_reverse_and_replace(r1="~", r2="0", executable_buffer=executable_buffer)
+                elif target_pattern == r"09~A5~D4":
+                    self.method_3_reverse_and_replace(r1="~", r2="", executable_buffer=executable_buffer)
+                else:
+                    pass
+
             # Using method 4: Reverse and double replace
             elif target_method == "method_4":
                 if target_pattern == r"09}A5}D4":
                     self.method_4_reverse_and_double_replace(r1="Q", r2="00", r3="}", r4="", executable_buffer=executable_buffer)
+                elif target_pattern == r"WP09PA5PD4":
+                    self.method_4_reverse_and_double_replace(r1="W", r2="00", r3="P", r4="", executable_buffer=executable_buffer)
+                else:
+                    pass
             else:
                 print(f"{errorS} There is no method implemented for that data type!")
         else:
-            print(f"{errorS} There is no embedded PE executable pattern found!")
+            print(f"{errorS} There is no embedded PE executable pattern found!\n")
 
     def method_1_replace_split(self, r1, r2, sp1, executable_buffer):
         self.r1 = r1 # Replace 1
@@ -240,9 +254,7 @@ class ResourceScanner:
         sanitized_data = self.buffer_sanitizer(executable_buffer=output_buffer)
 
         # Finally save data into file
-        with open("sc0pe_carved_deobfuscated.exe", "wb") as cf:
-            cf.write(binascii.unhexlify(sanitized_data))
-        print(f"{infoS} Data saved into: [bold green]sc0pe_carved_deobfuscated.exe[white]")
+        self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
     def method_2_double_replace(self, r1, r2, r3, r4, executable_buffer):
         self.r1 = r1 # Replace 1
         self.r2 = r2 # Replace 2
@@ -257,9 +269,7 @@ class ResourceScanner:
         sanitized_data = self.buffer_sanitizer(executable_buffer=self.executable_buffer)
 
         # Finally save data into file
-        with open("sc0pe_carved_deobfuscated.exe", "wb") as cf:
-            cf.write(binascii.unhexlify(sanitized_data))
-        print(f"{infoS} Data saved into: [bold green]sc0pe_carved_deobfuscated.exe[white]")
+        self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
     def method_3_reverse_and_replace(self, r1, r2, executable_buffer):
         self.r1 = r1 # Replace 1
         self.r2 = r2 # Replace 2
@@ -272,9 +282,7 @@ class ResourceScanner:
         sanitized_data = self.buffer_sanitizer(executable_buffer=self.executable_buffer)
 
         # Finally save data into file
-        with open("sc0pe_carved_deobfuscated.exe", "wb") as cf:
-            cf.write(binascii.unhexlify(sanitized_data))
-        print(f"{infoS} Data saved into: [bold green]sc0pe_carved_deobfuscated.exe[white]")
+        self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
     def method_4_reverse_and_double_replace(self, r1, r2, r3, r4, executable_buffer):
         self.r1 = r1 # Replace 1
         self.r2 = r2 # Replace 2
@@ -289,9 +297,7 @@ class ResourceScanner:
         sanitized_data = self.buffer_sanitizer(executable_buffer=self.executable_buffer)
 
         # Finally save data into file
-        with open("sc0pe_carved_deobfuscated.exe", "wb") as cf:
-            cf.write(binascii.unhexlify(sanitized_data))
-        print(f"{infoS} Data saved into: [bold green]sc0pe_carved_deobfuscated.exe[white]")
+        self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
     def buffer_sanitizer(self, executable_buffer):
         self.executable_buffer = executable_buffer
 
@@ -302,6 +308,111 @@ class ResourceScanner:
                 self.executable_buffer = self.executable_buffer.replace(uc, "")
 
         return self.executable_buffer
+    def windows_resource_scanner_split_data_carver_method(self):
+        print(f"{infoS} Using Method 2: [bold yellow]Detecting and merging split data[white]")
+        # Signature information we needed
+        resource_sigs = {
+            "Quartz": {
+                "signature_start": "74656d61",
+                "signature_end": "905a4d",
+                "additional_bytes": 3,
+                "offset_start": [],
+                "offset_end": []
+            },
+            "Versa": {
+                "signature_start": "65725078",
+                "signature_end": "f8afcfc0",
+                "additional_bytes": 4,
+                "offset_start": [],
+                "offset_end": []
+            },
+            "Zinc": {
+                "signature_start": "abf4dbbf",
+                "signature_end": "abf4dbbf",
+                "additional_bytes": 0,
+                "offset_start": [],
+                "offset_end": []
+            }
+        }
+
+        # We need target executable buffer and file handler
+        target_executable_buffer = open(self.target_file, "rb").read()
+        target_file_handler = open(self.target_file, "rb")
+
+        # Switch
+        founder_switch = 0
+
+        # Locate start offsets
+        print(f"{infoS} Locating start offsets...")
+        for rs in resource_sigs:
+            find = re.finditer(binascii.unhexlify(resource_sigs[rs]["signature_start"]), target_executable_buffer)
+            for pos in find:
+                resource_sigs[rs]["offset_start"].append(pos.start())
+                founder_switch += 1
+        # Locate end offsets
+        print(f"{infoS} Locating end offsets...")
+        for rs in resource_sigs:
+            find = re.finditer(binascii.unhexlify(resource_sigs[rs]["signature_end"]), target_executable_buffer)
+            for pos in find:
+                resource_sigs[rs]["offset_end"].append(pos.start())
+                founder_switch += 1
+
+        # Okay now we need to retrieve all data for deobfuscation
+        if founder_switch != 0:
+            print(f"{infoS} Deobfuscating split data. Please wait...")
+            output_buffer = b""
+            for rf in resource_sigs:
+                if resource_sigs[rf]["offset_start"] != [] and resource_sigs[rf]["offset_end"] != []:
+                    if len(resource_sigs[rf]["offset_start"]) == len(resource_sigs[rf]["offset_end"]):
+                        for ofst, ofnd in zip(resource_sigs[rf]["offset_start"], resource_sigs[rf]["offset_end"]):
+                            temporary_buffer = self.file_carver_for_method_2(
+                                file_handler=target_file_handler,
+                                start_offset=ofst,
+                                end_offset=ofnd,
+                                additional_bytes=resource_sigs[rf]["additional_bytes"],
+                                partition_name=rf
+                            )
+                            if rf == "Quartz":
+                                # Now first we need to convert this data to "bytearray" and reverse it
+                                byte_array = bytearray(temporary_buffer)
+                                byte_array.reverse()
+                                output_buffer += binascii.hexlify(byte_array)
+                            else:
+                                byte_array = bytearray(temporary_buffer)
+                                output_buffer += binascii.hexlify(byte_array)
+
+            # After retrieve and obfuscate all data we need to save it!
+            self.save_data_into_file("sc0pe_carved_deobfuscated_split.exe", output_buffer)
+        else:
+            print(f"{errorS} There is no split data found!\n")
+
+    def file_carver_for_method_2(self, file_handler, start_offset, end_offset, additional_bytes, partition_name):
+        self.file_handler = file_handler
+        self.start_offset = start_offset
+        self.end_offset = end_offset
+        self.additional_bytes = additional_bytes
+        self.partition_name = partition_name
+
+        # Seek start offset
+        self.file_handler.seek(self.start_offset)
+
+        # Calculating data size and carving
+        if self.partition_name == "Zinc":
+            data_size = 8876 # Fixed size
+            carved_data = self.file_handler.read(data_size)
+        else:
+            data_size = self.end_offset - self.start_offset
+            carved_data = self.file_handler.read(data_size+self.additional_bytes)
+
+        # Return carved data for deobfuscation phase
+        return carved_data
+    def save_data_into_file(self, output_name, save_buffer):
+        self.output_name = output_name
+        self.save_buffer = save_buffer
+
+        with open(self.output_name, "wb") as cf:
+            cf.write(binascii.unhexlify(self.save_buffer))
+        print(f"{infoS} Data saved into: [bold green]{self.output_name}[white]\n")
 
 # Execution zone
 targFile = sys.argv[1]
@@ -311,7 +422,8 @@ if os.path.isfile(targFile):
     if ostype == "file_android":
         resource_scan.android_resource_scanner()
     elif ostype == "file_windows":
-        resource_scan.windows_resource_scanner()
+        resource_scan.windows_resource_scanner_strings_method()
+        resource_scan.windows_resource_scanner_split_data_carver_method()
     else:
         print("\n[bold white on red]Target OS couldn\'t detected!\n")
 else:
