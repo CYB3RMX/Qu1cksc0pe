@@ -36,6 +36,11 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![2023-04-06_03-47](https://user-images.githubusercontent.com/42123683/230245219-2ed5fc0c-5da2-4ac0-ae77-bf4d2e83704d.png)
 
 # Updates
+<b>17/04/2023</b>
+- [X] <b>New feature</b>: ```SignatureAnalyzer``` module is upgraded. Qu1cksc0pe can detect possible corrupted Windows executable headers and fix them!<br>
+- <b>Usage</b>: ```python3 qu1cksc0pe.py --file malware.exe --sigcheck```
+![new_updates](https://user-images.githubusercontent.com/42123683/232541633-16922b59-3cd3-41d0-8843-315c92a0f9e0.gif)
+
 <b>13/04/2023</b>
 - [X] New detection and carve methods implemented to ```ResourceAnalyzer``` module.
 ![newupdate](https://user-images.githubusercontent.com/42123683/231849768-a31086d4-f584-4e52-b7c6-d5d7f5209ffa.gif)

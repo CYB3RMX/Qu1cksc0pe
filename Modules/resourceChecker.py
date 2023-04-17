@@ -332,6 +332,27 @@ class ResourceScanner:
                 "additional_bytes": 0,
                 "offset_start": [],
                 "offset_end": []
+            },
+            "Zar": {
+                "signature_start": "4d5a90",
+                "signature_end": "4d5a90",
+                "additional_bytes": 0,
+                "offset_start": [],
+                "offset_end": []
+            },
+            "Yar": {
+                "signature_start": "051f6d91208e",
+                "signature_end": "01ff35f8",
+                "additional_bytes": 4,
+                "offset_start": [],
+                "offset_end": []
+            },
+            "Xar": {
+                "signature_start": "f7934c0931",
+                "signature_end": "f7934c0931",
+                "additional_bytes": 0,
+                "offset_start": [],
+                "offset_end": []
             }
         }
 
@@ -347,15 +368,17 @@ class ResourceScanner:
         for rs in resource_sigs:
             find = re.finditer(binascii.unhexlify(resource_sigs[rs]["signature_start"]), target_executable_buffer)
             for pos in find:
-                resource_sigs[rs]["offset_start"].append(pos.start())
-                founder_switch += 1
+                if pos.start() != 0: # If there is another MZ pattern
+                    resource_sigs[rs]["offset_start"].append(pos.start())
+                    founder_switch += 1
         # Locate end offsets
         print(f"{infoS} Locating end offsets...")
         for rs in resource_sigs:
             find = re.finditer(binascii.unhexlify(resource_sigs[rs]["signature_end"]), target_executable_buffer)
             for pos in find:
-                resource_sigs[rs]["offset_end"].append(pos.start())
-                founder_switch += 1
+                if pos.start() != 0:
+                    resource_sigs[rs]["offset_end"].append(pos.start())
+                    founder_switch += 1
 
         # Okay now we need to retrieve all data for deobfuscation
         if founder_switch != 0:
@@ -399,6 +422,12 @@ class ResourceScanner:
         # Calculating data size and carving
         if self.partition_name == "Zinc":
             data_size = 8876 # Fixed size
+            carved_data = self.file_handler.read(data_size)
+        elif self.partition_name == "Zar":
+            data_size = 18090 # Fixed size
+            carved_data = self.file_handler.read(data_size)
+        elif self.partition_name == "Xar":
+            data_size = 18092 # Fixed size
             carved_data = self.file_handler.read(data_size)
         else:
             data_size = self.end_offset - self.start_offset
