@@ -1,7 +1,7 @@
 [
     {
         "Windows Executable File": [
-            "4D5A900003000000"
+            "4D5A9000"
         ]
     },
     {
@@ -67,6 +67,11 @@
     {
         "Composite Document File": [
             "D0CF11E0A1B11AE1"
+        ]
+    },
+    {
+        "Portable Document Format (PDF)": [
+            "255044462d"
         ]
     }
 ]
