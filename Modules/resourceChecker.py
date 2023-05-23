@@ -180,7 +180,9 @@ class ResourceScanner:
             "method_4": {
                 "patterns": [
                     r"09}A5}D4",
-                    r"WP09PA5PD4"
+                    r"WP09PA5PD4",
+                    r"X-09-A5-D4",
+                    r"ZZ-09-A5-D4"
                 ]
             }
         }
@@ -228,6 +230,10 @@ class ResourceScanner:
                     self.method_4_reverse_and_double_replace(r1="Q", r2="00", r3="}", r4="", executable_buffer=executable_buffer)
                 elif target_pattern == r"WP09PA5PD4":
                     self.method_4_reverse_and_double_replace(r1="W", r2="00", r3="P", r4="", executable_buffer=executable_buffer)
+                elif target_pattern == r"X-09-A5-D4":
+                    self.method_4_reverse_and_double_replace(r1="X", r2="00", r3="-", r4="", executable_buffer=executable_buffer)
+                elif target_pattern == r"ZZ-09-A5-D4":
+                    self.method_4_reverse_and_double_replace(r1="ZZ", r2="00", r3="-", r4="", executable_buffer=executable_buffer)
                 else:
                     pass
             else:
@@ -435,6 +441,50 @@ class ResourceScanner:
 
         # Return carved data for deobfuscation phase
         return carved_data
+    def windows_resource_scanner_bitmap_carver_method(self):
+        print(f"{infoS} Using Method 3: [bold yellow]Extract PE file from Bitmap data[white]")
+        # First we need to locate bitmap data
+        bitmap_sigs = {
+            "Jmo": {
+                "signature_start": "4d00ff005a",
+                "fixed_size": 57350,
+                "offset_start": []
+            }
+        }
+        # We need target executable buffer
+        target_executable_buffer = open(self.target_file, "rb").read()
+
+        # Switch
+        fswitch = 0
+
+        # Signature scan phase
+        print(f"{infoS} Locating offsets...")
+        for bs in bitmap_sigs:
+            loc = re.finditer(binascii.unhexlify(bitmap_sigs[bs]["signature_start"]), target_executable_buffer)
+            for pos in loc:
+                if pos.start() != 0:
+                    bitmap_sigs[bs]["offset_start"].append(pos.start())
+                    fswitch += 1
+
+        # After finding offsets perform carving
+        if fswitch != 0:
+            print(f"{infoS} Deobfuscating and carving data. Please wait...")
+            for bs in bitmap_sigs:
+                if bitmap_sigs[bs]["offset_start"] != 0 and bs == "Jmo":
+                    # Deobfuscating Jmo
+                    cleaning = binascii.hexlify(target_executable_buffer).decode().replace("00ff00", "")
+                    # After clean data locate MZ header
+                    locate_mz = re.finditer(r"4d5a9000030", cleaning)
+                    for pos in locate_mz:
+                        if pos.start() != 0:
+                            end_pos = bitmap_sigs[bs]["fixed_size"] + pos.start()
+                            output_buffer = cleaning[pos.start():end_pos] # Carving target PE file
+
+            # Saving carved data
+            self.save_data_into_file("sc0pe_carved_deobfuscated_bitmap.exe", output_buffer)
+        else:
+            print(f"{errorS} There is no suspicious Bitmap pattern found!\n")
+
     def save_data_into_file(self, output_name, save_buffer):
         self.output_name = output_name
         self.save_buffer = save_buffer
@@ -453,6 +503,7 @@ if os.path.isfile(targFile):
     elif ostype == "file_windows":
         resource_scan.windows_resource_scanner_strings_method()
         resource_scan.windows_resource_scanner_split_data_carver_method()
+        resource_scan.windows_resource_scanner_bitmap_carver_method()
     else:
         print("\n[bold white on red]Target OS couldn\'t detected!\n")
 else:
