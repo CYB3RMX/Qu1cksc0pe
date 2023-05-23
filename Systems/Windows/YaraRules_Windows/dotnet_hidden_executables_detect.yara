@@ -12,6 +12,8 @@ rule Dotnet_Hidden_Executables_Detect {
         $pattern5 = "09~A5~D4" nocase wide ascii
         $pattern6 = "09}A5}D4" nocase wide ascii
         $pattern7 = "WP09PA5PD4" nocase wide ascii
+        $pattern8 = "X-09-A5-D4" nocase wide ascii
+        $pattern9 = "ZZ-09-A5-D4" nocase wide ascii
         $hexpat1 = { 74 65 6D 61 }
         $hexpat2 = { 90 5A 4D }
         $hexpat3 = { 65 72 50 78 }

@@ -36,19 +36,14 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![2023-04-06_03-47](https://user-images.githubusercontent.com/42123683/230245219-2ed5fc0c-5da2-4ac0-ae77-bf4d2e83704d.png)
 
 # Updates
+<b>23/05/2023</b>
+- [X] ```ResourceAnalyzer``` module is improved. Now Qu1cksc0pe can detect suspicious Bitmap data in .NET executable files!</br>
+![bitmap_update](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/f2602414-a84c-4368-9b21-23fc27946206)
+
 <b>17/04/2023</b>
 - [X] <b>New feature</b>: ```SignatureAnalyzer``` module is upgraded. Qu1cksc0pe can detect possible corrupted Windows executable headers and fix them!<br>
 - <b>Usage</b>: ```python3 qu1cksc0pe.py --file malware.exe --sigcheck```
 ![new_updates](https://user-images.githubusercontent.com/42123683/232541633-16922b59-3cd3-41d0-8843-315c92a0f9e0.gif)
-
-<b>13/04/2023</b>
-- [X] New detection and carve methods implemented to ```ResourceAnalyzer``` module.
-![newupdate](https://user-images.githubusercontent.com/42123683/231849768-a31086d4-f584-4e52-b7c6-d5d7f5209ffa.gif)
-
-<b>12/04/2023</b>
-- [X] <b>New feature</b>: Now Qu1cksc0pe can detect and extract possible hidden/embedded PE files in .NET executables. (Effective against ```AgentTesla``` and similar malware family samples.)
-- <b>Usage</b>: ```python3 qu1cksc0pe.py --file malware.exe --resource```
-![dotnetfilecarver](https://user-images.githubusercontent.com/42123683/231505529-8a261ce4-e879-417f-89f7-ca9cf1eeeaf1.gif)
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
