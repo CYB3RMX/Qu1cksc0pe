@@ -20,3 +20,4 @@ pdfminer.six
 requests
 rarfile
 acefile
+Pillow

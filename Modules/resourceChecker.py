@@ -20,6 +20,13 @@ except:
     print("Error: >puremagic< module not found.")
     sys.exit(1)
 
+# Check for Pillow
+try:
+    from PIL import Image
+except:
+    print("Error: >Pillow< module not found.")
+    sys.exit(1)
+
 # Testing rich existence
 try:
     from rich import print
@@ -184,6 +191,16 @@ class ResourceScanner:
                     r"X-09-A5-D4",
                     r"ZZ-09-A5-D4"
                 ]
+            },
+            "method_5": {
+                "patterns": [
+                    r"4D~5A~90O~"
+                ]
+            },
+            "method_6": {
+                "patterns": [
+                    r"300009A5D4"
+                ]
             }
         }
         strings_data = subprocess.run(["strings", strings_param, self.target_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -234,6 +251,19 @@ class ResourceScanner:
                     self.method_4_reverse_and_double_replace(r1="X", r2="00", r3="-", r4="", executable_buffer=executable_buffer)
                 elif target_pattern == r"ZZ-09-A5-D4":
                     self.method_4_reverse_and_double_replace(r1="ZZ", r2="00", r3="-", r4="", executable_buffer=executable_buffer)
+                else:
+                    pass
+
+            # Using method 5: Triple replace
+            elif target_method == "method_5":
+                if target_pattern == r"4D~5A~90O~":
+                    self.method_5_triple_replace(r1="O", r2="-00", r3="~", r4="-", r5="-", r6="", executable_buffer=executable_buffer)
+                else:
+                    pass
+            # Using method 6: Simple reverse
+            elif target_method == "method_6":
+                if target_pattern == r"300009A5D4":
+                    self.method_6_simple_reverse(executable_buffer=executable_buffer)
                 else:
                     pass
             else:
@@ -303,6 +333,34 @@ class ResourceScanner:
         sanitized_data = self.buffer_sanitizer(executable_buffer=self.executable_buffer)
 
         # Finally save data into file
+        self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
+    def method_5_triple_replace(self, r1, r2, r3, r4, r5, r6, executable_buffer):
+        self.r1 = r1 # Replace 1
+        self.r2 = r2 # Replace 2
+        self.r3 = r3 # Replace 3
+        self.r4 = r4 # Replace 4
+        self.r5 = r5 # Replace 5
+        self.r6 = r6 # Replace 6
+        self.executable_buffer = executable_buffer
+
+        # Deobfuscation
+        self.executable_buffer = self.executable_buffer.replace(self.r1, self.r2).replace(self.r3, self.r4).replace(self.r5, self.r6)
+
+        # Data sanitization
+        sanitized_data = self.buffer_sanitizer(executable_buffer=self.executable_buffer)
+
+        # Save data
+        self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
+    def method_6_simple_reverse(self, executable_buffer):
+        self.executable_buffer = executable_buffer
+
+        # Deobfuscation
+        revz = self.executable_buffer[::-1]
+
+        # Data sanitization
+        sanitized_data = self.buffer_sanitizer(executable_buffer=revz)
+
+        # Save data
         self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
     def buffer_sanitizer(self, executable_buffer):
         self.executable_buffer = executable_buffer
@@ -443,48 +501,64 @@ class ResourceScanner:
         return carved_data
     def windows_resource_scanner_bitmap_carver_method(self):
         print(f"{infoS} Using Method 3: [bold yellow]Extract PE file from Bitmap data[white]")
-        # First we need to locate bitmap data
-        bitmap_sigs = {
-            "Jmo": {
-                "signature_start": "4d00ff005a",
-                "fixed_size": 57350,
-                "offset_start": []
-            }
-        }
-        # We need target executable buffer
+        # We need target executable buffer and file handler
         target_executable_buffer = open(self.target_file, "rb").read()
+        target_file_handler = open(self.target_file, "rb")
 
-        # Switch
-        fswitch = 0
+        # Locate Bitmap headers
+        offsets = []
+        loc = re.finditer(r"BM".encode(), target_executable_buffer)
+        for pos in loc:
+            if pos.start() != 0:
+                offsets.append(pos.start())
+        valid_offsets = {}
+        for of in offsets:
+            target_file_handler.seek(of)
+            bitmap_header = binascii.hexlify(target_file_handler.read(8))
+            if b"424d" in bitmap_header and b"0000" in bitmap_header:
+                valid_offsets.update({of: bitmap_header})
 
-        # Signature scan phase
-        print(f"{infoS} Locating offsets...")
-        for bs in bitmap_sigs:
-            loc = re.finditer(binascii.unhexlify(bitmap_sigs[bs]["signature_start"]), target_executable_buffer)
-            for pos in loc:
-                if pos.start() != 0:
-                    bitmap_sigs[bs]["offset_start"].append(pos.start())
-                    fswitch += 1
-
-        # After finding offsets perform carving
-        if fswitch != 0:
-            print(f"{infoS} Deobfuscating and carving data. Please wait...")
-            for bs in bitmap_sigs:
-                if bitmap_sigs[bs]["offset_start"] != 0 and bs == "Jmo":
-                    # Deobfuscating Jmo
-                    cleaning = binascii.hexlify(target_executable_buffer).decode().replace("00ff00", "")
-                    # After clean data locate MZ header
-                    locate_mz = re.finditer(r"4d5a9000030", cleaning)
-                    for pos in locate_mz:
-                        if pos.start() != 0:
-                            end_pos = bitmap_sigs[bs]["fixed_size"] + pos.start()
-                            output_buffer = cleaning[pos.start():end_pos] # Carving target PE file
-
-            # Saving carved data
-            self.save_data_into_file("sc0pe_carved_deobfuscated_bitmap.exe", output_buffer)
+        # Calculate size of file
+        if valid_offsets != {}:
+            for offset in valid_offsets:
+                try:
+                    pattern = bytes.fromhex(valid_offsets[offset][4:12].decode())
+                    reverz = pattern[::-1] # Little endian stuff
+                    size_of_file = int(binascii.hexlify(reverz), 16) # Convert to decimal
+                    print(f"{infoS} Found a valid Bitmap file on: [bold green]{hex(offset)}[white] | Size: [bold magenta]{size_of_file}")
+                    print(f"{infoS} Performing extraction. Please wait...")
+                    data_carve = target_executable_buffer[offset:offset+size_of_file]
+                    with open("carved.bmp", "wb") as ff:
+                        ff.write(data_carve)
+                    if os.path.exists("carved.bmp"):
+                        print(f"{infoS} Extraction was successful. Performing PE extraction...")
+                        img = Image.open("carved.bmp")
+                        extraction = self.bitmap_carver_1(image_handler=img)
+                        if extraction:
+                            sys.exit(0)
+                    else:
+                        print(f"{errorS} An error occured while extracting Bitmap file!!\n")
+                        sys.exit(1)
+                except:
+                    continue
         else:
-            print(f"{errorS} There is no suspicious Bitmap pattern found!\n")
+            print(f"{errorS} There is no valid Bitmap file pattern found!\n")
 
+    def bitmap_carver_1(self, image_handler):
+        b_array = bytearray()
+        for x in range(image_handler.width):
+            for y in range(image_handler.height):
+                red = image_handler.getpixel((x, y))[0]
+                b_array.append(red)
+        if b"4d5a90" in binascii.hexlify(b_array):
+            print(f"{infoS} Hidden PE file found. Extracting...")
+            with open("sc0pe_hidden_pe.exe", "wb") as ff:
+                ff.write(b_array)
+            print(f"{infoS} Data saved into: [bold green]sc0pe_hidden_pe.exe[white]\n")
+            os.system("rm -rf carved.bmp")
+            return True
+        else:
+            return False
     def save_data_into_file(self, output_name, save_buffer):
         self.output_name = output_name
         self.save_buffer = save_buffer
