@@ -2,9 +2,6 @@
 
 import os
 import sys
-import json
-import hashlib
-import configparser
 try:
     from rich import print
     from rich.table import Table
@@ -16,12 +13,6 @@ try:
     import lief
 except:
     print("Error: >lief< module not found.")
-    sys.exit(1)
-
-try:
-    import yara
-except:
-    print("Error: >yara< module not found.")
     sys.exit(1)
 
 try:
