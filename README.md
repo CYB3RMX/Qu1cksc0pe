@@ -36,6 +36,11 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![2023-04-06_03-47](https://user-images.githubusercontent.com/42123683/230245219-2ed5fc0c-5da2-4ac0-ae77-bf4d2e83704d.png)
 
 # Updates
+<b>10/06/2023</b>
+- [X] ```WindowsAnalyzer``` module is upgraded. Added basic detection capability for detecting ```PsExec```, ```Rubeus```, ```Mimikatz``` binaries.
+- [X] Added basic detection capability for detecting interesting strings(like filenames etc.)
+![new_update](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/4b39bfbd-2f7c-44d6-a8b2-b9ce64396ed8)
+
 <b>25/05/2023</b>
 - [X] ```ResourceAnalyzer``` module is significantly upgraded. Now it has better detection and carving abilities!<br>
 ![upgraded_bitmap](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/1756c152-26b9-4b3b-a446-db83cfff770f)
@@ -170,6 +175,7 @@ bash setup.sh
 - <a href="https://vulners.com/kitploit/KITPLOIT:8846405132281597137">Vulners</a>
 - <a href="https://www.redpacketsecurity.com/qu1cksc0pe-all-in-one-static-malware-analysis-tool/">RedPacket Security</a>
 - <a href="https://cert.bournemouth.ac.uk/qu1cksc0pe-all-in-one-static-malware-analysis-tool/">Bournemouth University - CERT</a>
+- <a href="https://github.com/Ignitetechnologies/Mindmap/blob/main/Forensics/Digital%20Forensics%20Tools%20UHD.png">Hacking Articles - Digital Forensics Tools Mindmap</a>
 
 # Thanks to
 For most of FRIDA scripts: <i>https://github.com/Ch0pin/</i><br>

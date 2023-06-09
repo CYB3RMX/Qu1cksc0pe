@@ -1,0 +1,38 @@
+{
+    "PsExec": {
+        "patterns": [
+            "psserve_path",
+            "Psexec",
+            "Psexec service"
+        ]
+    },
+    "Rubeus/KrbRelayUp": {
+        "patterns": [
+            "KrbRelayUp.pdb",
+            "KrbRelayUp.Ndr.ProxyFileInfo32",
+            "KrbRelayUp.Ndr.CInterfaceStubHeader32",
+            "KrbRelayUp.Asn1",
+            "KrbRelayUp.Relay.Attacks.Ldap",
+            "KrbCredInfo",
+            "KrbRelayUp.exe",
+            "KRB_CRED",
+            "KerbCredOffset",
+            "KERB_CHECKSUM_Initialize"
+        ]
+    },
+    "Mimikatz": {
+        "patterns": [
+            "y7i39hzmyGRNbenR",
+            "arrowtower.pdb",
+            ".e i P_m.X ~i!",
+            "_w_Y0S4_DP",
+            "mimilib.dll",
+            "dpapisrv!",
+            "lsasrv!",
+            "kdcsvc!",
+            "gentilkiwi",
+            "KIWI_MSV1_0_PRIMARY_CREDENTIALS",
+            "KIWI_MSV1_0_CREDENTIALS"
+        ]
+    }
+}
