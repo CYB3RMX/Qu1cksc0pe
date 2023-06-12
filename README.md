@@ -26,6 +26,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps us
 | Golang Binaries (Linux) | Static |
 | Document Files | Static |
 | Archive Files (.zip, .rar, .ace) | Static |
+| PCAP Files (.pcap) | Static |
 
 # Usage
 ```bash
@@ -36,14 +37,19 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![2023-04-06_03-47](https://user-images.githubusercontent.com/42123683/230245219-2ed5fc0c-5da2-4ac0-ae77-bf4d2e83704d.png)
 
 # Updates
+<b>12/06/2023</b>
+- [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform PCAP analysis. You can do:
+- Find URL addresses
+- Find DNS Queries
+- Find interesting strings
+- Detect embedded executable files and extract them
+
+https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/4749f107-177b-4c91-90dd-ae63cffc465b
+
 <b>10/06/2023</b>
 - [X] ```WindowsAnalyzer``` module is upgraded. Added basic detection capability for detecting ```PsExec```, ```Rubeus```, ```Mimikatz``` binaries.
 - [X] Added basic detection capability for detecting interesting strings(like filenames etc.)
 ![new_update](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/4b39bfbd-2f7c-44d6-a8b2-b9ce64396ed8)
-
-<b>25/05/2023</b>
-- [X] ```ResourceAnalyzer``` module is significantly upgraded. Now it has better detection and carving abilities!<br>
-![upgraded_bitmap](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/1756c152-26b9-4b3b-a446-db83cfff770f)
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
@@ -52,31 +58,8 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 # Note
 - [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
 
-# Setup
-<b>Necessary python modules</b>: 
-- ```puremagic``` => <i>Analyzing target OS and magic numbers.</i>
-- ```androguard``` => <i>Analyzing APK files.</i>
-- ```apkid``` => <i>Check for Obfuscators, Anti-Disassembly, Anti-VM and Anti-Debug.</i>
-- ```rich``` => <i>Pretty outputs and TUI.</i>
-- ```tqdm``` => <i>Progressbar animation.</i>
-- ```colorama``` => <i>Colored outputs.</i>
-- ```oletools``` => <i>Analyzing VBA Macros.</i>
-- ```pefile``` => <i>Gathering all information from PE files.</i>
-- ```quark-engine``` => <i>Extracting IP addresses and URLs from APK files.</i>
-- ```pyaxmlparser``` => <i>Gathering informations from target APK files.</i>
-- ```yara-python``` => <i>Android library scanning with Yara rules.</i>
-- ```prompt_toolkit``` => <i>Interactive shell.</i>
-- ```frida``` => <i>Performing dynamic analysis against android applications.</i>
-- ```lief``` => <i>ELF binary parsing and analysis.</i>
-- ```zepu1chr3``` => <i>Analyzing binaries via radare2.</i>
-- ```pygore``` => <i>Analyzing golang binaries.</i>
-- ```qiling``` => <i>Dynamic analysis of binaries.</i>
-- ```pdfminer.six``` => <i>PDF analysis.</i>
-- ```rarfile``` => <i>Rar analysis.</i>
-- ```acefile``` => <i>Ace analysis.</i>
-- ```Pillow``` => <i>Bitmap image analysis.</i>
-
-<br><b>Other dependencies</b>:
+# Setup and Installation
+<br><b>Necessary Dependencies</b>:
 - ```VirusTotal API Key``` => <i>Performing VirusTotal based analysis.</i>
 - ```Strings``` => <i>Necessary for static analysis.</i>
 - ```PyExifTool``` => <i>Metadata extraction.</i>
@@ -84,14 +67,13 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 - ```PyOneNote``` => <i>OneNote document analysis.</i>
 
 ```bash
-# You can simply execute the following command!
+# You can simply execute the following command it will do everything for you!
 bash setup.sh
-```
 
-# Installation
-- [X] You can install Qu1cksc0pe easily on your system. Just execute the following commands.<br>
-<b>Command 0</b>: ```sudo pip3 install -r requirements.txt```<br>
-<b>Command 1</b>: ```sudo python3 qu1cksc0pe.py --install```
+# If you want to install Qu1cksc0pe on your system just execute the following commands.
+bash setup.sh
+sudo python3 qu1cksc0pe.py --install
+```
 
 # Static Analysis
 ## Normal analysis
@@ -175,7 +157,7 @@ bash setup.sh
 - <a href="https://vulners.com/kitploit/KITPLOIT:8846405132281597137">Vulners</a>
 - <a href="https://www.redpacketsecurity.com/qu1cksc0pe-all-in-one-static-malware-analysis-tool/">RedPacket Security</a>
 - <a href="https://cert.bournemouth.ac.uk/qu1cksc0pe-all-in-one-static-malware-analysis-tool/">Bournemouth University - CERT</a>
-- <a href="https://github.com/Ignitetechnologies/Mindmap/blob/main/Forensics/Digital%20Forensics%20Tools%20UHD.png">Hacking Articles - Digital Forensics Tools Mindmap</a>
+- <a href="https://github.com/Ignitetechnologies/Mindmap/blob/main/Forensics/Digital%20Forensics%20Tools%20HD.png">Hacking Articles - Digital Forensics Tools Mindmap</a>
 
 # Thanks to
 For most of FRIDA scripts: <i>https://github.com/Ch0pin/</i><br>
