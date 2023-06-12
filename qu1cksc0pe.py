@@ -201,6 +201,12 @@ def BasicAnalyzer(analyzeFile):
             # If given file is a JAR file then run JAR file analysis
             command = f"python3 {sc0pe_path}/Modules/apkAnalyzer.py {analyzeFile} False JAR"
             os.system(command)
+
+    # Pcap analysis
+    elif "pcap" in fileType or "capture file" in fileType:
+        print(f"{infoS} Performing [bold green]PCAP[while] analysis...\n")
+        command = f"python3 {sc0pe_path}/Modules/pcap_analyzer.py {analyzeFile}"
+        os.system(command)
     else:
         print("\n[bold white on red]File type not supported. Make sure you are analyze executable files or document files.")
         print("[bold]>>> If you want to scan document files try [bold green][i]--docs[/i] [white]argument.")
