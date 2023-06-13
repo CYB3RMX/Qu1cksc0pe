@@ -21,3 +21,4 @@ requests
 rarfile
 acefile
 Pillow
+dpkt

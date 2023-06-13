@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 
+import os
 import re
 import sys
 import json
+import struct
 import binascii
 
 try:
@@ -14,6 +16,7 @@ except:
 try:
     from rich import print
     from rich.table import Table
+    from rich.progress import track
 except:
     print("Error: >rich< module not found.")
     sys.exit(1)
@@ -37,24 +40,27 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
-targetFile = sys.argv[1]
-
-# Open targetFile in binary mode
-getbins_buffer = open(targetFile, "rb").read()
-getbins = open(targetFile, "rb")
-
 class SignatureChecker:
     def __init__(self, target_file):
         self.target_file = target_file
+        self.target_file_size = os.path.getsize(self.target_file)
+        if self.target_file_size < 52428800:
+            self.getbins = open(self.target_file, "rb")
+            self.getbins_buffer = open(self.target_file, "rb").read()
+        else:
+            print(f"\n{infoS} Performing pumped file analysis against large file...")
+            self.pumped_file_carver()
 
     def file_carver(self, offset_array):
         self.offset_array = offset_array
 
         for off in self.offset_array:
-            print(f"\n{infoS} Carving executable file found on offset: [bold green]{off}")
-            getbins.seek(off) # Locating executable file offset
+            self.getbins.seek(off) # Locating executable file offset
             try:
-                pfile = pf.PE(data=getbins.read()) # Using pefile for PE trim
+                data_to_trim = self.getbins.read()
+                carve_size = self.parse_pe_size(data_to_trim)
+                print(f"\n{infoS} Carving executable file found on offset: [bold green]{off}[white] | Size: [bold green]{carve_size}[white] bytes")
+                pfile = pf.PE(data=data_to_trim) # Using pefile for PE trim
             except:
                 continue
 
@@ -88,7 +94,7 @@ class SignatureChecker:
             for categ in fsigs[index]:
                 for sigs in fsigs[index][categ]:
                     try:
-                        regex = re.finditer(binascii.unhexlify(sigs), getbins_buffer)
+                        regex = re.finditer(binascii.unhexlify(sigs), self.getbins_buffer)
                         for position in regex:
                             sigTable.add_row(str(categ), f"[bold green]{str(binascii.unhexlify(sigs))}", str(hex(position.start())))
                             if sigs == "4D5A9000" and position.start() != 0:
@@ -112,7 +118,7 @@ class SignatureChecker:
 
         # Check for headers
         mz_offsets = []
-        find = re.finditer(binascii.unhexlify(POSSIBLE_HEADER), getbins_buffer)
+        find = re.finditer(binascii.unhexlify(POSSIBLE_HEADER), self.getbins_buffer)
         for pos in find:
             if pos.start() % 512 == 0: # Check if the header is aligned
                 mz_offsets.append(pos.start())
@@ -120,9 +126,9 @@ class SignatureChecker:
         # Check possible corrupted MZ headers
         corrupted = 0
         for offset in mz_offsets:
-            if getbins_buffer[offset+2:offset+4] != b"\x90\x00":
+            if self.getbins_buffer[offset+2:offset+4] != b"\x90\x00":
                 print(f"[bold magenta]>>>[white] Possible corrupted MZ header at: [bold green]{hex(offset)}[white]. Attempting to fix that!")
-                new_buffer = getbins_buffer[:offset+2] + b"\x90\x00" + getbins_buffer[offset+4:]
+                new_buffer = self.getbins_buffer[:offset+2] + b"\x90\x00" + self.getbins_buffer[offset+4:]
                 corrupted += 1
 
         if corrupted == 0:
@@ -132,7 +138,51 @@ class SignatureChecker:
                 fx.write(new_buffer)
             print(f"\n{infoS} Modified data saved into: [bold green]fixed_corrupted_headers.exe")
 
+    def pumped_file_carver(self):
+        print(f"{infoS} Performing executable file detection. Please wait...")
+        pattern = b'\x4D\x5A\x90\x00'
+        detected_executables = []
+        with open(self.target_file, "rb") as target:
+            for _ in track(range(0, self.target_file_size, 1024), description="Processing buffer..."):
+                buffer_read = target.read(1024)
+                matches = re.finditer(pattern, buffer_read)
+                for mat in matches:
+                    exec_offset = mat.start()
+                    exec_size = self.parse_pe_size(buffer_read)
+                    detected_executables.append([exec_offset, exec_size])
+            if detected_executables != []:
+                print(f"\n{infoS} Performing embedded binary extraction...")
+                for binary in detected_executables:
+                    print(f"\n{infoS} Carving executable file found on offset: [bold green]{binary[0]}[white] | Size: [bold green]{binary[1]}[white] bytes")
+                    target.seek(binary[0])
+                    binary_buffer_size = binary[1]
+                    try:
+                        pfile = pf.PE(data=target.read(binary_buffer_size))
+                    except:
+                        continue
+                    # Creating dump files
+                    try:
+                        dumpfile = open(f"sc0pe_carved-{binary[0]}.bin", "wb")
+                        buffer_to_write = pfile.trim()
+                        if len(buffer_to_write) >= 52428800:
+                            print(f"\n{infoS} Looks like the carved file is larger than 50MB. You need to re-execute program against the carved file!\n")
+                        print(f"[bold magenta]>>>[white] Data saving into: [bold green]sc0pe_carved-{binary[0]}.bin[white] | Size: [bold green]{len(buffer_to_write)}[white]")
+                        dumpfile.write(buffer_to_write)
+                        dumpfile.close()
+                        pfile.close()
+                    except:
+                        continue
+        target.close()
+        sys.exit(0)
+
+    def parse_pe_size(self, pe_data):
+        # Parse the PE header to retrieve the SizeOfImage field
+        pe_header_offset = struct.unpack('<L', pe_data[0x3C:0x40])[0]
+        size_of_image_offset = pe_header_offset + 0x50
+        size_of_image = struct.unpack('<L', pe_data[size_of_image_offset:size_of_image_offset + 4])[0]
+        return size_of_image
+
 # Execution
-sig_check = SignatureChecker(target_file=targetFile)
+sig_check = SignatureChecker(target_file=sys.argv[1])
 sig_check.signature_checker()
 sig_check.search_possible_corrupt_mz_headers()

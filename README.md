@@ -37,6 +37,11 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![2023-04-06_03-47](https://user-images.githubusercontent.com/42123683/230245219-2ed5fc0c-5da2-4ac0-ae77-bf4d2e83704d.png)
 
 # Updates
+<b>13/06/2023</b>
+- [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform large file analysis. You can now detect and extract actual malwares from large files!
+
+https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/c9084ba4-e10d-4cbd-af06-bf4af0387632
+
 <b>12/06/2023</b>
 - [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform PCAP analysis. You can do:
 - Find URL addresses
@@ -45,11 +50,6 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 - Detect embedded executable files and extract them
 
 https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/4749f107-177b-4c91-90dd-ae63cffc465b
-
-<b>10/06/2023</b>
-- [X] ```WindowsAnalyzer``` module is upgraded. Added basic detection capability for detecting ```PsExec```, ```Rubeus```, ```Mimikatz``` binaries.
-- [X] Added basic detection capability for detecting interesting strings(like filenames etc.)
-![new_update](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/4b39bfbd-2f7c-44d6-a8b2-b9ce64396ed8)
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
