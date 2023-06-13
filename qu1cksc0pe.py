@@ -217,15 +217,25 @@ def Qu1cksc0pe():
     # Getting all strings from the file if the target file exists.
     if args.file:
         if os.path.exists(args.file):
-            if os.path.exists("/usr/bin/strings"):
-                allA = "--all"
-                if sys.platform == "darwin":
-                    allA = "-a"
-                command = f"strings {allA} {args.file} > temp.txt"
-                os.system(command)
+            # Before doing something we need to check file size
+            file_size = os.path.getsize(args.file)
+            if file_size < 52428800: # If given file smaller than 100MB
+                if os.path.exists("/usr/bin/strings"):
+                    allA = "--all"
+                    if sys.platform == "darwin":
+                        allA = "-a"
+                    command = f"strings {allA} {args.file} > temp.txt"
+                    os.system(command)
+                else:
+                    print("[bold white on red][blink]strings[/blink] command not found. You need to install it.")
+                    sys.exit(1)
             else:
-                print("[bold white on red][blink]strings[/blink] command not found. You need to install it.")
-                sys.exit(1)
+                print(f"{infoS} Whoa!! Looks like we have a large file here.")
+                if not args.sigcheck:
+                    print(f"{infoS} Executing [bold green]SignatureAnalyzer[white] module...")
+                    command = f"python3 {sc0pe_path}/Modules/sigChecker.py {args.file}"
+                    os.system(command)
+                    sys.exit(0)
         else:
             print("[bold white on red]Target file not found!\n")
             sys.exit(1)
