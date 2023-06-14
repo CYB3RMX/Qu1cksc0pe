@@ -163,8 +163,13 @@ class ResourceScanner:
         if counter == 0:
             print("\n[bold white on red]There is no interesting things found!\n")
 
-    def windows_resource_scanner_strings_method(self):
-        print(f"{infoS} Using Method 1: [bold yellow]Hidden PE signature scan via strings[white]")
+    def windows_resource_scanner_strings_method(self, strings_type):
+        self.strings_type = strings_type
+        if self.strings_type == "16-bit":
+            print(f"{infoS} Using Method 1: [bold yellow]Hidden PE signature scan via strings[white] ([bold green]16-bit[white])")
+        else:
+            print(f"{infoS} Using Method 1: [bold yellow]Hidden PE signature scan via strings[white]")
+
         # Scan strings and find potential embedded PE executables
         possible_patterns = {
             "method_1": {
@@ -203,7 +208,10 @@ class ResourceScanner:
                 ]
             }
         }
-        strings_data = subprocess.run(["strings", strings_param, self.target_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if self.strings_type == "16-bit":
+            strings_data = subprocess.run(["strings", strings_param, "-e", "l", self.target_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        else:
+            strings_data = subprocess.run(["strings", strings_param, self.target_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         executable_buffer = ""
         for dat in strings_data.stdout.decode().split("\n"):
             for pat in possible_patterns: # Look for methods
@@ -575,7 +583,8 @@ if os.path.isfile(targFile):
     if ostype == "file_android":
         resource_scan.android_resource_scanner()
     elif ostype == "file_windows":
-        resource_scan.windows_resource_scanner_strings_method()
+        resource_scan.windows_resource_scanner_strings_method(strings_type="normal")
+        resource_scan.windows_resource_scanner_strings_method(strings_type="16-bit")
         resource_scan.windows_resource_scanner_split_data_carver_method()
         resource_scan.windows_resource_scanner_bitmap_carver_method()
     else:
