@@ -37,6 +37,9 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![2023-04-06_03-47](https://user-images.githubusercontent.com/42123683/230245219-2ed5fc0c-5da2-4ac0-ae77-bf4d2e83704d.png)
 
 # Updates
+<b>15/06/2023</b>
+- [X] ```ResourceAnalyzer``` module is improved.
+
 <b>13/06/2023</b>
 - [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform large file analysis. You can now detect and extract actual malwares from large files!
 
@@ -55,8 +58,11 @@ https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/4749f107-177b-4c91-90dd-ae
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
 ![tsurugi](https://user-images.githubusercontent.com/42123683/189416193-a709291f-be8f-469c-b649-c6201fa86677.jpeg)
 
-# Note
-- [X] You can also use Qu1cksc0pe from ```Windows Subsystem Linux``` in Windows 10.
+# Recommended Systems
+- [X] Parrot OS
+- [X] Kali Linux
+
+<br><b><i>And similar Linux distributions...</i></b>
 
 # Setup and Installation
 <br><b>Necessary Dependencies</b>:
@@ -158,6 +164,8 @@ sudo python3 qu1cksc0pe.py --install
 - <a href="https://www.redpacketsecurity.com/qu1cksc0pe-all-in-one-static-malware-analysis-tool/">RedPacket Security</a>
 - <a href="https://cert.bournemouth.ac.uk/qu1cksc0pe-all-in-one-static-malware-analysis-tool/">Bournemouth University - CERT</a>
 - <a href="https://github.com/Ignitetechnologies/Mindmap/blob/main/Forensics/Digital%20Forensics%20Tools%20HD.png">Hacking Articles - Digital Forensics Tools Mindmap</a>
+- <a href="https://twitter.com/hack_git/status/1666867995036057602">HackGit - Twitter Post</a>
+- <a href="https://twitter.com/DailyDarkWeb/status/1668966526358286336">Daily Dark Web - Twitter Post</a>
 
 # Thanks to
 For most of FRIDA scripts: <i>https://github.com/Ch0pin/</i><br>
