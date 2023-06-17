@@ -37,6 +37,17 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![2023-04-06_03-47](https://user-images.githubusercontent.com/42123683/230245219-2ed5fc0c-5da2-4ac0-ae77-bf4d2e83704d.png)
 
 # Updates
+<b>17/06/2023</b>
+- [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform .Net binary analysis. You can detect:
+- AgentTesla
+- NjRAT
+- Formbook
+- AsyncRAT/DCRat
+- SnakeKeylogger
+- Malware contains SmartAssembly
+
+https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/ba413c1c-b219-4ec7-b2b9-96470ac28b84
+
 <b>15/06/2023</b>
 - [X] ```ResourceAnalyzer``` module is improved.
 

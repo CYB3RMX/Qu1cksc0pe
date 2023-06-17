@@ -13,8 +13,15 @@ success="${cyan}[${green}+${cyan}]${default}"
 error="${cyan}[${red}!${cyan}]${default}"
 
 # Gather necessary python modules
-echo -en "${info} Installing python modules...\n"
-pip3 install -r requirements.txt
+if command -v pip3 &>/dev/null; then
+    echo -en "${info} Installing python modules...\n"
+    pip3 install -r requirements.txt
+else
+  echo -en "${error} pip3 is not installed on this system. Installing it for you..."
+  sudo apt install python3-pip
+  echo -en "${info} Installing python modules...\n"
+  pip3 install -r requirements.txt
+fi
 
 # Setting up sc0pe_Base folder in /home/$user if its not exist
 echo -en "${info} Setting up ${green}sc0pe_Base${default} folder in ${green}/home/$USER${default}...\n"
