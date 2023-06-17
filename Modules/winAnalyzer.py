@@ -4,10 +4,13 @@ import os
 import re
 import sys
 import json
+import warnings
+import subprocess
 
 try:
     from rich import print
     from rich.table import Table
+    from rich.progress import track
 except:
     print("Error: >rich< module not found.")
     sys.exit(1)
@@ -22,6 +25,13 @@ try:
     import zepu1chr3
 except:
     print("Error: >zepu1chr3< module not found.")
+    sys.exit(1)
+
+try:
+    warnings.filterwarnings("ignore")
+    import clr
+except:
+    print("Error: >pythonnet< module not found.")
     sys.exit(1)
 
 #--------------------------------------------- Getting name of the file for statistics
@@ -40,6 +50,11 @@ if os.path.exists("/usr/lib/python3/dist-packages/sc0pe_helper.py"):
 else:
     print(f"{errorS} [bold green]sc0pe_helper[white] library not installed. You need to execute [bold green]setup.sh[white] script!")
     sys.exit(1)
+
+# Loading dnlib.dll
+clr.AddReference(f"{sc0pe_path}/Systems/Windows/dnlib.dll")
+from dnlib.DotNet import *
+from System.IO import *
 
 #--------------------------------------------- Gathering all function imports from binary
 zep = zepu1chr3.Binary()
@@ -81,6 +96,7 @@ except:
 
 #--------------------------------------------------------------------- Keywords for categorized scanning
 windows_api_list = json.load(open(f"{sc0pe_path}/Systems/Windows/windows_api_categories.json"))
+dotnet_malware_pattern = json.load(open(f"{sc0pe_path}/Systems/Windows/dotnet_malware_patterns.json"))
 
 #--------------------------------------------- Dictionary of Categories
 dictCateg = {
@@ -123,6 +139,23 @@ class WindowsAnalyzer:
         self.allFuncs = 0
         self.import_indicator = 0
         self.executable_buffer = open(self.target_file, "rb").read()
+        self.interesting_stuff = [
+            r"[a-zA-Z0-9_.]*pdb", r"[a-zA-Z0-9_.]*vbs", 
+            r"[a-zA-Z0-9_.]*vba", r"[a-zA-Z0-9_.]*vbe", 
+            r"[a-zA-Z0-9_.]*exe", r"[a-zA-Z0-9_.]*ps1",
+            r"[a-zA-Z0-9_.]*dll", r"[a-zA-Z0-9_.]*bat",
+            r"[a-zA-Z0-9_.]*cmd", r"[a-zA-Z0-9_.]*tmp",
+            r"[a-zA-Z0-9_.]*dmp", r"[a-zA-Z0-9_.]*cfg",
+            r"[a-zA-Z0-9_.]*lnk", r"[a-zA-Z0-9_.]*config"
+        ]
+        self.int_stf = {
+            "offsets": [],
+            "interesting_stuff": []
+        }
+        self.exec_type = subprocess.run(["file", self.target_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if ".Net" in self.exec_type.stdout.decode():
+            self.dotnet_file_analyzer()
+            sys.exit(0)
 
     def api_categorizer(self):
         for win_api in allStrings:
@@ -206,27 +239,14 @@ class WindowsAnalyzer:
         stuff_table = Table()
         stuff_table.add_column("[bold green]Offsets", justify="center")
         stuff_table.add_column("[bold green]Interesting Patterns", justify="center")
-        interesting_stuff = [
-            r"[a-zA-Z0-9_]*.pdb", r"[a-zA-Z0-9_]*.vbs", 
-            r"[a-zA-Z0-9_]*.vba", r"[a-zA-Z0-9_]*.vbe", 
-            r"[a-zA-Z0-9_]*.exe", r"[a-zA-Z0-9_]*.ps1",
-            r"[a-zA-Z0-9_]*.dll", r"[a-zA-Z0-9_]*.bat",
-            r"[a-zA-Z0-9_]*.cmd", r"[a-zA-Z0-9_]*.tmp",
-            r"[a-zA-Z0-9_]*.dmp", r"[a-zA-Z0-9_]*.cfg",
-            r"[a-zA-Z0-9_]*.lnk"
-        ]
 
         # First check for keys about software
         found_keys = {
             "offsets": [],
             "registry_keys": []
         }
-        int_stf = {
-            "offsets": [],
-            "interesting_stuff": []
-        }
         self.reg_interest_check(reg_key_array, found_keys, reg_table, "registry_keys")
-        self.reg_interest_check(interesting_stuff, int_stf, stuff_table, "interesting_stuff")
+        self.reg_interest_check(self.interesting_stuff, self.int_stf, stuff_table, "interesting_stuff")
 
     def reg_interest_check(self, pattern_array, target_dict, table_obj, stuff_type):
         self.pattern_array = pattern_array
@@ -335,6 +355,48 @@ class WindowsAnalyzer:
             print("[bold white on red]This file might be obfuscated or encrypted. [white]Try [bold green][i]--packer[/i] [white]to scan this file for packers.")
             print("[bold]You can also use [green][i]--hashscan[/i] [white]to scan this file.")
             sys.exit(0)
+
+    def dotnet_file_analyzer(self):
+        print(f"{infoS} Performing .NET analysis...")
+
+        # Load the assembly using dnlib
+        assembly = AssemblyDef.Load(self.target_file)
+
+        class_names = []
+        for module in assembly.Modules:
+            for typ in module.Types:
+                if "<Module>" not in typ.FullName:
+                    class_names.append(typ.FullName)
+                    dotnet_table = Table()
+                    dotnet_table.add_column(f"Methods in Class: [bold green]{typ.FullName}[white]", justify="center")
+                    methodz = []
+                    for met in typ.Methods:
+                        if str(met.Name) not in methodz:
+                            methodz.append(str(met.Name))
+                            dotnet_table.add_row(str(met.Name))
+                    print(dotnet_table)
+
+        print(f"\n{infoS} Performing pattern analysis...")
+        fswc = 0
+        dot_fam = Table()
+        dot_fam.add_column(f"[bold green]Malware Family/Artifact", justify="center")
+        dot_fam.add_column(f"[bold green]Pattern Occurence", justify="center")
+        for family in dotnet_malware_pattern:
+            for dotp in dotnet_malware_pattern[family]["patterns"]:
+                if dotp in class_names:
+                    dotnet_malware_pattern[family]["occurence"] += 1
+            if dotnet_malware_pattern[family]["occurence"] != 0:
+                dot_fam.add_row(family, str(dotnet_malware_pattern[family]["occurence"]))
+                fswc += 1
+        if fswc != 0:
+            print(dot_fam)
+        else:
+            print(f"{errorS} Couldn\'t detect any pattern. This file might be obfuscated!\n")
+
+        stuff_table = Table()
+        stuff_table.add_column("[bold green]Offsets", justify="center")
+        stuff_table.add_column("[bold green]Interesting Patterns", justify="center")
+        self.reg_interest_check(self.interesting_stuff, self.int_stf, stuff_table, "interesting_stuff")
 
 # Execute
 windows_analyzer = WindowsAnalyzer(target_file=fileName)
