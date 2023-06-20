@@ -37,6 +37,11 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![2023-04-06_03-47](https://user-images.githubusercontent.com/42123683/230245219-2ed5fc0c-5da2-4ac0-ae77-bf4d2e83704d.png)
 
 # Updates
+<b>20/06/2023</b>
+- [X] ```WindowsAnalyzer``` and ```ResourceAnalyzer``` modules are both improved.
+
+https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/1362236a-4dac-458c-9b21-8b5fef1b1b77
+
 <b>17/06/2023</b>
 - [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform .Net binary analysis. You can detect:
 - AgentTesla
@@ -47,23 +52,6 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 - Malware contains SmartAssembly
 
 https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/ba413c1c-b219-4ec7-b2b9-96470ac28b84
-
-<b>15/06/2023</b>
-- [X] ```ResourceAnalyzer``` module is improved.
-
-<b>13/06/2023</b>
-- [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform large file analysis. You can now detect and extract actual malwares from large files!
-
-https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/c9084ba4-e10d-4cbd-af06-bf4af0387632
-
-<b>12/06/2023</b>
-- [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform PCAP analysis. You can do:
-- Find URL addresses
-- Find DNS Queries
-- Find interesting strings
-- Detect embedded executable files and extract them
-
-https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/4749f107-177b-4c91-90dd-ae63cffc465b
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
@@ -82,6 +70,7 @@ https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/4749f107-177b-4c91-90dd-ae
 - ```PyExifTool``` => <i>Metadata extraction.</i>
 - ```Jadx``` => <i>Performing source code and resource analysis.</i>
 - ```PyOneNote``` => <i>OneNote document analysis.</i>
+- ```Mono``` => <i>Performing .Net binary analysis.</i>
 
 ```bash
 # You can simply execute the following command it will do everything for you!

@@ -5,6 +5,9 @@ import re
 import sys
 import subprocess
 import binascii
+import base64
+import hashlib
+from Crypto.Cipher import DES3
 
 # Testing pyaxmlparser existence
 try:
@@ -206,6 +209,11 @@ class ResourceScanner:
                 "patterns": [
                     r"300009A5D4"
                 ]
+            },
+            "method_7": {
+                "patterns": [
+                    r"ABjAHUAZABvAHIAUAABAAEAIgAAAAAAbABsAGQAL"
+                ]
             }
         }
         if self.strings_type == "16-bit":
@@ -272,6 +280,12 @@ class ResourceScanner:
             elif target_method == "method_6":
                 if target_pattern == r"300009A5D4":
                     self.method_6_simple_reverse(executable_buffer=executable_buffer)
+                else:
+                    pass
+            # Using method 7: Base64 and reverse
+            elif target_method == "method_7":
+                if target_pattern == r"ABjAHUAZABvAHIAUAABAAEAIgAAAAAAbABsAGQAL":
+                    self.method_7_base64_and_reverse(executable_buffer=executable_buffer)
                 else:
                     pass
             else:
@@ -370,6 +384,19 @@ class ResourceScanner:
 
         # Save data
         self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
+
+    def method_7_base64_and_reverse(self, executable_buffer):
+        self.executable_buffer = executable_buffer
+
+        # Deobfuscation
+        decode1 = base64.b64decode(self.executable_buffer)
+        final_buffer = decode1[::-1]
+
+        # Save data
+        with open("sc0pe_carved_deobfuscated.exe", "wb") as ff:
+            ff.write(final_buffer)
+        print(f"{infoS} Data saved into: [bold green]sc0pe_carved_deobfuscated.exe[white]\n")
+
     def buffer_sanitizer(self, executable_buffer):
         self.executable_buffer = executable_buffer
 
@@ -567,6 +594,44 @@ class ResourceScanner:
             return True
         else:
             return False
+    def windows_resource_scanner_locate_encrypted(self):
+        print(f"{infoS} Using Method 4: [bold yellow]Locate and decrypt hidden PE file[white]")
+        # We need target executable buffer and file handler
+        target_executable_buffer = open(self.target_file, "rb").read()
+        target_file_handler = open(self.target_file, "rb")
+
+        # Signatures
+        encrypted_sigs = {
+            "Bvdohovalgmkvczfebimk": {
+                "signature_start": "d6278ed277bfe2fcb77ee67c0eb03dde",
+                "size_of_data": 2220040,
+                "key_to_decrypt": "Oaxvkmfiubpynfqupmzypmbr",
+                "additional_bytes": 1740
+            }
+        }
+
+        # Iterate and decrypt
+        founz = 0
+        for artifact in encrypted_sigs:
+            offsets = []
+            matchs = re.finditer(binascii.unhexlify(encrypted_sigs[artifact]["signature_start"]), target_executable_buffer)
+            for mm in matchs:
+                offsets.append(mm.start())
+            if offsets != []:
+                founz += 1
+                print(f"{infoS} Carving encrypted resource on: [bold green]{hex(offsets[0])}[white] | Size: [bold green]{encrypted_sigs[artifact]['size_of_data']}")
+                carve_data = target_executable_buffer[offsets[0]:encrypted_sigs[artifact]["size_of_data"]+encrypted_sigs[artifact]["additional_bytes"]]
+                print(f"{infoS} Performing decryption...")
+                key = hashlib.md5(encrypted_sigs[artifact]["key_to_decrypt"].encode('utf-8')).digest()
+                barr = bytearray(carve_data)
+                cipher = DES3.new(key, DES3.MODE_ECB)
+                decr = cipher.decrypt(barr)
+                with open(f"sc0pe_carved_decrypted-{hex(offsets[0])}.exe", "wb") as ff:
+                    ff.write(decr)
+                print(f"{infoS} Data saved into: [bold green]sc0pe_carved_decrypted-{hex(offsets[0])}.exe[white]\n")
+        if founz == 0:
+            print(f"{errorS} There is no encrypted PE pattern found!\n")
+
     def save_data_into_file(self, output_name, save_buffer):
         self.output_name = output_name
         self.save_buffer = save_buffer
@@ -587,6 +652,7 @@ if os.path.isfile(targFile):
         resource_scan.windows_resource_scanner_strings_method(strings_type="16-bit")
         resource_scan.windows_resource_scanner_split_data_carver_method()
         resource_scan.windows_resource_scanner_bitmap_carver_method()
+        resource_scan.windows_resource_scanner_locate_encrypted()
     else:
         print("\n[bold white on red]Target OS couldn\'t detected!\n")
 else:
