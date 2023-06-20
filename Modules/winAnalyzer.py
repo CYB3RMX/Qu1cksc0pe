@@ -10,7 +10,6 @@ import subprocess
 try:
     from rich import print
     from rich.table import Table
-    from rich.progress import track
 except:
     print("Error: >rich< module not found.")
     sys.exit(1)
@@ -32,6 +31,7 @@ try:
     import clr
 except:
     print("Error: >pythonnet< module not found.")
+    print(f"[bold red]>>>[white] You can execute: [bold green]sudo apt install mono-complete && pip3 install pythonnet[white]")
     sys.exit(1)
 
 #--------------------------------------------- Getting name of the file for statistics

@@ -12,13 +12,26 @@ info="${cyan}[${yellow}*${cyan}]${default}"
 success="${cyan}[${green}+${cyan}]${default}"
 error="${cyan}[${red}!${cyan}]${default}"
 
+# Detecting package manager
+command_exists() {
+  command -v "$1" >/dev/null 2>&1
+}
+if command_exists apt; then
+  echo -en "${info} APT package manager detected.\n"
+  package_manager="apt install"
+fi
+if command_exists pacman; then
+  echo -en "${info} Pacman package manager detected.\n"
+  package_manager="pacman -S"
+fi
+
 # Gather necessary python modules
 if command -v pip3 &>/dev/null; then
     echo -en "${info} Installing python modules...\n"
     pip3 install -r requirements.txt
 else
   echo -en "${error} pip3 is not installed on this system. Installing it for you..."
-  sudo apt install python3-pip
+  sudo ${package_manager} python3-pip
   echo -en "${info} Installing python modules...\n"
   pip3 install -r requirements.txt
 fi
@@ -54,7 +67,7 @@ fi
 if [ ! -f "/usr/bin/strings" ]; then
     echo -e "${error} Whoa there! ${green}strings${default} command is not exist in your system!"
     echo -en "${yellow}>>> ${default}I will install it for you, but you need to enter your password to continue...\n"
-    sudo apt install binutils
+    sudo ${package_manager} binutils
     echo -en "${success} Done!\n"
 else
     echo -en "${info} ${green}strings${default} command is already exist...\n"
@@ -66,7 +79,7 @@ echo -en "${info} Setting up ${green}PyExifTool${default}...\n"
 if [ ! -f "/usr/bin/exiftool" ]; then
     echo -e "${error} Whoops! ${green}exiftool${default} command is not exist in your system!"
     echo -en "${yellow}>>> ${default}Looks like I need your sudo permissions :3\n"
-    sudo apt install libimage-exiftool-perl
+    sudo ${package_manager} libimage-exiftool-perl
     echo -en "${success} Done!\n"
 else
     echo -en "${info} ${green}exiftool${default} command is already exist...\n"
@@ -92,5 +105,9 @@ sudo rm -rf pyexiftool
 # Setting up sc0pe_helper module
 echo -en "${yellow}>>> ${default}Just one more...\n"
 sudo cp Modules/lib/sc0pe_helper.py /usr/lib/python3/dist-packages/
+
+# Setting up "mono-complete"
+echo -en "${info} Setting up mono-complete\n"
+sudo ${package_manager} mono-complete
 
 echo -en "\n${info} All done.\n"
