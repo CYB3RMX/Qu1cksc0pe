@@ -111,9 +111,6 @@ parser.add_argument("--domain", required=False,
 parser.add_argument("--hashscan", required=False,
                     help="Scan target file's hash in local database.",
                     action="store_true")
-parser.add_argument("--health", required=False,
-                    help="Check for dependencies and configurations.",
-                    action="store_true")
 parser.add_argument("--setup_venv", required=False,
                     help="Setup Python virtual environment automatically.", action="store_true")
 parser.add_argument("--install", required=False,
@@ -207,6 +204,12 @@ def BasicAnalyzer(analyzeFile):
         print(f"{infoS} Performing [bold green]PCAP[while] analysis...\n")
         command = f"python3 {sc0pe_path}/Modules/pcap_analyzer.py {analyzeFile}"
         os.system(command)
+
+    # Powershell analysis
+    elif ".ps1" in analyzeFile:
+        print(f"{infoS} Performing [bold green]Powershell Script[white] analysis...\n")
+        command = f"python3 {sc0pe_path}/Modules/powershell_analyzer.py {analyzeFile}"
+        os.system(command)
     else:
         print("\n[bold white on red]File type not supported. Make sure you are analyze executable files or document files.")
         print("[bold]>>> If you want to scan document files try [bold green][i]--docs[/i] [white]argument.")
@@ -225,6 +228,8 @@ def Qu1cksc0pe():
                     if sys.platform == "darwin":
                         allA = "-a"
                     command = f"strings {allA} {args.file} > temp.txt"
+                    os.system(command)
+                    command = f"strings {allA} -e l {args.file} >> temp.txt"
                     os.system(command)
                 else:
                     print("[bold white on red][blink]strings[/blink] command not found. You need to install it.")
@@ -404,11 +409,6 @@ def Qu1cksc0pe():
     # Interactive shell
     if args.console:
         command = f"python3 {sc0pe_path}/Modules/console.py"
-        os.system(command)
-
-    # Dependency checker
-    if args.health:
-        command = f"python3 {sc0pe_path}/Modules/checkHealth.py"
         os.system(command)
 
     # Virtual environment setup

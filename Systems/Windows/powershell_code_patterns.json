@@ -1,0 +1,38 @@
+{
+    "Obfuscation/Encoding": {
+        "patterns": [
+            "FromBase64String",
+            "System.Text.Encoding",
+            "UTF8.GetString",
+            "-bxor",
+            "fromHEXString",
+            "System.Convert"
+        ],
+        "occurence": 0
+    },
+    "Evasion/Bypass": {
+        "patterns": [
+            "Microsoft.Win32.UnsafeNativeMethods"
+        ],
+        "occurence": 0
+    },
+    "FileSystem": {
+        "patterns": [
+            "env:APPDATA",
+            "Remove-Item",
+            "expand-archive",
+            "New-Item",
+            "WriteAllText",
+            "IO.File"
+        ],
+        "occurence": 0
+    },
+    "Networking": {
+        "patterns": [
+            "Start-BitsTransfer",
+            "MSXML2.XMLH",
+            "IEX"
+        ],
+        "occurence": 0
+    }
+}

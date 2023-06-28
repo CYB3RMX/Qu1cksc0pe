@@ -27,7 +27,7 @@ banner1=f"""
 {cy} \_/\_|\___/ \___/\____/\_| \_/\____/ \____/\___/\_|   \____/       {gr}@ @ @
                                                                       @
                                    {ye}|             |
-  {wh}All in One malware analysis tool.{ye}| {wh}By CYB3RMX_ {ye}| {wh}Version: {gr}1.8.0
+  {wh}All in One malware analysis tool.{ye}| {wh}By CYB3RMX_ {ye}| {wh}Version: {gr}1.8.1
   {ye}---------------------------------|             |{wh}\n
 """
 banner2=f"""
@@ -39,7 +39,7 @@ banner2=f"""
   {ma}dmmMMMMMMNmmNMMMMMMMMNmmNMMMMMMmmm   {wh}|                                         |
   {ma}NMMyoodMMMMMMMMMMMMMMMMMMMMdoosMMM   {wh}|    {gr}All in One malware analysis tool.    {wh}|
   {ma}NMM-  sMMMNNNNNNNNNNNNNNNMMy  .MMM   {wh}|                                         |
-  {ma}NMM-  sMMyvvvvvvvvvvvvvvsMMy  .MMM   {wh}|             {gr}Version{wh}: {ye}1.8.0              {wh}|
+  {ma}NMM-  sMMyvvvvvvvvvvvvvvsMMy  .MMM   {wh}|             {gr}Version{wh}: {ye}1.8.1              {wh}|
   {ma}ooo.  :ooooooo+    +ooooooo/   ooo   {wh}+-----------------|||||||-----------------+
            {ma}/MMMMN    mMMMM+                              {wh}|||||||
                                                          |||||||\n
@@ -51,7 +51,7 @@ banner3=f"""
       /                \\
      ;   Qu1cksc0pe    ;;
      |                 |;
-     ;     v1.8.0      ;|
+     ;     v1.8.1      ;|
      ;\               / ;
       \ .           .  /
         . -._____.-  .

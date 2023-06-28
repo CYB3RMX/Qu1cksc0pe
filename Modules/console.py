@@ -319,11 +319,6 @@ try:
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
 
-        # Setup health checker
-        elif con_command == "health":
-            command = f"python3 {sc0pe_path}/Modules/checkHealth.py"
-            os.system(command)
-
         # Metadata analyzer
         elif con_command == "metadata":
             if os.path.exists(".target-file.txt"):
