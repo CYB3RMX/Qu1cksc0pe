@@ -27,6 +27,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps us
 | Document Files | Static |
 | Archive Files (.zip, .rar, .ace) | Static |
 | PCAP Files (.pcap) | Static |
+| Powershell Scripts | Static |
 
 # Usage
 ```bash
@@ -34,9 +35,18 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ```
 
 # Screenshot
-![2023-04-06_03-47](https://user-images.githubusercontent.com/42123683/230245219-2ed5fc0c-5da2-4ac0-ae77-bf4d2e83704d.png)
+![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/22e652db-c25f-49b1-b122-ac9f89d14ae3)
 
 # Updates
+<b>28/06/2023</b>
+- [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform Powershell Script analysis. Now you can do:
+- Extract execution patterns like: ```start cmd.exe``` etc.
+- Extract PATH values.
+- Detect common obfuscation techniques used by CobaltStrike and Metasploit.
+- Decode and extract payloads from scripts.
+
+https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/5944ae85-63a9-45ed-a2bd-16000368b5fc
+
 <b>20/06/2023</b>
 - [X] ```WindowsAnalyzer``` and ```ResourceAnalyzer``` modules are both improved.
 
@@ -166,6 +176,7 @@ sudo python3 qu1cksc0pe.py --install
 - <a href="https://github.com/Ignitetechnologies/Mindmap/blob/main/Forensics/Digital%20Forensics%20Tools%20HD.png">Hacking Articles - Digital Forensics Tools Mindmap</a>
 - <a href="https://twitter.com/hack_git/status/1666867995036057602">HackGit - Twitter Post</a>
 - <a href="https://twitter.com/DailyDarkWeb/status/1668966526358286336">Daily Dark Web - Twitter Post</a>
+- <a href="https://isc.sans.edu/diary/The+Importance+of+Malware+Triage/29984">SANS ISC - Blog Post</a>
 
 # Thanks to
 For most of FRIDA scripts: <i>https://github.com/Ch0pin/</i><br>
