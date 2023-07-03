@@ -38,6 +38,11 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/22e652db-c25f-49b1-b122-ac9f89d14ae3)
 
 # Updates
+<b>03/07/2023</b>
+- [X] ```PowerShell``` analyzer module is improved.
+
+https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/0e943396-ab0b-4832-bab4-88a462c9dbd7
+
 <b>28/06/2023</b>
 - [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform Powershell Script analysis. Now you can do:
 - Extract execution patterns like: ```start cmd.exe``` etc.
@@ -46,22 +51,6 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 - Decode and extract payloads from scripts.
 
 https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/5944ae85-63a9-45ed-a2bd-16000368b5fc
-
-<b>20/06/2023</b>
-- [X] ```WindowsAnalyzer``` and ```ResourceAnalyzer``` modules are both improved.
-
-https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/1362236a-4dac-458c-9b21-8b5fef1b1b77
-
-<b>17/06/2023</b>
-- [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform .Net binary analysis. You can detect:
-- AgentTesla
-- NjRAT
-- Formbook
-- AsyncRAT/DCRat
-- SnakeKeylogger
-- Malware contains SmartAssembly
-
-https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/ba413c1c-b219-4ec7-b2b9-96470ac28b84
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)

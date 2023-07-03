@@ -6,7 +6,8 @@
             "UTF8.GetString",
             "-bxor",
             "fromHEXString",
-            "System.Convert"
+            "System.Convert",
+            "sYsTem.io.comprEsSIOn.CoMPReSsIONmOdE"
         ],
         "occurence": 0
     },
@@ -31,7 +32,23 @@
         "patterns": [
             "Start-BitsTransfer",
             "MSXML2.XMLH",
-            "IEX"
+            "IEX",
+            "TcpClient",
+            "Net.Sockets",
+            "Text.AsciiEncoding",
+            "Reverse TCP",
+            "System.Net.WebRequest",
+            "GetSystemWebProxy",
+            "webclient",
+            "Host",
+            "user-agent",
+            "Mozilla/4.0",
+            "Headers.add",
+            "DownloadFile",
+            "PowerShellTcp",
+            "IPAddress",
+            "Port",
+            "AcceptTcpClient"
         ],
         "occurence": 0
     }
