@@ -1,10 +1,30 @@
-FROM python:3.7
+# Create environment
+FROM ubuntu:latest
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Europe/Istanbul
 
+# Gather dependencies
+RUN apt update && apt install -y curl wget git binutils sudo unzip python3 python3-pip libimage-exiftool-perl mono-complete default-jre
+RUN pip3 install setuptools wheel pythonnet pycryptodome python-magic
+
+# Install application
 WORKDIR /app
-
-COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
-
 COPY . .
 
+# Configuration
+RUN chmod +x qu1cksc0pe.py setup.sh
+RUN ln -s /root /home/root
+RUN ./setup.sh
+RUN wget https://raw.githubusercontent.com/CYB3RMX/MalwareHashDB/main/HashDB -O /home/root/sc0pe_Base/HashDB
+
+# Radare2 Installation
+WORKDIR /opt
+RUN git clone https://github.com/radareorg/radare2
+RUN radare2/sys/install.sh
+
+# Cleanup
+RUN apt clean
+
+# RE-Enter app directory
+WORKDIR /app
 ENTRYPOINT ["/app/qu1cksc0pe.py"]

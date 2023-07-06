@@ -78,6 +78,10 @@ bash setup.sh
 # If you want to install Qu1cksc0pe on your system just execute the following commands.
 bash setup.sh
 sudo python3 qu1cksc0pe.py --install
+
+# Or you can use Qu1cksc0pe from Docker!
+docker build qu1cksc0pe .
+docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_file --analyze
 ```
 
 # Static Analysis
