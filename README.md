@@ -38,6 +38,11 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/22e652db-c25f-49b1-b122-ac9f89d14ae3)
 
 # Updates
+<b>07/07/2023</b>
+- [X] Improvements on ```Dockerfile```
+- [X] ```WindowsAnalyzer``` and ```ResourceAnalyzer``` modules now have better detection capabilites!
+- [X] Added new Yara rule to detect ```RustyStealer``` samples!
+
 <b>03/07/2023</b>
 - [X] ```PowerShell``` analyzer module is improved.
 

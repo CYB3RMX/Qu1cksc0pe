@@ -383,8 +383,9 @@ class WindowsAnalyzer:
         dot_fam.add_column(f"[bold green]Pattern Occurence", justify="center")
         for family in dotnet_malware_pattern:
             for dotp in dotnet_malware_pattern[family]["patterns"]:
-                if dotp in class_names:
-                    dotnet_malware_pattern[family]["occurence"] += 1
+                matcher = re.findall(dotp, str(class_names), re.IGNORECASE)
+                if matcher != []:
+                    dotnet_malware_pattern[family]["occurence"] += len(matcher)
             if dotnet_malware_pattern[family]["occurence"] != 0:
                 dot_fam.add_row(family, str(dotnet_malware_pattern[family]["occurence"]))
                 fswc += 1

@@ -42,7 +42,7 @@ language_dict = {
         "occurence": 0
     },
     "Zig": {
-        "patterns": ["ZIG_DEBUG_COLOR", "__zig_probe_stack", "__zig_return_error", "ZIG"],
+        "patterns": ["ZIG_DEBUG_COLOR", "__zig_probe_stack", "__zig_return_error"],
         "occurence": 0
     },
     "C#": {
@@ -55,6 +55,10 @@ language_dict = {
     },
     "C": {
         "patterns": ["__libc_start_main", "GLIBC_2.2.5", "libc.so.6", "__cxa_finalize", ".text"],
+        "occurence": 0
+    },
+    "Rust": {
+        "patterns": ["rustc", "cargo"],
         "occurence": 0
     }
 }
@@ -74,7 +78,7 @@ def LanguageDetect():
             try:
                 matches = re.findall(pat, str(allStrings))
                 if matches != []:
-                    language_dict[key]["occurence"] += 1
+                    language_dict[key]["occurence"] += len(matches)
                     indicator += 1
             except:
                 continue
