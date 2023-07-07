@@ -197,7 +197,8 @@ class ResourceScanner:
                     r"09}A5}D4",
                     r"WP09PA5PD4",
                     r"X-09-A5-D4",
-                    r"ZZ-09-A5-D4"
+                    r"ZZ-09-A5-D4",
+                    r"\?3\?\?9A5D4"
                 ]
             },
             "method_5": {
@@ -267,6 +268,8 @@ class ResourceScanner:
                     self.method_4_reverse_and_double_replace(r1="X", r2="00", r3="-", r4="", executable_buffer=executable_buffer)
                 elif target_pattern == r"ZZ-09-A5-D4":
                     self.method_4_reverse_and_double_replace(r1="ZZ", r2="00", r3="-", r4="", executable_buffer=executable_buffer)
+                elif target_pattern == r"\?3\?\?9A5D4":
+                    self.method_4_reverse_and_double_replace(r1="--", r2="0", r3="?", r4="00", executable_buffer=executable_buffer)
                 else:
                     pass
 
