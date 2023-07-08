@@ -21,12 +21,6 @@ except:
     sys.exit(1)
 
 try:
-    import zepu1chr3
-except:
-    print("Error: >zepu1chr3< module not found.")
-    sys.exit(1)
-
-try:
     warnings.filterwarnings("ignore")
     import clr
 except:
@@ -56,12 +50,15 @@ clr.AddReference(f"{sc0pe_path}/Systems/Windows/dnlib.dll")
 from dnlib.DotNet import *
 from System.IO import *
 
+#--------------------------------------------------------------------- Keywords for categorized scanning
+windows_api_list = json.load(open(f"{sc0pe_path}/Systems/Windows/windows_api_categories.json"))
+dotnet_malware_pattern = json.load(open(f"{sc0pe_path}/Systems/Windows/dotnet_malware_patterns.json"))
+
 #--------------------------------------------- Gathering all function imports from binary
-zep = zepu1chr3.Binary()
-tfl = zep.File(fileName)
 pe = pf.PE(fileName)
 allStrings = []
 try:
+    print(f"{infoS} Performing extraction of imports...")
     binaryfile = pf.PE(fileName)
     for imps in binaryfile.DIRECTORY_ENTRY_IMPORT:
         try:
@@ -70,11 +67,16 @@ try:
         except:
             continue
 except:
-    for imps in zep.GetImports(tfl):
-        try:
-            allStrings.append(imps["realname"], imps["offset"])
-        except:
-            continue
+    print(f"{infoS} Performing extraction of imports via [bold green]HEX read+regex[white] style...")
+    binary_data = open(fileName, "rb").read()
+    for categ in windows_api_list:
+        for api in windows_api_list[categ]["apis"]:
+            try:
+                matcher = re.finditer(api.encode(), binary_data, re.IGNORECASE)
+                for pos in matcher:
+                    allStrings.append([api, hex(pos.start())])
+            except:
+                continue
 
 # Get exports
 try:
@@ -87,16 +89,6 @@ try:
             continue
 except:
     pass
-
-# Get number of functions via radare2
-try:
-    num_of_funcs = len(zep.GetFunctions(tfl))
-except:
-    num_of_funcs = None
-
-#--------------------------------------------------------------------- Keywords for categorized scanning
-windows_api_list = json.load(open(f"{sc0pe_path}/Systems/Windows/windows_api_categories.json"))
-dotnet_malware_pattern = json.load(open(f"{sc0pe_path}/Systems/Windows/dotnet_malware_patterns.json"))
 
 #--------------------------------------------- Dictionary of Categories
 dictCateg = {
@@ -125,7 +117,6 @@ winrep = {
     "imphash": "",
     "all_imports": 0,
     "categorized_imports": 0,
-    "number_of_functions": 0,    
     "categories": {},
     "matched_rules": [],
     "linked_dll": [],
@@ -336,10 +327,8 @@ class WindowsAnalyzer:
         statistics.add_column("Number of Functions or Strings", justify="center")
         statistics.add_row("[bold green][i]All Imports,Exports[/i]", f"[bold green]{len(allStrings)}")
         statistics.add_row("[bold green][i]Categorized Imports[/i]", f"[bold green]{self.allFuncs}")
-        statistics.add_row("[bold green][i]Number of Functions[/i]", f"[bold green]{num_of_funcs}")
         winrep["all_imports_exports"] = len(allStrings)
         winrep["categorized_imports"] = self.allFuncs
-        winrep["number_of_functions"] = num_of_funcs
         for key in windows_api_list:
             if windows_api_list[key]["occurence"] == 0:
                 pass

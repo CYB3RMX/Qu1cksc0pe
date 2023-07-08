@@ -8,7 +8,6 @@ rule RustyStealer_Detect {
         $rusty1 = ".cargo" ascii wide
         $rusty2 = "rust_panic" ascii wide
         $rusty3 = "rustc" ascii wide
-        $rusty4 = ".rs" ascii wide
         $pattern1 = "C:\\Users\\peter\\OneDrive\\Documents\\Others\\CTHULHU\\target\\release\\deps\\rcrypt.pdb" ascii wide
         $pattern2 = "C:\\Users\\Administrator\\Desktop\\CK-567-master\\CK-567-master\\target\\release\\loader\\target\\release\\deps\\payload.pdb" ascii wide
         $pattern3 = "HELP_RECOVER_ALL_MY_FILES.txt" ascii wide
@@ -25,5 +24,5 @@ rule RustyStealer_Detect {
         $pattern14 = "C:\\Users\\user\\Documents\\Project\\check_name\\target\\debug\\deps\\FingerPrint_disable_x64.pdb" ascii wide
         $pattern15 = "args.rscmd.exe" ascii wide
     condition:
-        (2 or all of ($rusty*) and (3 or all of ($pattern*)))
+        ((2 or all of ($rusty*)) and (3 or all of ($pattern*)))
 }
