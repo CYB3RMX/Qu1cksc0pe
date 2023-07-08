@@ -12,8 +12,6 @@ yara-python==3.11.0
 prompt_toolkit==3.0.19
 frida
 lief
-zepu1chr3
-r2pipe
 pygore
 qiling
 pdfminer.six

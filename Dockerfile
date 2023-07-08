@@ -17,11 +17,6 @@ RUN ln -s /root /home/root
 RUN ./setup.sh
 RUN wget https://raw.githubusercontent.com/CYB3RMX/MalwareHashDB/main/HashDB -O /home/root/sc0pe_Base/HashDB
 
-# Radare2 Installation
-WORKDIR /opt
-RUN git clone https://github.com/radareorg/radare2
-RUN radare2/sys/install.sh
-
 # Cleanup
 RUN apt clean
 
