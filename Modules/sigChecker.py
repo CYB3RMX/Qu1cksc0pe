@@ -14,6 +14,12 @@ except:
     sys.exit(1)
 
 try:
+    import lief
+except:
+    print("Error: >lief< module not found.")
+    sys.exit(1)
+
+try:
     from rich import print
     from rich.table import Table
     from rich.progress import track
@@ -51,7 +57,7 @@ class SignatureChecker:
             print(f"\n{infoS} Performing pumped file analysis against large file...")
             self.pumped_file_carver()
 
-    def file_carver(self, offset_array):
+    def file_carver_for_windows_executables(self, offset_array):
         self.offset_array = offset_array
 
         for off in self.offset_array:
@@ -89,6 +95,7 @@ class SignatureChecker:
 
         # Lets scan!
         mz_offsets = []
+        elf_offsets = []
         valid_pattern_switch = 0
         for index in range(0, len(fsigs)):
             for categ in fsigs[index]:
@@ -99,6 +106,10 @@ class SignatureChecker:
                             sigTable.add_row(str(categ), f"[bold green]{str(binascii.unhexlify(sigs))}", str(hex(position.start())))
                             if sigs == "4D5A9000" and position.start() != 0:
                                 mz_offsets.append(position.start())
+                            elif sigs == "7f454c4602010100" and position.start() != 0:
+                                elf_offsets.append(position.start())
+                            else:
+                                pass
                             valid_pattern_switch += 1
                     except:
                         continue
@@ -107,10 +118,17 @@ class SignatureChecker:
         else:
             print(sigTable)
 
+        # Windows side
         if mz_offsets != []:
             choice = str(input(f"{infoC} Do you want to extract executable files from target file[Y/n]?: "))
             if choice == "Y" or choice == "y":
-                self.file_carver(mz_offsets)
+                self.file_carver_for_windows_executables(mz_offsets)
+
+        # ELF side
+        if elf_offsets != []:
+            choice = str(input(f"{infoC} Do you want to extract executable files from target file[Y/n]?: "))
+            if choice == "Y" or choice == "y":
+                self.file_carver_for_elf_executables(elf_offsets)
 
     def search_possible_corrupt_mz_headers(self):
         print(f"\n{infoS} Looking for possible corrupted Windows executable patterns...")
@@ -181,6 +199,14 @@ class SignatureChecker:
         size_of_image_offset = pe_header_offset + 0x50
         size_of_image = struct.unpack('<L', pe_data[size_of_image_offset:size_of_image_offset + 4])[0]
         return size_of_image
+
+    def file_carver_for_elf_executables(self, offset_array):
+        for ofs in offset_array:
+            binary = lief.parse(self.getbins_buffer[ofs:])
+            if binary is not None:
+                with open(f"sc0pe_carved_ELF-{hex(ofs)}.bin", "wb") as ff:
+                    ff.write(self.getbins_buffer[ofs:binary.eof_offset+ofs])
+                print(f"[bold magenta]>>>[white] Data saved into: [bold green]sc0pe_carved_ELF-{hex(ofs)}.bin")
 
 # Execution
 sig_check = SignatureChecker(target_file=sys.argv[1])
