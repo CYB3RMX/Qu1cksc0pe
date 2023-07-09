@@ -5,6 +5,7 @@ import re
 import sys
 import json
 import warnings
+import binascii
 import subprocess
 
 try:
@@ -130,19 +131,7 @@ class WindowsAnalyzer:
         self.allFuncs = 0
         self.import_indicator = 0
         self.executable_buffer = open(self.target_file, "rb").read()
-        self.interesting_stuff = [
-            r"[a-zA-Z0-9_.]*pdb", r"[a-zA-Z0-9_.]*vbs", 
-            r"[a-zA-Z0-9_.]*vba", r"[a-zA-Z0-9_.]*vbe", 
-            r"[a-zA-Z0-9_.]*exe", r"[a-zA-Z0-9_.]*ps1",
-            r"[a-zA-Z0-9_.]*dll", r"[a-zA-Z0-9_.]*bat",
-            r"[a-zA-Z0-9_.]*cmd", r"[a-zA-Z0-9_.]*tmp",
-            r"[a-zA-Z0-9_.]*dmp", r"[a-zA-Z0-9_.]*cfg",
-            r"[a-zA-Z0-9_.]*lnk", r"[a-zA-Z0-9_.]*config"
-        ]
-        self.int_stf = {
-            "offsets": [],
-            "interesting_stuff": []
-        }
+        self.all_strings = open(f"{sc0pe_path}/temp.txt", "r").read().split("\n")
         self.exec_type = subprocess.run(["file", self.target_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if ".Net" in self.exec_type.stdout.decode():
             self.dotnet_file_analyzer()
@@ -187,7 +176,7 @@ class WindowsAnalyzer:
     def dll_files(self):
         try:
             dllTable = Table()
-            dllTable.add_column("Linked DLL Files", style="bold green")
+            dllTable.add_column("Linked DLL Files", style="bold green", justify="center")
             for items in binaryfile.DIRECTORY_ENTRY_IMPORT:
                 dlStr = str(items.dll.decode())
                 dllTable.add_row(f"{dlStr}", style="bold red")
@@ -221,49 +210,85 @@ class WindowsAnalyzer:
         else:
             print(f"{errorS} There is no special artifact pattern found!\n")
 
-    def check_for_registry_keys_and_interesting_stuff(self):
+    def check_for_valid_registry_keys(self):
+        print(f"\n{infoS} Looking for: [bold green]Windows Registry Key[white]")
+        # Defining table and patterns
         reg_table = Table()
-        reg_table.add_column("[bold green]Offsets", justify="center")
         reg_table.add_column("[bold green]Registry Keys", justify="center")
         reg_key_array = [r"SOFTWARE\\[A-Za-z0-9_\\]*", r"HKCU_[A-Za-z0-9_\\]*", r"HKLM_[A-Za-z0-9_\\]*", r"SYSTEM\\[A-Za-z0-9_\\]*"]
 
+        # Array for holding keys
+        registry_keys = []
+
+        # Search for keys in file buffer
+        for key in reg_key_array:
+            chk = re.findall(key, str(self.all_strings), re.IGNORECASE) # "re.IGNORECASE" in case of non case sensitive values
+            if chk != []:
+                for pattern in chk:
+                    if len(pattern) > 10 and pattern not in registry_keys:
+                        registry_keys.append(pattern)
+        # Print output
+        if registry_keys != []:
+            for reg in registry_keys:
+                reg_table.add_row(reg)
+            print(reg_table)
+        else:
+            print(f"{errorS} There is no pattern about registry keys!\n")
+
+    def check_for_interesting_stuff(self):
+        print(f"\n{infoS} Looking for: [bold green]Interesting String Patterns[white]")
+        # Defining table and patterns
         stuff_table = Table()
-        stuff_table.add_column("[bold green]Offsets", justify="center")
         stuff_table.add_column("[bold green]Interesting Patterns", justify="center")
+        interesting_stuff = [
+            r"[a-zA-Z0-9_.]*pdb", r"[a-zA-Z0-9_.]*vbs", 
+            r"[a-zA-Z0-9_.]*vba", r"[a-zA-Z0-9_.]*vbe", 
+            r"[a-zA-Z0-9_.]*exe", r"[a-zA-Z0-9_.]*ps1",
+            r"[a-zA-Z0-9_.]*dll", r"[a-zA-Z0-9_.]*bat",
+            r"[a-zA-Z0-9_.]*cmd", r"[a-zA-Z0-9_.]*tmp",
+            r"[a-zA-Z0-9_.]*dmp", r"[a-zA-Z0-9_.]*cfg",
+            r"[a-zA-Z0-9_.]*lnk", r"[a-zA-Z0-9_.]*config",
+            r"[a-zA-Z0-9_.]*7z", r"[a-zA-Z0-9_.]*docx"
+            r"SeLockMemoryPrivilege", r"SeShutdownPrivilege",
+            r"SeChangeNotifyPrivilege", r"SeUndockPrivilege",
+            r"SeIncreaseWorkingSetPrivilege", r"SeTimeZonePrivilege"
+        ]
 
-        # First check for keys about software
-        found_keys = {
-            "offsets": [],
-            "registry_keys": []
-        }
-        self.reg_interest_check(reg_key_array, found_keys, reg_table, "registry_keys")
-        self.reg_interest_check(self.interesting_stuff, self.int_stf, stuff_table, "interesting_stuff")
+        # Array for holding string values
+        intstf = []
 
-    def reg_interest_check(self, pattern_array, target_dict, table_obj, stuff_type):
-        self.pattern_array = pattern_array
-        self.target_dict = target_dict
-        self.table_obj = table_obj
-        self.stuff_type = stuff_type
+        # Search for keys in file buffer
+        for key in interesting_stuff:
+            chk = re.findall(key, str(self.all_strings), re.IGNORECASE) # "re.IGNORECASE" in case of non case sensitive values
+            if chk != []:
+                for pattern in chk:
+                    if pattern not in intstf:
+                        intstf.append(pattern)
 
-        for key in self.pattern_array:
-            chk = re.finditer(key.encode(), self.executable_buffer)
-            for rr in chk:
-                if len(rr.group()) > 10 and self.stuff_type == "registry_keys":
-                    self.target_dict["offsets"].append(rr.start())
-                    self.target_dict[stuff_type].append(rr.group())
-                elif b"." in rr.group():
-                    self.target_dict["offsets"].append(rr.start())
-                    self.target_dict[stuff_type].append(rr.group())
+        # Print output
+        if intstf != []:
+            for stf in intstf:
+                if "Se" in stf and "Privilege" in stf:
+                    stuff_table.add_row(f"[bold red]{stf}[white]")
                 else:
-                    pass
-        if self.target_dict["offsets"] != []:
-            if self.stuff_type == "registry_keys":
-                print(f"\n{infoS} Looks like we found patterns about registry keys. Attempting to extraction...")
-            else:
-                print(f"\n{infoS} Looks like we found patterns about interesting stuff. Attempting to locate...")
-            for ofs, key in zip(self.target_dict["offsets"], self.target_dict[stuff_type]):
-                self.table_obj.add_row(str(hex(ofs)), key.decode())
-            print(self.table_obj)
+                    stuff_table.add_row(stf)
+            print(stuff_table)
+        else:
+            print(f"{errorS} There is no pattern about interesting string values!\n")
+
+    def detect_embedded_PE(self):
+        print(f"\n{infoS} Performing embedded PE file detection...")
+        mz_header = "4D5A9000"
+        valid_offsets = []
+        matches = re.finditer(binascii.unhexlify(mz_header), self.executable_buffer)
+        for pos in matches:
+            if pos.start() != 0:
+                valid_offsets.append(pos.start())
+        if valid_offsets != []:
+            print(f"{infoS} There is possible [bold red]{len(valid_offsets)}[white] embedded PE file found!")
+            print(f"{infoS} Execute: [bold green]python3 qu1cksc0pe.py --file {fileName} --sigcheck[white] to extract them!\n")
+        else:
+            print(f"{errorS} There is no embedded PE file!\n")
 
     def section_parser(self):
         peStatistics = Table(title="* Informations About Sections *", title_style="bold italic cyan", title_justify="center")
@@ -352,9 +377,13 @@ class WindowsAnalyzer:
         assembly = AssemblyDef.Load(self.target_file)
 
         class_names = []
+        blacklisted = ["AES_Decrypt", "AntiVM", "Decrypt", "GetResource",
+                       "ReadProcessMemory", "WriteProcessMemory",
+                       "SetKernelObjectSecurity", "VirtualAllocEx", "MSHTMLHost"
+                    ]
         for module in assembly.Modules:
             for typ in module.Types:
-                if "<Module>" not in typ.FullName:
+                if "<" not in typ.FullName:
                     class_names.append(typ.FullName)
                     dotnet_table = Table()
                     dotnet_table.add_column(f"Methods in Class: [bold green]{typ.FullName}[white]", justify="center")
@@ -362,7 +391,10 @@ class WindowsAnalyzer:
                     for met in typ.Methods:
                         if str(met.Name) not in methodz:
                             methodz.append(str(met.Name))
-                            dotnet_table.add_row(str(met.Name))
+                            if str(met.Name) in blacklisted:
+                                dotnet_table.add_row(f"[bold red]{str(met.Name)}[white]")
+                            else:
+                                dotnet_table.add_row(str(met.Name))
                     print(dotnet_table)
 
         print(f"\n{infoS} Performing pattern analysis...")
@@ -383,10 +415,8 @@ class WindowsAnalyzer:
         else:
             print(f"{errorS} Couldn\'t detect any pattern. This file might be obfuscated!\n")
 
-        stuff_table = Table()
-        stuff_table.add_column("[bold green]Offsets", justify="center")
-        stuff_table.add_column("[bold green]Interesting Patterns", justify="center")
-        self.reg_interest_check(self.interesting_stuff, self.int_stf, stuff_table, "interesting_stuff")
+        self.check_for_valid_registry_keys()
+        self.check_for_interesting_stuff()
 
 # Execute
 windows_analyzer = WindowsAnalyzer(target_file=fileName)
@@ -394,7 +424,9 @@ windows_analyzer.api_categorizer()
 windows_analyzer.dictcateg_parser()
 windows_analyzer.dll_files()
 windows_analyzer.scan_for_special_artifacts()
-windows_analyzer.check_for_registry_keys_and_interesting_stuff()
+windows_analyzer.check_for_valid_registry_keys()
+windows_analyzer.check_for_interesting_stuff()
+windows_analyzer.detect_embedded_PE()
 
 # Yara rule match
 print(f"\n{infoS} Performing YARA rule matching...")

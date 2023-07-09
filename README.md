@@ -38,6 +38,12 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/22e652db-c25f-49b1-b122-ac9f89d14ae3)
 
 # Updates
+<b>10/07/2023</b>
+- [X] ```SignatureAnalyzer``` module is improved. Now you can perform detection and extraction of embedded ELF executables!
+- [X] ```WindowsAnalyzer``` module is now also perform embedded PE file detection!
+
+https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/aaa9debf-8cdf-40ba-a57a-87ccc6ca04f2
+
 <b>08/07/2023</b>
 - [X] ```WindowsAnalyzer``` module is improved.
 - [X] Bug fixes and performance tweaks.
@@ -46,20 +52,6 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 - [X] Improvements on ```Dockerfile```
 - [X] ```WindowsAnalyzer``` and ```ResourceAnalyzer``` modules now have better detection capabilites!
 - [X] Added new Yara rule to detect ```RustyStealer``` samples!
-
-<b>03/07/2023</b>
-- [X] ```PowerShell``` analyzer module is improved.
-
-https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/0e943396-ab0b-4832-bab4-88a462c9dbd7
-
-<b>28/06/2023</b>
-- [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform Powershell Script analysis. Now you can do:
-- Extract execution patterns like: ```start cmd.exe``` etc.
-- Extract PATH values.
-- Detect common obfuscation techniques used by CobaltStrike and Metasploit.
-- Decode and extract payloads from scripts.
-
-https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/5944ae85-63a9-45ed-a2bd-16000368b5fc
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
