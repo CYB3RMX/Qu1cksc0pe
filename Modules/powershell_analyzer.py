@@ -5,6 +5,7 @@ import io
 import sys
 import json
 import zlib
+import gzip
 import base64
 import binascii
 import subprocess
@@ -41,7 +42,7 @@ class PowerShellAnalyzer:
         self.target_buffer_normal = subprocess.run(["strings", strings_param, self.target_file], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.target_buffer_16bit = subprocess.run(["strings", strings_param, "-e", "l", self.target_file], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
         self.all_strings = self.target_buffer_16bit.stdout.decode().split("\n")+self.target_buffer_normal.stdout.decode().split("\n")
-        self.pattern_b64 = r"\[(?i)sYsteM\.coNvert\]::FROmbaSe64StRiNG\(\s*'([^']*)'\s*\)|\[System\.Convert\]::FromBase64String\(\s*'([A-Za-z0-9+/=]+)'\s*\)"
+        self.pattern_b64 = r"\[(?i)sYsteM\.coNvert\]::FROmbaSe64StRiNG\(\s*[\'\"]([^']*)[\'\"]\s*\)|\[System\.Convert\]::FromBase64String\(\s*'([A-Za-z0-9+/=]+)'\s*\)"
         self.pattern_ascii = r'\[Byte\[\]\]\((\d+(?:,\d+)*)\)'
         self.pattern_hex = r'\[System\.Convert\]::fromHEXString\(\'([0-9a-fA-F]+)\'\)'
 
@@ -211,13 +212,18 @@ class PowerShellAnalyzer:
             b64_data = base64.b64decode(b64matches[0][0])
             print(f"{infoS} We have a [bold green]BASE64[white] encoded payload. Performing decode and extract...")
             print(f"{infoS} Checking for compressed data presence...")
-            comp_data = re.findall(r'sYsTem\.io\.comprEsSIOn\.CoMPReSsIONmOdE', str(self.all_strings), re.IGNORECASE)
-            if comp_data != []:
-                print(f"{infoS} Compressed data found! Attempting to decompress...")
+            deflatestream = re.findall(r'Io\.CoMpRESSiOn\.defLaTEstReam', str(self.all_strings), re.IGNORECASE)
+            gzipstream = re.findall(r"IO\.Compression\.GZipStream", str(self.all_strings), re.IGNORECASE)
+            if deflatestream != []:
+                print(f"{infoS} Deflatestream data found! Attempting to decompress...")
                 decompress_obj = zlib.decompressobj(-zlib.MAX_WBITS)
                 decompressed_data = decompress_obj.decompress(b64_data)
                 output = io.BytesIO(decompressed_data).read().decode('ascii')
                 self.save_data_into_file(output_file="sc0pe_decoded_b64_payload.bin", data=output.encode())
+            elif gzipstream != []:
+                print(f"{infoS} Gzip data found! Attempting to decompress...")
+                decompressed_data = gzip.decompress(b64_data)
+                self.save_data_into_file(output_file="sc0pe_decoded_b64_payload.bin", data=decompressed_data)
             else:
                 print(f"{infoS} There is no compression. Extracting payload anyway...")
                 self.save_data_into_file(output_file="sc0pe_decoded_b64_payload.bin", data=b64_data)
