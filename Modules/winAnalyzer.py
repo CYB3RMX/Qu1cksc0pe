@@ -55,42 +55,6 @@ from System.IO import *
 windows_api_list = json.load(open(f"{sc0pe_path}/Systems/Windows/windows_api_categories.json"))
 dotnet_malware_pattern = json.load(open(f"{sc0pe_path}/Systems/Windows/dotnet_malware_patterns.json"))
 
-#--------------------------------------------- Gathering all function imports from binary
-pe = pf.PE(fileName)
-allStrings = []
-try:
-    print(f"{infoS} Performing extraction of imports...")
-    binaryfile = pf.PE(fileName)
-    for imps in binaryfile.DIRECTORY_ENTRY_IMPORT:
-        try:
-            for im in imps.imports:
-                allStrings.append([im.name.decode("ascii"), hex(binaryfile.OPTIONAL_HEADER.ImageBase + im.address)]) # For full address and not only offset
-        except:
-            continue
-except:
-    print(f"{infoS} Performing extraction of imports via [bold green]HEX read+regex[white] style...")
-    binary_data = open(fileName, "rb").read()
-    for categ in windows_api_list:
-        for api in windows_api_list[categ]["apis"]:
-            try:
-                matcher = re.finditer(api.encode(), binary_data, re.IGNORECASE)
-                for pos in matcher:
-                    allStrings.append([api, hex(pos.start())])
-            except:
-                continue
-
-# Get exports
-try:
-    binaryfile = pf.PE(fileName)
-    for exp in binaryfile.DIRECTORY_ENTRY_EXPORT.symbols:
-        try:
-            allStrings.append([exp.name.decode('utf-8'), hex(binaryfile.OPTIONAL_HEADER.ImageBase + exp.address)]) # For full address and not only offset
-
-        except:
-            continue
-except:
-    pass
-
 #--------------------------------------------- Dictionary of Categories
 dictCateg = {
     "Registry": [],
@@ -129,16 +93,59 @@ class WindowsAnalyzer:
     def __init__(self, target_file):
         self.target_file = target_file
         self.allFuncs = 0
-        self.import_indicator = 0
+        self.windows_imports_and_exports = []
         self.executable_buffer = open(self.target_file, "rb").read()
         self.all_strings = open(f"{sc0pe_path}/temp.txt", "r").read().split("\n")
+        self.blacklisted_patterns = open(f"{sc0pe_path}/Systems/Windows/dotnet_blacklisted_methods.txt", "r").read().split("\n")
+
+        # Check for windows file type
         self.exec_type = subprocess.run(["file", self.target_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if ".Net" in self.exec_type.stdout.decode():
+            print(f"{infoS} File Type: [bold green].NET Executable[white]\n")
             self.dotnet_file_analyzer()
             sys.exit(0)
+        elif "MSI Installer" in self.exec_type.stdout.decode():
+            print(f"{infoS} File Type: [bold green]MSI Installer[white]\n")
+            self.msi_file_analyzer()
+            sys.exit(0)
+        else:
+            print(f"{infoS} File Type: [bold green]Windows Executable[white]\n")
+            self.gather_windows_imports_and_exports()
+
+    def gather_windows_imports_and_exports(self):
+        print(f"{infoS} Performing extraction of imports and exports. Please wait...")
+        try:
+            self.binaryfile = pf.PE(fileName)
+            for imps in self.binaryfile.DIRECTORY_ENTRY_IMPORT:
+                try:
+                    for im in imps.imports:
+                        self.windows_imports_and_exports.append([im.name.decode("ascii"), hex(self.binaryfile.OPTIONAL_HEADER.ImageBase + im.address)]) # For full address and not only offset
+                except:
+                    continue
+            for exp in self.binaryfile.DIRECTORY_ENTRY_EXPORT.symbols:
+                try:
+                    self.windows_imports_and_exports.append([exp.name.decode('utf-8'), hex(self.binaryfile.OPTIONAL_HEADER.ImageBase + exp.address)]) # For full address and not only offset
+                except:
+                    continue
+        except:
+            binary_data = open(fileName, "rb").read()
+            for categ in windows_api_list:
+                for api in windows_api_list[categ]["apis"]:
+                    try:
+                        matcher = re.finditer(api.encode(), binary_data, re.IGNORECASE)
+                        for pos in matcher:
+                            if [api, hex(pos.start())] not in self.windows_imports_and_exports:
+                                self.windows_imports_and_exports.append([api, hex(pos.start())])
+                    except:
+                        continue
+        if self.windows_imports_and_exports != []:
+            self.api_categorizer()
+            self.dictcateg_parser()
+        else:
+            print(f"{errorS} There is no pattern about function/API imports!\n")
 
     def api_categorizer(self):
-        for win_api in allStrings:
+        for win_api in self.windows_imports_and_exports:
             for key in windows_api_list:
                 if win_api[0] in windows_api_list[key]["apis"]:
                     if win_api[0] != "":
@@ -165,19 +172,13 @@ class WindowsAnalyzer:
                     else:
                         tables.add_row(f"[bold red]{func[0]}", f"[bold red]{func[1]}")
                         winrep["categories"][key].append(func[0])
-                        self.import_indicator += 1
                 print(tables)
-
-        # If there is no function imported in target executable
-        if self.import_indicator == 0:
-            print("[bold white on red]There is no function/API imports found.")
-            print("[magenta]>>[white] Try [bold green][i]--packer[/i] [white]or [bold green][i]--lang[/i] [white]to see additional info about target file.\n")
 
     def dll_files(self):
         try:
             dllTable = Table()
             dllTable.add_column("Linked DLL Files", style="bold green", justify="center")
-            for items in binaryfile.DIRECTORY_ENTRY_IMPORT:
+            for items in self.binaryfile.DIRECTORY_ENTRY_IMPORT:
                 dlStr = str(items.dll.decode())
                 dllTable.add_row(f"{dlStr}", style="bold red")
                 winrep["linked_dll"].append(dlStr)
@@ -186,7 +187,7 @@ class WindowsAnalyzer:
             pass
 
     def gather_timestamp(self):
-        mydict = pe.dump_dict()
+        mydict = self.binaryfile.dump_dict()
         tempstr = mydict["FILE_HEADER"]["TimeDateStamp"]["Value"][11:].replace("[", "")
         datestamp = tempstr.replace("]", "")
         return datestamp
@@ -268,7 +269,7 @@ class WindowsAnalyzer:
         # Print output
         if intstf != []:
             for stf in intstf:
-                if "Se" in stf and "Privilege" in stf:
+                if (stf in interesting_stuff) or (".cmd" in stf or ".bat" in stf or ".exe" in stf):
                     stuff_table.add_row(f"[bold red]{stf}[white]")
                 else:
                     stuff_table.add_row(stf)
@@ -300,7 +301,7 @@ class WindowsAnalyzer:
         peStatistics.add_column("Entropy", justify="center")
 
         # Parsing sections
-        for sect in pe.sections:
+        for sect in self.binaryfile.sections:
             try:
                 if sect.get_entropy() >= 7:
                     peStatistics.add_row(
@@ -343,16 +344,16 @@ class WindowsAnalyzer:
         winrep["filename"] = self.target_file
         winrep["timedatestamp"] = datestamp
         sc0pehelper.hash_calculator(self.target_file, winrep)
-        print(f"[bold magenta]>>[white] IMPHASH: [bold green]{binaryfile.get_imphash()}")
-        winrep["imphash"] = binaryfile.get_imphash()
+        print(f"[bold magenta]>>[white] IMPHASH: [bold green]{self.binaryfile.get_imphash()}")
+        winrep["imphash"] = self.binaryfile.get_imphash()
 
         # printing all function statistics
         statistics = Table()
         statistics.add_column("Categories", justify="center")
         statistics.add_column("Number of Functions or Strings", justify="center")
-        statistics.add_row("[bold green][i]All Imports,Exports[/i]", f"[bold green]{len(allStrings)}")
+        statistics.add_row("[bold green][i]All Imports,Exports[/i]", f"[bold green]{len(self.windows_imports_and_exports)}")
         statistics.add_row("[bold green][i]Categorized Imports[/i]", f"[bold green]{self.allFuncs}")
-        winrep["all_imports_exports"] = len(allStrings)
+        winrep["all_imports_exports"] = len(self.windows_imports_and_exports)
         winrep["categorized_imports"] = self.allFuncs
         for key in windows_api_list:
             if windows_api_list[key]["occurence"] == 0:
@@ -373,14 +374,13 @@ class WindowsAnalyzer:
     def dotnet_file_analyzer(self):
         print(f"{infoS} Performing .NET analysis...")
 
+        self.gather_windows_imports_and_exports()
+
         # Load the assembly using dnlib
         assembly = AssemblyDef.Load(self.target_file)
 
         class_names = []
-        blacklisted = ["AES_Decrypt", "AntiVM", "Decrypt", "GetResource",
-                       "ReadProcessMemory", "WriteProcessMemory",
-                       "SetKernelObjectSecurity", "VirtualAllocEx", "MSHTMLHost"
-                    ]
+        print(f"\n{infoS} Extracting and analyzing classes...")
         for module in assembly.Modules:
             for typ in module.Types:
                 if "<" not in typ.FullName:
@@ -391,7 +391,7 @@ class WindowsAnalyzer:
                     for met in typ.Methods:
                         if str(met.Name) not in methodz:
                             methodz.append(str(met.Name))
-                            if str(met.Name) in blacklisted:
+                            if str(met.Name) in self.blacklisted_patterns:
                                 dotnet_table.add_row(f"[bold red]{str(met.Name)}[white]")
                             else:
                                 dotnet_table.add_row(str(met.Name))
@@ -417,11 +417,23 @@ class WindowsAnalyzer:
 
         self.check_for_valid_registry_keys()
         self.check_for_interesting_stuff()
+        self.detect_embedded_PE()
+        # Yara rule match
+        print(f"\n{infoS} Performing YARA rule matching...")
+        sc0pehelper.yara_rule_scanner("windows", fileName, config_path=f"{sc0pe_path}/Systems/Windows/windows.conf", report_object=winrep)
+
+    def msi_file_analyzer(self):
+        print(f"{infoS} Performing MSI Installer analysis...\n")
+        self.gather_windows_imports_and_exports()
+        self.check_for_valid_registry_keys()
+        self.check_for_interesting_stuff()
+        self.detect_embedded_PE()
+        # Yara rule match
+        print(f"\n{infoS} Performing YARA rule matching...")
+        sc0pehelper.yara_rule_scanner("windows", fileName, config_path=f"{sc0pe_path}/Systems/Windows/windows.conf", report_object=winrep)
 
 # Execute
 windows_analyzer = WindowsAnalyzer(target_file=fileName)
-windows_analyzer.api_categorizer()
-windows_analyzer.dictcateg_parser()
 windows_analyzer.dll_files()
 windows_analyzer.scan_for_special_artifacts()
 windows_analyzer.check_for_valid_registry_keys()

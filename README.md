@@ -38,20 +38,17 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/22e652db-c25f-49b1-b122-ac9f89d14ae3)
 
 # Updates
+<b>12/07/2023</b>
+- [X] ```WindowsAnalyzer``` module is improved. Now it can analyze ```Microsoft Software Installer(.msi)``` files properly!
+- [X] New Yara rules added.
+- [X] Improvements on .NET analysis feature and ```SignatureAnalyzer``` module!
+
 <b>10/07/2023</b>
 - [X] ```SignatureAnalyzer``` module is improved. Now you can perform detection and extraction of embedded ELF executables!
 - [X] ```WindowsAnalyzer``` module is now also perform embedded PE file detection!
 
 https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/aaa9debf-8cdf-40ba-a57a-87ccc6ca04f2
 
-<b>08/07/2023</b>
-- [X] ```WindowsAnalyzer``` module is improved.
-- [X] Bug fixes and performance tweaks.
-
-<b>07/07/2023</b>
-- [X] Improvements on ```Dockerfile```
-- [X] ```WindowsAnalyzer``` and ```ResourceAnalyzer``` modules now have better detection capabilites!
-- [X] Added new Yara rule to detect ```RustyStealer``` samples!
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
