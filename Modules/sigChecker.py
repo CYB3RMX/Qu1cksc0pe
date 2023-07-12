@@ -103,7 +103,13 @@ class SignatureChecker:
                     try:
                         regex = re.finditer(binascii.unhexlify(sigs), self.getbins_buffer)
                         for position in regex:
-                            sigTable.add_row(str(categ), f"[bold green]{str(binascii.unhexlify(sigs))}", str(hex(position.start())))
+                            # If there is an executable file warn user!
+                            if "Executable File" in str(categ) and position.start() != 0:
+                                sigTable.add_row(f"[bold red]{str(categ)}[white]", f"[bold green]{str(binascii.unhexlify(sigs))}", f"[bold red]{str(hex(position.start()))}[white]")
+                            else:
+                                sigTable.add_row(str(categ), f"[bold green]{str(binascii.unhexlify(sigs))}", str(hex(position.start())))
+
+                            # Also check for executable file existence
                             if sigs == "4D5A9000" and position.start() != 0:
                                 mz_offsets.append(position.start())
                             elif sigs == "7f454c4602010100" and position.start() != 0:
