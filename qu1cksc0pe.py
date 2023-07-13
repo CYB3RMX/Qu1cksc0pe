@@ -210,6 +210,12 @@ def BasicAnalyzer(analyzeFile):
         print(f"{infoS} Performing [bold green]Powershell Script[white] analysis...\n")
         command = f"python3 {sc0pe_path}/Modules/powershell_analyzer.py {analyzeFile}"
         os.system(command)
+
+    # Email file analysis
+    elif "email message" in fileType or "message/rfc822" in fileType:
+        print(f"{infoS} Performing [bold green]Email File[white] analysis...\n")
+        command = f"python3 {sc0pe_path}/Modules/email_analyzer.py {analyzeFile}"
+        os.system(command)
     else:
         print("\n[bold white on red]File type not supported. Make sure you are analyze executable files or document files.")
         print("[bold]>>> If you want to scan document files try [bold green][i]--docs[/i] [white]argument.")
