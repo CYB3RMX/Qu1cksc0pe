@@ -45,29 +45,6 @@ banner2=f"""
                                                          |||||||\n
 """
 banner3=f"""
-           {wh} ______
-         .--      --.
-       ./             \\
-      /                \\
-     ;   Qu1cksc0pe    ;;
-     |                 |;
-     ;     v1.8.1      ;|
-     ;\               / ;
-      \ .           .  /
-        . -._____.-  .
-         / / _____.-
-        / / /
-       / / /
-      / / /
-     / / /
-    / / /
-   / / /
-  / / /
- / / /
-/ / /
-\/_/ \n
-"""
-banner4=f"""
                    {wh}<------------------------------------------>
                    <  This tool is very dangerous. Be careful >
            {gr}__      {wh}<   while using it!!                       >
@@ -80,7 +57,7 @@ banner4=f"""
     |_|_        _|_|   {wh}<- Mr. Virus
       {gr}|_|      |_|{wh} \n
 """
-banner5=f"""
+banner4=f"""
 \n{ye}+ ------------------------------ +
 I                                I
 I      {wh}*********************     {ye}I
@@ -92,7 +69,7 @@ I                                I
                 {ye}I I
              ____V_____              {ma}Version: {re}1.8.1{wh}\n\n
 """
-banner6=f"""
+banner5=f"""
                         {re}* -------------------------------- *
            {gr}__           {re}| {gr}Name: {wh}Mr. Virus                  {re}|
          {gr}_|  |_         {re}| {gr}Type: {wh}Trojan.Dropper             {re}|
@@ -104,7 +81,7 @@ banner6=f"""
     |_|_        _|_|
       |_|      |_|{wh} \n
 """
-banner7=f"""
+banner6=f"""
 \n{cy}SIMON SAYS:\n
          {gr}-o          o-
           +hydNNNNdyh+          {wh}<--------------------------->
@@ -125,7 +102,7 @@ banner7=f"""
           MMMMo  oMMMM
           oNMm-  -mMNs{wh} \n
 """
-banner8=f"""
+banner7=f"""
 \n  .-------------------------------------.
   | [____{re}DOWNLOADING FREE RTX 3090{wh}____] |
   |  _________________________________  |
@@ -133,7 +110,7 @@ banner8=f"""
   |  \"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"  |
   |_____________________________________|\n
 """
-banner9=f"""
+banner8=f"""
 {gr}                            .oodMMMM
                    .oodMMMMMMMMMMMMM
 {re}       ..oodMMM{gr}  MMMMMMMMMMMMMMMMMMM
@@ -152,6 +129,25 @@ banner9=f"""
 {cy} `^^^^^^MMMMMMM{ye}  MMMMMMMMMMMMMMMMMMM
 {cy}       ````^^^^{ye}  ^^MMMMMMMMMMMMMMMMM
                       ````^^^^^^MMMM{wh}
+"""
+banner9=f"""
+       {re}_______________
+      |{cy}@@@@{re}|     |{cy}####{re}|
+      |{cy}@@@@{re}|     |{cy}####{re}|
+      |{cy}@@@@{re}|     |{cy}####{re}|
+      \\\{cy}@@@@{re}|     |{cy}####{re}/
+       \\\{cy}@@@{re}|     |{cy}###{re}/
+        `{cy}@@{re}|_____|{cy}##{re}'
+             {ma}(O)
+        {ye}.-''''''''''-.             {gr}Congratulations!{ye}
+      .'  * * * * * * `.
+     :  *             * :                  {gr}You just analyzed your 1000th sample :){ye}
+    : ~ Malware Hunter ~ :
+    :         of         :
+    :    ~ The Year ~    :             {gr}You won 100BTC!!!{ye}
+     :  *             * :
+      `.  * * * * * * .'
+        `-..........-'
 """
 
 randomBanner = random.randint(1, 9)

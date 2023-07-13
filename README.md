@@ -3,7 +3,7 @@
 <p align="center">
     <img width="400" src="https://user-images.githubusercontent.com/42123683/216772963-0b035e5a-c9db-4a6e-ac32-ebca22921405.png" alt="logo">
 </p>
-<br>All-in-One malware analysis tool for analyze Windows, Linux, OSX binaries, Document files, APK files and Archive files.<br>
+<br>All-in-One malware analysis tool for analyze many file types, from Windows binaries to E-Mail files.<br>
 
 *You can get*: 
 - What DLL files are used.
@@ -12,6 +12,7 @@
 - URLs, IP addresses and emails.
 - Android permissions.
 - File extensions and their names.
+- Embedded executables/exploits.
 <br><b>And so on...</b><br>
 
 Qu1cksc0pe aims to get even more information about suspicious files and helps user realize what that file is capable of.
@@ -28,6 +29,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps us
 | Archive Files (.zip, .rar, .ace) | Static |
 | PCAP Files (.pcap) | Static |
 | Powershell Scripts | Static |
+| E-Mail Files (.eml) | Static |
 
 # Usage
 ```bash
@@ -38,6 +40,13 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/22e652db-c25f-49b1-b122-ac9f89d14ae3)
 
 # Updates
+<b>14/07/2023</b>
+- [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform E-Mail file analysis. You can do:
+- Perform ```DNSBL Lookup``` against sender e-mail address.
+- Extract attachments and analyze them!
+
+https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/9ec0c0e1-1862-40a0-9019-e119b152d325
+
 <b>12/07/2023</b>
 - [X] ```WindowsAnalyzer``` module is improved. Now it can analyze ```Microsoft Software Installer(.msi)``` files properly!
 - [X] New Yara rules added.

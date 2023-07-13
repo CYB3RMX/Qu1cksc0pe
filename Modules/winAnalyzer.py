@@ -105,7 +105,7 @@ class WindowsAnalyzer:
             self.dotnet_file_analyzer()
             sys.exit(0)
         elif "MSI Installer" in self.exec_type.stdout.decode():
-            print(f"{infoS} File Type: [bold green]MSI Installer[white]\n")
+            print(f"{infoS} File Type: [bold green]Microsoft Software Installer[white]\n")
             self.msi_file_analyzer()
             sys.exit(0)
         else:
@@ -423,7 +423,7 @@ class WindowsAnalyzer:
         sc0pehelper.yara_rule_scanner("windows", fileName, config_path=f"{sc0pe_path}/Systems/Windows/windows.conf", report_object=winrep)
 
     def msi_file_analyzer(self):
-        print(f"{infoS} Performing MSI Installer analysis...\n")
+        print(f"{infoS} Performing Microsoft Software Installer analysis...\n")
         self.gather_windows_imports_and_exports()
         self.check_for_valid_registry_keys()
         self.check_for_interesting_stuff()

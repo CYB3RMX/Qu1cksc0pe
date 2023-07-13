@@ -21,3 +21,4 @@ acefile
 Pillow
 dpkt
 pythonnet
+pydnsbl
