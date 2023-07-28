@@ -215,6 +215,11 @@ class ResourceScanner:
                 "patterns": [
                     r"ABjAHUAZABvAHIAUAABAAEAIgAAAAAAbABsAGQAL"
                 ]
+            },
+            "method_8": {
+                "patterns": [
+                    r"4D5A9ZZZZ3"
+                ]
             }
         }
         if self.strings_type == "16-bit":
@@ -246,8 +251,10 @@ class ResourceScanner:
 
             # Using method 2: Double replace
             elif target_method == "method_2":
-                if target_pattern == r"4D5A9ZZZ":
+                if target_pattern == r"4D5A9ZZZ" and "YY" in executable_buffer:
                     self.method_2_double_replace(r1="ZZ", r2="0", r3="YY", r4="F", executable_buffer=executable_buffer)
+                else:
+                    pass
 
             # Using method 3: Reverse replace
             elif target_method == "method_3":
@@ -289,6 +296,12 @@ class ResourceScanner:
             elif target_method == "method_7":
                 if target_pattern == r"ABjAHUAZABvAHIAUAABAAEAIgAAAAAAbABsAGQAL":
                     self.method_7_base64_and_reverse(executable_buffer=executable_buffer)
+                else:
+                    pass
+            # Using method 8: Simple replace
+            elif target_method == "method_8":
+                if target_pattern == r"4D5A9ZZZZ3":
+                    self.method_8_simple_replace(r1="ZZ", r2="00", executable_buffer=executable_buffer)
                 else:
                     pass
             else:
@@ -399,6 +412,20 @@ class ResourceScanner:
         with open("sc0pe_carved_deobfuscated.exe", "wb") as ff:
             ff.write(final_buffer)
         print(f"{infoS} Data saved into: [bold green]sc0pe_carved_deobfuscated.exe[white]\n")
+
+    def method_8_simple_replace(self, r1, r2, executable_buffer):
+        self.r1 = r1 # Replace 1
+        self.r2 = r2 # Replace 2
+        self.executable_buffer = executable_buffer
+
+        # Deobfuscation
+        self.executable_buffer = self.executable_buffer.replace(self.r1, self.r2)
+
+        # Data sanitization
+        sanitized_data = self.buffer_sanitizer(executable_buffer=self.executable_buffer)
+
+        # Save data
+        self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
 
     def buffer_sanitizer(self, executable_buffer):
         self.executable_buffer = executable_buffer
@@ -571,9 +598,8 @@ class ResourceScanner:
                     if os.path.exists("carved.bmp"):
                         print(f"{infoS} Extraction was successful. Performing PE extraction...")
                         img = Image.open("carved.bmp")
-                        extraction = self.bitmap_carver_1(image_handler=img)
-                        if extraction:
-                            sys.exit(0)
+                        self.bitmap_carver_1(image_handler=img) # Testing for technique 1
+                        self.bitmap_carver_2(image_handler=img) # Testing for technique 2
                     else:
                         print(f"{errorS} An error occured while extracting Bitmap file!!\n")
                         sys.exit(1)
@@ -583,20 +609,40 @@ class ResourceScanner:
             print(f"{errorS} There is no valid Bitmap file pattern found!\n")
 
     def bitmap_carver_1(self, image_handler):
-        b_array = bytearray()
-        for x in range(image_handler.width):
-            for y in range(image_handler.height):
-                red = image_handler.getpixel((x, y))[0]
-                b_array.append(red)
-        if b"4d5a90" in binascii.hexlify(b_array):
-            print(f"{infoS} Hidden PE file found. Extracting...")
-            with open("sc0pe_hidden_pe.exe", "wb") as ff:
-                ff.write(b_array)
-            print(f"{infoS} Data saved into: [bold green]sc0pe_hidden_pe.exe[white]\n")
-            os.system("rm -rf carved.bmp")
-            return True
-        else:
-            return False
+        if os.path.exists("carved.bmp"):
+            b_array = bytearray()
+            for x in range(image_handler.width):
+                for y in range(image_handler.height):
+                    red = image_handler.getpixel((x, y))[0]
+                    b_array.append(red)
+            if b"4d5a90" in binascii.hexlify(b_array):
+                print(f"{infoS} Hidden PE file found. Extracting...")
+                with open("sc0pe_hidden_pe.exe", "wb") as ff:
+                    ff.write(b_array)
+                print(f"{infoS} Data saved into: [bold green]sc0pe_hidden_pe.exe[white]\n")
+                os.system("rm -rf carved.bmp")
+            else:
+                pass
+    def bitmap_carver_2(self, image_handler):
+        if os.path.exists("carved.bmp"):
+            width, height = image_handler.size
+            b_array = bytearray(width  * height)
+            i = 0
+            for x in range(width):
+                for y in range(height):
+                    pixel = image_handler.getpixel((x, y))
+                    red = pixel[2]
+                    b_array[i] = red
+                    i += 1
+            if b"4d5a90" in binascii.hexlify(b_array):
+                print(f"{infoS} Hidden PE file found. Extracting...")
+                with open("sc0pe_hidden_pe.exe", "wb") as ff:
+                    ff.write(b_array)
+                print(f"{infoS} Data saved into: [bold green]sc0pe_hidden_pe.exe[white]\n")
+                os.system("rm -rf carved.bmp")
+            else:
+                pass
+
     def windows_resource_scanner_locate_encrypted(self):
         print(f"{infoS} Using Method 4: [bold yellow]Locate and decrypt hidden PE file[white]")
         # We need target executable buffer and file handler

@@ -205,7 +205,7 @@ class ArchiveAnalyzer:
             print(yaraTable)
 
         if yara_match_indicator == 0:
-            print(f"[bold white on red]Not any rules matched for {self.yara_target}")
+            print(f"[bold white on red]There is no rules matched for {self.yara_target}")
 
 # Execution
 arch_analyzer = ArchiveAnalyzer(targetFile)

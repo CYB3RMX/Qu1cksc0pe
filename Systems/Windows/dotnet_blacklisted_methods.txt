@@ -23,3 +23,6 @@ ZindgeSaxte
 Pumprize
 Xos
 Caller
+get_Choupa
+GetKeyState
+GetKeyboardState

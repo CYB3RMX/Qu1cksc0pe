@@ -40,6 +40,10 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/22e652db-c25f-49b1-b122-ac9f89d14ae3)
 
 # Updates
+<b>29/07/2023</b>
+- [X] ```AndroidAnalyzer``` module is improved. Now you can perform detection against Anti-VM/Anti-Debug patterns!
+- [X] Added new payload detection/carving techniques to ```ResourceAnalyzer``` module.
+
 <b>14/07/2023</b>
 - [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform E-Mail file analysis. You can do:
 - Perform ```DNSBL Lookup``` against sender e-mail address.

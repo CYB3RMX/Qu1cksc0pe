@@ -114,7 +114,7 @@ class DocumentAnalyzer:
                 print(" ")
 
         if yara_match_indicator == 0:
-            print(f"[blink bold white on red]Not any rules matched for {self.targetFile}")
+            print(f"[bold white on red]There is no rules matched for {self.targetFile}")
 
     # Perform analysis against embedded binaries
     def JARCheck(self):

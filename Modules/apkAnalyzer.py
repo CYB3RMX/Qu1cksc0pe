@@ -78,11 +78,6 @@ normal = 0
 # Gathering all strings from file
 allStrings = open("temp.txt", "r").read().split('\n')
 
-# Gathering apkid tools output
-if sys.argv[3] != "JAR":
-    apkid_output = open("apkid.json", "r")
-    data = json.load(apkid_output)
-
 # Categories
 categs = {
     "Banker": [], "SMS Bot": [], "Base64": [], "VNC Implementation": [], "Keylogging": [],
@@ -91,7 +86,7 @@ categs = {
     "Windows Operations": [],
     "Persistence/Managing": [], "Network/Internet": [], "SSL Pining/Certificate Handling": [],
     "Dynamic Class/Dex Loading": [], "Java Reflection": [], "Root Detection": [],
-    "Cryptography": [], "Command Execution": []
+    "Cryptography": [], "Command Execution": [], "Anti-VM/Anti-Debug": []
 }
 
 # Parsing date
@@ -120,65 +115,10 @@ reportz = {
     "libraries": [],
     "signatures": [],
     "permissions": [],
-    "compiler_info": "",
-    "anti_vm": [],
-    "anti_debug": [],
-    "anti_disassembly": [],
-    "obfuscation": [],
     "matched_rules": [],
     "user": username,
     "date": dformat,
 }
-
-# Function for parsing apkid tool's output
-def ApkidParser(apkid_output):
-    print(f"\n{infoS} Performing APKID analysis...")
-    for index in range(0, len(data["files"])):
-        print(f"[bold red]---->[white] File Name: [bold green]{data['files'][index]['filename']}")
-
-        # Fetching compiler information
-        try:
-            compiler = data["files"][index]["matches"]["compiler"][0]
-            print(f"[bold red]-->[white] Compiler Information: [bold green]{compiler}\n")
-            reportz["compiler_info"] = compiler
-        except KeyError:
-            print("[bold white on red]There is no information about compiler!\n")
-
-        # Fetching and parsing anti virtualization
-        if "anti_vm" in data["files"][index]["matches"].keys():
-            print("[bold green]--->[magenta] Anti Virtualization Codes")
-            if data["files"][index]["matches"]["anti_vm"] != []:
-                for avm in data["files"][index]["matches"]["anti_vm"]:
-                    print(f"[bold green]>>[white] {avm}")
-                    reportz["anti_vm"].append(avm)
-                print(" ")
-        
-        # Fetching and parsing anti debug codes
-        if "anti_debug" in data["files"][index]["matches"].keys():
-            print("[bold green]--->[magenta] Anti Debug Codes")
-            if data["files"][index]["matches"]["anti_debug"] != []:
-                for adb in data["files"][index]["matches"]["anti_debug"]:
-                    print(f"[bold green]>>[white] {adb}")
-                    reportz["anti_debug"].append(adb)
-                print(" ")
-        
-        # Fetching and parsing anti disassembly
-        if "anti_disassembly" in data["files"][index]["matches"].keys():
-            print("[bold green]--->[magenta] Anti Disassembly")
-            if data["files"][index]["matches"]["anti_disassembly"] != []:
-                for disas in data["files"][index]["matches"]["anti_disassembly"]:
-                    print(f"[bold green]>>[white] {disas}")
-                    reportz["anti_disassembly"].append(disas)
-                print(" ")
-
-        # Fetching and parsing obfuscators
-        if "obfuscator" in data["files"][index]["matches"].keys():
-            print("[bold green]--->[magenta] Obfuscation")
-            if data["files"][index]["matches"]["obfuscator"] != []:
-                for obf in data["files"][index]["matches"]["obfuscator"]:
-                    print(f"[bold green]>>[white] {obf}")
-                    reportz["obfuscation"].append(obf)
-                print(" ")
 
 def MultiYaraScanner(targetAPK):
     lib_files_indicator = 0
@@ -312,7 +252,7 @@ def PerformJAR(targetAPK):
 # Scan files with quark-engine
 def Quarked(targetAPK):
     not_found_indicator = 0
-    print(f"{infoS} Extracting IP addresses and URLs. Please wait...")
+    print(f"\n{infoS} Extracting IP addresses and URLs. Please wait...")
     # Parsing phase
     forensic = Forensic(targetAPK)
 
@@ -542,9 +482,6 @@ if __name__ == '__main__':
         # Source code analysis zone
         print(f"\n{infoS} Performing source code analysis...")
         ScanSource(targetAPK)
-
-        # APKID scanner
-        ApkidParser(apkid_output)
 
         # Quark scanner
         Quarked(targetAPK)
