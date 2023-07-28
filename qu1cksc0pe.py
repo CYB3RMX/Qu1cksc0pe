@@ -179,15 +179,11 @@ def BasicAnalyzer(analyzeFile):
         look = pyaxmlparser.APK(analyzeFile)
         if look.is_valid_APK() == True:
             print(f"{infoS} Target OS: [bold green]Android[white]")
-            command = f"apkid -j {args.file} > apkid.json"
-            os.system(command)
             if args.report:
                 command = f"python3 {sc0pe_path}/Modules/apkAnalyzer.py {analyzeFile} True APK"
             else:
                 command = f"python3 {sc0pe_path}/Modules/apkAnalyzer.py {analyzeFile} False APK"
             os.system(command)
-            if os.path.exists("apkid.json"):
-                os.remove("apkid.json")
             # APP Security
             choice = str(input(f"\n{infoC} Do you want to check target app\'s security? This process will take a while.[Y/n]: "))
             if choice == "Y" or choice == "y":

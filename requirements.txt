@@ -1,6 +1,5 @@
 puremagic
 androguard==3.4.0a1
-apkid
 rich
 tqdm
 colorama

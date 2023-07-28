@@ -149,7 +149,7 @@ class Sc0peHelper:
                 print(" ")
 
         if yara_match_indicator == 0:
-            print(f"[blink bold white on red]Not any rules matched for {self.filename}")
+            print(f"[bold white on red]There is no rules matched for {self.filename}")
 
     def recursive_dir_scan(self, target_directory):
         self.target_directory = target_directory

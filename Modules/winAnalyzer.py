@@ -252,7 +252,8 @@ class WindowsAnalyzer:
             r"[a-zA-Z0-9_.]*7z", r"[a-zA-Z0-9_.]*docx"
             r"SeLockMemoryPrivilege", r"SeShutdownPrivilege",
             r"SeChangeNotifyPrivilege", r"SeUndockPrivilege",
-            r"SeIncreaseWorkingSetPrivilege", r"SeTimeZonePrivilege"
+            r"SeIncreaseWorkingSetPrivilege", r"SeTimeZonePrivilege",
+            r"Select \* from \w+", r"VirtualBox", r"vmware"
         ]
 
         # Array for holding string values
@@ -269,7 +270,7 @@ class WindowsAnalyzer:
         # Print output
         if intstf != []:
             for stf in intstf:
-                if (stf in interesting_stuff) or (".cmd" in stf or ".bat" in stf or ".exe" in stf):
+                if (stf in interesting_stuff) or (".cmd" in stf or ".bat" in stf or ".exe" in stf) or ("Select" in stf):
                     stuff_table.add_row(f"[bold red]{stf}[white]")
                 else:
                     stuff_table.add_row(stf)

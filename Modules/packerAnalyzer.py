@@ -73,7 +73,7 @@ def YaraBased(target_file):
 
     # If there is no match
     if yara_match_indicator == 0:
-        print(f"[bold white on red]Not any rules matched for {target_file}")
+        print(f"[bold white on red]There is no rules matched for {target_file}")
 
 # Simple analyzer function
 def Analyzer():

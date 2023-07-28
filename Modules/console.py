@@ -233,13 +233,9 @@ try:
                         if os.path.exists("/usr/bin/strings"):
                             command = f"strings --all {filename} > temp.txt"
                             os.system(command)
-                            print(f"{infoS} Target OS: [bold green]Android[white]")
-                            command = f"apkid -j {filename} > apkid.json"
-                            os.system(command)
+                            print(f"{infoS} Target OS: [bold green]Android[white]")    
                             command = f"python3 {sc0pe_path}/Modules/apkAnalyzer.py {filename}"
                             os.system(command)
-                            if os.path.exists("apkid.json"):
-                                os.remove("apkid.json")
                             os.remove(f"{sc0pe_path}/temp.txt")
                         else:
                             print(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
