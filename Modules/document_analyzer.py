@@ -3,6 +3,9 @@
 import re
 import os
 import sys
+import json
+import zlib
+import binascii
 import zipfile
 import configparser
 
@@ -64,6 +67,7 @@ allstr = open("temp.txt", "r").read()
 class DocumentAnalyzer:
     def __init__(self, targetFile):
         self.targetFile = targetFile
+        self.file_sigs = json.load(open(f"{sc0pe_path}/Systems/Multiple/file_sigs.json"))
 
     # Checking for file extension
     def CheckExt(self):
@@ -423,7 +427,17 @@ class DocumentAnalyzer:
         suspicious = [
             "/JavaScript", "/JS", "/AcroForm", "/OpenAction", 
             "/Launch", "/LaunchUrl", "/EmbeddedFile", "/URI", 
-            "/Action", "cmd.exe", "system32", "%HOMEDRIVE%"
+            "/Action", "cmd.exe", "system32", "%HOMEDRIVE%",
+            "<script>",
+            r"[a-zA-Z0-9_.]*pdb", r"[a-zA-Z0-9_.]*vbs", 
+            r"[a-zA-Z0-9_.]*vba", r"[a-zA-Z0-9_.]*vbe", 
+            r"[a-zA-Z0-9_.]*exe", r"[a-zA-Z0-9_.]*ps1",
+            r"[a-zA-Z0-9_.]*dll", r"[a-zA-Z0-9_.]*bat",
+            r"[a-zA-Z0-9_.]*cmd", r"[a-zA-Z0-9_.]*tmp",
+            r"[a-zA-Z0-9_.]*dmp", r"[a-zA-Z0-9_.]*cfg",
+            r"[a-zA-Z0-9_.]*lnk", r"[a-zA-Z0-9_.]*config",
+            r"[a-zA-Z0-9_.]*7z", r"[a-zA-Z0-9_.]*docx",
+            r"[a-zA-Z0-9_.]*zip"
         ]
         sTable = Table(title="* Suspicious Strings *", title_style="bold italic cyan", title_justify="center")
         sTable.add_column("[bold green]String", justify="center")
@@ -442,7 +456,7 @@ class DocumentAnalyzer:
             print(f"{infoS} No suspicious strings found.")
 
         # Looking for embedded links
-        print(f"\n{infoS} Looking for embedded URL\'s...")
+        print(f"\n{infoS} Looking for embedded URL\'s via [bold green]Regex[white]...")
         urlTable = Table(title="* Embedded URL\'s *", title_style="bold italic cyan", title_justify="center")
         urlTable.add_column("[bold green]URL", justify="center")
         uustr = 0
@@ -458,32 +472,70 @@ class DocumentAnalyzer:
             if uustr != 0:
                 print(urlTable)
             else:
-                print(f"{infoS} No interesting URL\'s found.")
+                print(f"{infoS} There is no interesting URL\'s found!\n")
         else:
-            print(f"{errorS} No URL\'s found.")
+            print(f"{errorS} There is no URL pattern found via regex!\n")
 
-        # Embedded file extraction Method 1
-        if embedded_switch != 0:
-            print(f"\n{infoS} Performing embedded file extraction...")
-            print(f"{infoS} Locating embedded file streams...")
-            for obid in range(100):
-                try:
-                    tmp = doc.getobj(obid)
-                    if "EmbeddedFiles" in str(tmp):
-                        print(f"{infoS} Found embedded file stream at object ID: [bold yellow]{obid}")
-                        print(f"{infoS} Locating data stream...")
-                        if "Names" in str(tmp["EmbeddedFiles"].resolve()) and len(tmp["EmbeddedFiles"].resolve()["Names"]) == 2:
-                            if "EF" in str(tmp["EmbeddedFiles"].resolve()["Names"][1].resolve()):
-                                if "F" in str(tmp["EmbeddedFiles"].resolve()["Names"][1].resolve()["EF"].resolve()):
-                                    print(f"{infoS} Data stream found. Extracting...")
-                                    emb = tmp["EmbeddedFiles"].resolve()["Names"][1].resolve()["EF"].resolve()["F"].resolve().get_data()
-                                    outfile = open(f"sc0pe_embedded_data.bin", "wb")
-                                    outfile.write(emb)
-                                    outfile.close()
-                                    print(f"{infoS} Embedded file extracted to [bold yellow]sc0pe_embedded_data.bin[white]")
-                                    break
-                except:
-                    continue
+        # PDF Stream analysis
+        print(f"{infoS} Performing PDF stream analysis...")
+        print(f"{infoS} Analyzing total objects...")
+        # Iterate over objects and analyze them!
+        number_of_objects = 0
+        ext_urls = []
+        for xref in doc.xrefs:
+            if "ranges" in str(xref):
+                temp_of_objects = xref.ranges[0][1]
+            else:
+                temp_of_objects = len(xref.get_objids())
+
+            if number_of_objects != temp_of_objects:
+                number_of_objects = temp_of_objects
+                for obj in xref.get_objids():
+                    try:
+                        if "PDFStream" in str(doc.getobj(obj)):
+                            object_data = doc.getobj(obj).get_rawdata() # Gather buffer from object
+                        else:
+                            object_data = None
+
+                        # Check for magic headers
+                        if object_data:
+                            for categ in self.file_sigs:
+                                for pattern in self.file_sigs[categ]["patterns"]:
+                                    regex = re.findall(pattern.encode(), binascii.hexlify(object_data))
+                                    if regex != []:
+                                        print(f"{infoS} Possible [bold green]{categ}[white] detected at [bold green]ObjectID[white]: [bold yellow]{obj}[white]")
+                                        print(f"{infoS} Attempting to extraction...")
+                                        with open(f"sc0pe_carved-{categ}-{obj}.bin", "wb") as ff:
+                                            ff.write(object_data)
+                                        print(f"{infoS} Extracted data saved as: [bold green]sc0pe_carved-{categ}-{obj}.bin[white]")
+
+                        # Check for /URI object
+                        if "URI" in str(doc.getobj(obj)):
+                            if doc.getobj(obj)["URI"].decode() not in ext_urls and doc.getobj(obj)["URI"].decode() != "":
+                                ext_urls.append(doc.getobj(obj)["URI"].decode())
+
+                            # Print all
+                            if ext_urls != []:
+                                for ext in ext_urls:
+                                    print(f"{infoS} Extracted URI from stream: [bold green]{ext}[white]")
+
+                        # Check for /EmbeddedFile stream
+                        if "EmbeddedFile" in str(doc.getobj(obj)) and "PDFStream" in str(doc.getobj(obj)):
+                            print(f"\n{infoS} Performing embedded file extraction...")
+                            print(f"{infoS} Checking for compression...")
+                            try:
+                                decompressed = zlib.decompress(doc.getobj(obj).get_rawdata())
+                                with open(f"sc0pe_embedded_decompressed_file-{obj}.bin", "wb") as ef:
+                                    ef.write(decompressed)
+                                print(f"{infoS} Extracted data saved into: [bold green]sc0pe_embedded_decompressed_file-{obj}.bin[white]")
+                            except:
+                                with open(f"sc0pe_embedded_file-{obj}.bin", "wb") as ef:
+                                    ef.write(doc.getobj(obj).get_rawdata())
+                                print(f"{infoS} Extracted data saved into: [bold green]sc0pe_embedded_file-{obj}.bin[white]")
+                    except:
+                        continue
+            else:
+                pass
 
         # Perform Yara scan
         print(f"\n{infoS} Performing YARA rule matching...")

@@ -97,28 +97,27 @@ class SignatureChecker:
         mz_offsets = []
         elf_offsets = []
         valid_pattern_switch = 0
-        for index in range(0, len(fsigs)):
-            for categ in fsigs[index]:
-                for sigs in fsigs[index][categ]:
-                    try:
-                        regex = re.finditer(binascii.unhexlify(sigs), self.getbins_buffer)
-                        for position in regex:
-                            # If there is an executable file warn user!
-                            if "Executable File" in str(categ) and position.start() != 0:
-                                sigTable.add_row(f"[bold red]{str(categ)}[white]", f"[bold green]{str(binascii.unhexlify(sigs))}", f"[bold red]{str(hex(position.start()))}[white]")
-                            else:
-                                sigTable.add_row(str(categ), f"[bold green]{str(binascii.unhexlify(sigs))}", str(hex(position.start())))
+        for categ in fsigs:
+            for pattern in fsigs[categ]["patterns"]:
+                try:
+                    regex = re.finditer(binascii.unhexlify(pattern), self.getbins_buffer)
+                    for position in regex:
+                        # If there is an executable file warn user!
+                        if "Executable File" in str(categ) and position.start() != 0:
+                            sigTable.add_row(f"[bold red]{str(categ)}[white]", f"[bold green]{str(binascii.unhexlify(pattern))}", f"[bold red]{str(hex(position.start()))}[white]")
+                        else:
+                            sigTable.add_row(str(categ), f"[bold green]{str(binascii.unhexlify(pattern))}", str(hex(position.start())))
 
-                            # Also check for executable file existence
-                            if sigs == "4D5A9000" and position.start() != 0:
-                                mz_offsets.append(position.start())
-                            elif sigs == "7f454c4602010100" and position.start() != 0:
-                                elf_offsets.append(position.start())
-                            else:
-                                pass
-                            valid_pattern_switch += 1
-                    except:
-                        continue
+                        # Also check for executable file existence
+                        if pattern == "4D5A9000" and position.start() != 0:
+                            mz_offsets.append(position.start())
+                        elif pattern == "7f454c4602010100" and position.start() != 0:
+                            elf_offsets.append(position.start())
+                        else:
+                            pass
+                        valid_pattern_switch += 1
+                except:
+                    continue
         if valid_pattern_switch == 0:
             print(f"{errorS} There is no valid pattern found!")
         else:

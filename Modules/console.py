@@ -251,7 +251,7 @@ try:
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
                 print(f"{infoS} Analyzing: [bold green]{filename}[white]")
-                command = f"python3 {sc0pe_path}/Modules/nonExecAnalyzer.py {filename}"
+                command = f"python3 {sc0pe_path}/Modules/document_analyzer.py {filename}"
                 os.system(command)
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")

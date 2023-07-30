@@ -70,7 +70,7 @@ class EmailAnalyzer:
         if "Microsoft Office Word" in parsed_type or "Microsoft Excel" in parsed_type or "PDF" in parsed_type:
             print(f"\n{infoS} Attachment Type: [bold green]Document[white]")
             print(f"{infoS} Executing: [bold green]DocumentAnalyzer[white] against [bold cyan]{target_attach}[white]")
-            command = f"python3 {sc0pe_path}/Modules/nonExecAnalyzer.py {target_attach}"
+            command = f"python3 {sc0pe_path}/Modules/document_analyzer.py {target_attach}"
             os.system(command)
         # Analyze executable files and anothers
         elif "executable" in parsed_type:

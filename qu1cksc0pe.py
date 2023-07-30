@@ -274,7 +274,7 @@ def Qu1cksc0pe():
         # Handling --file argument
         if args.file is not None:
             print(f"{infoS} Analyzing: [bold green]{args.file}[white]")
-            command = f"python3 {sc0pe_path}/Modules/nonExecAnalyzer.py {args.file}"
+            command = f"python3 {sc0pe_path}/Modules/document_analyzer.py {args.file}"
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
