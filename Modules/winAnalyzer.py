@@ -29,6 +29,13 @@ except:
     print(f"[bold red]>>>[white] You can execute: [bold green]sudo apt install mono-complete && pip3 install pythonnet[white]")
     sys.exit(1)
 
+try:
+    import vivisect
+    vivisect.logging.disable() # Suppressing error messages
+except:
+    print("Error: >vivisect< module not found.")
+    sys.exit(1)
+
 #--------------------------------------------- Getting name of the file for statistics
 fileName = str(sys.argv[1])
 
@@ -338,6 +345,62 @@ class WindowsAnalyzer:
                 continue
         print(peStatistics)
 
+    def analyze_via_viv(self):
+        print(f"\n{infoS} Extracting and parsing function informations. Please wait...")
+        viv = vivisect.VivWorkspace() # Creating workspace
+        viv.loadFromFile(self.target_file)
+        viv.analyze()
+
+        # Get functions
+        funcz = viv.getFunctions()
+
+        # Perform basic analysis against functions
+        # -- Create table
+        fun_table = Table()
+        fun_table.add_column("[bold green]Function Name", justify="center")
+        fun_table.add_column("[bold green]Size", justify="center")
+        fun_table.add_column("[bold green]Offset", justify="center")
+        fun_table.add_column("[bold green]Xrefs From This Address", justify="center")
+        fun_table.add_column("[bold green]Xrefs To This Address", justify="center")
+
+        # -- Parse functions
+        print(f"[bold magenta]>>>[white] Number of functions: [bold green]{len(funcz)}[white]")
+        for fun in funcz:
+            try:
+                fn_name = viv.getName(fun)
+                fn_size = viv.getCodeBlock(fun)[1]
+                xrf_fr = len(viv.getXrefsFrom(fun))
+                xrf_to = len(viv.getXrefsTo(fun))
+
+                # -- If we have function size larger than 200 there is must be something!
+                if fn_size >= 200:
+                    table_str = f"[bold red]{fn_size} Attention!![white]"
+                else:
+                    table_str = str(fn_size)
+
+                # -- Check for xrefs_fr
+                if xrf_fr != 0:
+                    xrf_fr_str = f"[bold red]{xrf_fr}[white]"
+                else:
+                    xrf_fr_str = str(xrf_fr)
+
+                # -- Check for xrefs_to
+                if xrf_to != 0:
+                    xrf_to_str = f"[bold red]{xrf_to}[white]"
+                else:
+                    xrf_to_str = str(xrf_to)
+
+                fun_table.add_row(
+                    fn_name,
+                    table_str,
+                    str(hex(fun)),
+                    xrf_fr_str,
+                    xrf_to_str
+                )
+            except:
+                continue
+        print(fun_table)
+        
     def statistics_method(self):
         datestamp = self.gather_timestamp()
         print(f"\n[bold green]-> [white]Statistics for: [bold green][i]{self.target_file}[/i]")
@@ -446,6 +509,7 @@ print(f"\n{infoS} Performing YARA rule matching...")
 sc0pehelper.yara_rule_scanner("windows", fileName, config_path=f"{sc0pe_path}/Systems/Windows/windows.conf", report_object=winrep)
 
 windows_analyzer.section_parser()
+windows_analyzer.analyze_via_viv()
 windows_analyzer.statistics_method()
 
 # Print reports

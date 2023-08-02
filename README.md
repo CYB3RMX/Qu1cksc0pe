@@ -40,6 +40,10 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/22e652db-c25f-49b1-b122-ac9f89d14ae3)
 
 # Updates
+<b>03/08/2023</b>
+- [X] ```WindowsAnalyzer``` module is improved. Now you can get XREF information about functions!
+![windows_analyze](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/bd6945b6-5198-42fb-adff-2118a596bf58)
+
 <b>30/07/2023</b>
 - [X] ```DocumentAnalyzer``` module is improved. Now you can perform better PDF analysis!
 
@@ -53,11 +57,6 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 - Extract attachments and analyze them!
 
 https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/9ec0c0e1-1862-40a0-9019-e119b152d325
-
-<b>12/07/2023</b>
-- [X] ```WindowsAnalyzer``` module is improved. Now it can analyze ```Microsoft Software Installer(.msi)``` files properly!
-- [X] New Yara rules added.
-- [X] Improvements on .NET analysis feature and ```SignatureAnalyzer``` module!
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
@@ -94,7 +93,7 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 # Static Analysis
 ## Normal analysis
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --analyze```<br>
-![analyze](https://user-images.githubusercontent.com/42123683/189416371-5815062d-09d9-49aa-82c9-e9961203a642.gif)
+![windows_analyze](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/bd6945b6-5198-42fb-adff-2118a596bf58)
 
 ## Resource analysis
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --resource```<br>
