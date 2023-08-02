@@ -466,7 +466,10 @@ class DocumentAnalyzer:
             for l in linkz:
                 if "schemas.openxmlformats.org" not in l and "schemas.microsoft.com" not in l and "purl.org" not in l and "www.w3.org" not in l and "go.microsoft.com" not in l and "ns.adobe.com" not in l and "www.adobe.com" not in l and "www.microsoft.com" not in l:
                     if l not in lcontrol:
-                        urlTable.add_row(f"[bold yellow]{l}")
+                        if ")" in l:
+                            urlTable.add_row(f"[bold yellow]{l.split(')')[0]}")
+                        else:
+                            urlTable.add_row(f"[bold yellow]{l}")
                         uustr += 1
                         lcontrol.append(l)
             if uustr != 0:
