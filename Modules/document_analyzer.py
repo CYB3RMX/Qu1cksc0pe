@@ -211,7 +211,7 @@ class DocumentAnalyzer:
             if exlinks.rows != []:
                 print(exlinks)
             else:
-                print(f"[blink bold white on red]Not any interesting links found.")
+                print(f"[bold white on red]There is no interesting links found.")
         except:
             print(f"{errorS} Error: Unable to unzip file.")
 
@@ -347,7 +347,7 @@ class DocumentAnalyzer:
                     urlswitch += 1
         
         if urlswitch == 0:
-            print(f"[bold white on red]Not any interesting links found.")
+            print(f"[bold white on red]There is no interesting links found.")
 
         # Read and parse
         print(f"\n{infoS} Searching for embedded data/files...")
@@ -389,16 +389,20 @@ class DocumentAnalyzer:
         print(f"{infoS} Performing PDF analysis...")
 
         # Parsing the PDF
-        pdata = open(self.targetFile, "rb")
-        pdf = PDFParser(pdata)
-        doc = PDFDocument(pdf)
+        try:
+            pdata = open(self.targetFile, "rb")
+            pdf = PDFParser(pdata)
+            doc = PDFDocument(pdf)
+        except Exception as er:
+            print(f"{errorS} Error: {er}")
+            sys.exit(1)
 
         # Gathering meta information
         print(f"\n{infoS} Gathering meta information...")
         metaTable = Table(title="* Meta Information *", title_style="bold italic cyan", title_justify="center")
         metaTable.add_column("[bold green]Key", justify="center")
         metaTable.add_column("[bold green]Value", justify="center")
-        if doc.info[0] != {}:
+        if doc.info != [] and doc.info[0] != {}:
             for vals in doc.info[0]:
                 metaTable.add_row(f"[bold yellow]{vals}", f"{doc.info[0][vals]}")
             print(metaTable)
@@ -453,7 +457,7 @@ class DocumentAnalyzer:
         if sstr != 0:
             print(sTable)
         else:
-            print(f"{infoS} No suspicious strings found.")
+            print(f"{errorS} There is no suspicious strings found!")
 
         # Looking for embedded links
         print(f"\n{infoS} Looking for embedded URL\'s via [bold green]Regex[white]...")
@@ -467,11 +471,17 @@ class DocumentAnalyzer:
                 if "schemas.openxmlformats.org" not in l and "schemas.microsoft.com" not in l and "purl.org" not in l and "www.w3.org" not in l and "go.microsoft.com" not in l and "ns.adobe.com" not in l and "www.adobe.com" not in l and "www.microsoft.com" not in l:
                     if l not in lcontrol:
                         if ")" in l:
-                            urlTable.add_row(f"[bold yellow]{l.split(')')[0]}")
+                            if l.split(')')[0] not in lcontrol:
+                                urlTable.add_row(f"[bold yellow]{l.split(')')[0]}")
+                                lcontrol.append(l.split(')')[0])
+                        elif "<" in l:
+                            if l.split('<')[0] not in lcontrol:
+                                urlTable.add_row(f"[bold yellow]{l.split('<')[0]}")
+                                lcontrol.append(l.split('<')[0])
                         else:
                             urlTable.add_row(f"[bold yellow]{l}")
+                            lcontrol.append(l)
                         uustr += 1
-                        lcontrol.append(l)
             if uustr != 0:
                 print(urlTable)
             else:
@@ -497,6 +507,11 @@ class DocumentAnalyzer:
                     try:
                         if "PDFStream" in str(doc.getobj(obj)):
                             object_data = doc.getobj(obj).get_rawdata() # Gather buffer from object
+                            # Check if there is an zlib compression
+                            try:
+                                object_data = zlib.decompress(object_data)
+                            except:
+                                pass
                         else:
                             object_data = None
 
@@ -514,8 +529,23 @@ class DocumentAnalyzer:
 
                         # Check for /URI object
                         if "URI" in str(doc.getobj(obj)):
-                            if doc.getobj(obj)["URI"].decode() not in ext_urls and doc.getobj(obj)["URI"].decode() != "":
-                                ext_urls.append(doc.getobj(obj)["URI"].decode())
+                            # Method 1
+                            try:
+                                if doc.getobj(obj)["URI"].decode() not in ext_urls and doc.getobj(obj)["URI"].decode() != "":
+                                    ext_urls.append(doc.getobj(obj)["URI"].decode())
+                            except:
+                                pass
+
+                            # Method 2
+                            get_url = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", str(doc.getobj(obj)))
+                            if get_url != []:
+                                for ur in get_url:
+                                    if "'" in ur:
+                                        if ur.split("'")[0] not in ext_urls:
+                                            ext_urls.append(ur.split("'")[0])
+                                    else:
+                                        if ur not in ext_urls:
+                                            ext_urls.append(ur)
 
                             # Print all
                             if ext_urls != []:

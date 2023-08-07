@@ -41,6 +41,9 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/22e652db-c25f-49b1-b122-ac9f89d14ae3)
 
 # Updates
+<b>07/08/2023</b>
+- [X] Bug fixes and improvements.
+
 <b>03/08/2023</b>
 - [X] ```WindowsAnalyzer``` module is improved. Now you can get XREF information about functions!
 ![windows_analyze](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/bd6945b6-5198-42fb-adff-2118a596bf58)
@@ -51,13 +54,6 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 <b>29/07/2023</b>
 - [X] ```AndroidAnalyzer``` module is improved. Now you can perform detection against Anti-VM/Anti-Debug patterns!
 - [X] Added new payload detection/carving techniques to ```ResourceAnalyzer``` module.
-
-<b>14/07/2023</b>
-- [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform E-Mail file analysis. You can do:
-- Perform ```DNSBL Lookup``` against sender e-mail address.
-- Extract attachments and analyze them!
-
-https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/9ec0c0e1-1862-40a0-9019-e119b152d325
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
