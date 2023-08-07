@@ -175,8 +175,13 @@ def BasicAnalyzer(analyzeFile):
     # Android Analysis
     elif "PK" in fileType and "Java archive" in fileType:
 
-        # If given file is an APK file then run APK analysis
-        look = pyaxmlparser.APK(analyzeFile)
+        # If given file is an valid APK file then run APK analysis
+        try:
+            look = pyaxmlparser.APK(analyzeFile)
+        except:
+            print(f"{errorS} An error occured while parsing the file. Maybe [bold green]AndroidManifest.xml[white] is corrupted?")
+            sys.exit(1)
+
         if look.is_valid_APK() == True:
             print(f"{infoS} Target OS: [bold green]Android[white]")
             if args.report:

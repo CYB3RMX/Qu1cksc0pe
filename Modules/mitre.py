@@ -255,7 +255,7 @@ def MakeMitreTable():
             print(mtable)
             tech_count += 1
     if tech_count == 0:
-        print("[bold wihte on red]Not any techniques detected!")
+        print("[bold wihte on red]There is no techniques detected!")
 
 # Execution
 MakeMitreTable()

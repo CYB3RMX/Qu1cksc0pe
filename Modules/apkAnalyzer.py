@@ -143,7 +143,7 @@ def MultiYaraScanner(targetAPK):
                     sc0pehelper.yara_rule_scanner("android", extens, config_path=f"{sc0pe_path}/Systems/Android/libScanner.conf", report_object=reportz)
 
         if lib_files_indicator == 0:
-            print("\n[bold white on red]Not any library files found for analysis!\n")
+            print("\n[bold white on red]There is no library files found for analysis!\n")
     else:
         print("[blink]Decompiler([bold green]JADX[white])[/blink] [white]not found. Skipping...")
 
@@ -293,7 +293,7 @@ def Quarked(targetAPK):
         not_found_indicator += 1
 
     if not_found_indicator == 2:
-        print("\n[bold white on red]Not any Email or IP string found in target file!\n")
+        print("\n[bold white on red]There is no Email or IP string found in target file!\n")
 
 # Permission analyzer
 def Analyzer(parsed):
@@ -327,7 +327,7 @@ def Analyzer(parsed):
 
     # If there is no permission:
     if danger == 0 and normal == 0:
-        print("\n[bold white on red]Not any permissions found!\n")
+        print("\n[bold white on red]There is no permissions found!\n")
     else:
         print(statistics)
 

@@ -41,7 +41,7 @@ regex_dict = {
 # Main function
 def RegexScanner():
    counter = 0
-   print(f"{infoS} Qu1cksc0pe is analyzing this file for possible domain strings. Please wait...\n")
+   print(f"{infoS} Qu1cksc0pe is analyzing this file for possible domain and interesting strings. Please wait...\n")
    for key in regex_dict:
       for targ in allStrings:
          try:
@@ -52,7 +52,7 @@ def RegexScanner():
          except:
             continue
    if counter == 0:
-      print(f"{errorS} Not any possible domain strings found.")
+      print(f"{errorS} There is no possible domain strings found.")
 
 #Execution zone
 RegexScanner()
