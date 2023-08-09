@@ -1,0 +1,213 @@
+{
+    "Discovery": {
+        "Account Discovery": {
+            "api_list": [
+                "IsNTAdmin",
+                "IsUserAnAdmin",
+                "GetUserNameA",
+                "GetUserNameEx",
+                "NetUserEnum",
+                "NetLocalGroupEnum",
+                "NetQueryDisplayInformation"
+            ], 
+            "score": 0
+        },
+        "Application Window Discovery": {
+            "api_list": [
+                "GetWindowThreadProcessId",
+                "GetWindowLongA",
+                "GetForegroundWindow",
+                "FindWindow",
+                "FindWindowA",
+                "FindWindowEx",
+                "GetActiveWindow",
+                "GetWindowPlacement",
+                "GetProcessWindowStation",
+                "EnumWindows",
+                "GetWindowText",
+                "EnumChildWindows",
+                "EnumDesktopWindows"
+            ],
+            "score": 0
+        },
+        "File and Directory Discovery": {
+            "api_list": [
+                "GetCurrentDirectoryA",
+                "FileSystemInfo",
+                "GetPathRoot",
+                "SHGetFileInfoW",
+                "SHGetFileInfoA",
+                "FindFirstFileA",
+                "FindNextFileA",
+                "GetWindowsDirectoryA",
+                "GetWindowsDirectoryW",
+                "GetWindowsDirectory",
+                "GetSystemDirectoryA",
+                "GetTempPathA",
+                "GetTempPathW"
+            ],
+            "score": 0
+        },
+        "Process Discovery": {
+            "api_list": [
+                "EnumProcesses",
+                "CreateToolhelp32Snapshot",
+                "GetProcessImageFileNameA"
+            ],
+            "score": 0
+        },
+        "Query Registry": {
+            "api_list": [
+                "RegQueryValueEx",
+                "RegQueryInfoKeyW",
+                "RegQueryInfoKeyA",
+                "RegQueryValueExA",
+                "RegQueryValueExW",
+                "RegGetValue",
+                "RegOpenKey",
+                "RegEnumKey",
+                "RegEnumValueA",
+                "RegEnumValueW"
+            ],
+            "score": 0
+        }
+    },
+    "Privilege Escalation": {
+        "Access Token Manipulation": {
+            "api_list": [
+                "ImpersonateLoggedOnUser",
+                "DuplicateToken",
+                "DuplicateTokenEx",
+                "SetThreadToken",
+                "CreateProcessWithTokenW",
+                "LogonUser",
+                "CreateProcess",
+                "OpenProcessToken",
+                "AdjustTokenPrivileges",
+                "CreateRestrictedToken"
+            ],
+            "score": 0
+        }
+    },
+    "Persistence": {
+        "Event Triggered Execution": {
+            "api_list": [
+                "CreateProcess",
+                "CreateProcessAsUser",
+                "CreateProcessWithLoginW",
+                "CreateProcessWithTokenW",
+                "WinExec",
+                "RegisterWaitForSingleObject",
+                "CreateRemoteThread",
+                "CreateRemoteThreadEx"
+            ],
+            "score": 0
+        },
+        "Boot or Logon Autostart Execution": {
+            "api_list": [
+                "AddMonitor",
+                "CreateService",
+                "ChangeServiceConfig",
+                "RegSetValueA",
+                "RegSetValueW"
+            ],
+            "score": 0
+        }
+    },
+    "Collection": {
+        "Screen Capture": {
+            "api_list": [
+                "CopyFromScreen",
+                "PrintWindow",
+                "BitBlt"
+            ],
+            "score": 0
+        },
+        "Input Capture": {
+            "api_list": [
+                "GetClipboardData",
+                "EnumClipboardFormats",
+                "OpenClipboard",
+                "CountClipboardFormats",
+                "SetWindowsHook",
+                "SetWindowsHookEx",
+                "SetWindowsHookExA",
+                "SetWindowsHookExW",
+                "GetKeyState",
+                "GetAsyncKeyState",
+                "AttachThreadInput",
+                "GetRawInputData",
+                "GetForegroundWindow",
+                "GetWindowText"
+            ],
+            "score": 0
+        }
+    },
+    "Credential Access": {
+        "Input Capture": {
+            "api_list": [
+                "GetClipboardData",
+                "EnumClipboardFormats",
+                "OpenClipboard",
+                "CountClipboardFormats",
+                "SetWindowsHook",
+                "SetWindowsHookEx",
+                "SetWindowsHookExA",
+                "SetWindowsHookExW",
+                "GetKeyState",
+                "GetAsyncKeyState",
+                "AttachThreadInput",
+                "GetRawInputData",
+                "GetForegroundWindow",
+                "GetWindowText",
+                "CryptUnprotectData",
+                "CredEnumerateA",
+                "CredEnumerateW",
+                "CredReadA",
+                "CredReadW",
+                "CredUnPackAuthenticationBufferA",
+                "CredUnPackAuthenticationBufferW"
+            ],
+            "score": 0
+        },
+        "Network Sniffing": {
+            "api_list": [
+                "WSAIoctl",
+                "WinPcap",
+                "PacketGetNetInfo"
+            ],
+            "score": 0
+        }
+    },
+    "Defense Evasion": {
+        "Modify Registry": {
+            "api_list": [
+                "RegCreateKeyTransactedA",
+                "RegCreateKeyExW",
+                "RegCreateKeyExA",
+                "RegSetValueExW",
+                "RegSetValueExA",
+                "RegDeleteKeyExA",
+                "RegDeleteKeyA",
+                "RegDeleteKeyW",
+                "RegDeleteKeyExW",
+                "RegDeleteValueA",
+                "RegDeleteValueW",
+                "RegCreateKeyA",
+                "RegCreateKeyW",
+                "RegLoadKeyW",
+                "RegLoadKeyA",
+                "RegReplaceKeyW",
+                "RegReplaceKeyA"
+            ],
+            "score": 0
+        },
+        "Time Based Evasion": {
+            "api_list": [
+                "NtDelayExecution",
+                "Sleep"
+            ],
+            "score": 0
+        }
+    }
+}

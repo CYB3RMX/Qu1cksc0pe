@@ -123,12 +123,14 @@ class WindowsAnalyzer:
         print(f"{infoS} Performing extraction of imports and exports. Please wait...")
         try:
             self.binaryfile = pf.PE(fileName)
+            # -- Extract imports
             for imps in self.binaryfile.DIRECTORY_ENTRY_IMPORT:
                 try:
                     for im in imps.imports:
                         self.windows_imports_and_exports.append([im.name.decode("ascii"), hex(self.binaryfile.OPTIONAL_HEADER.ImageBase + im.address)]) # For full address and not only offset
                 except:
                     continue
+            # -- Extract exports
             for exp in self.binaryfile.DIRECTORY_ENTRY_EXPORT.symbols:
                 try:
                     self.windows_imports_and_exports.append([exp.name.decode('utf-8'), hex(self.binaryfile.OPTIONAL_HEADER.ImageBase + exp.address)]) # For full address and not only offset

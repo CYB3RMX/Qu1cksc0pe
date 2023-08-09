@@ -41,6 +41,10 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/22e652db-c25f-49b1-b122-ac9f89d14ae3)
 
 # Updates
+<b>09/08/2023</b>
+- [X] ```MITRE ATT&CK Analyzer``` module is improved.
+- [X] Bug fixes and improvements.
+
 <b>07/08/2023</b>
 - [X] Bug fixes and improvements.
 
@@ -50,10 +54,6 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 
 <b>30/07/2023</b>
 - [X] ```DocumentAnalyzer``` module is improved. Now you can perform better PDF analysis!
-
-<b>29/07/2023</b>
-- [X] ```AndroidAnalyzer``` module is improved. Now you can perform detection against Anti-VM/Anti-Debug patterns!
-- [X] Added new payload detection/carving techniques to ```ResourceAnalyzer``` module.
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
@@ -89,14 +89,24 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 
 # Static Analysis
 ## Normal analysis
+<i><b>Description</b>: You can perform basic analysis and triage against your samples.</i>
+
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --analyze```<br>
 ![windows_analyze](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/bd6945b6-5198-42fb-adff-2118a596bf58)
 
 ## Resource analysis
+<i><b>Description</b>: With this feature you can analyze assets of given file. Also you can detect and extract embedded payloads from malware samples such as AgentTesla, Formbook etc.</i>
+
+<b>Effective Against</b>:
+- .NET Executables
+- Android Files (.apk)
+
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --resource```<br>
 ![resource](https://user-images.githubusercontent.com/42123683/189416431-de08337f-8d46-4c9c-a635-59a5faca28ff.gif)
 
 ## Hash scan
+<i><b>Description</b>: You can check if hash value of the given file is in built-in malware hash database. Also you can scan your directories with this feature.</i>
+
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --hashscan```<br>
 ![hash](https://user-images.githubusercontent.com/42123683/189416516-8268817c-f186-4ee9-971e-adcccfcb45eb.gif)
 
@@ -118,6 +128,14 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 ![total](https://user-images.githubusercontent.com/42123683/189416676-06216d52-4882-492d-9ee4-4ff7c04b6358.gif)
 
 ## Document scan
+<i><b>Description</b>: This feature can perform deep file inspection against given document files. For example: You can detect and extract possible malicious links or embedded exploits/payloads from your suspicious document file easily!</i>
+
+<b>Effective Against</b>:
+- Word Documents (.doc, .docm, .docx)
+- Excel Documents (.xls, .xlsm, .xlsx)
+- Portable Document Format (.pdf)
+- OneNote Documents (.one)
+
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_document --docs```<br>
 ![docs](https://user-images.githubusercontent.com/42123683/189416778-f7f93d49-7ff0-4eb5-9898-53e63e5833a1.gif)
 
@@ -125,10 +143,19 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 ![exploit](https://user-images.githubusercontent.com/42123683/189676461-86565ff2-3a0c-426a-a66b-80a9462489b7.gif)
 
 ## Archive File Scan
+<i><b>Description</b>: With this feature you can perform checks for suspicious files against archive files.</i>
+
+<b>Effective Against</b>:
+- ZIP
+- RAR 
+- ACE
+ 
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_archive_file --archive```
 ![archiveanalysis](https://user-images.githubusercontent.com/42123683/230241452-0d93d2ca-69a2-42d9-aa99-c9c7cfe637bf.gif)
 
 ## File signature analyzer
+<i><b>Description</b>: With this feature you can detect and extract embedded executable files(.exe, .elf) from given file. Also you can analyze large files (even 1gb or higher) and extract actual malware samples from them (pumped-file analysis).</i>
+
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --sigcheck```<br>
 ![sigcheck](https://user-images.githubusercontent.com/42123683/189416864-0e3e3be0-a7bf-4d35-bd9d-403afc38bb96.gif)
 
@@ -136,14 +163,23 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 ![carving](https://user-images.githubusercontent.com/42123683/189416908-31a06ac7-778a-48bd-a5f7-26708a255340.gif)
 
 ## MITRE ATT&CK Technique Extraction
+<i><b>Description</b>: This feature allows you to generate potential MITRE ATT&CK tables based on the import/export table or functions contained within the given file.</i>
+
+<b>Effective Against</b>:
+- Windows Executables
+
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --mitre```<br>
 ![mitre](https://user-images.githubusercontent.com/42123683/189416941-46e8be6b-2eec-4145-b0b8-b0da78d6611e.gif)
 
 ## Programming language detection
+<i><b>Description</b>: You can get programming language information from given file.</i>
+
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_executable --lang```<br>
 ![langdetect](https://user-images.githubusercontent.com/42123683/228696312-1362cc48-f978-40c9-a0f0-22a216b83f6f.gif)
 
 ## Interactive shell
+<i><b>Description</b>: You can use Qu1cksc0pe in command line mode.</i>
+
 <b>Usage</b>: ```python3 qu1cksc0pe.py --console```<br>
 ![console](https://user-images.githubusercontent.com/42123683/189417009-dec6a91b-228c-4c7e-9579-66c4aa9f4036.gif)
 
