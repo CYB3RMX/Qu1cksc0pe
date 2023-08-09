@@ -86,6 +86,7 @@ def Downloader():
             for data in tqdm(req.iter_content(block_size), total=math.ceil(total_size//block_size), unit='KB', unit_scale=True):
                 wrote = wrote + len(data)
                 ff.write(data)
+        print(f"\n{infoS} Now you are ready to go :)")
         sys.exit(0)
     except:
         sys.exit(0)
@@ -135,10 +136,20 @@ def UpToDate():
 
 # Updating database
 def DatabaseUpdate():
-    print("[bold magenta]>>>[bold white] Removing old database...")
-    os.system(f"rm -rf {install_dir}/HashDB")
-    Downloader()
-    print("[bold green]>>>[bold white] New database has successfully downloaded.")
+    if os.path.exists(install_dir):
+        if os.path.exists(f"{install_dir}/HashDB"):
+            print("[bold magenta]>>>[bold white] Removing old database...")
+            os.system(f"rm -rf {install_dir}/HashDB")
+            Downloader()
+            print("[bold green]>>>[bold white] New database has successfully downloaded.")
+        else:
+            print(f"{infoS} Looks like you don\'t have any hash database. Downloading it for you...")
+            Downloader()
+            print("[bold green]>>>[bold white] New database has successfully downloaded.")
+    else:
+        print(f"{errorS} Error: [bold green]{install_dir}[white] directory not found!")
+        print(f"[bold magenta]>>>[white] Make sure [bold green]setup.sh[white] script is worked successfully!")
+        print(f"[bold magenta]>>>[white] If you don\'t want to execute [bold green]setup.sh[white] then try this: [bold green]python3 qu1cksc0pe.py --file your_sample --hashscan[white]")
 
 # Handling single scans
 def NormalScan():
