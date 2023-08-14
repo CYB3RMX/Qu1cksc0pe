@@ -1,0 +1,57 @@
+{
+    "_0x": {
+        "description": "There might be obfuscated code present in the file. The '_0x' prefix is often used to obfuscate variable and function names.",
+        "type": "obfuscation",
+        "count": 0
+    },
+    "eval": {
+        "description": "The 'eval' function is commonly used by attackers to dynamically execute JavaScript code, which can be a security risk.",
+        "type": "execution",
+        "count": 0
+    },
+    "atob": {
+        "description": "The 'atob' function is used to decode base64-encoded strings. It can be used for obfuscation or evading security mechanisms.",
+        "type": "obfuscation",
+        "count": 0
+    },
+    "parseInt": {
+        "description": "The 'parseInt' function converts a string to an integer. Attackers might use it to extract data from obfuscated strings.",
+        "type": "obfuscation",
+        "count": 0
+    },
+    "iframe": {
+        "description": "The 'iframe' element is used to embed another HTML document within the current page. Attackers might use it for malicious activities like clickjacking or drive-by downloads.",
+        "type": "attack",
+        "count": 0
+    },
+    "unescape": {
+        "description": "The 'unescape' function is used to decode URI-encoded characters. It can be exploited by attackers to decode malicious content encoded in URLs.",
+        "type": "obfuscation",
+        "count": 0
+    },
+    "window.location": {
+        "description": "The 'window.location' object is used to manipulate the current URL of the browser. Attackers might abuse it to redirect users to malicious websites or perform phishing attacks.",
+        "type": "phishing",
+        "count": 0
+    },
+    "setTimeout": {
+        "description": "The 'setTimeout' function is used to schedule the execution of a function after a specified delay.",
+        "type": "evasion",
+        "count": 0
+    },
+    "document.write": {
+        "description": "The 'document.write' method is used to dynamically write content to a document. Attackers might use it to inject malicious content into a page.",
+        "type": "attack",
+        "count": 0
+    },
+    "XMLHttpRequest": {
+        "description": "The 'XMLHttpRequest' object is used to make HTTP requests from a web page. Attackers might use it to perform cross-site request forgery (CSRF) attacks.",
+        "type": "attack",
+        "count": 0
+    },
+    "fromCharCode": {
+        "description": "The 'fromCharCode' method is used to create a string from a sequence of Unicode values. Attackers might use it to obfuscate malicious strings.",
+        "type": "obfuscation",
+        "count": 0
+    }
+}
