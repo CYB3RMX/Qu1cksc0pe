@@ -41,6 +41,14 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/22e652db-c25f-49b1-b122-ac9f89d14ae3)
 
 # Updates
+<b>14/08/2023</b>
+- [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform HTML file analysis. You can do:
+- Perform basic analysis and triage against HTML files.
+- Extract encoded/obfuscated payloads.
+- Detect malicious code patterns and determine the capabilites of the file (obfuscation, phishing etc.)
+
+https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/f9a0c7b8-da77-47ea-a643-f88b47a00c10
+
 <b>09/08/2023</b>
 - [X] ```MITRE ATT&CK Analyzer``` module is improved.
 - [X] Bug fixes and improvements.
@@ -51,9 +59,6 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 <b>03/08/2023</b>
 - [X] ```WindowsAnalyzer``` module is improved. Now you can get XREF information about functions!
 ![windows_analyze](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/bd6945b6-5198-42fb-adff-2118a596bf58)
-
-<b>30/07/2023</b>
-- [X] ```DocumentAnalyzer``` module is improved. Now you can perform better PDF analysis!
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
@@ -135,6 +140,7 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 - Excel Documents (.xls, .xlsm, .xlsx)
 - Portable Document Format (.pdf)
 - OneNote Documents (.one)
+- HTML Documents (.htm, .html)
 
 <b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_document --docs```<br>
 ![docs](https://user-images.githubusercontent.com/42123683/189416778-f7f93d49-7ff0-4eb5-9898-53e63e5833a1.gif)
