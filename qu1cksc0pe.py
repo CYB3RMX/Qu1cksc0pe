@@ -133,10 +133,8 @@ parser.add_argument("--resource", required=False,
                     help="Analyze resources in target file", action="store_true")
 parser.add_argument("--report", required=False,
                     help="Export analysis reports into a file (JSON Format for now).", action="store_true")
-parser.add_argument("--runtime", required=False,
-                    help="Analyze APK files dynamically. (With FRIDA scripts!!)", action="store_true")
 parser.add_argument("--watch", required=False,
-                    help="Perform emulation against executable files.", action="store_true")
+                    help="Perform dynamic analysis against Windows/Linux/Android files.", action="store_true")
 parser.add_argument("--sigcheck", required=False,
                     help="Scan file signatures in target file.", action="store_true")
 parser.add_argument("--vtFile", required=False,
@@ -396,11 +394,6 @@ def Qu1cksc0pe():
         if args.folder is not None:
             print("[bold white on red][blink]--domain[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
-
-    # Dynamic APK analyzer
-    if args.runtime:
-        command = f"python3 {sc0pe_path}/Modules/androidRuntime.py"
-        os.system(command)
 
     # Strace
     if args.watch:
