@@ -38,9 +38,18 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ```
 
 # Screenshot
-![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/22e652db-c25f-49b1-b122-ac9f89d14ae3)
+![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/857571bb-57bd-44fd-9bcd-c247922e1ba4)
 
 # Updates
+<b>23/08/2023</b>
+- [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform analysis against memory dump of an android application. You can get:
+- Possible C2 addresses at runtime.
+- Socket connections.
+- Created services.
+- Methods used by target application.
+
+https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/3251dc28-7c97-4a82-aa6b-a981fb6da13e
+
 <b>14/08/2023</b>
 - [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform HTML file analysis. You can do:
 - Perform basic analysis and triage against HTML files.
@@ -52,13 +61,6 @@ https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/f9a0c7b8-da77-47ea-a643-f8
 <b>09/08/2023</b>
 - [X] ```MITRE ATT&CK Analyzer``` module is improved.
 - [X] Bug fixes and improvements.
-
-<b>07/08/2023</b>
-- [X] Bug fixes and improvements.
-
-<b>03/08/2023</b>
-- [X] ```WindowsAnalyzer``` module is improved. Now you can get XREF information about functions!
-![windows_analyze](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/bd6945b6-5198-42fb-adff-2118a596bf58)
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
@@ -190,12 +192,13 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 ![console](https://user-images.githubusercontent.com/42123683/189417009-dec6a91b-228c-4c7e-9579-66c4aa9f4036.gif)
 
 # Dynamic Analysis
-## Dynamic instrumentation with FRIDA scripts (for android applications)
+## Android Application Analysis
 **Alert**
 > **You must connect a virtual device or physical device to your computer.**
 
-<br><b>Usage</b>: ```python3 qu1cksc0pe.py --runtime```<br>
-![dynamic](https://user-images.githubusercontent.com/42123683/189417071-7c23e5c7-77c1-419a-b563-7820751e4ae6.gif)
+<br><b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious.apk --watch```<br>
+
+https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/3251dc28-7c97-4a82-aa6b-a981fb6da13e
 
 ## Binary Emulation
 **Alert**
@@ -215,7 +218,3 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 - <a href="https://twitter.com/hack_git/status/1666867995036057602">HackGit - Twitter Post</a>
 - <a href="https://twitter.com/DailyDarkWeb/status/1668966526358286336">Daily Dark Web - Twitter Post</a>
 - <a href="https://isc.sans.edu/diary/The+Importance+of+Malware+Triage/29984">SANS ISC - Blog Post</a>
-
-# Thanks to
-For most of FRIDA scripts: <i>https://github.com/Ch0pin/</i><br>
-Another scripts: <i>https://codeshare.frida.re/browse</i>
