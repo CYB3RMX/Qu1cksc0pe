@@ -41,6 +41,11 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/857571bb-57bd-44fd-9bcd-c247922e1ba4)
 
 # Updates
+<b>26/08/2023</b>
+- [X] ```Android Dynamic Analyzer``` module is upgraded. Now you can also perform analysis against heavily obfuscated samples to!
+
+https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/131b334c-0320-4a0a-8b4e-4759e26851dc
+
 <b>23/08/2023</b>
 - [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform analysis against memory dump of an android application. You can get:
 - Possible C2 addresses at runtime.
@@ -57,10 +62,6 @@ https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/3251dc28-7c97-4a82-aa6b-a9
 - Detect malicious code patterns and determine the capabilites of the file (obfuscation, phishing etc.)
 
 https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/f9a0c7b8-da77-47ea-a643-f88b47a00c10
-
-<b>09/08/2023</b>
-- [X] ```MITRE ATT&CK Analyzer``` module is improved.
-- [X] Bug fixes and improvements.
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
