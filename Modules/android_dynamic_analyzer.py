@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import time
+import json
 import threading
 import subprocess
 
@@ -75,7 +76,10 @@ class AndroidDynamicAnalyzer:
         self.url_regex = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
         self.ip_addr_regex = r"^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$"
         self.frida_script = open(f"{sc0pe_path}/Systems/Android/FridaScripts/sc0pe_android_enumeration.js", "r").read()
-        self.axmlobj = pyaxmlparser.APK(self.target_file)
+        try:
+            self.axmlobj = pyaxmlparser.APK(self.target_file)
+        except:
+            self.axmlobj = None
 
     def search_package_name(self, package_name):
         print(f"{infoS} Searching for existing installation...")
@@ -99,7 +103,7 @@ class AndroidDynamicAnalyzer:
             return frida_session
         except:
             print(f"{errorS} Error: Unable to create frida session! Make sure your USB device connected properly...")
-            print(f"{infoS} Hint: Make sure the target application is running on device! (If you sure about USB connection!)")
+            print(f"{infoS} Hint: Make sure the target application [bold green]is running[white] on device! (If you sure about USB connection!)")
             return None
 
     def program_tracer(self, package_name, device):
@@ -242,53 +246,58 @@ class AndroidDynamicAnalyzer:
         return device_index
 
     def analyze_apk_via_adb(self):
-        if self.axmlobj.is_valid_APK():
-            package_name = self.axmlobj.get_package()
-            print(f"[bold magenta]>>>[white] Package name: [bold green]{package_name}\n")
-            # Gathering devices
-            device_indexes = self.enumerate_adb_devices()
+        if self.axmlobj:
+            if self.axmlobj.is_valid_APK():
+                package_name = self.axmlobj.get_package()
+                print(f"[bold magenta]>>>[white] Package name: [bold green]{package_name}\n")
+                # Gathering devices
+                device_indexes = self.enumerate_adb_devices()
 
-            # Print devices
-            if len(device_indexes) == 0:
-                print(f"{errorS} No devices found. Try to connect a device and try again.\n{infoS} You can use [bold cyan]\"adb connect <device_ip>:<device_port>\"[white] to connect a device.")
-                sys.exit(0)
-            else:
-                print(f"{infoS} Available devices:")
-                for device in device_indexes:
-                    print(f"[bold magenta]>>>[white] [bold yellow]{list(device.keys())[0]} [white]| [bold green]{list(device.values())[0]}")
-
-                # Select device
-                dnum = int(input("\n>>> Select device: "))
-                if dnum > len(device_indexes) - 1:
-                    print(f"{errorS} Invalid device number.")
+                # Print devices
+                if len(device_indexes) == 0:
+                    print(f"{errorS} No devices found. Try to connect a device and try again.\n{infoS} You can use [bold cyan]\"adb connect <device_ip>:<device_port>\"[white] to connect a device.")
                     sys.exit(0)
                 else:
-                    mbool = self.search_package_name(package_name)
-                    if not mbool:
-                        print(f"{infoS} Installing [bold yellow]{package_name} [white]on [bold yellow]{list(device_indexes[dnum].values())[0]}")
-                        install_state = self.install_target_application(device=str(list(device_indexes[dnum].values())[0]), target_application=self.target_file, package_name=package_name)
-                        if install_state:
-                            print(f"{infoS} [bold yellow]{package_name} [white]installed successfully.\n")
+                    print(f"{infoS} Available devices:")
+                    for device in device_indexes:
+                        print(f"[bold magenta]>>>[white] [bold yellow]{list(device.keys())[0]} [white]| [bold green]{list(device.values())[0]}")
+
+                    # Select device
+                    dnum = int(input("\n>>> Select device: "))
+                    if dnum > len(device_indexes) - 1:
+                        print(f"{errorS} Invalid device number.")
+                        sys.exit(0)
+                    else:
+                        mbool = self.search_package_name(package_name)
+                        if not mbool:
+                            print(f"{infoS} Installing [bold yellow]{package_name} [white]on [bold yellow]{list(device_indexes[dnum].values())[0]}")
+                            install_state = self.install_target_application(device=str(list(device_indexes[dnum].values())[0]), target_application=self.target_file, package_name=package_name)
+                            if install_state:
+                                print(f"{infoS} [bold yellow]{package_name} [white]installed successfully.\n")
+                                tracer_thread = threading.Thread(target=self.program_tracer, args=(package_name, list(device_indexes[dnum].values())[0],))
+                                crawler_thread = threading.Thread(target=self.target_app_crawler, args=(package_name, list(device_indexes[dnum].values())[0],))
+                                tracer_thread.start()
+                                crawler_thread.start()
+                                tracer_thread.join()
+                                crawler_thread.join()
+                            else:
+                                print(f"{errorS} Installation failed.")
+                                print(f"\n{infoS} Trying to uninstall the existing app...\n")
+                                unstate = self.uninstall_target_application(device=str(list(device_indexes[dnum].values())[0]), package_name=package_name)
+                                if unstate:
+                                    print(f"{infoS} [bold yellow]{package_name} [white]uninstalled successfully.")
+                                    self.analyze_apk_via_adb(self.target_file)
+                        else:
                             tracer_thread = threading.Thread(target=self.program_tracer, args=(package_name, list(device_indexes[dnum].values())[0],))
                             crawler_thread = threading.Thread(target=self.target_app_crawler, args=(package_name, list(device_indexes[dnum].values())[0],))
                             tracer_thread.start()
                             crawler_thread.start()
                             tracer_thread.join()
                             crawler_thread.join()
-                        else:
-                            print(f"{errorS} Installation failed.")
-                            print(f"\n{infoS} Trying to uninstall the existing app...\n")
-                            unstate = self.uninstall_target_application(device=str(list(device_indexes[dnum].values())[0]), package_name=package_name)
-                            if unstate:
-                                print(f"{infoS} [bold yellow]{package_name} [white]uninstalled successfully.")
-                                self.analyze_apk_via_adb(self.target_file)
-                    else:
-                        tracer_thread = threading.Thread(target=self.program_tracer, args=(package_name, list(device_indexes[dnum].values())[0],))
-                        crawler_thread = threading.Thread(target=self.target_app_crawler, args=(package_name, list(device_indexes[dnum].values())[0],))
-                        tracer_thread.start()
-                        crawler_thread.start()
-                        tracer_thread.join()
-                        crawler_thread.join()
+        else:
+            print(f"{errorS} An error occured while parsing the target file. It might be corrupted or something...")
+            print(f"{infoS} You can also use [bold green]Application Memory Analysis[white] option for these situations!")
+            sys.exit(1)
 
     def gather_process_id_android(self, target_app, device):
         for procs in device.enumerate_processes():
@@ -315,20 +324,69 @@ class AndroidDynamicAnalyzer:
         if diff != 0:
             self.save_to_file(agent, cr_base, diff)
 
-    def analyze_apk_memory_dump(self):
-        print(f"\n{infoS} Performing memory dump analysis against: [bold green]{self.target_file}[white]")
-        app_name = self.axmlobj.get_app_name() # We need it for fetching process ID
-        package_name = self.axmlobj.get_package()
+    def parse_frida_output(self):
+        # First we need to get frida-ps output
+        command = "frida-ps -Uaij > package.json"
+        os.system(command)
 
-        # Check for junks
+        # After that get contents of json file and delete junks
+        jfile = json.load(open("package.json"))
+        os.system("rm -rf package.json")
+
+        return jfile
+
+    def table_generator(self, data_array, data_type):
+        if data_array != []:
+            data_table = Table()
+            data_table.add_column("[bold green]Extracted Values", justify="center")
+            for dmp in data_array:
+                data_table.add_row(dmp)
+            print(data_table)
+        else:
+            print(f"{errorS} There is no pattern about {data_type}")
+
+    def analyze_apk_memory_dump(self):
+        # Check for junks if exist
         if os.path.exists("temp_dump.dmp"):
             os.system("rm -rf temp_dump.dmp")
 
-        # Check if the target apk installed in system!
-        is_installed = self.search_package_name(package_name)
-        if not is_installed:
-            print(f"{errorS} Target application not found on the device. Please install it and try again!")
-            sys.exit(1)
+        print(f"\n{infoS} Performing memory dump analysis against: [bold green]{self.target_file}[white]")
+        if self.axmlobj:
+            # This code block will work if the given file is not being corrupted
+            app_name = self.axmlobj.get_app_name() # We need it for fetching process ID
+            package_name = self.axmlobj.get_package()
+            print(f"\n{infoS} Application Name: [bold green]{app_name}[white]")
+            print(f"{infoS} Package Name: [bold green]{package_name}[white]\n")
+
+            # Check if the target apk installed in system!
+            is_installed = self.search_package_name(package_name)
+            if not is_installed:
+                print(f"{errorS} Target application not found on the device. Please install it and try again!")
+                sys.exit(1)
+        else:
+            # Otherwise you can also select any installed application
+            print(f"{infoS} Looks like the target file is corrupted. [bold green]If you installed the target file anyway on your system then you can select it from here![white]")
+            target_apps = self.parse_frida_output()
+            temp_dict = {}
+            for ap in target_apps:
+                temp_dict.update({ap['name']: ap['identifier']})
+
+            print(f"{infoS} Enumerating installed applications...")
+            app_table = Table()
+            app_table.add_column("[bold green]Name", justify="center")
+            app_table.add_column("[bold green]Identifier", justify="center")
+            for ap in temp_dict:
+                app_table.add_row(ap, temp_dict[ap])
+            print(app_table)
+            app_name = str(input("\n>>> Enter Name: "))
+            if app_name not in temp_dict:
+                print(f"{errorS} Application name not found!")
+                sys.exit(1)
+            else:
+                package_name = temp_dict[app_name]
+                print(f"\n{infoS} Application Name: [bold green]{app_name}[white]")
+                print(f"{infoS} Package Name: [bold green]{package_name}[white]\n")
+
 
         # Starting frida session
         frida_session = self.create_frida_session(app_name=app_name)
@@ -366,7 +424,8 @@ class AndroidDynamicAnalyzer:
                          "android.com", "sectigo.com", "xmlpull.org", "w3.org", 
                          "apache.org", "xml.org", "ccil.org", "adobe.com", "javax.xml",
                          "digicert.com", "java.sun.com", "oracle.com", "exslt.org",
-                         "("]
+                         "(", "xsl.lotus.com", "www.alphaworks.ibm.com", "app-measurement.com",
+                         "picasaweb.google.com", "flickr.com", "android-developers.googleblog.com"]
             matchs = re.findall(self.url_regex.encode(), dump_bufffer)
             if matchs != []:
                 for url in matchs:
@@ -380,39 +439,46 @@ class AndroidDynamicAnalyzer:
                         if dont_c == 0:
                             dump_urls.append(url.decode())
             # Print
-            if dump_urls != []:
-                url_table = Table()
-                url_table.add_column("[bold green]Extracted URL Values", justify="center")
-                for dmp in dump_urls:
-                    url_table.add_row(dmp)
-                print(url_table)
-            else:
-                print(f"{errorS} There is no insteresting URL value found!")
+            self.table_generator(data_array=dump_urls, data_type="interesting URL\'s")
 
             # Check for class names/methods
-            print(f"\n{infoS} Looking for pattern contains: [bold green]{package_name}[white]")
-            methodz = []
-            all_things = []
-            all_things += self.axmlobj.get_activities()
-            all_things += self.axmlobj.get_providers()
-            all_things += self.axmlobj.get_services()
-            our_regex = rf"{package_name}.[a-zA-Z0-9]*"
-            matchs = re.findall(our_regex.encode(), dump_bufffer)
-            if matchs != []:
-                for reg in matchs:
-                    if reg.decode() not in methodz:
-                        if reg.decode() in all_things:
-                            methodz.append(reg.decode())
+            if self.axmlobj:
+                print(f"\n{infoS} Looking for pattern contains: [bold green]{package_name}[white]")
+                methodz = []
+                all_things = []
+                all_things += self.axmlobj.get_activities()
+                all_things += self.axmlobj.get_providers()
+                all_things += self.axmlobj.get_services()
+                our_regex = rf"{package_name}.[a-zA-Z0-9]*"
+                matchs = re.findall(our_regex.encode(), dump_bufffer)
+                if matchs != []:
+                    for reg in matchs:
+                        try:
+                            if reg.decode() not in methodz:
+                                if reg.decode() in all_things:
+                                    methodz.append(reg.decode())
+                        except:
+                            continue
+
+                # Print
+                self.table_generator(data_array=methodz, data_type="methods")
+
+            # Check for file paths
+            print(f"\n{infoS} Looking for path values related to: [bold green]{package_name}[white]")
+            path_vals = []
+            matches = re.findall(rf"/data/data/{package_name}/[a-zA-Z0-9./_]*".encode(), dump_bufffer) # /data/data
+            if matches != []:
+                for mat in matches:
+                    if mat.decode() not in path_vals:
+                        path_vals.append(mat.decode())
+            matches = re.findall(rf"/data/user/0/{package_name}/[a-zA-Z0-9./_]*".encode(), dump_bufffer)
+            if matches != []:
+                for mat in matches:
+                    if mat.decode() not in path_vals:
+                        path_vals.append(mat.decode())
 
             # Print
-            if methodz != []:
-                meth_table = Table()
-                meth_table.add_column("[bold green]Extracted Patterns", justify="center")
-                for reg in methodz:
-                    meth_table.add_row(reg)
-                print(meth_table)
-            else:
-                print(f"{errorS} There is no pattern found!")
+            self.table_generator(data_array=path_vals, data_type="path")
 
             # Check for apk names
             print(f"\n{infoS} Looking for APK files. Please wait...")
@@ -423,26 +489,21 @@ class AndroidDynamicAnalyzer:
                     if apkn.decode() not in apk_names:
                         apk_names.append(apkn.decode())
             # Print
-            if apk_names != []:
-                apk_table = Table()
-                apk_table.add_column("[bold green]Extracted Values", justify="center")
-                for aa in apk_names:
-                    apk_table.add_row(aa)
-                print(apk_table)
-            else:
-                print(f"{errorS} There is no pattern found!")
+            self.table_generator(data_array=apk_names, data_type="filenames with .apk extension")
 
             # Check for services
             print(f"\n{infoS} Checking for services started by: [bold green]{package_name}[white]")
-            matchs = re.findall(r'serviceStart: ServiceArgsData{([^}]*)}'.encode(), dump_bufffer)
-            app_serv = 0
+            matchs = re.findall(r"(serviceStart: ServiceArgsData\{([^}]*)\})|(serviceCreate: CreateServiceData\{([^}]*)\})".encode(), dump_bufffer)
+            sanitize_val = []
             if matchs != []:
-                for ser in matchs:
-                    if package_name in ser.decode():
-                        app_serv += 1
-                        print(f"[bold magenta]>>>[white] serviceStart: ServiceArgsData => [bold red]{ser.decode()}[white]")
+                for tup in matchs:
+                    for val in tup:
+                        if package_name in val.decode():
+                            if "serviceStart" in val.decode() or "serviceCreate" in val.decode():
+                                sanitize_val.append(val.decode())
+                                print(f"[bold magenta]>>>[white] {val.decode()}")
             # Handle error
-            if app_serv == 0:
+            if len(sanitize_val) == 0:
                 print(f"{errorS} There is no information about services!")
 
             # Hook socket connections
