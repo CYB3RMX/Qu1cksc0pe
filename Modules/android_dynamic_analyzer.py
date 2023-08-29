@@ -68,6 +68,20 @@ previous_states = {
     }
 }
 
+# Gathering code patterns
+pattern_file = json.load(open(f"{sc0pe_path}/Systems/Android/detections.json"))
+
+# Categories
+categs = {
+    "Banker": [], "SMS Bot": [], "Base64": [], "VNC Implementation": [], "Keylogging": [],
+    "Camera": [], "Phone Calls": [], "Microphone Interaction": [],
+    "Information Gathering/Stealing": [], "Database": [], "File Operations": [],
+    "Windows Operations": [],
+    "Persistence/Managing": [], "Network/Internet": [], "SSL Pining/Certificate Handling": [],
+    "Dynamic Class/Dex Loading": [], "Java Reflection": [], "Root Detection": [],
+    "Cryptography": [], "Command Execution": [], "Anti-VM/Anti-Debug": [], "BOT Activity": []
+}
+
 class AndroidDynamicAnalyzer:
     def __init__(self, target_file):
         self.target_file = target_file
@@ -94,7 +108,7 @@ class AndroidDynamicAnalyzer:
 
     def create_frida_session(self, app_name):
         try:
-            print(f"{infoS} Trying to connect USB device...")
+            print(f"\n{infoS} Trying to connect USB device for performing memory dump against: [bold green]{app_name}[white]")
             device_manager = frida.enumerate_devices()
             device = device_manager[-1] # Usb connected device
             proc_id = self.gather_process_id_android(app_name, device)
@@ -345,6 +359,51 @@ class AndroidDynamicAnalyzer:
         else:
             print(f"{errorS} There is no pattern about {data_type}")
 
+    def installed_app_selector(self):
+        target_apps = self.parse_frida_output()
+        temp_dict = {}
+        for ap in target_apps:
+            temp_dict.update({ap['name']: ap['identifier']})
+
+        print(f"{infoS} Enumerating installed applications...")
+        app_table = Table()
+        app_table.add_column("[bold green]Name", justify="center")
+        app_table.add_column("[bold green]Identifier", justify="center")
+        for ap in temp_dict:
+            app_table.add_row(ap, temp_dict[ap])
+        print(app_table)
+        app_name = str(input("\n>>> Enter Name: "))
+        if app_name not in temp_dict:
+            print(f"{errorS} Application name not found!")
+            return None
+        else:
+            return [app_name, temp_dict[app_name]]
+
+    def perform_pattern_categorization(self, mem_dump_buf):
+        for index in track(range(0, len(pattern_file)), description="Processing buffer..."):
+            for elem in pattern_file[index]:
+                for item in pattern_file[index][elem]:
+                    regx = re.findall(item.encode(), mem_dump_buf)
+                    if regx != [] and '' not in regx:
+                        categs[elem].append(str(item))
+
+        # Table for statistics about categories and components
+        statTable = Table(title="* Statistics About Categories and Components *", title_style="bold magenta", title_justify="center")
+        statTable.add_column("[bold red]Category", justify="center")
+        statTable.add_column("[bold red]Number of Found Patterns", justify="center")
+
+        # Parsing area
+        for cat in categs:
+            if categs[cat] != []:
+                sanalTable = Table(title=f"* {cat} *", title_style="bold green", title_justify="center")
+                sanalTable.add_column("Code/Pattern", justify="center")
+                for element in categs[cat]:
+                    sanalTable.add_row(f"[bold yellow]{element}")
+                print(sanalTable)
+                statTable.add_row(cat, str(len(categs[cat])))
+                print(" ")
+        print(statTable)
+
     def analyze_apk_memory_dump(self):
         # Check for junks if exist
         if os.path.exists("temp_dump.dmp"):
@@ -355,8 +414,22 @@ class AndroidDynamicAnalyzer:
             # This code block will work if the given file is not being corrupted
             app_name = self.axmlobj.get_app_name() # We need it for fetching process ID
             package_name = self.axmlobj.get_package()
-            print(f"\n{infoS} Application Name: [bold green]{app_name}[white]")
-            print(f"{infoS} Package Name: [bold green]{package_name}[white]\n")
+
+            # If we dont able to fetch app_name/package_name then look for installed applications list
+            if app_name == '' or package_name == '':
+                print(f"\n{infoS} An error occured while fetching [bold green]application name/package name[white]. Looks like this sample has [bold red]anti-analysis[white] techniques.")
+                print(f"{infoS} By the way you can select your target application from here!")
+                app_inf = self.installed_app_selector()
+                if app_inf:
+                    app_name = app_inf[0]
+                    package_name = app_inf[1]
+                    print(f"\n{infoS} Application Name: [bold green]{app_name}[white]")
+                    print(f"{infoS} Package Name: [bold green]{package_name}[white]\n")
+                else:
+                    sys.exit(1)
+            else:
+                print(f"\n{infoS} Application Name: [bold green]{app_name}[white]")
+                print(f"{infoS} Package Name: [bold green]{package_name}[white]\n")
 
             # Check if the target apk installed in system!
             is_installed = self.search_package_name(package_name)
@@ -366,27 +439,14 @@ class AndroidDynamicAnalyzer:
         else:
             # Otherwise you can also select any installed application
             print(f"{infoS} Looks like the target file is corrupted. [bold green]If you installed the target file anyway on your system then you can select it from here![white]")
-            target_apps = self.parse_frida_output()
-            temp_dict = {}
-            for ap in target_apps:
-                temp_dict.update({ap['name']: ap['identifier']})
-
-            print(f"{infoS} Enumerating installed applications...")
-            app_table = Table()
-            app_table.add_column("[bold green]Name", justify="center")
-            app_table.add_column("[bold green]Identifier", justify="center")
-            for ap in temp_dict:
-                app_table.add_row(ap, temp_dict[ap])
-            print(app_table)
-            app_name = str(input("\n>>> Enter Name: "))
-            if app_name not in temp_dict:
-                print(f"{errorS} Application name not found!")
-                sys.exit(1)
-            else:
-                package_name = temp_dict[app_name]
+            app_inf = self.installed_app_selector()
+            if app_inf:
+                app_name = app_inf[0]
+                package_name = app_inf[1]
                 print(f"\n{infoS} Application Name: [bold green]{app_name}[white]")
                 print(f"{infoS} Package Name: [bold green]{package_name}[white]\n")
-
+            else:
+                sys.exit(1)
 
         # Starting frida session
         frida_session = self.create_frida_session(app_name=app_name)
@@ -420,12 +480,7 @@ class AndroidDynamicAnalyzer:
             # Look for URLS
             print(f"{infoS} Looking for interesting URL values...")
             dump_urls = []
-            dont_need = ["usertrust.com", "crashlyticsreports-pa.googleapis.com", 
-                         "android.com", "sectigo.com", "xmlpull.org", "w3.org", 
-                         "apache.org", "xml.org", "ccil.org", "adobe.com", "javax.xml",
-                         "digicert.com", "java.sun.com", "oracle.com", "exslt.org",
-                         "(", "xsl.lotus.com", "www.alphaworks.ibm.com", "app-measurement.com",
-                         "picasaweb.google.com", "flickr.com", "android-developers.googleblog.com"]
+            dont_need = open(f"{sc0pe_path}/Systems/Android/blacklist_patterns.txt", "r").read().split("\n")
             matchs = re.findall(self.url_regex.encode(), dump_bufffer)
             if matchs != []:
                 for url in matchs:
@@ -479,6 +534,10 @@ class AndroidDynamicAnalyzer:
 
             # Print
             self.table_generator(data_array=path_vals, data_type="path")
+
+            # Pattern categorization
+            print(f"\n{infoS} Performing pattern categorization. Please wait...")
+            self.perform_pattern_categorization(mem_dump_buf=dump_bufffer)
 
             # Check for apk names
             print(f"\n{infoS} Looking for APK files. Please wait...")

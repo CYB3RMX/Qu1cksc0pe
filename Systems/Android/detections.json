@@ -148,7 +148,16 @@
             "sendTextMessage",
             "SMS_SEND",
             "{\"sms/sent\", \"sms/inbox\", \"sms/draft\"};",
-            "\"send_sms\""
+            "\"send_sms\"",
+            "SEND_SMS",
+            "RECEIVE_SMS",
+            "READ_SMS",
+            "SMSDispatcher.sendData",
+            "SMSDispatcher",
+            "EXC_SMSRCVs",
+            "SMSADMIN",
+            "SMS_Intercept",
+            "getDefaultSmsPackage"
         ]
     },
     {
@@ -169,7 +178,16 @@
             "vncUpdateFramebuffer",
             "vncConnectReverse",
             "VncIsOn",
-            "vnc_permission"
+            "vnc_permission",
+            "VNC_SCREEN",
+            "VNCINJ",
+            "last_vnc_request",
+            "last_vnc_stream_attempt",
+            "vncScr",
+            "vnc_backlight_off",
+            "vnc_overlay_enabled",
+            "vnc_screen",
+            "vnc_sound_off"
         ]
     },
     {
@@ -178,7 +196,13 @@
             "addKeyListener",
             "GlobalKeyboardHook",
             "org.jnativehook.keyboard.NativeKeyEvent",
-            "org.jnativehook.keyboard.NativeKeyListener"
+            "org.jnativehook.keyboard.NativeKeyListener",
+            "last_keylog_send",
+            "keylogger_delay",
+            "keylogger_enabled",
+            "save_keylog_prefs",
+            "start_keylogger",
+            "stop_keylogger"
         ]
     },
     {
@@ -209,7 +233,11 @@
             "android.intent.extra.PHONE_NUMBER",
             "incoming_number",
             "android.permission.PROCESS_OUTGOING_CALLS",
-            "android.permission.CALL_PHONE"
+            "android.permission.CALL_PHONE",
+            "Data.CONTACT_ID",
+            "PhoneLookup._ID",
+            "RawContacts.CONTACT_ID",
+            "CALL_PHONE"
         ]
     },
     {
@@ -261,7 +289,12 @@
             "isWifiEnabled",
             "getAllNetworkInfo",
             "android.app.KeyguardManager",
-            "inKeyguardRestrictedInputMode"
+            "inKeyguardRestrictedInputMode",
+            "screenshoter",
+            "Data.CONTACT_ID",
+            "PhoneLookup._ID",
+            "RawContacts.CONTACT_ID",
+            "installed_pkgs"
         ]
     },
     {
@@ -353,13 +386,17 @@
             "Runtime.getRuntime",
             "\"run_admin_device\"",
             "android.app.admin.DevicePolicyManager",
-            "\"device_policy\"",
+            "device_policy",
             "removeActiveAdmin",
             "doInBackground",
             "android.settings.ACCESSIBILITY_SETTINGS",
             "android.app.action.ADD_DEVICE_ADMIN",
             "android.app.extra.DEVICE_ADMIN",
-            "enabled_accessibility_services"
+            "enabled_accessibility_services",
+            "newWakeLock",
+            "devadmin_confirm",
+            "get_device_admin_delay",
+            "device_admin_set"
         ]
     },
     {
@@ -419,7 +456,9 @@
             "/proc/net/netfilter/nfnetlink_queue",
             "JarURLConnection",
             "URLClassLoader",
-            "URLConnection"
+            "URLConnection",
+            "wifi-state",
+            "wifi.scan"
         ]
     },
     {
@@ -538,6 +577,20 @@
             "/dev/socket/baseband_genyd",
             "isEmulator",
             "isDebuggerConnected"
+        ]
+    },
+    {
+        "BOT Activity": [
+            "kill_bot",
+            "getBotState",
+            "getBotTitle",
+            "bot_smarts",
+            "Bot state",
+            "Injects bot version",
+            "BOTLOG: Inject",
+            "injects_delay",
+            "injects_to_disable",
+            "INJECT Package"
         ]
     }
 ]

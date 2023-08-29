@@ -86,7 +86,7 @@ categs = {
     "Windows Operations": [],
     "Persistence/Managing": [], "Network/Internet": [], "SSL Pining/Certificate Handling": [],
     "Dynamic Class/Dex Loading": [], "Java Reflection": [], "Root Detection": [],
-    "Cryptography": [], "Command Execution": [], "Anti-VM/Anti-Debug": []
+    "Cryptography": [], "Command Execution": [], "Anti-VM/Anti-Debug": [], "BOT Activity": []
 }
 
 # Parsing date
