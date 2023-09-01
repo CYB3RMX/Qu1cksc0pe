@@ -24,3 +24,4 @@ video.google.com
 youtube.com
 youtu.be
 https://X
+unisolated.invalid

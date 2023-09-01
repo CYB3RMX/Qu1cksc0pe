@@ -41,6 +41,9 @@ python3 qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/857571bb-57bd-44fd-9bcd-c247922e1ba4)
 
 # Updates
+<b>01/09/2023</b>
+- [X] ```Android Dynamic Analyzer``` module is significantly upgraded.
+
 <b>29/08/2023</b>
 - [X] ```Android Dynamic Analyzer``` module is upgraded. Now Qu1cksc0pe also can perform categorized pattern scanning against application memory dumps!
 
