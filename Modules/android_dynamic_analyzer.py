@@ -5,6 +5,7 @@ import re
 import sys
 import time
 import json
+import warnings
 import threading
 import subprocess
 
@@ -18,6 +19,13 @@ try:
     import frida
 except:
     print("Error: >frida< module not found.")
+    sys.exit(1)
+
+try:
+    from prompt_toolkit import prompt
+    from prompt_toolkit.completion import WordCompleter
+except:
+    print("Error: >prompt_toolkit< module not found.")
     sys.exit(1)
 
 try:
@@ -45,6 +53,7 @@ else:
 
 # Disabling pyaxmlparser's logs
 pyaxmlparser.core.log.disabled = True
+warnings.filterwarnings("ignore") # Suppressing another warnings
 
 # Configurating strings parameter
 if sys.platform == "darwin":
@@ -106,12 +115,12 @@ class AndroidDynamicAnalyzer:
             print(f"{infoS} Package not found.")
             return False
 
-    def create_frida_session(self, app_name):
+    def create_frida_session(self, app_name, package_name):
         try:
             print(f"\n{infoS} Trying to connect USB device for performing memory dump against: [bold green]{app_name}[white]")
             device_manager = frida.enumerate_devices()
             device = device_manager[-1] # Usb connected device
-            proc_id = self.gather_process_id_android(app_name, device)
+            proc_id = self.gather_process_id_android(app_name, package_name, device)
             frida_session = frida.get_usb_device().attach(int(proc_id)) # Attach target app process
             print(f"{infoS} Connection successfull...")
             return frida_session
@@ -313,9 +322,15 @@ class AndroidDynamicAnalyzer:
             print(f"{infoS} You can also use [bold green]Application Memory Analysis[white] option for these situations!")
             sys.exit(1)
 
-    def gather_process_id_android(self, target_app, device):
+    def gather_process_id_android(self, target_app, package_name, device):
+        # Look process for name
         for procs in device.enumerate_processes():
             if procs.name == target_app:
+                return procs.pid
+
+        # Look process for package name
+        for procs in device.enumerate_processes():
+            if procs.name == package_name:
                 return procs.pid
         return None
 
@@ -372,12 +387,26 @@ class AndroidDynamicAnalyzer:
         for ap in temp_dict:
             app_table.add_row(ap, temp_dict[ap])
         print(app_table)
-        app_name = str(input("\n>>> Enter Name: "))
-        if app_name not in temp_dict:
-            print(f"{errorS} Application name not found!")
-            return None
+        print("\n[bold cyan][[bold red]1[bold cyan]][white] Select Target via Its [bold green]Name[white]")
+        print("[bold cyan][[bold red]2[bold cyan]][white] Select Target via Its [bold green]Package Name[white]")
+        print(f"{infoS} NOTE: If you couldn\'t find your target in the table then It is recommended to choose [bold green]2nd[white] option to scan it!")
+        choice = int(input("\n>>> Enter choice: "))
+        if choice == 1:
+            app_completer = WordCompleter(temp_dict.keys())
+            app_name = prompt(">>> Enter Target App Name [Press TAB to auto-complete]: ", completer=app_completer)
+            if app_name not in temp_dict:
+                print(f"{errorS} Application name not found!")
+                return None
+            else:
+                return [app_name, temp_dict[app_name]]
+        elif choice == 2:
+            print(f"\n{infoS} Enumerating all installed packages...")
+            pack_completer = WordCompleter(self.user_installed_packages())
+            package_name = prompt("\n>>> Enter Target Package Name [Press TAB to auto-complete]: ", completer=pack_completer)
+            return [package_name, package_name]
         else:
-            return [app_name, temp_dict[app_name]]
+            print(f"{errorS} Wrong choice :(")
+            sys.exit(1)
 
     def perform_pattern_categorization(self, mem_dump_buf):
         for index in track(range(0, len(pattern_file)), description="Processing buffer..."):
@@ -404,9 +433,53 @@ class AndroidDynamicAnalyzer:
                 print(" ")
         print(statTable)
 
+    def locate_main_activity(self, package_name):
+        print(f"\n{infoS} Locating MainActivity of the target application...")
+        if self.axmlobj:
+            print(f"{infoS} MainActivity: [bold green]{self.axmlobj.get_main_activity()}[white]")
+            return self.axmlobj.get_main_activity()
+        else:
+            result = subprocess.run(["adb", "shell", "dumpsys", "package", package_name], capture_output=True, check=True, text=True)
+            lines = result.stdout.split("\n")
+            for index, line in enumerate(lines):
+                if "android.intent.action.MAIN:" in line:
+                    main_activity_line = lines[index + 1]
+                    main_activity = main_activity_line.strip()
+                    print(f"{infoS} MainActivity: [bold green]{main_activity.split(' ')[1]}[white]")
+                    return str(main_activity.split(" ")[1])
+
+    def save_dump_for_further(self, app_name):
+        print(f"\n{infoS} Do you want to save dump file for further analysis (y/n)?")
+        choice = str(input(">>>> Choice: "))
+        if choice == "Y" or choice == "y":
+            os.system(f"mv temp_dump.dmp mem_dump-{app_name}.dmp")
+            print(f"{infoS} File saved as: [bold green]mem_dump-{app_name}.dmp[white]")
+        else:
+            os.system("rm -rf temp_dump.dmp")
+
+    def user_installed_packages(self):
+        plist = subprocess.run(["adb", "shell", "pm", "list", "packages"], stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+        pack_l = plist.stdout.decode().split("\n")
+        all_packs = []
+        if pack_l:
+            ptable = Table()
+            ptable.add_column("[bold green]Package Name", justify="center")
+            for p in pack_l:
+                try:
+                    ptable.add_row(str(p.split(":")[1]))
+                    all_packs.append(str(p.split(":")[1]))
+                except:
+                    continue
+            print(ptable)
+            return all_packs
+        else:
+            print(f"{errorS} There is no package found!")
+            return None
+
     def analyze_apk_memory_dump(self):
         # Check for junks if exist
         if os.path.exists("temp_dump.dmp"):
+            print(f"\n{infoS} Removing old memory dump file...\n")
             os.system("rm -rf temp_dump.dmp")
 
         print(f"\n{infoS} Performing memory dump analysis against: [bold green]{self.target_file}[white]")
@@ -430,15 +503,9 @@ class AndroidDynamicAnalyzer:
             else:
                 print(f"\n{infoS} Application Name: [bold green]{app_name}[white]")
                 print(f"{infoS} Package Name: [bold green]{package_name}[white]\n")
-
-            # Check if the target apk installed in system!
-            is_installed = self.search_package_name(package_name)
-            if not is_installed:
-                print(f"{errorS} Target application not found on the device. Please install it and try again!")
-                sys.exit(1)
         else:
             # Otherwise you can also select any installed application
-            print(f"{infoS} Looks like the target file is corrupted. [bold green]If you installed the target file anyway on your system then you can select it from here![white]")
+            print(f"{infoS} Looks like the target file is [bold red]corrupted[white]. [bold green]If you installed the target file anyway on your system then you can select it from here![white]")
             app_inf = self.installed_app_selector()
             if app_inf:
                 app_name = app_inf[0]
@@ -448,8 +515,17 @@ class AndroidDynamicAnalyzer:
             else:
                 sys.exit(1)
 
+        # Check if the target apk installed in system!
+        is_installed = self.search_package_name(package_name)
+        if not is_installed:
+            print(f"{errorS} Target application not found on the device. Please install it and try again!")
+            sys.exit(1)
+
+        # Locate main_activity: Helpfull against samples wiht corrupted manifest file
+        main_act = self.locate_main_activity(package_name=package_name)
+
         # Starting frida session
-        frida_session = self.create_frida_session(app_name=app_name)
+        frida_session = self.create_frida_session(app_name=app_name, package_name=package_name)
         if not frida_session:
             sys.exit(1)
 
@@ -575,11 +651,11 @@ class AndroidDynamicAnalyzer:
                 sys.stdin.read()
             except:
                 print(f"\n{errorS} Program terminated!")
-                os.system("rm -rf temp_dump.dmp")
+                self.save_dump_for_further(app_name)
                 sys.exit(1)
 
             # Cleanup
-            os.system("rm -rf temp_dump.dmp")
+            self.save_dump_for_further(app_name)
 
     def analyzer_main(self):
         print(f"\n{infoS} What do you want to perform?\n")
