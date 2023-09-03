@@ -374,6 +374,13 @@ class AndroidDynamicAnalyzer:
         else:
             print(f"{errorS} There is no pattern about {data_type}")
 
+    def check_adb_connection(self):
+        chek = subprocess.check_output("adb devices", shell=True)
+        if len(chek) != 26:
+            return True
+        else:
+            return None
+
     def installed_app_selector(self):
         target_apps = self.parse_frida_output()
         temp_dict = {}
@@ -477,6 +484,12 @@ class AndroidDynamicAnalyzer:
             return None
 
     def analyze_apk_memory_dump(self):
+        # Check for adb connection first
+        con_state = self.check_adb_connection()
+        if not con_state:
+            print(f"\n{errorS} You need to connect a device via adb first!\n")
+            sys.exit(1)
+
         # Check for junks if exist
         if os.path.exists("temp_dump.dmp"):
             print(f"\n{infoS} Removing old memory dump file...\n")
