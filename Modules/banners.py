@@ -17,6 +17,7 @@ wh = "[white]"
 gr = "[bold green]"
 ma = "[bold magenta]"
 ye = "[bold yellow]"
+bl = "[bold blue]"
 
 banner1=f"""
  {cy}_____ _   _  __  _____  _   __ _____ _____ ___________ _____         {gr}@
@@ -164,6 +165,23 @@ banner10=f"""
 ⠀⠀⠀⠈⣿⠏⠀⣰⣿⣿⣿⣿⣿⣿⠿⠟⠛⠋⠉⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⢠⡿⠿⠛⠋⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 """
+banner11=f"""
+{bl}⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⣿⣿⣿⣿⠁⠀⠀⣻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿             {gr}[blink]#OPENTOWORK #OPENTOWORK #OPENTOWORK #OPENTOWORK[/blink]{bl}
+⣿⣿⣿⣿⣷⣤⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿           {gr}#                                                   #{bl}
+⣿⣿⣿⣿⠉⠉⠉⣿⣿⣿⠉⠉⠉⠟⠉⠉⠉⠻⣿⣿⣿⣿           {gr}# {wh}DO YOU WANT TO CREATE MALWARE ANALYSIS PROJECTS?{gr}  #{bl}
+⣿⣿⣿⣿⠀⠀⠀⣿⣿⣿⠀⠀⠀⣠⣤⡀⠀⠀⢹⣿⣿⣿           {gr}#                                                   #{bl}
+⣿⣿⣿⣿⠀⠀⠀⣿⣿⣿⠀⠀⠀⣿⣿⡇⠀⠀⢸⣿⣿⣿           {gr}#                         {re}OR{gr}                        #{bl}
+⣿⣿⣿⣿⠀⠀⠀⣿⣿⣿⠀⠀⠀⣿⣿⡇⠀⠀⢸⣿⣿⣿           {gr}#                                                   #{bl}
+⣿⣿⣿⣿⣀⣀⣀⣿⣿⣿⣀⣀⣀⣿⣿⣇⣀⣀⣼⣿⣿⣿           {gr}# {wh}DO YOU NEED ASSISTANCE FOR MALWARE ANALYSIS/DFIR?{gr} #{bl}
+⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿           {gr}#                                                   #{bl}
+⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿             {gr}[blink]#OPENTOWORK #OPENTOWORK #OPENTOWORK #OPENTOWORK[/blink]{bl}
+
+                                      {ye}THEN FEEL FREE TO CONTACT ME FOR FURTHER INFORMATION :){wh}
+                                      {gr}LinkedIn: {cy}https://www.linkedin.com/in/mehmetalikerimoglu/{wh}
+
+"""
 
 randomBanner = random.randint(1, 10)
 if randomBanner == 1:
@@ -173,18 +191,20 @@ elif randomBanner == 2:
 elif randomBanner == 3:
     print(banner3)
 elif randomBanner == 4:
-    print(banner4)
+    print(banner11) #temp
 elif randomBanner == 5:
-    print(banner5)
+    print(banner11) #temp
 elif randomBanner == 6:
     print(banner6)
 elif randomBanner == 7:
-    print(banner7)
+    print(banner11) #temp
 elif randomBanner == 8:
     print(banner8)
 elif randomBanner == 9:
     print(banner9)
 elif randomBanner == 10:
     print(banner10)
+elif randomBanner == 11:
+    print(banner11)
 else:
     pass
