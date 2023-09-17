@@ -4,7 +4,8 @@ import os
 import readline
 import sys
 import glob
-import getpass
+import distutils.spawn
+import subprocess
 
 # Testing prompt_toolkit existence
 try:
@@ -55,13 +56,17 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 # Path variable
 sc0pe_path = open(".path_handler", "r").read()
 
-# Gathering username
-username = getpass.getuser()
-
-# User home detection
-homeD = "/home"
-if sys.platform == "darwin":
-    homeD = "/Users"
+# User home detection and compatibility
+homeD = os.path.expanduser("~")
+path_seperator = "/"
+strings_param = "--all"
+if sys.platform == "win32":
+    path_seperator = "\\"
+    strings_param = "-a"
+elif sys.platform == "darwin":
+    strings_param = "-a"
+else:
+    pass
 
 console_style = prstyle.from_dict({
     # User input (default text).
@@ -148,7 +153,10 @@ try:
 
         # Simple clear command
         elif con_command == "clear":
-            os.system("clear")
+            if sys.platform == "win32":
+                os.system("cls")
+            else:
+                os.system("clear")
 
         # Specifying target file
         elif con_command == "set target-file":
@@ -176,7 +184,7 @@ try:
                 fileType = str(pr.magic_file(filename))
                 if "Windows Executable" in fileType or ".msi" in fileType or ".dll" in fileType or ".exe" in fileType:
                     print(f"{infoS} Target OS: [bold green]Windows[white]\n")
-                    command = f"python3 {sc0pe_path}/Modules/winAnalyzer.py {filename}"
+                    command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}winAnalyzer.py \"{filename}\""
                     os.system(command)
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
@@ -188,13 +196,12 @@ try:
                 print(f"\n{infoS} Analyzing: [bold green]{filename}[white]")
                 fileType = str(pr.magic_file(filename))
                 if "ELF" in fileType:
-                    if os.path.exists("/usr/bin/strings"):
-                        command = f"strings --all {filename} > temp.txt"
-                        os.system(command)
+                    if distutils.spawn.find_executable("strings"):
+                        str_proc = subprocess.run(f"strings {strings_param} \"{filename}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                         print(f"{infoS} Target OS: [bold green]Linux[white]\n")
-                        command = f"python3 {sc0pe_path}/Modules/linAnalyzer.py {filename}"
+                        command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}linAnalyzer.py \"{filename}\""
                         os.system(command)
-                        os.remove(f"{sc0pe_path}/temp.txt")
+                        os.remove(f"{sc0pe_path}{path_seperator}temp.txt")
                     else:
                         print(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
                         sys.exit(1)
@@ -208,13 +215,12 @@ try:
                 print(f"\n{infoS} Analyzing: [bold green]{filename}[white]")
                 fileType = str(pr.magic_file(filename))
                 if "Mach-O" in fileType:
-                    if os.path.exists("/usr/bin/strings"):
-                        command = f"strings --all {filename} > temp.txt"
-                        os.system(command)
+                    if distutils.spawn.find_executable("strings"):
+                        str_proc = subprocess.run(f"strings {strings_param} \"{filename}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                         print(f"{infoS} Target OS: [bold green]OSX[white]\n")
-                        command = f"python3 {sc0pe_path}/Modules/osXAnalyzer.py {filename}"
+                        command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}osXAnalyzer.py \"{filename}\""
                         os.system(command)
-                        os.remove(f"{sc0pe_path}/temp.txt")
+                        os.remove(f"{sc0pe_path}{path_seperator}temp.txt")
                     else:
                         print(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
                         sys.exit(1)
@@ -230,13 +236,12 @@ try:
                 if "PK" in fileType and "Java archive" in fileType:
                     look = pyaxmlparser.APK(filename)
                     if look.is_valid_APK() == True:
-                        if os.path.exists("/usr/bin/strings"):
-                            command = f"strings --all {filename} > temp.txt"
-                            os.system(command)
+                        if distutils.spawn.find_executable("strings"):
+                            str_proc = subprocess.run(f"strings {strings_param} \"{filename}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                             print(f"{infoS} Target OS: [bold green]Android[white]")    
-                            command = f"python3 {sc0pe_path}/Modules/apkAnalyzer.py {filename}"
+                            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}apkAnalyzer.py \"{filename}\""
                             os.system(command)
-                            os.remove(f"{sc0pe_path}/temp.txt")
+                            os.remove(f"{sc0pe_path}{path_seperator}temp.txt")
                         else:
                             print(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
                             sys.exit(1)
@@ -251,7 +256,7 @@ try:
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
                 print(f"{infoS} Analyzing: [bold green]{filename}[white]")
-                command = f"python3 {sc0pe_path}/Modules/document_analyzer.py {filename}"
+                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}document_analyzer.py \"{filename}\""
                 os.system(command)
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
@@ -260,12 +265,11 @@ try:
         elif con_command == "domain":
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
-                if os.path.exists("/usr/bin/strings"):
-                    command = f"strings --all {filename} > temp.txt"
+                if distutils.spawn.find_executable("strings"):
+                    str_proc = subprocess.run(f"strings {strings_param} \"{filename}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+                    command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}domainCatcher.py \"{filename}\""
                     os.system(command)
-                    command = f"python3 {sc0pe_path}/Modules/domainCatcher.py {filename}"
-                    os.system(command)
-                    os.remove(f"{sc0pe_path}/temp.txt")
+                    os.remove(f"{sc0pe_path}{path_seperator}temp.txt")
                 else:
                     print(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
                     sys.exit(1)
@@ -276,12 +280,11 @@ try:
         elif con_command == "language":
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
-                if os.path.exists("/usr/bin/strings"):
-                    command = f"strings --all {filename} > temp.txt"
+                if distutils.spawn.find_executable("strings"):
+                    str_proc = subprocess.run(f"strings {strings_param} \"{filename}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+                    command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}languageDetect.py \"{filename}\""
                     os.system(command)
-                    command = f"python3 {sc0pe_path}/Modules/languageDetect.py {filename}"
-                    os.system(command)
-                    os.remove(f"{sc0pe_path}/temp.txt")
+                    os.remove(f"{sc0pe_path}{path_seperator}temp.txt")
                 else:
                     print(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
                     sys.exit(1)
@@ -292,7 +295,7 @@ try:
         elif con_command == "packer":
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
-                command = f"python3 {sc0pe_path}/Modules/packerAnalyzer.py {filename} --single"
+                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}packerAnalyzer.py \"{filename}\" --single"
                 os.system(command)
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
@@ -301,7 +304,7 @@ try:
         elif con_command == "hash-scan":
             if os.path.exists(".target-folder.txt"):
                 foldername = open(".target-folder.txt", "r").read()
-                command = f"python3 {sc0pe_path}/Modules/hashScanner.py {foldername} --multiscan"
+                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}hashScanner.py {foldername} --multiscan"
                 os.system(command)
             else:
                 print(f"{errorS} You must specify target folder with [bold green]set target-folder[white] command.")
@@ -310,7 +313,7 @@ try:
         elif con_command == "sigcheck":
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
-                command = f"python3 {sc0pe_path}/Modules/sigChecker.py {filename}"
+                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}sigChecker.py \"{filename}\""
                 os.system(command)
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
@@ -319,7 +322,7 @@ try:
         elif con_command == "metadata":
             if os.path.exists(".target-file.txt"):
                 foldername = open(".target-file.txt", "r").read()
-                command = f"python3 {sc0pe_path}/Modules/metadata.py {filename}"
+                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}metadata.py \"{filename}\""
                 os.system(command)
             else:
                 print(f"{errorS} You must specify target folder with [bold green]set target-folder[white] command.")
@@ -328,7 +331,7 @@ try:
         elif con_command == "resource-scan":
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
-                command = f"python3 {sc0pe_path}/Modules/resourceChecker.py {filename}"
+                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}resourceChecker.py \"{filename}\""
                 os.system(command)
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
@@ -336,13 +339,13 @@ try:
         # VirusTotal API Key import
         elif con_command == "key_init":
             try:
-                if os.path.exists(f"{homeD}/{username}/sc0pe_Base/"):
+                if os.path.exists(f"{homeD}{path_seperator}sc0pe_Base"):
                     pass
                 else:
-                    os.system(f"mkdir {homeD}/{username}/sc0pe_Base/")
+                    os.system(f"mkdir {homeD}{path_seperator}sc0pe_Base")
 
                 apikey = str(input(f"{infoC} Enter your VirusTotal API key: "))
-                apifile = open(f"{homeD}/{username}/sc0pe_Base/sc0pe_VT_apikey.txt", "w")
+                apifile = open(f"{homeD}{path_seperator}sc0pe_Base{path_seperator}sc0pe_VT_apikey.txt", "w")
                 apifile.write(apikey)
                 print(f"{foundS} Your VirusTotal API key saved. You must restart the program!")
                 sys.exit(0)
@@ -353,7 +356,7 @@ try:
         elif con_command == "virustotal":
             # if there is no key quit
             try:
-                directory = f"{homeD}/{username}/sc0pe_Base/sc0pe_VT_apikey.txt"
+                directory = f"{homeD}{path_seperator}sc0pe_Base{path_seperator}sc0pe_VT_apikey.txt"
                 apik = open(directory, "r").read().split("\n")
             except:
                 print(f"{errorS} Use key_init to enter your key.")
@@ -364,7 +367,7 @@ try:
                 print(f"{errorS} Please get your API key from -> [bold green]https://www.virustotal.com/[white]")
                 sys.exit(1)
             else:
-                command = f"python3 {sc0pe_path}/Modules/VTwrapper.py {apik[0]} {filename}"
+                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}VTwrapper.py {apik[0]} \"{filename}\""
                 os.system(command)
 
         # Wrong command

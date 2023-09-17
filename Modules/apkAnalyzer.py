@@ -19,6 +19,7 @@ except:
 try:
     from rich import print
     from rich.table import Table
+    from rich.progress import track
 except:
     print("Error: >rich< module not found.")
     sys.exit(1)
@@ -33,12 +34,6 @@ try:
     import pyaxmlparser
 except:
     print("Error: >pyaxmlparser< module not found.")
-    sys.exit(1)
-
-try:
-    import yara
-except:
-    print("Error: >yara< module not found.")
     sys.exit(1)
 
 try:
@@ -61,14 +56,24 @@ infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 foundS = f"[bold cyan][[bold red]+[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
+# Compatibility
+homeD = os.path.expanduser("~")
+sc0pe_helper_path = "/usr/lib/python3/dist-packages/sc0pe_helper.py"
+path_seperator = "/"
+setup_scr = "setup.sh"
+if sys.platform == "win32":
+    sc0pe_helper_path = f"{homeD}\\appdata\\local\\programs\\python\\python310\\lib\\site-packages\\sc0pe_helper.py"
+    path_seperator = "\\"
+    setup_scr = "setup.ps1"
+
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 # Using helper library
-if os.path.exists("/usr/lib/python3/dist-packages/sc0pe_helper.py"):
+if os.path.exists(sc0pe_helper_path):
     from sc0pe_helper import Sc0peHelper
     sc0pehelper = Sc0peHelper(sc0pe_path)
 else:
-    print(f"{errorS} [bold green]sc0pe_helper[white] library not installed. You need to execute [bold green]setup.sh[white] script!")
+    print(f"{errorS} [bold green]sc0pe_helper[white] library not installed. You need to execute [bold green]{setup_scr}[white] script!")
     sys.exit(1)
 
 # necessary variables
@@ -97,7 +102,7 @@ dformat = today.strftime("%d-%m-%Y")
 username = getpass.getuser()
 
 # Gathering code patterns
-pattern_file = json.load(open(f"{sc0pe_path}/Systems/Android/detections.json"))
+pattern_file = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Android{path_seperator}detections.json"))
 
 # Creating report structure
 reportz = {
@@ -124,23 +129,24 @@ def MultiYaraScanner(targetAPK):
     lib_files_indicator = 0
     # Configurating decompiler...
     conf = configparser.ConfigParser()
-    conf.read(f"{sc0pe_path}/Systems/Android/libScanner.conf")
+    conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Android{path_seperator}libScanner.conf")
     decompiler_path = conf["Decompiler"]["decompiler"]
 
     # Check if the decompiler exist on system
     if os.path.exists(decompiler_path):
         # Executing decompiler...
         print(f"{infoS} Decompiling target APK file...")
-        os.system(f"{decompiler_path} -q -d TargetAPK {targetAPK}")
+        full_path_file = r"{}".format(os.path.abspath(targetAPK))
+        os.system(f"{decompiler_path} -q -d TargetAPK \"{full_path_file}\"")
 
         # Scan for library files and analyze them
-        path = "TargetAPK/resources/"
+        path = f"TargetAPK{path_seperator}resources{path_seperator}"
         fnames = sc0pehelper.recursive_dir_scan(path)
         if fnames != []:
             for extens in fnames:
                 if os.path.splitext(extens)[1] == ".so":
                     lib_files_indicator += 1
-                    sc0pehelper.yara_rule_scanner("android", extens, config_path=f"{sc0pe_path}/Systems/Android/libScanner.conf", report_object=reportz)
+                    sc0pehelper.yara_rule_scanner("android", extens, config_path=f"{sc0pe_path}{path_seperator}Systems{path_seperator}Android{path_seperator}libScanner.conf", report_object=reportz)
 
         if lib_files_indicator == 0:
             print("\n[bold white on red]There is no library files found for analysis!\n")
@@ -172,36 +178,50 @@ def PrintCategs():
     # Print statistics table
     print(statTable)
 
-# Source code analysis TODO: look for better algorithm!!
+# Source code analysis
 def ScanSource(targetAPK):
     # Parsing main activity
     fhandler = pyaxmlparser.APK(targetAPK)
     parsed_package = fhandler.get_package().split(".")
 
     # Check for decompiled source
-    if os.path.exists("TargetAPK/"):
-        path = "TargetAPK/sources/"
+    if os.path.exists(f"TargetAPK{path_seperator}"):
+        path = f"TargetAPK{path_seperator}sources{path_seperator}"
         fnames = sc0pehelper.recursive_dir_scan(path)
         if fnames != []:
             question = input(f"{infoC} Do you want to analyze all packages [Y/n]?: ")
-            for sources in fnames:
-                for index in range(0, len(pattern_file)):
-                    for elem in pattern_file[index]:
-                        for item in pattern_file[index][elem]:
-                            regx = re.findall(item, open(sources, "r").read())
-                            if question == "Y" or question == "y":
-                                if regx != [] and '' not in regx:
-                                    categs[elem].append([str(item), sources.replace('TargetAPK/sources/', '')])
-                            else:
-                                if regx != [] and '' not in regx and parsed_package[1] in sources.replace('TargetAPK/sources/', ''):
-                                    categs[elem].append([str(item), sources.replace('TargetAPK/sources/', '')])
-                                
+            print(f"{infoS} Preparing source files...")
+            target_source_files = []
+            for sources in track(range(len(fnames)), description="Processing files..."):
+                if question == "Y" or question == "y" or question == "yes" or question == "Yes":
+                    target_source_files.append(fnames[sources].replace(f'TargetAPK{path_seperator}sources{path_seperator}', ''))
+                else:
+                    if parsed_package[-1] in fnames[sources].replace(f'TargetAPK{path_seperator}sources{path_seperator}', ''):
+                        target_source_files.append(fnames[sources].replace(f'TargetAPK{path_seperator}sources{path_seperator}', ''))
+
+            if target_source_files != [] and len(target_source_files) > 1:
+                print(f"\n{infoS} Analyzing source codes. Please wait...")
+                for scode in track(range(len(target_source_files)), description="Analyzing..."):
+                    try:
+                        scode_buffer = open(f"TargetAPK{path_seperator}sources{path_seperator}{target_source_files[scode]}", "r").read()
+                        for code_key in pattern_file:
+                            for code_val in pattern_file[code_key]["patterns"]:
+                                try:
+                                    regx = re.findall(code_val, scode_buffer)
+                                    if regx != [] and '' not in regx:
+                                        categs[code_key].append([str(code_val), target_source_files[scode]])
+                                except:
+                                    continue
+                    except:
+                        continue
+                # Printing report
+                PrintCategs()
+            else:
+                print(f"\n{errorS} Looks like there is nothing to scan or maybe there is an [bold green]Anti-Analysis[white] technique implemented!")
+                print(f"{infoS} You need to select \"[bold green]yes[white]\" option in [bold yellow]Analyze All Packages[white]")
     else:
         print("[bold white on red]Couldn\'t locate source codes. Did target file decompiled correctly?")
-        print(">>>[bold yellow] Hint: [white]Don\'t forget to specify decompiler path in [bold green]Systems/Android/libScanner.conf")
-
-    # Printing report
-    PrintCategs()
+        print(f">>>[bold yellow] Hint: [white]Don\'t forget to specify decompiler path in [bold green]Systems{path_seperator}Android{path_seperator}libScanner.conf")
 
 # Following function will perform JAR file analysis
 def PerformJAR(targetAPK):
@@ -214,37 +234,48 @@ def PerformJAR(targetAPK):
         if chek != []:
             # Configurating decompiler...
             conf = configparser.ConfigParser()
-            conf.read(f"{sc0pe_path}/Systems/Android/libScanner.conf")
+            conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Android{path_seperator}libScanner.conf")
             decompiler_path = conf["Decompiler"]["decompiler"]
 
             # Check if the decompiler exist on system
             if os.path.exists(decompiler_path):
                 # Executing decompiler...
                 print(f"{infoS} Decompiling target file...")
-                os.system(f"{decompiler_path} -q -d TargetSource {targetAPK}")
+                full_path_file = r"{}".format(os.path.abspath(targetAPK))
+                os.system(f"{decompiler_path} -q -d TargetSource \"{full_path_file}\"")
 
                 # If we successfully decompiled the target file
                 if os.path.exists("TargetSource"):
                     # Reading MANIFEST file
                     print(f"\n{infoS} MANIFEST file found. Fetching data...")
-                    data = open("TargetSource/resources/META-INF/MANIFEST.MF").read()
+                    data = open(f"TargetSource{path_seperator}resources{path_seperator}META-INF{path_seperator}MANIFEST.MF").read()
                     print(data)
-                    fnames = sc0pehelper.recursive_dir_scan(target_directory="TargetSource/sources/")
-                    for sources in fnames:
-                        for index in range(0, len(pattern_file)):
-                            for elem in pattern_file[index]:
-                                for item in pattern_file[index][elem]:
-                                    regx = re.findall(item, open(sources, "r").read())
-                                    if regx != [] and '' not in regx:
-                                        sanit1 = sources.replace('TargetSource/sources/', '')
-                                        if "defpackage/" in sanit1:
-                                            sanit2 = sanit1.replace("defpackage/", "")
-                                            categs[elem].append([str(item), sanit2])
-                                        else:
-                                            categs[elem].append([str(item), sanit1])
+                    fnames = sc0pehelper.recursive_dir_scan(target_directory=f"TargetSource{path_seperator}sources{path_seperator}")
+                    print(f"{infoS} Preparing source files...")
+                    target_source_files = []
+                    for sources in track(range(len(fnames)), description="Processing files..."):
+                        target_source_files.append(fnames[sources].replace(f'TargetSource{path_seperator}sources{path_seperator}', ''))
+
+                    print(f"\n{infoS} Analyzing source codes. Please wait...")
+                    for scode in track(range(len(target_source_files)), description="Analyzing..."):
+                        try:
+                            scode_buffer = open(f"TargetSource{path_seperator}sources{path_seperator}{target_source_files[scode]}", "r").read()
+                            for code_key in pattern_file:
+                                for code_val in pattern_file[code_key]["patterns"]:
+                                    try:
+                                        regx = re.findall(code_val, scode_buffer)
+                                        if regx != [] and '' not in regx:
+                                            if f"defpackage{path_seperator}" in target_source_files[scode]:
+                                                categs[code_key].append([str(code_val), target_source_files[scode].replace(f"defpackage{path_seperator}", "")])
+                                            else:
+                                                categs[code_key].append([str(code_val), target_source_files[scode]])
+                                    except:
+                                        continue
+                        except:
+                            continue
                 else:
                     print("[bold white on red]Couldn\'t locate source codes. Did target file decompiled correctly?")
-                    print(">>>[bold yellow] Hint: [white]Don\'t forget to specify decompiler path in [bold green]Systems/Android/libScanner.conf")
+                    print(f">>>[bold yellow] Hint: [white]Don\'t forget to specify decompiler path in [bold green]Systems{path_seperator}Android{path_seperator}libScanner.conf")
 
             # Print area
             PrintCategs()
@@ -304,7 +335,7 @@ def Analyzer(parsed):
     statistics.add_column("[bold green]State", justify="center")
 
     # Getting blacklisted permissions
-    with open(f"{sc0pe_path}/Systems/Android/perms.json", "r") as f:
+    with open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Android{path_seperator}perms.json", "r") as f:
         permissions = json.load(f)
 
     apkPerms = parsed.get_permissions()
@@ -443,7 +474,7 @@ def GeneralInformation(targetAPK):
 if __name__ == '__main__':
     try:
         # Getting target APK
-        targetAPK = str(sys.argv[1])
+        targetAPK = sys.argv[1]
 
         # Check for JAR file
         if sys.argv[3] == "JAR":
@@ -464,7 +495,7 @@ if __name__ == '__main__':
 
         # Yara matches
         print(f"\n{infoS} Performing YARA rule matching...")
-        sc0pehelper.yara_rule_scanner("android", targetAPK, config_path=f"{sc0pe_path}/Systems/Android/libScanner.conf", report_object=reportz)
+        sc0pehelper.yara_rule_scanner("android", targetAPK, config_path=f"{sc0pe_path}{path_seperator}Systems{path_seperator}Android{path_seperator}libScanner.conf", report_object=reportz)
 
         # Decompiling and scanning libraries
         print(f"\n{infoS} Performing library analysis...")
@@ -472,11 +503,11 @@ if __name__ == '__main__':
             MultiYaraScanner(targetAPK)
         except:
             print("\n[bold white on red]An error occured while decompiling the file. Please check configuration file and modify the [blink]Decompiler[/blink] option.")
-            print(f"[bold white]>>> Configuration file path: [bold green]{sc0pe_path}/Systems/Android/libScanner.conf")
+            print(f"[bold white]>>> Configuration file path: [bold green]{sc0pe_path}{path_seperator}Systems{path_seperator}Android{path_seperator}libScanner.conf")
 
         # Malware family detection
         print(f"\n{infoS} Performing malware family detection. Please wait!!")
-        command = f"python3 {sc0pe_path}/Modules/andro_familydetect.py {targetAPK}"
+        command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}andro_familydetect.py \"{targetAPK}\""
         os.system(command)
 
         # Source code analysis zone

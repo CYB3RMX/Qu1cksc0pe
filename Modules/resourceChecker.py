@@ -46,7 +46,7 @@ infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # Configurating strings parameter
-if sys.platform == "darwin":
+if sys.platform == "darwin" or sys.platform == "win32":
     strings_param = "-a"
 else:
     strings_param = "--all"
@@ -698,7 +698,8 @@ if os.path.isfile(targFile):
         resource_scan.android_resource_scanner()
     elif ostype == "file_windows":
         resource_scan.windows_resource_scanner_strings_method(strings_type="normal")
-        resource_scan.windows_resource_scanner_strings_method(strings_type="16-bit")
+        if sys.platform != "win32":
+            resource_scan.windows_resource_scanner_strings_method(strings_type="16-bit")
         resource_scan.windows_resource_scanner_split_data_carver_method()
         resource_scan.windows_resource_scanner_bitmap_carver_method()
         resource_scan.windows_resource_scanner_locate_encrypted()

@@ -1,6 +1,6 @@
-[
-    {
-        "Banker": [
+{
+    "Banker": {
+        "patterns": [
             "com.paypal.android",
             "com.binance.dev",
             "com.bitfinex.mobileapp",
@@ -143,8 +143,8 @@
             "io.safepal.wallet"
         ]
     },
-    {
-        "SMS Bot": [
+    "SMS Bot": {
+        "patterns": [
             "smsto://",
             "content://sms/inbox",
             "sms_sdk_Q",
@@ -172,15 +172,15 @@
             "getDefaultSmsPackage"
         ]
     },
-    {
-        "Base64": [
+    "Base64": {
+        "patterns": [
             "Base64.decode",
             "Base64.encode",
             "android.util.Base64"
         ]
     },
-    {
-        "VNC Implementation": [
+    "VNC Implementation": {
+        "patterns": [
             "vncConnectReverse",
             "vncGetFramebufferHeight",
             "vncGetFramebufferWidth",
@@ -202,8 +202,8 @@
             "vnc_sound_off"
         ]
     },
-    {
-        "Keylogging": [
+    "Keylogging": {
+        "patterns": [
             "lc.kra.system.keyboard.GlobalKeyboardHook",
             "addKeyListener",
             "GlobalKeyboardHook",
@@ -217,8 +217,8 @@
             "stop_keylogger"
         ]
     },
-    {
-        "Camera": [
+    "Camera": {
+        "patterns": [
             "android.hardware.camera",
             "Camera.getNumberOfCameras",
             "CameraInfo",
@@ -230,8 +230,8 @@
             "android.permission.CAMERA"
         ]
     },
-    {
-        "Phone Calls": [
+    "Phone Calls": {
+        "patterns": [
             "CallsManager",
             "content://call_log/calls",
             "callsList",
@@ -252,8 +252,8 @@
             "CALL_PHONE"
         ]
     },
-    {
-        "Microphone Interaction": [
+    "Microphone Interaction": {
+        "patterns": [
             "android.media.MediaRecorder",
             "MicManager",
             "MediaRecorder recorder;",
@@ -271,8 +271,8 @@
             "android.permission.RECORD_AUDIO"
         ]
     },
-    {
-        "Information Gathering/Stealing": [
+    "Information Gathering/Stealing": {
+        "patterns": [
             "telephonyManager.getNetworkCountryIso",
             "getActiveNetworkInfo",
             "getAllCellInfo",
@@ -309,8 +309,8 @@
             "installed_pkgs"
         ]
     },
-    {
-        "Database": [
+    "Database": {
+        "patterns": [
             "execSQL",
             "android.database.sqlite.SQLiteDatabase",
             "getWritableDatabase",
@@ -328,8 +328,8 @@
             "java.sql.DriverManager"
         ]
     },
-    {
-        "File Operations": [
+    "File Operations": {
+        "patterns": [
             "getFilesDir",
             "getAbsolutePath",
             "java.io.InputStream",
@@ -370,8 +370,8 @@
             "getResourceAsStream"
         ]
     },
-    {
-        "Windows Operations": [
+    "Windows Operations": {
+        "patterns": [
             "com.sun.jna.platform.win32.WinNT",
             "Wow64DisableWow64FsRedirection",
             "com.sun.jna.platform.win32.Kernel32",
@@ -383,8 +383,8 @@
             "WinReg.HKEY_CURRENT_USER"
         ]
     },
-    {
-        "Persistence/Managing": [
+    "Persistence/Managing": {
+        "patterns": [
             "startService",
             "AccessibilityServiceInfo",
             "startForeground",
@@ -411,8 +411,8 @@
             "device_admin_set"
         ]
     },
-    {
-        "Network/Internet": [
+    "Network/Internet": {
+        "patterns": [
             "java.net.URL",
             "java.net.URLConnection",
             "loadUrl",
@@ -473,8 +473,8 @@
             "wifi.scan"
         ]
     },
-    {
-        "SSL Pining/Certificate Handling": [
+    "SSL Pining/Certificate Handling": {
+        "patterns": [
             "CertificateFactory",
             "java.security.cert.X509Certificate",
             "X509Certificate",
@@ -485,8 +485,8 @@
             "TrustManagerFactory"
         ]
     },
-    {
-        "Dynamic Class/Dex Loading": [
+    "Dynamic Class/Dex Loading": {
+        "patterns": [
             "dalvik.system.DexClassLoader",
             "DexClassLoader",
             "loadClass",
@@ -496,15 +496,15 @@
             "System.loadLibrary"
         ]
     },
-    {
-        "Java Reflection": [
+    "Java Reflection": {
+        "patterns": [
             "getDeclaredMethods",
             "java.lang.reflect",
             "Class.forName"
         ]
     },
-    {
-        "Root Detection": [
+    "Root Detection": {
+        "patterns": [
             "{\"/system/xbin/which\", \"su\"}",
             "check_su_binary",
             "\"/data/su_test\"",
@@ -512,8 +512,8 @@
             "\"to shell exec which for find su :\""
         ]
     },
-    {
-        "Cryptography": [
+    "Cryptography": {
+        "patterns": [
             "javax.crypto.Cipher",
             "javax.crypto.KeyGenerator",
             "javax.crypto.SecretKey",
@@ -534,8 +534,8 @@
             "SecureRandom"
         ]
     },
-    {
-        "Command Execution": [
+    "Command Execution": {
+        "patterns": [
             "\"cat /proc/self/cgroup\"",
             "\"sh\"",
             "\"ps\"",
@@ -544,8 +544,8 @@
             "pm install -r"
         ]
     },
-    {
-        "Anti-VM/Anti-Debug": [
+    "Anti-VM/Anti-Debug": {
+        "patterns": [
             "Build.MANUFACTURER",
             "Build.BOARD",
             "Build.MODEL",
@@ -591,8 +591,8 @@
             "isDebuggerConnected"
         ]
     },
-    {
-        "BOT Activity": [
+    "BOT Activity": {
+        "patterns": [
             "kill_bot",
             "getBotState",
             "getBotTitle",
@@ -605,4 +605,4 @@
             "INJECT Package"
         ]
     }
-]
+}

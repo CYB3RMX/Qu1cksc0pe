@@ -23,6 +23,11 @@ except:
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
+# Compatibility
+path_seperator = "/"
+if sys.platform == "win32":
+    path_seperator = "\\"
+
 #--------------------------------------------- Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
@@ -140,13 +145,14 @@ class PcapAnalyzer:
         if valid_offsets != []:
             print(f"{infoS} This PCAP file contains [bold red]{len(valid_offsets)}[white] possible executable files!!")
             print(f"{infoS} Executing [bold green]SignatureAnalyzer[white] for embedded file extraction...")
-            command = f"python3 {sc0pe_path}/Modules/sigChecker.py {self.pcap_file}"
+            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}sigChecker.py \"{self.pcap_file}\""
             os.system(command)
         else:
             print(f"{errorS} There is no executable file pattern found!")
 
 # Execution
-pcap_analyzer = PcapAnalyzer(sys.argv[1])
+target_pcap = sys.argv[1]
+pcap_analyzer = PcapAnalyzer(target_pcap)
 pcap_analyzer.search_urls()
 pcap_analyzer.search_dns_queries()
 pcap_analyzer.find_interesting_stuff()

@@ -59,22 +59,25 @@ username = getpass.getuser() # NOTE: If you run program as sudo your username wi
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
-# User home detection
-homeD = "/home"
-if sys.platform == "darwin":
-    homeD = "/Users"
+# User home detection and compatibility
+homeD = os.path.expanduser("~")
+path_seperator = "/"
+setup_scr = "setup.sh"
+if sys.platform == "win32":
+    path_seperator = "\\"
+    setup_scr = "setup.ps1"
 
 # Directory checking
-if os.path.exists(f"{homeD}/{username}/sc0pe_Base/"):
+if os.path.exists(f"{homeD}{path_seperator}sc0pe_Base"):
     pass
 else:
-    os.system(f"mkdir {homeD}/{username}/sc0pe_Base/")
+    os.system(f"mkdir {homeD}{path_seperator}sc0pe_Base")
 
 # Configurating installation directory
-install_dir = f"{homeD}/{username}/sc0pe_Base"
+install_dir = f"{homeD}{path_seperator}sc0pe_Base"
 
 def Downloader():
-    local_database = f"{install_dir}/HashDB"
+    local_database = f"{install_dir}{path_seperator}HashDB"
     dbUrl = "https://raw.githubusercontent.com/CYB3RMX/MalwareHashDB/main/HashDB"
     req = requests.get(dbUrl, stream=True)
     total_size = int(req.headers.get('content-length', 0))
@@ -92,7 +95,7 @@ def Downloader():
         sys.exit(0)
 
 def DatabaseCheck():
-    if os.path.isfile(f"{install_dir}/HashDB") == False:
+    if os.path.isfile(f"{install_dir}{path_seperator}HashDB") == False:
         print("[blink bold white on red]Local signature database not found!!")
         choose = str(input(f"{green}=>{white} Would you like to download it [Y/n]?: "))
         if choose == "Y" or choose == "y":
@@ -113,8 +116,8 @@ def GetHash(targetFile):
     return hashMd5.hexdigest()
 
 # Accessing hash database content
-if os.path.exists(f"{install_dir}/HashDB"):
-    hashbase = sqlite3.connect(f"{install_dir}/HashDB")
+if os.path.exists(f"{install_dir}{path_seperator}HashDB"):
+    hashbase = sqlite3.connect(f"{install_dir}{path_seperator}HashDB")
     dbcursor = hashbase.cursor()
 else:
     DatabaseCheck()
@@ -137,9 +140,12 @@ def UpToDate():
 # Updating database
 def DatabaseUpdate():
     if os.path.exists(install_dir):
-        if os.path.exists(f"{install_dir}/HashDB"):
+        if os.path.exists(f"{install_dir}{path_seperator}HashDB"):
             print("[bold magenta]>>>[bold white] Removing old database...")
-            os.system(f"rm -rf {install_dir}/HashDB")
+            if sys.platform == "win32":
+                os.system(f"powershell -c \"del {install_dir}{path_seperator}HashDB -Force -Recurse\"")
+            else:
+                os.system(f"rm -rf {install_dir}{path_seperator}HashDB")
             Downloader()
             print("[bold green]>>>[bold white] New database has successfully downloaded.")
         else:
@@ -148,8 +154,8 @@ def DatabaseUpdate():
             print("[bold green]>>>[bold white] New database has successfully downloaded.")
     else:
         print(f"{errorS} Error: [bold green]{install_dir}[white] directory not found!")
-        print(f"[bold magenta]>>>[white] Make sure [bold green]setup.sh[white] script is worked successfully!")
-        print(f"[bold magenta]>>>[white] If you don\'t want to execute [bold green]setup.sh[white] then try this: [bold green]python3 qu1cksc0pe.py --file your_sample --hashscan[white]")
+        print(f"[bold magenta]>>>[white] Make sure [bold green]{setup_scr}[white] script is worked successfully!")
+        print(f"[bold magenta]>>>[white] If you don\'t want to execute [bold green]{setup_scr}[white] then try this: [bold green]python qu1cksc0pe.py --file your_sample --hashscan[white]")
 
 # Handling single scans
 def NormalScan():
@@ -170,7 +176,7 @@ def NormalScan():
     print(f"[bold cyan]>>>[white] Target Hash: [bold green]{targetHash}")
 
     # Finding target hash in the database_content
-    db_answer = dbcursor.execute(f"SELECT * FROM HashDB where hash=\"{targetHash}\"").fetchall()
+    db_answer = dbcursor.execute(f"SELECT * FROM HashDB where hash='{targetHash}'").fetchall()
     if db_answer != []:
         answTable.add_row(f"[bold red]{db_answer[0][0]}", f"[bold red]{db_answer[0][1]}")
         print(answTable)
@@ -286,7 +292,7 @@ def MultipleScan():
                     splitted = os.path.split(scanme)[1]
 
                     # Finding target hash in the database_content
-                    db_answers = dbcursor.execute(f"SELECT * FROM HashDB where hash=\"{targetHash}\"").fetchall()
+                    db_answers = dbcursor.execute(f"SELECT * FROM HashDB where hash='{targetHash}'").fetchall()
                     if db_answers != []:
                         if len(mulansTable.columns[0]._cells) < 11:
                             mulansTable.add_row(f"{splitted}", f"{db_answers[0][0]}", f"{db_answers[0][1]}")
@@ -325,14 +331,11 @@ if __name__ == '__main__':
     if str(sys.argv[1]) == '--db_update':
         DatabaseUpdate()
     else:
-        targetFile = str(sys.argv[1])
+        targetFile = sys.argv[1]
 
-    # Argument side
     if str(sys.argv[2]) == '--normal':
         UpToDate()
         NormalScan()
-    elif str(sys.argv[2]) == '--multiscan':
+    else:
         UpToDate()
         MultipleScan()
-    else:
-        pass

@@ -34,21 +34,30 @@ scoreDict = {
     "Sova": 0
 }
 
+# Compatibility
+homeD = os.path.expanduser("~")
+sc0pe_helper_path = "/usr/lib/python3/dist-packages/sc0pe_helper.py"
+path_seperator = "/"
+setup_scr = "setup.sh"
+if sys.platform == "win32":
+    sc0pe_helper_path = f"{homeD}\\appdata\\local\\programs\\python\\python310\\lib\\site-packages\\sc0pe_helper.py"
+    path_seperator = "\\"
+    setup_scr = "setup.ps1"
+
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
+targetApk = sys.argv[1]
+
 # Using helper library
-if os.path.exists("/usr/lib/python3/dist-packages/sc0pe_helper.py"):
+if os.path.exists(sc0pe_helper_path):
     from sc0pe_helper import Sc0peHelper
     sc0pehelper = Sc0peHelper(sc0pe_path)
 else:
-    print(f"{errorS} [bold green]sc0pe_helper[white] library not installed. You need to execute [bold green]setup.sh[white] script!")
+    print(f"{errorS} [bold green]sc0pe_helper[white] library not installed. You need to execute [bold green]{setup_scr}[white] script!")
     sys.exit(1)
 
 # Gathering data
-fam_data = json.load(open(f"{sc0pe_path}/Systems/Android/family.json"))
-
-# Target APK file
-targetApk = sys.argv[1]
+fam_data = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Android{path_seperator}family.json"))
 
 # Parsing target apk file
 checktarg = pyaxmlparser.APK(targetApk)
@@ -106,7 +115,7 @@ def FluBot():
 # Function for detecting: SpyNote family
 def SpyNote():
     # Checking for file names
-    source_files = sc0pehelper.recursive_dir_scan(target_directory="TargetAPK/sources/")
+    source_files = sc0pehelper.recursive_dir_scan(target_directory=f"TargetAPK{path_seperator}sources{path_seperator}")
     occur1 = re.findall(r"SensorRestarterBroadcastReceiver", str(source_files))
     occur2 = re.findall(r"_ask_remove_", str(source_files))
     occur3 = re.findall(r"SimpleIME", str(source_files))
@@ -123,11 +132,14 @@ def SpyNote():
         "root@": 0
     }
     for ff in source_files:
-        file_buffer = open(ff, "r").read()
-        for pat in patternz:
-            occur = re.findall(pat, file_buffer)
-            if occur != []:
-                patternz[pat] += 1
+        try:
+            file_buffer = open(ff, "r").read()
+            for pat in patternz:
+                occur = re.findall(pat, file_buffer)
+                if occur != []:
+                    patternz[pat] += 1
+        except:
+            continue
 
     # Check for occurences
     occount = 0
@@ -148,7 +160,7 @@ def Sova():
 
     # Checking for existence
     ex_count = 0
-    expected = ["TargetAPK/resources/assets/nointernet.html", "TargetAPK/resources/assets/unique.html"]
+    expected = [f"TargetAPK{path_seperator}resources{path_seperator}assets{path_seperator}nointernet.html", f"TargetAPK{path_seperator}resources{path_seperator}assets{path_seperator}unique.html"]
     for fl in expected:
         if os.path.exists(fl):
             target_hash = GetSHA256(fl)
@@ -193,5 +205,5 @@ def CheckFamily():
         print(f"{errorS} Couldn\'t detect malware family.")
 
 # Execute
-if os.path.exists("TargetAPK/"):
+if os.path.exists("TargetAPK"):
     CheckFamily()

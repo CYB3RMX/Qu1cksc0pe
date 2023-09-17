@@ -11,6 +11,7 @@ import subprocess
 try:
     from rich import print
     from rich.table import Table
+    from rich.progress import track
 except:
     print("Error: >rich< module not found.")
     sys.exit(1)
@@ -36,31 +37,40 @@ except:
     print("Error: >vivisect< module not found.")
     sys.exit(1)
 
-#--------------------------------------------- Getting name of the file for statistics
-fileName = str(sys.argv[1])
-
 #--------------------------------------------- Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
+# Compatibility
+homeD = os.path.expanduser("~")
+sc0pe_helper_path = "/usr/lib/python3/dist-packages/sc0pe_helper.py"
+path_seperator = "/"
+setup_scr = "setup.sh"
+if sys.platform == "win32":
+    sc0pe_helper_path = f"{homeD}\\appdata\\local\\programs\\python\\python310\\lib\\site-packages\\sc0pe_helper.py"
+    path_seperator = "\\"
+    setup_scr = "setup.ps1"
+
 #--------------------------------------------- Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
+fileName = sys.argv[1]
+
 # Using helper library
-if os.path.exists("/usr/lib/python3/dist-packages/sc0pe_helper.py"):
+if os.path.exists(sc0pe_helper_path):
     from sc0pe_helper import Sc0peHelper
     sc0pehelper = Sc0peHelper(sc0pe_path)
 else:
-    print(f"{errorS} [bold green]sc0pe_helper[white] library not installed. You need to execute [bold green]setup.sh[white] script!")
+    print(f"{errorS} [bold green]sc0pe_helper[white] library not installed. You need to execute [bold green]{setup_scr}[white] script!")
     sys.exit(1)
 
 # Loading dnlib.dll
-clr.AddReference(f"{sc0pe_path}/Systems/Windows/dnlib.dll")
+clr.AddReference(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}dnlib.dll")
 from dnlib.DotNet import *
 from System.IO import *
 
 #--------------------------------------------------------------------- Keywords for categorized scanning
-windows_api_list = json.load(open(f"{sc0pe_path}/Systems/Windows/windows_api_categories.json"))
-dotnet_malware_pattern = json.load(open(f"{sc0pe_path}/Systems/Windows/dotnet_malware_patterns.json"))
+windows_api_list = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows_api_categories.json"))
+dotnet_malware_pattern = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}dotnet_malware_patterns.json"))
 
 #--------------------------------------------- Dictionary of Categories
 dictCateg = {
@@ -102,8 +112,8 @@ class WindowsAnalyzer:
         self.allFuncs = 0
         self.windows_imports_and_exports = []
         self.executable_buffer = open(self.target_file, "rb").read()
-        self.all_strings = open(f"{sc0pe_path}/temp.txt", "r").read().split("\n")
-        self.blacklisted_patterns = open(f"{sc0pe_path}/Systems/Windows/dotnet_blacklisted_methods.txt", "r").read().split("\n")
+        self.all_strings = open(f"{sc0pe_path}{path_seperator}temp.txt", "r").read().split("\n")
+        self.blacklisted_patterns = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}dotnet_blacklisted_methods.txt", "r").read().split("\n")
 
         # Check for windows file type
         self.exec_type = subprocess.run(["file", self.target_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -208,7 +218,7 @@ class WindowsAnalyzer:
         spec_table.add_column("[bold green]Artifact Names", justify="center")
         spec_table.add_column("[bold green]Patterns", justify="center")
         spec_table.add_column("[bold green]Occurence", justify="center")
-        special = json.load(open(f"{sc0pe_path}/Systems/Multiple/special_artifact_patterns.json"))
+        special = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}special_artifact_patterns.json"))
         for spec in special:
             for pat in special[spec]["patterns"]:
                 ofs = re.findall(pat.encode(), self.executable_buffer)
@@ -297,7 +307,7 @@ class WindowsAnalyzer:
                 valid_offsets.append(pos.start())
         if valid_offsets != []:
             print(f"{infoS} There is possible [bold red]{len(valid_offsets)}[white] embedded PE file found!")
-            print(f"{infoS} Execute: [bold green]python3 qu1cksc0pe.py --file {fileName} --sigcheck[white] to extract them!\n")
+            print(f"{infoS} Execute: [bold green]python qu1cksc0pe.py --file {fileName} --sigcheck[white] to extract them!\n")
         else:
             print(f"{errorS} There is no embedded PE file!\n")
 
@@ -367,12 +377,12 @@ class WindowsAnalyzer:
 
         # -- Parse functions
         print(f"[bold magenta]>>>[white] Number of functions: [bold green]{len(funcz)}[white]")
-        for fun in funcz:
+        for fun in track(range(len(funcz)), description="Processing..."):
             try:
-                fn_name = viv.getName(fun)
-                fn_size = viv.getCodeBlock(fun)[1]
-                xrf_fr = len(viv.getXrefsFrom(fun))
-                xrf_to = len(viv.getXrefsTo(fun))
+                fn_name = viv.getName(funcz[fun])
+                fn_size = viv.getCodeBlock(funcz[fun])[1]
+                xrf_fr = len(viv.getXrefsFrom(funcz[fun]))
+                xrf_to = len(viv.getXrefsTo(funcz[fun]))
 
                 # -- If we have function size larger than 200 there is must be something!
                 if fn_size >= 200:
@@ -486,7 +496,7 @@ class WindowsAnalyzer:
         self.detect_embedded_PE()
         # Yara rule match
         print(f"\n{infoS} Performing YARA rule matching...")
-        sc0pehelper.yara_rule_scanner("windows", fileName, config_path=f"{sc0pe_path}/Systems/Windows/windows.conf", report_object=winrep)
+        sc0pehelper.yara_rule_scanner("windows", fileName, config_path=f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf", report_object=winrep)
 
     def msi_file_analyzer(self):
         print(f"{infoS} Performing Microsoft Software Installer analysis...\n")
@@ -496,10 +506,10 @@ class WindowsAnalyzer:
         self.detect_embedded_PE()
         # Yara rule match
         print(f"\n{infoS} Performing YARA rule matching...")
-        sc0pehelper.yara_rule_scanner("windows", fileName, config_path=f"{sc0pe_path}/Systems/Windows/windows.conf", report_object=winrep)
+        sc0pehelper.yara_rule_scanner("windows", fileName, config_path=f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf", report_object=winrep)
 
 # Execute
-windows_analyzer = WindowsAnalyzer(target_file=fileName)
+windows_analyzer = WindowsAnalyzer(target_file=str(fileName))
 windows_analyzer.dll_files()
 windows_analyzer.scan_for_special_artifacts()
 windows_analyzer.check_for_valid_registry_keys()
@@ -508,7 +518,7 @@ windows_analyzer.detect_embedded_PE()
 
 # Yara rule match
 print(f"\n{infoS} Performing YARA rule matching...")
-sc0pehelper.yara_rule_scanner("windows", fileName, config_path=f"{sc0pe_path}/Systems/Windows/windows.conf", report_object=winrep)
+sc0pehelper.yara_rule_scanner("windows", fileName, config_path=f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf", report_object=winrep)
 
 windows_analyzer.section_parser()
 windows_analyzer.analyze_via_viv()

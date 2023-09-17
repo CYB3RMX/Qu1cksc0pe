@@ -24,13 +24,18 @@ except:
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
+# Compatibility
+path_seperator = "/"
+if sys.platform == "win32":
+    path_seperator = "\\"
+
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
 class EmailAnalyzer:
     def __init__(self, target_file):
         self.target_file = target_file
-        self.blacklist_domain_list = open(f"{sc0pe_path}/Systems/Multiple/blacklist_domains.txt", "r").read().split("\n")
+        self.blacklist_domain_list = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}blacklist_domains.txt", "r").read().split("\n")
         self.attachments = []
 
     def extract_and_analyze_attachment_file_type(self, message_obj):
@@ -70,19 +75,19 @@ class EmailAnalyzer:
         if "Microsoft Office Word" in parsed_type or "Microsoft Excel" in parsed_type or "PDF" in parsed_type:
             print(f"\n{infoS} Attachment Type: [bold green]Document[white]")
             print(f"{infoS} Executing: [bold green]DocumentAnalyzer[white] against [bold cyan]{target_attach}[white]")
-            command = f"python3 {sc0pe_path}/Modules/document_analyzer.py {target_attach}"
+            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}document_analyzer.py \"{target_attach}\""
             os.system(command)
         # Analyze executable files and anothers
         elif "executable" in parsed_type:
             if "PE" in parsed_type or ".Net" in parsed_type:
                 print(f"\n{infoS} Attachment Type: [bold green]Windows Executable[white]")
                 print(f"{infoS} Executing: [bold green]WindowsAnalyzer[white] against [bold cyan]{target_attach}[white]")
-                command = f"python3 {sc0pe_path}/Modules/winAnalyzer.py {target_attach}"
+                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}winAnalyzer.py \"{target_attach}\""
                 os.system(command)
             elif "ELF" in parsed_type:
                 print(f"\n{infoS} Attachment Type: [bold green]Linux/Unix Executable[white]")
                 print(f"{infoS} Executing: [bold green]LinuxAnalyzer[white] against [bold cyan]{target_attach}[white]")
-                command = f"python3 {sc0pe_path}/Modules/linAnalyzer.py {target_attach}"
+                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}linAnalyzer.py \"{target_attach}\""
                 os.system(command)
             else:
                 print(f"{errorS} Executable type not supported!\n")
@@ -90,11 +95,11 @@ class EmailAnalyzer:
         elif "archive data" in parsed_type:
             print(f"\n{infoS} Attachment Type: [bold green]Archive File[white]")
             print(f"{infoS} Executing: [bold green]ArchiveAnalyzer[white] against [bold cyan]{target_attach}[white]")
-            command = f"python3 {sc0pe_path}/Modules/archiveAnalyzer.py {target_attach}"
+            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}archiveAnalyzer.py \"{target_attach}\""
             os.system(command)
         else:
             print(f"\n{infoS} Executing: [bold green]SignatureAnalyzer[white] against [bold cyan]{target_attach}[white]")
-            command = f"python3 {sc0pe_path}/Modules/sigChecker.py {target_attach}"
+            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}sigChecker.py \"{target_attach}\""
             os.system(command)
 
     def check_blacklist_domain(self, target_email):
@@ -134,10 +139,14 @@ class EmailAnalyzer:
         choice = str(input(">>> Do you want to remove extracted files [y/n]?: "))
         if choice == "Y" or choice == "y":
             for att in self.attachments:
-                os.system(f"rm -rf {sc0pe_path}/{att}")
+                if sys.platform != "win32":
+                    os.system(f"rm -rf {sc0pe_path}{path_seperator}{att}")
+                else:
+                    os.system(f"powershell -c \"del {sc0pe_path}{path_seperator}{att} -Force -Recurse\"")
             print(f"{infoS} Cleaning up...")
 
 # Execution
-em_anl = EmailAnalyzer(target_file=sys.argv[1])
+target_eml = sys.argv[1]
+em_anl = EmailAnalyzer(target_file=target_eml)
 em_anl.email_analyzer_main()
 em_anl.cleanup_junks()

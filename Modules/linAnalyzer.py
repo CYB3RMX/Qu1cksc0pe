@@ -25,19 +25,27 @@ except:
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
+# Compatibility
+homeD = os.path.expanduser("~")
+sc0pe_helper_path = "/usr/lib/python3/dist-packages/sc0pe_helper.py"
+path_seperator = "/"
+setup_scr = "setup.sh"
+if sys.platform == "win32":
+    sc0pe_helper_path = f"{homeD}\\appdata\\local\\programs\\python\\python310\\lib\\site-packages\\sc0pe_helper.py"
+    path_seperator = "\\"
+    setup_scr = "setup.ps1"
+
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
+fileName = sys.argv[1]
 
 # Using helper library
-if os.path.exists("/usr/lib/python3/dist-packages/sc0pe_helper.py"):
+if os.path.exists(sc0pe_helper_path):
     from sc0pe_helper import Sc0peHelper
     sc0pehelper = Sc0peHelper(sc0pe_path)
 else:
-    print(f"{errorS} [bold green]sc0pe_helper[white] library not installed. You need to execute [bold green]setup.sh[white] script!")
+    print(f"{errorS} [bold green]sc0pe_helper[white] library not installed. You need to execute [bold green]{setup_scr}[white] script!")
     sys.exit(1)
-
-# Getting name of the file for statistics
-fileName = str(sys.argv[1])
 
 # Elf parsing
 binary = lief.parse(fileName)
@@ -45,15 +53,15 @@ binary = lief.parse(fileName)
 # Wordlists
 # All strings
 getStrings = open("temp.txt", "r").read().split("\n")
-networkz = open(f"{sc0pe_path}/Systems/Linux/Networking.txt", "r").read().split("\n")
-filez = open(f"{sc0pe_path}/Systems/Linux/Files.txt", "r").read().split("\n")
-procesz = open(f"{sc0pe_path}/Systems/Linux/Processes.txt", "r").read().split("\n")
-memoryz = open(f"{sc0pe_path}/Systems/Linux/Memory.txt", "r").read().split("\n")
-infogaz = open(f"{sc0pe_path}/Systems/Linux/Infoga.txt", "r").read().split("\n")
-persisz = open(f"{sc0pe_path}/Systems/Linux/Persistence.txt", "r").read().split("\n")
-cryptoz = open(f"{sc0pe_path}/Systems/Linux/Crypto.txt", "r").read().split("\n")
-debuggz = open(f"{sc0pe_path}/Systems/Linux/Debug.txt", "r").read().split("\n")
-otherz = open(f"{sc0pe_path}/Systems/Linux/Others.txt", "r").read().split("\n")
+networkz = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}Networking.txt", "r").read().split("\n")
+filez = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}Files.txt", "r").read().split("\n")
+procesz = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}Processes.txt", "r").read().split("\n")
+memoryz = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}Memory.txt", "r").read().split("\n")
+infogaz = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}Infoga.txt", "r").read().split("\n")
+persisz = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}Persistence.txt", "r").read().split("\n")
+cryptoz = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}Crypto.txt", "r").read().split("\n")
+debuggz = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}Debug.txt", "r").read().split("\n")
+otherz = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}Others.txt", "r").read().split("\n")
 
 # Categories
 Networking = []
@@ -331,7 +339,7 @@ def Analyzer():
 
     # Perform YARA scan
     print(f"\n{infoS} Performing YARA rule matching...")
-    sc0pehelper.yara_rule_scanner("linux", fileName, config_path=f"{sc0pe_path}/Systems/Linux/linux.conf", report_object=linrep)
+    sc0pehelper.yara_rule_scanner("linux", fileName, config_path=f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}linux.conf", report_object=linrep)
 
     # Get sections
     SectionParser()
