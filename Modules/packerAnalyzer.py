@@ -23,6 +23,11 @@ except:
     print("Module: >tqdm< not found.")
     sys.exit(1)
 
+# Compatibility
+path_seperator = "/"
+if sys.platform == "win32":
+    path_seperator = "\\"
+
 # Path variable
 sc0pe_path = open(".path_handler", "r").read()
 
@@ -30,12 +35,12 @@ sc0pe_path = open(".path_handler", "r").read()
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 
 # Target file
-targetFile = str(sys.argv[1])
+targetFile = sys.argv[2]
 
 # File signatures
 file_sigs = {'UPX': 'UPX0', 'AsPack': '.aspack', 'ConfuserEx v0.6.0': 'ConfuserEx v0.6.0',
             'UPX!': 'UPX!', 'Confuser v1.9.0.0': 'Confuser v1.9.0.0', 'PEtite': 'petite',
-            'MEW': 'MEW', 'MPRESS_1': 'MPRESS1', 'MPRESS_2': 'MPRESS2H'}
+            'MPRESS_1': 'MPRESS1', 'MPRESS_2': 'MPRESS2H'}
 
 # YARA rule based scanner
 def YaraBased(target_file):
@@ -43,13 +48,13 @@ def YaraBased(target_file):
     yara_match_indicator = 0
 
     # Gathering all rules
-    allRules = os.listdir(f"{sc0pe_path}/Systems/Multiple/Packer_Rules/")
+    allRules = os.listdir(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}Packer_Rules{path_seperator}")
 
     # Parsing rule matches
     yara_matches = []
     for rul in allRules:
         try:
-            rules = yara.compile(f"{sc0pe_path}/Systems/Multiple/Packer_Rules/{rul}")
+            rules = yara.compile(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}Packer_Rules{path_seperator}{rul}")
             tempmatch = rules.match(target_file)
             if tempmatch != []:
                 for matched in tempmatch:
@@ -128,7 +133,7 @@ def MultiAnalyzer():
         print("[bold red]>>>[white] Qu1cksc0pe scans everything under that folder for malicious things. [bold][blink]Please wait...[/blink]")
         for tf in tqdm(range(0, filNum), desc="Scanning..."):
             if allFiles[tf] != '':
-                scanme = f"{targetFile}/{allFiles[tf]}"
+                scanme = f"{targetFile}{path_seperator}{allFiles[tf]}"
                 try:
                     if os.path.isfile(scanme) == True:
                         mulData = open(scanme, "rb").read()
@@ -152,17 +157,15 @@ def MultiAnalyzer():
 
 # Execute and clean up
 if __name__ == '__main__':
-    if str(sys.argv[2]) == '--single':
+    if str(sys.argv[1]) == '--single':
         try:
             Analyzer()
         except:
             print("\n[bold white on red]Program terminated!\n")
-
-    elif str(sys.argv[2]) == '--multiscan':
+    elif str(sys.argv[1]) == '--multiscan':
         try:
             MultiAnalyzer()
         except:
             print("\n[bold white on red]Program terminated!\n")
-
     else:
         pass

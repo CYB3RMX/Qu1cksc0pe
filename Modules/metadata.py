@@ -17,6 +17,12 @@ except:
 
 # Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
+errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
+
+# Check for operating system
+if sys.platform == "win32":
+    print(f"{errorS} This feature is not suitable for Windows systems for now!")
+    sys.exit(1)
 
 def GetExif(mfile):
     print(f"{infoS} Extracting metadata from target file...\n")

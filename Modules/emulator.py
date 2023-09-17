@@ -48,7 +48,12 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 
 # Target file
-targetFile = str(sys.argv[1])
+targetFile = sys.argv[1]
+
+# Compatibility
+path_seperator = "/"
+if sys.platform == "win32":
+    path_seperator = "\\"
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
@@ -70,7 +75,7 @@ class DynamicAnalyzer:
             return "Unsupported OS"
 
     def env_downloader(self, target_os, target_arch):
-        local_database = f"{sc0pe_path}/Systems/{target_os}/{target_arch}_{target_os.lower()}.tar.gz"
+        local_database = f"{sc0pe_path}{path_seperator}Systems{path_seperator}{target_os}{path_seperator}{target_arch}_{target_os.lower()}.tar.gz"
         dbUrl = f"https://media.githubusercontent.com/media/CYB3RMX/Emu-RootFS/main/{target_os}/{target_arch}_{target_os.lower()}.tar.gz"
         req = requests.get(dbUrl, stream=True)
         total_size = int(req.headers.get('content-length', 0))
@@ -87,17 +92,17 @@ class DynamicAnalyzer:
 
     def archive_extractor(self, archive_file, target_os):
         print(f"{infoS} Extracting rootfs archive...")
-        os.chdir(f"{sc0pe_path}/Systems/{target_os}/")
-        cmd = ["tar", "-xzf", f"{sc0pe_path}/Systems/{target_os}/{archive_file}"]
+        os.chdir(f"{sc0pe_path}{path_seperator}Systems{path_seperator}{target_os}{path_seperator}")
+        cmd = ["tar", "-xzf", f"{sc0pe_path}{path_seperator}Systems{path_seperator}{target_os}{path_seperator}{archive_file}"]
         cmdl = Popen(cmd, stdout=PIPE, stderr=PIPE)
         cmdl.wait()
-        os.remove(f"{sc0pe_path}/Systems/{target_os}/{archive_file}")
+        os.remove(f"{sc0pe_path}{path_seperator}Systems{path_seperator}{target_os}{path_seperator}{archive_file}")
         print(f"{infoS} Rootfs archive extracted.")
 
     def init_qiling(self, target_file, target_os, target_arch):
         print(f"{infoS} Emulating {target_arch} {target_os}...")
         print(f"\n{infoS} Preparing emulator...")
-        ql = Qiling([target_file], f"{sc0pe_path}/Systems/{target_os}/{target_arch}_{target_os.lower()}/")
+        ql = Qiling([target_file], f"{sc0pe_path}{path_seperator}Systems{path_seperator}{target_os}{path_seperator}{target_arch}_{target_os.lower()}{path_seperator}")
         print(f"\n{infoS} Executing emulator...")
         time.sleep(2)
         ql.run()
@@ -116,7 +121,7 @@ class DynamicAnalyzer:
             if hex(pe.FILE_HEADER.Machine) == "0x14c":
                 try:
                     print(f"{infoS} Detected [bold green]x86[white] architecture...")
-                    if os.path.exists(f"{sc0pe_path}/Systems/Windows/x86_windows/"):
+                    if os.path.exists(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}x86_windows{path_seperator}"):
                         self.init_qiling(targetFile, "Windows", "x86")
                     else:
                         print(f"\n{errorS} x86 Windows rootfs not found.")
@@ -131,7 +136,7 @@ class DynamicAnalyzer:
             elif hex(pe.FILE_HEADER.Machine) == "0x8664":
                 try:
                     print(f"{infoS} Detected [bold green]x64[white] architecture...")
-                    if os.path.exists(f"{sc0pe_path}/Systems/Windows/x8664_windows/"):
+                    if os.path.exists(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}x8664_windows{path_seperator}"):
                         self.init_qiling(targetFile, "Windows", "x8664")
                     else:
                         print(f"{errorS} x64 Windows rootfs not found.")
@@ -151,7 +156,7 @@ class DynamicAnalyzer:
             if ll.header.machine_type.name == "x86_64":
                 try:
                     print(f"{infoS} Detected [bold green]x86_64[white] architecture...")
-                    if os.path.exists(f"{sc0pe_path}/Systems/Linux/x8664_linux/"):
+                    if os.path.exists(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}x8664_linux{path_seperator}"):
                         self.init_qiling(targetFile, "Linux", "x8664")
                     else:
                         print(f"\n{errorS} x86_64 Linux rootfs not found.")
@@ -163,7 +168,7 @@ class DynamicAnalyzer:
                     sys.exit(1)
         # ------Android emulation side-------
         elif target_os == "Android":
-            command = f"python3 {sc0pe_path}/Modules/android_dynamic_analyzer.py {targetFile}"
+            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}android_dynamic_analyzer.py \"{targetFile}\""
             os.system(command)
         else:
             print(f"{errorS} Unsupported OS.")

@@ -43,6 +43,11 @@ infoC = f"{cyan}[{red}*{cyan}]{white}"
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
+# Compatibility
+path_seperator = "/"
+if sys.platform == "win32":
+    path_seperator = "\\"
+
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
@@ -85,7 +90,7 @@ class SignatureChecker:
         print(f"\n{infoS} Performing magic number analysis...")
 
         # Get file signatures
-        fsigs = json.load(open(f"{sc0pe_path}/Systems/Multiple/file_sigs.json"))
+        fsigs = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}file_sigs.json"))
 
         # Create tables
         sigTable = Table()
@@ -195,6 +200,8 @@ class SignatureChecker:
                         pfile.close()
                     except:
                         continue
+            else:
+                print(f"\n{errorS} There is nothing found to extract!\n")
         target.close()
         sys.exit(0)
 
@@ -214,6 +221,7 @@ class SignatureChecker:
                 print(f"[bold magenta]>>>[white] Data saved into: [bold green]sc0pe_carved_ELF-{hex(ofs)}.bin")
 
 # Execution
-sig_check = SignatureChecker(target_file=sys.argv[1])
+target_file = sys.argv[1]
+sig_check = SignatureChecker(target_file=target_file)
 sig_check.signature_checker()
 sig_check.search_possible_corrupt_mz_headers()

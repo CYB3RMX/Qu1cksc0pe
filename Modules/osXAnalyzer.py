@@ -9,22 +9,25 @@ except:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
-# Getting filename for statistics
-fileName = str(sys.argv[1])
+# Compatibility
+path_seperator = "/"
+if sys.platform == "win32":
+    path_seperator = "\\"
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
+fileName = sys.argv[1]
 
 # Keywords ;)
 allStrings = open("temp.txt", "r").read().split('\n')
-loadCommands = open(f"{sc0pe_path}/Systems/OSX/LoadCommands.txt", "r").read().split('\n')
-fileHeaders = open(f"{sc0pe_path}/Systems/OSX/Headers.txt", "r").read().split('\n')
-sharedLibs = open(f"{sc0pe_path}/Systems/OSX/SharedLibs.txt", "r").read().split('\n')
-memoryz = open(f"{sc0pe_path}/Systems/OSX/Memory.txt", "r").read().split('\n')
-procesz = open(f"{sc0pe_path}/Systems/OSX/Process.txt", "r").read().split('\n')
-infogaz = open(f"{sc0pe_path}/Systems/OSX/Infoga.txt", "r").read().split('\n')
-cryptoz = open(f"{sc0pe_path}/Systems/OSX/Cryptography.txt", "r").read().split('\n')
-otherz = open(f"{sc0pe_path}/Systems/OSX/Other.txt", "r").read().split('\n')
+loadCommands = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}OSX{path_seperator}LoadCommands.txt", "r").read().split('\n')
+fileHeaders = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}OSX{path_seperator}Headers.txt", "r").read().split('\n')
+sharedLibs = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}OSX{path_seperator}SharedLibs.txt", "r").read().split('\n')
+memoryz = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}OSX{path_seperator}Memory.txt", "r").read().split('\n')
+procesz = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}OSX{path_seperator}Process.txt", "r").read().split('\n')
+infogaz = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}OSX{path_seperator}Infoga.txt", "r").read().split('\n')
+cryptoz = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}OSX{path_seperator}Cryptography.txt", "r").read().split('\n')
+otherz = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}OSX{path_seperator}Other.txt", "r").read().split('\n')
 
 # Arrayz
 lCommands = []

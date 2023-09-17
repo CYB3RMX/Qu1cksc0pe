@@ -23,7 +23,12 @@ infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # Specify target binary
-fileName = str(sys.argv[1])
+fileName = sys.argv[1]
+
+# Compatibility
+path_seperator = "/"
+if sys.platform == "win32":
+    path_seperator = "\\"
 
 #--------------------------------------------- Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
@@ -32,8 +37,9 @@ class MitreAnalyzer:
     def __init__(self, target_file):
         self.target_file = target_file
         self.all_strings = []
-        self.mitre_data_windows = json.load(open(f"{sc0pe_path}/Systems/Windows/mitre_for_windows.json"))
-        self.windows_api_list = json.load(open(f"{sc0pe_path}/Systems/Windows/windows_api_categories.json"))
+        self.find_bytes = 0
+        self.mitre_data_windows = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}mitre_for_windows.json"))
+        self.windows_api_list = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows_api_categories.json"))
         self.table_contents = {
             "Discovery": [],
             "Privilege Escalation": [],
@@ -58,8 +64,12 @@ class MitreAnalyzer:
             for api in mitre_data[key]:
                 for funcs in mitre_data[key][api]:
                     for af in mitre_data[key][api]["api_list"]:
-                        if af in self.all_strings:
-                            mitre_data[key][api]["score"] += 1
+                        if self.find_bytes != 0:
+                            if af.encode() in self.all_strings:
+                                mitre_data[key][api]["score"] += 1
+                        else:
+                            if af in self.all_strings:
+                                mitre_data[key][api]["score"] += 1
 
         # Parse table contents
         for key in mitre_data:
@@ -81,7 +91,6 @@ class MitreAnalyzer:
                 tech_count += 1
         if tech_count == 0:
             print(f"{errorS} There is no technique detected!")
-
 
     def extract_windows_api_imports_exports(self):
         print(f"{infoS} Performing Windows API import/export extraction. Please wait...")
@@ -111,6 +120,7 @@ class MitreAnalyzer:
                         if matcher != []:
                             if matcher[0] not in self.all_strings:
                                 self.all_strings.append(matcher[0])
+                                self.find_bytes += 1
                     except:
                         continue
 

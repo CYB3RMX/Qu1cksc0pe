@@ -60,7 +60,12 @@ infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # Target file
-targetFile = str(sys.argv[1])
+targetFile = sys.argv[1]
+
+# Compatibility
+path_seperator = "/"
+if sys.platform == "win32":
+    path_seperator = "\\"
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
@@ -71,14 +76,14 @@ allstr = open("temp.txt", "r").read()
 class DocumentAnalyzer:
     def __init__(self, targetFile):
         self.targetFile = targetFile
-        self.file_sigs = json.load(open(f"{sc0pe_path}/Systems/Multiple/file_sigs.json"))
+        self.file_sigs = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}file_sigs.json"))
         self.base64_pattern = r'(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})'
-        self.mal_code = json.load(open(f"{sc0pe_path}/Systems/Multiple/malicious_html_codes.json"))
+        self.mal_code = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}malicious_html_codes.json"))
 
     # Checking for file extension
     def CheckExt(self):
         doc_type = subprocess.run(["file", self.targetFile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if "Microsoft Word" in doc_type.stdout.decode() or "Microsoft Excel" in doc_type.stdout.decode():
+        if "Microsoft Word" in doc_type.stdout.decode() or "Microsoft Excel" in doc_type.stdout.decode() or "Microsoft Office Word" in doc_type.stdout.decode():
             return "docscan"
         elif "PDF document" in doc_type.stdout.decode():
             return "pdfscan"
@@ -94,9 +99,9 @@ class DocumentAnalyzer:
         yara_match_indicator = 0
         # Parsing config file to get rule path
         conf = configparser.ConfigParser()
-        conf.read(f"{sc0pe_path}/Systems/Multiple/multiple.conf")
+        conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}multiple.conf")
         rule_path = conf["Rule_PATH"]["rulepath"]
-        finalpath = f"{sc0pe_path}/{rule_path}"
+        finalpath = f"{sc0pe_path}{path_seperator}{rule_path}"
         allRules = os.listdir(finalpath)
 
         # This array for holding and parsing easily matched rules

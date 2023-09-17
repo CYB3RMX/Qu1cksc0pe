@@ -34,13 +34,17 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps us
 
 # Usage
 ```bash
-python3 qu1cksc0pe.py --file suspicious_file --analyze
+python qu1cksc0pe.py --file suspicious_file --analyze
 ```
 
 # Screenshot
-![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/857571bb-57bd-44fd-9bcd-c247922e1ba4)
+![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/14839679-5751-4f8a-81e0-34c96c607842)
 
 # Updates
+<b>17/09/2023</b>
+- [X] Compatibility has been added for Windows. Qu1cksc0pe can now run on Windows 10 or 11!
+- [x] Lots of improvements and bug fixes.
+
 <b>01/09/2023</b>
 - [X] ```Android Dynamic Analyzer``` module is significantly upgraded.
 
@@ -70,8 +74,9 @@ https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/3251dc28-7c97-4a82-aa6b-a9
 # Recommended Systems
 - [X] Parrot OS
 - [X] Kali Linux
+- [X] Windows 10 or 11
 
-<br><b><i>And similar Linux distributions...</i></b>
+<br><b><i>And also another Linux distributions like as Kali/Parrot</i></b>
 
 # Setup and Installation
 <br><b>Necessary Dependencies</b>:
@@ -88,18 +93,21 @@ bash setup.sh
 
 # If you want to install Qu1cksc0pe on your system just execute the following commands.
 bash setup.sh
-sudo python3 qu1cksc0pe.py --install
+sudo python qu1cksc0pe.py --install
 
 # Or you can use Qu1cksc0pe from Docker!
 docker build qu1cksc0pe .
 docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_file --analyze
+
+# For Windows systems you need to execute the following command (Powershell)
+# PS C:\Users\user\Desktop\Qu1cksc0pe> .\setup.ps1
 ```
 
 # Static Analysis
 ## Normal analysis
 <i><b>Description</b>: You can perform basic analysis and triage against your samples.</i>
 
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --analyze```<br>
+<b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_file --analyze```<br>
 ![windows_analyze](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/bd6945b6-5198-42fb-adff-2118a596bf58)
 
 ## Resource analysis
@@ -109,13 +117,13 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 - .NET Executables
 - Android Files (.apk)
 
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --resource```<br>
+<b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_file --resource```<br>
 ![resource](https://user-images.githubusercontent.com/42123683/189416431-de08337f-8d46-4c9c-a635-59a5faca28ff.gif)
 
 ## Hash scan
 <i><b>Description</b>: You can check if hash value of the given file is in built-in malware hash database. Also you can scan your directories with this feature.</i>
 
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --hashscan```<br>
+<b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_file --hashscan```<br>
 ![hash](https://user-images.githubusercontent.com/42123683/189416516-8268817c-f186-4ee9-971e-adcccfcb45eb.gif)
 
 ## Folder scan
@@ -123,7 +131,7 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 - ```--hashscan```
 - ```--packer```
 
-<b>Usage</b>: ```python3 qu1cksc0pe.py --folder FOLDER --hashscan```<br>
+<b>Usage</b>: ```python qu1cksc0pe.py --folder FOLDER --hashscan```<br>
 ![hashscan_tui](https://user-images.githubusercontent.com/42123683/189416636-494f8d0b-4692-4b81-b133-8bd5eb0f5683.gif)
 
 ## VirusTotal
@@ -132,7 +140,7 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 - ```Detections```
 - ```CrowdSourced IDS Reports```
 
-<b>Usage for --vtFile</b>: ```python3 qu1cksc0pe.py --file suspicious_file --vtFile```<br>
+<b>Usage for --vtFile</b>: ```python qu1cksc0pe.py --file suspicious_file --vtFile```<br>
 ![total](https://user-images.githubusercontent.com/42123683/189416676-06216d52-4882-492d-9ee4-4ff7c04b6358.gif)
 
 ## Document scan
@@ -145,7 +153,7 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 - OneNote Documents (.one)
 - HTML Documents (.htm, .html)
 
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_document --docs```<br>
+<b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_document --docs```<br>
 ![docs](https://user-images.githubusercontent.com/42123683/189416778-f7f93d49-7ff0-4eb5-9898-53e63e5833a1.gif)
 
 ### Embedded File/Exploit Extraction
@@ -159,13 +167,13 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 - RAR 
 - ACE
  
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_archive_file --archive```
+<b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_archive_file --archive```
 ![archiveanalysis](https://user-images.githubusercontent.com/42123683/230241452-0d93d2ca-69a2-42d9-aa99-c9c7cfe637bf.gif)
 
 ## File signature analyzer
 <i><b>Description</b>: With this feature you can detect and extract embedded executable files(.exe, .elf) from given file. Also you can analyze large files (even 1gb or higher) and extract actual malware samples from them (pumped-file analysis).</i>
 
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --sigcheck```<br>
+<b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_file --sigcheck```<br>
 ![sigcheck](https://user-images.githubusercontent.com/42123683/189416864-0e3e3be0-a7bf-4d35-bd9d-403afc38bb96.gif)
 
 ### File Carving
@@ -177,19 +185,19 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 <b>Effective Against</b>:
 - Windows Executables
 
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --mitre```<br>
+<b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_file --mitre```<br>
 ![mitre](https://user-images.githubusercontent.com/42123683/189416941-46e8be6b-2eec-4145-b0b8-b0da78d6611e.gif)
 
 ## Programming language detection
 <i><b>Description</b>: You can get programming language information from given file.</i>
 
-<b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_executable --lang```<br>
+<b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_executable --lang```<br>
 ![langdetect](https://user-images.githubusercontent.com/42123683/228696312-1362cc48-f978-40c9-a0f0-22a216b83f6f.gif)
 
 ## Interactive shell
 <i><b>Description</b>: You can use Qu1cksc0pe in command line mode.</i>
 
-<b>Usage</b>: ```python3 qu1cksc0pe.py --console```<br>
+<b>Usage</b>: ```python qu1cksc0pe.py --console```<br>
 ![console](https://user-images.githubusercontent.com/42123683/189417009-dec6a91b-228c-4c7e-9579-66c4aa9f4036.gif)
 
 # Dynamic Analysis
@@ -197,7 +205,7 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 **Alert**
 > **You must connect a virtual device or physical device to your computer.**
 
-<br><b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious.apk --watch```<br>
+<br><b>Usage</b>: ```python qu1cksc0pe.py --file suspicious.apk --watch```<br>
 
 https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/3251dc28-7c97-4a82-aa6b-a981fb6da13e
 
@@ -205,7 +213,7 @@ https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/3251dc28-7c97-4a82-aa6b-a9
 **Alert**
 > **Binary emulator is not recommended for .NET analysis.**
 
-<br><b>Usage</b>: ```python3 qu1cksc0pe.py --file suspicious_file --watch```<br>
+<br><b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_file --watch```<br>
 ![animation](.animations/emulate.gif)
 
 # References
@@ -219,3 +227,4 @@ https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/3251dc28-7c97-4a82-aa6b-a9
 - <a href="https://twitter.com/hack_git/status/1666867995036057602">HackGit - Twitter Post</a>
 - <a href="https://twitter.com/DailyDarkWeb/status/1668966526358286336">Daily Dark Web - Twitter Post</a>
 - <a href="https://isc.sans.edu/diary/The+Importance+of+Malware+Triage/29984">SANS ISC - Blog Post</a>
+- <a href="https://korben.info/qu1cksc0pe-analyse-logiciels-malveillants.html">Korben - Blog Post</a>

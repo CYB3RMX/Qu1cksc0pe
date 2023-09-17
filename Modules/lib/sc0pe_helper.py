@@ -13,6 +13,11 @@ infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 foundS = f"[bold cyan][[bold red]+[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
+# Make compatibility
+path_seperator = "/"
+if sys.platform == "win32":
+    path_seperator = "\\"
+
 class Sc0peHelper:
     def __init__(self, sc0pe_path):
         self.sc0pe_path = sc0pe_path
@@ -21,7 +26,10 @@ class Sc0peHelper:
         junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt", "TargetAPK/", "TargetSource/"]
         for junk in junkFiles:
             if os.path.exists(junk):
-                os.system(f"rm -rf {junk}")
+                if sys.platform != "win32":
+                    os.system(f"rm -rf {junk}")
+                else:
+                    os.system(f"powershell -c \"del {junk} -Force -Recurse\"")
 
     def setup_virtual_environment(self):
         # Check if Qu1cksc0pe running in virtualenv
@@ -46,16 +54,16 @@ class Sc0peHelper:
             else:
                 print(f"{infoS} Creating a virtual environment...")
                 if os.path.exists(f"/home/{username}/.local/bin/virtualenv"):
-                    os.system("virtualenv -p python3 sc0pe_venv")
+                    os.system(f"virtualenv -p python sc0pe_venv")
                     print(f"\n{foundS} Virtual environment created. Execute program again for further instructions.")
-                    print("[bold magenta]>>>[white] Command: [bold green]python3 qu1cksc0pe.py --setup_venv")
+                    print(f"[bold magenta]>>>[white] Command: [bold green]python qu1cksc0pe.py --setup_venv")
                     sys.exit(0)
                 else:
                     print(f"{errorS} Error: >virtualenv< not found. Downloading it for you...")
                     os.system("pip3 install virtualenv")
-                    os.system("virtualenv -p python3 sc0pe_venv")
+                    os.system(f"virtualenv -p python sc0pe_venv")
                     print(f"\n{foundS} Virtual environment created. Execute program again for further instructions.")
-                    print("[bold magenta]>>>[white] Command: [bold green]python3 qu1cksc0pe.py --setup_venv")
+                    print(f"[bold magenta]>>>[white] Command: [bold green]python qu1cksc0pe.py --setup_venv")
                     sys.exit(0)
 
     def hash_calculator(self, filename, report_object):
@@ -110,10 +118,10 @@ class Sc0peHelper:
             try:
                 allRules = os.listdir(rule_path)
             except:
-                finalpath = f"{self.sc0pe_path}/{rule_path}"
+                finalpath = f"{self.sc0pe_path}{path_seperator}{rule_path}"
                 allRules = os.listdir(finalpath)
         else:
-            finalpath = f"{self.sc0pe_path}/{rule_path}"
+            finalpath = f"{self.sc0pe_path}{path_seperator}{rule_path}"
             allRules = os.listdir(finalpath)
 
         # This array for holding and parsing easily matched rules

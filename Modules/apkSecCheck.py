@@ -14,10 +14,16 @@ except:
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
+# Compatibility
+if sys.platform == "win32":
+    path_seperator = "\\"
+else:
+    path_seperator = "/"
+
 def ManifestAnalysis():
     # Obtaining manifest file
     try:
-        manifest_path = "TargetAPK/resources/AndroidManifest.xml"
+        manifest_path = f"TargetAPK{path_seperator}resources{path_seperator}AndroidManifest.xml"
         manifest_tree = etr.parse(manifest_path)
         manifest_root = manifest_tree.getroot()
     except FileNotFoundError:

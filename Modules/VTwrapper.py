@@ -24,7 +24,7 @@ except:
     print("[blink bold white on red]Please get your API key from [white]-> [bold green][a]https://www.virustotal.com/[/a]")
     sys.exit(1)
 try:
-    targetFile = str(sys.argv[2])
+    targetFile = sys.argv[2]
 except:
     print("\n[bold white on red]Please enter your file!!\n")
     sys.exit(1)

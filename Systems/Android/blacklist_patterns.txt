@@ -25,3 +25,12 @@ youtube.com
 youtu.be
 https://X
 unisolated.invalid
+globalsign.com
+google.com
+pki.goog
+gstatic.com
+globalsign.net
+pki.go
+https://adservic
+https://csp.wit
+https://w@iO

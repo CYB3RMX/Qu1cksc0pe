@@ -37,11 +37,22 @@ except:
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
+# Compatibility
+path_seperator = "/"
+strings_param = "--all"
+if sys.platform == "darwin":
+    strings_param = "-a"
+elif sys.platform == "win32":
+    strings_param = "-a"
+    path_seperator = "\\"
+else:
+    pass
+
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
 # Target file
-targetFile = str(sys.argv[1])
+targetFile = sys.argv[1]
 
 class ArchiveAnalyzer:
     def __init__(self, targetFile):
@@ -116,6 +127,10 @@ class ArchiveAnalyzer:
                 # Sanitize file name
                 if "/" in af:
                     af = af.split("/")[-1]
+                elif "\\" in af:
+                    af = af.split("\\")[-1]
+                else:
+                    pass
 
                 # Write file content into another file for further analysis
                 with open(af, "wb") as fc:
@@ -129,13 +144,13 @@ class ArchiveAnalyzer:
                 detect_os = subprocess.run(["file", af], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 if "Windows" in detect_os.stdout.decode():
                     print(f"\n{infoS} Performing YARA scan against: [bold green]{af}[white]")
-                    self.perform_yara_scan(af, config_file=f"{sc0pe_path}/Systems/Windows/windows.conf")
+                    self.perform_yara_scan(af, config_file=f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf")
                 elif "ELF" in detect_os.stdout.decode():
                     print(f"\n{infoS} Performing YARA scan against: [bold green]{af}[white]")
-                    self.perform_yara_scan(af, config_file=f"{sc0pe_path}/Systems/Linux/linux.conf")
+                    self.perform_yara_scan(af, config_file=f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}linux.conf")
                 elif "Word" in detect_os.stdout.decode() or "Excel" in detect_os.stdout.decode() or "PDF" in detect_os.stdout.decode() or "Rich Text" in detect_os.stdout.decode():
                     print(f"\n{infoS} Performing YARA scan against: [bold green]{af}[white]")
-                    self.perform_yara_scan(af, config_file=f"{sc0pe_path}/Systems/Multiple/multiple.conf")
+                    self.perform_yara_scan(af, config_file=f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}multiple.conf")
                 else:
                     pass
 
@@ -146,12 +161,6 @@ class ArchiveAnalyzer:
 
     def extract_urls(self, url_target):
         self.url_target = url_target
-
-        # Configurating strings parameter
-        if sys.platform == "darwin":
-            strings_param = "-a"
-        else:
-            strings_param = "--all"
 
         # Get all strings from file and search url patterns
         strings_buffer = subprocess.run(["strings", strings_param, self.url_target], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -178,7 +187,7 @@ class ArchiveAnalyzer:
         conf = configparser.ConfigParser()
         conf.read(self.config_file)
         rule_path = conf["Rule_PATH"]["rulepath"]
-        finalpath = f"{sc0pe_path}/{rule_path}"
+        finalpath = f"{sc0pe_path}{path_seperator}{rule_path}"
         allRules = os.listdir(finalpath)
 
         # This array for holding and parsing easily matched rules

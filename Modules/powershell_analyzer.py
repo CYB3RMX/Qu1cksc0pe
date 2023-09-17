@@ -25,14 +25,19 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
-# Configurating strings parameter
+# Configurating strings parameter and make compatability
+path_seperator = "/"
+strings_param = "--all"
 if sys.platform == "darwin":
     strings_param = "-a"
+elif sys.platform == "win32":
+    strings_param = "-a"
+    path_seperator = "\\"
 else:
-    strings_param = "--all"
+    pass
 
 # Load patterns
-powershell_code_patterns = json.load(open(f"{sc0pe_path}/Systems/Windows/powershell_code_patterns.json"))
+powershell_code_patterns = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}powershell_code_patterns.json"))
 
 warnings.filterwarnings("ignore")
 
@@ -40,8 +45,11 @@ class PowerShellAnalyzer:
     def __init__(self, target_file):
         self.target_file = target_file
         self.target_buffer_normal = subprocess.run(["strings", strings_param, self.target_file], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        self.target_buffer_16bit = subprocess.run(["strings", strings_param, "-e", "l", self.target_file], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        self.all_strings = self.target_buffer_16bit.stdout.decode().split("\n")+self.target_buffer_normal.stdout.decode().split("\n")
+        if sys.platform != "win32":
+            self.target_buffer_16bit = subprocess.run(["strings", strings_param, "-e", "l", self.target_file], stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+            self.all_strings = self.target_buffer_16bit.stdout.decode().split("\n")+self.target_buffer_normal.stdout.decode().split("\n")
+        else:
+            self.all_strings = self.target_buffer_normal.stdout.decode().split("\n")
         self.pattern_b64 = r"\[(?i)sYsteM\.coNvert\]::FROmbaSe64StRiNG\(\s*[\'\"]([^']*)[\'\"]\s*\)|\[System\.Convert\]::FromBase64String\(\s*'([A-Za-z0-9+/=]+)'\s*\)"
         self.pattern_ascii = r'\[Byte\[\]\]\((\d+(?:,\d+)*)\)'
         self.pattern_hex = r'\[System\.Convert\]::fromHEXString\(\'([0-9a-fA-F]+)\'\)'
@@ -254,7 +262,8 @@ class PowerShellAnalyzer:
         return executable_buffer
 
 # Execution
-pwsh_analyzer = PowerShellAnalyzer(sys.argv[1])
+target_pwsh = sys.argv[1]
+pwsh_analyzer = PowerShellAnalyzer(target_pwsh)
 pwsh_analyzer.scan_code_patterns()
 pwsh_analyzer.extract_path_values()
 pwsh_analyzer.check_executions()

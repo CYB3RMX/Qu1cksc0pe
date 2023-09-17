@@ -1,4 +1,5 @@
 puremagic
+python-magic
 androguard==3.4.0a1
 rich
 tqdm
@@ -9,7 +10,7 @@ quark-engine==21.8.1
 pyaxmlparser
 yara-python==3.11.0
 prompt_toolkit==3.0.19
-frida
+frida-tools
 lief
 pygore
 qiling

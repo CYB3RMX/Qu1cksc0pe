@@ -8,6 +8,8 @@ import json
 import warnings
 import threading
 import subprocess
+import configparser
+import distutils.spawn
 
 try:
     import pyaxmlparser
@@ -43,23 +45,36 @@ infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
+# Compatibility
+homeD = os.path.expanduser("~")
+sc0pe_helper_path = "/usr/lib/python3/dist-packages/sc0pe_helper.py"
+path_seperator = "/"
+setup_scr = "setup.sh"
+strings_param = "--all"
+adb_path = distutils.spawn.find_executable("adb")
+del_com = "rm -rf"
+if sys.platform == "win32":
+    sc0pe_helper_path = f"{homeD}\\appdata\\local\\programs\\python\\python310\\lib\\site-packages\\sc0pe_helper.py"
+    path_seperator = "\\"
+    setup_scr = "setup.ps1"
+    strings_param = "-a"
+    del_com = "del"
+    # Get adb path for windows
+    conf = configparser.ConfigParser()
+    conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf")
+    adb_path = conf["ADB_PATH"]["win_adb_path"]
+
 # Using helper library
-if os.path.exists("/usr/lib/python3/dist-packages/sc0pe_helper.py"):
+if os.path.exists(sc0pe_helper_path):
     from sc0pe_helper import Sc0peHelper
     sc0pehelper = Sc0peHelper(sc0pe_path)
 else:
-    print(f"{errorS} [bold green]sc0pe_helper[white] library not installed. You need to execute [bold green]setup.sh[white] script!")
+    print(f"{errorS} [bold green]sc0pe_helper[white] library not installed. You need to execute [bold green]{setup_scr}[white] script!")
     sys.exit(1)
 
 # Disabling pyaxmlparser's logs
 pyaxmlparser.core.log.disabled = True
 warnings.filterwarnings("ignore") # Suppressing another warnings
-
-# Configurating strings parameter
-if sys.platform == "darwin":
-    strings_param = "-a"
-else:
-    strings_param = "--all"
 
 # Initialize a dictionary to store the current state of the folders
 previous_states = {
@@ -78,7 +93,7 @@ previous_states = {
 }
 
 # Gathering code patterns
-pattern_file = json.load(open(f"{sc0pe_path}/Systems/Android/detections.json"))
+pattern_file = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Android{path_seperator}detections.json"))
 
 # Categories
 categs = {
@@ -98,7 +113,7 @@ class AndroidDynamicAnalyzer:
         self.MAX_SIZE = 20971520
         self.url_regex = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
         self.ip_addr_regex = r"^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$"
-        self.frida_script = open(f"{sc0pe_path}/Systems/Android/FridaScripts/sc0pe_android_enumeration.js", "r").read()
+        self.frida_script = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Android{path_seperator}FridaScripts{path_seperator}sc0pe_android_enumeration.js", "r").read()
         try:
             self.axmlobj = pyaxmlparser.APK(self.target_file)
         except:
@@ -106,7 +121,7 @@ class AndroidDynamicAnalyzer:
 
     def search_package_name(self, package_name):
         print(f"{infoS} Searching for existing installation...")
-        exist_install = subprocess.check_output("adb shell pm list packages", shell=True).decode().split("\n")
+        exist_install = subprocess.check_output(f"{adb_path} shell pm list packages", shell=True).decode().split("\n")
         matchh = re.findall(rf"{package_name}", str(exist_install))
         if len(matchh) > 0:
             print(f"{infoS} Package found.")
@@ -139,7 +154,7 @@ class AndroidDynamicAnalyzer:
         tmp_role = ""
         try:
             while True:
-                logcat_output = subprocess.check_output(["adb", "-s", f"{device}", "logcat", "-d", package_name + ":D"])
+                logcat_output = subprocess.check_output([f"{adb_path}", "-s", f"{device}", "logcat", "-d", package_name + ":D"])
                 payload = logcat_output.decode()
 
                 # File calls for /data/user/0/
@@ -189,14 +204,14 @@ class AndroidDynamicAnalyzer:
             sys.exit(0)
 
     def crawler_for_adb_analysis(self, target_directory):
-        if os.path.exists(f"{sc0pe_path}/{target_directory}"):
+        if os.path.exists(f"{sc0pe_path}{path_seperator}{target_directory}"):
             # Create a simple table for better view
             dirTable = Table(title=f"* {target_directory} Directory *", title_justify="center", title_style="bold magenta")
             dirTable.add_column("File Name", justify="center", style="bold green")
             dirTable.add_column("Type", justify="center", style="bold green")
 
             # Crawl the directory
-            dircontent = sc0pehelper.recursive_dir_scan(target_directory=f"{sc0pe_path}/{target_directory}")
+            dircontent = sc0pehelper.recursive_dir_scan(target_directory=f"{sc0pe_path}{path_seperator}{target_directory}")
             if dircontent != []:
                 print(f"\n[bold cyan][INFO][white] Crawling [bold green]{target_directory} [white]directory.")
                 for file in dircontent:
@@ -214,12 +229,12 @@ class AndroidDynamicAnalyzer:
         # First we need to fetch the directories
         for di in target_dirs:
             try:
-                adb_output = subprocess.check_output(["adb", "-s", f"{device}", "pull", f"/data/data/{package_name}{di}"])
+                adb_output = subprocess.check_output([f"{adb_path}", "-s", f"{device}", "pull", f"/data/data/{package_name}{di}"])
                 if "No such file" in adb_output.decode():
                     continue
                 else:
                     # Get the current state of the folder
-                    current_state = os.listdir(os.path.join(f"{sc0pe_path}", di.replace("/", "")))
+                    current_state = os.listdir(os.path.join(f"{sc0pe_path}", di.replace(f"{path_seperator}", "")))
                     if previous_states[di]['contents'] != current_state:
                         print(f"[bold cyan][INFO][white] {di} directory fetched.")
                         previous_states[di]['contents'] = current_state
@@ -238,7 +253,7 @@ class AndroidDynamicAnalyzer:
         self.target_app_crawler(package_name, device)
 
     def install_target_application(self, device, target_application):
-        install_cmd = ["adb", "-s", f"{device}", "install", f"{target_application}"]
+        install_cmd = [f"{adb_path}", "-s", f"{device}", "install", f"{target_application}"]
         install_cmdl = subprocess.Popen(install_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         install_cmdl.wait()
         if "Success" in str(install_cmdl.communicate()):
@@ -246,7 +261,7 @@ class AndroidDynamicAnalyzer:
         else:
             return None
     def uninstall_target_application(self, device, package_name):
-        uninstall_cmd = ["adb", "-s", f"{device}", "uninstall", f"{package_name}"]
+        uninstall_cmd = [f"{adb_path}", "-s", f"{device}", "uninstall", f"{package_name}"]
         uninstall_cmdl = subprocess.Popen(uninstall_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         uninstall_cmdl.wait()
         if "Success" in str(uninstall_cmdl.communicate()):
@@ -257,13 +272,13 @@ class AndroidDynamicAnalyzer:
     def enumerate_adb_devices(self):
         print(f"{infoS} Searching for devices...")
         device_index = []
-        get_dev_cmd = ["adb", "devices"]
+        get_dev_cmd = [f"{adb_path}", "devices"]
         get_dev_cmdl = subprocess.Popen(get_dev_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
         get_dev_cmdl = str(get_dev_cmdl[0]).split("\\n")
         get_dev_cmdl = get_dev_cmdl[1:-1]
         dindex = 0
         for device in get_dev_cmdl:
-            if device.split("\\t")[0] != "":
+            if device.split("\\t")[0] != "" and device.split("\\t")[0] != "\\r":
                 device_index.append({dindex: device.split("\\t")[0]})
                 dindex += 1
         return device_index
@@ -294,7 +309,7 @@ class AndroidDynamicAnalyzer:
                         mbool = self.search_package_name(package_name)
                         if not mbool:
                             print(f"{infoS} Installing [bold yellow]{package_name} [white]on [bold yellow]{list(device_indexes[dnum].values())[0]}")
-                            install_state = self.install_target_application(device=str(list(device_indexes[dnum].values())[0]), target_application=self.target_file, package_name=package_name)
+                            install_state = self.install_target_application(device=str(list(device_indexes[dnum].values())[0]), target_application=self.target_file)
                             if install_state:
                                 print(f"{infoS} [bold yellow]{package_name} [white]installed successfully.\n")
                                 tracer_thread = threading.Thread(target=self.program_tracer, args=(package_name, list(device_indexes[dnum].values())[0],))
@@ -360,7 +375,8 @@ class AndroidDynamicAnalyzer:
 
         # After that get contents of json file and delete junks
         jfile = json.load(open("package.json"))
-        os.system("rm -rf package.json")
+
+        os.system(f"{del_com} package.json")
 
         return jfile
 
@@ -375,7 +391,7 @@ class AndroidDynamicAnalyzer:
             print(f"{errorS} There is no pattern about {data_type}")
 
     def check_adb_connection(self):
-        chek = subprocess.check_output("adb devices", shell=True)
+        chek = subprocess.check_output(f"{adb_path} devices", shell=True)
         if len(chek) != 26:
             return True
         else:
@@ -416,12 +432,11 @@ class AndroidDynamicAnalyzer:
             sys.exit(1)
 
     def perform_pattern_categorization(self, mem_dump_buf):
-        for index in track(range(0, len(pattern_file)), description="Processing buffer..."):
-            for elem in pattern_file[index]:
-                for item in pattern_file[index][elem]:
-                    regx = re.findall(item.encode(), mem_dump_buf)
-                    if regx != [] and '' not in regx:
-                        categs[elem].append(str(item))
+        for code_categ in track(range(len(pattern_file)), description="Processing buffer..."):
+            for patt in pattern_file[list(pattern_file.keys())[code_categ]]["patterns"]:
+                regx = re.findall(patt.encode(), mem_dump_buf)
+                if regx != [] and '' not in regx:
+                    categs[list(pattern_file.keys())[code_categ]].append(str(patt))
 
         # Table for statistics about categories and components
         statTable = Table(title="* Statistics About Categories and Components *", title_style="bold magenta", title_justify="center")
@@ -446,7 +461,7 @@ class AndroidDynamicAnalyzer:
             print(f"{infoS} MainActivity: [bold green]{self.axmlobj.get_main_activity()}[white]")
             return self.axmlobj.get_main_activity()
         else:
-            result = subprocess.run(["adb", "shell", "dumpsys", "package", package_name], capture_output=True, check=True, text=True)
+            result = subprocess.run([f"{adb_path}", "shell", "dumpsys", "package", package_name], capture_output=True, check=True, text=True)
             lines = result.stdout.split("\n")
             for index, line in enumerate(lines):
                 if "android.intent.action.MAIN:" in line:
@@ -462,10 +477,10 @@ class AndroidDynamicAnalyzer:
             os.system(f"mv temp_dump.dmp mem_dump-{app_name}.dmp")
             print(f"{infoS} File saved as: [bold green]mem_dump-{app_name}.dmp[white]")
         else:
-            os.system("rm -rf temp_dump.dmp")
+            os.system(f"{del_com} temp_dump.dmp")
 
     def user_installed_packages(self):
-        plist = subprocess.run(["adb", "shell", "pm", "list", "packages"], stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+        plist = subprocess.run([f"{adb_path}", "shell", "pm", "list", "packages"], stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
         pack_l = plist.stdout.decode().split("\n")
         all_packs = []
         if pack_l:
@@ -493,7 +508,7 @@ class AndroidDynamicAnalyzer:
         # Check for junks if exist
         if os.path.exists("temp_dump.dmp"):
             print(f"\n{infoS} Removing old memory dump file...\n")
-            os.system("rm -rf temp_dump.dmp")
+            os.system(f"{del_com} temp_dump.dmp")
 
         print(f"\n{infoS} Performing memory dump analysis against: [bold green]{self.target_file}[white]")
         if self.axmlobj:
@@ -569,7 +584,7 @@ class AndroidDynamicAnalyzer:
             # Look for URLS
             print(f"{infoS} Looking for interesting URL values...")
             dump_urls = []
-            dont_need = open(f"{sc0pe_path}/Systems/Android/blacklist_patterns.txt", "r").read().split("\n")
+            dont_need = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Android{path_seperator}blacklist_patterns.txt", "r").read().split("\n")
             matchs = re.findall(self.url_regex.encode(), dump_bufffer)
             if matchs != []:
                 for url in matchs:
@@ -684,5 +699,5 @@ class AndroidDynamicAnalyzer:
             sys.exit(1)
 
 # Execution
-androdyn = AndroidDynamicAnalyzer(target_file=sys.argv[1])
+androdyn = AndroidDynamicAnalyzer(target_file=str(sys.argv[1]))
 androdyn.analyzer_main()

@@ -98,7 +98,7 @@ def LanguageDetect():
     print(langTable)
 
     if indicator == 0:
-        print(f"{errorS} Programming language couldn\'t detected :(\n")
+        print(f"{errorS} Programming language couldn\'t detected. This file is might be obfuscated!\n")
         sys.exit(1)
 
 # This function analyses if given file is an executable file
