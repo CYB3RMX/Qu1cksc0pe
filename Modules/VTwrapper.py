@@ -55,7 +55,7 @@ def Hasher(targetFile):
 
 # Function for querying target file's hashes on VT
 def DoRequest(targetFile):
-    print(f"\n{infoS} Sending query to VirusTotal API...")
+    print(f"\n{infoS} Querying the target hash to the VirusTotal API...")
     # Building request
     request_headers = {"x-apikey": apikey}
     targetHash = Hasher(targetFile)
@@ -194,6 +194,8 @@ def ReportParser(reportStr):
                     print(" ")
             else:
                 print("\n[bold white on red]There is no IDS reports for target file.\n")
+    else:
+        print(f"{errorS} There is no report about the target hash. You need to upload it!")
 
 # Execution area
 reportstr = DoRequest(targetFile)

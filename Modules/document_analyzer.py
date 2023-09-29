@@ -79,9 +79,12 @@ class DocumentAnalyzer:
         self.file_sigs = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}file_sigs.json"))
         self.base64_pattern = r'(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})'
         self.mal_code = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}malicious_html_codes.json"))
+        self.mal_rtf_code = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}malicious_rtf_codes.json"))
+        self.pat_ct = 0
 
     # Checking for file extension
     def CheckExt(self):
+        magic_buf = open(self.targetFile, "rb").read(8)
         doc_type = subprocess.run(["file", self.targetFile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if "Microsoft Word" in doc_type.stdout.decode() or "Microsoft Excel" in doc_type.stdout.decode() or "Microsoft Office Word" in doc_type.stdout.decode():
             return "docscan"
@@ -91,6 +94,8 @@ class DocumentAnalyzer:
             return "onenote"
         elif "HTML document" in doc_type.stdout.decode():
             return "html"
+        elif ("Rich Text Format" in doc_type.stdout.decode() and binascii.unhexlify(b"7B5C72746631") in magic_buf) or (binascii.unhexlify(b"7B5C7274") in magic_buf):
+            return "rtf"
         else:
             return "unknown"
 
@@ -537,9 +542,7 @@ class DocumentAnalyzer:
                                     if regex != []:
                                         print(f"{infoS} Possible [bold green]{categ}[white] detected at [bold green]ObjectID[white]: [bold yellow]{obj}[white]")
                                         print(f"{infoS} Attempting to extraction...")
-                                        with open(f"sc0pe_carved-{categ}-{obj}.bin", "wb") as ff:
-                                            ff.write(object_data)
-                                        print(f"{infoS} Extracted data saved as: [bold green]sc0pe_carved-{categ}-{obj}.bin[white]")
+                                        self.output_writer(out_file=f"sc0pe_carved-{categ}-{obj}.bin", mode="wb", buffer=object_data)
 
                         # Check for /URI object
                         if "URI" in str(doc.getobj(obj)):
@@ -572,13 +575,9 @@ class DocumentAnalyzer:
                             print(f"{infoS} Checking for compression...")
                             try:
                                 decompressed = zlib.decompress(doc.getobj(obj).get_rawdata())
-                                with open(f"sc0pe_embedded_decompressed_file-{obj}.bin", "wb") as ef:
-                                    ef.write(decompressed)
-                                print(f"{infoS} Extracted data saved into: [bold green]sc0pe_embedded_decompressed_file-{obj}.bin[white]")
+                                self.output_writer(out_file=f"sc0pe_embedded_decompressed_file-{obj}.bin", mode="wb", buffer=decompressed)
                             except:
-                                with open(f"sc0pe_embedded_file-{obj}.bin", "wb") as ef:
-                                    ef.write(doc.getobj(obj).get_rawdata())
-                                print(f"{infoS} Extracted data saved into: [bold green]sc0pe_embedded_file-{obj}.bin[white]")
+                                self.output_writer(out_file=f"sc0pe_embedded_file-{obj}.bin", mode="wb", buffer=doc.getobj(obj).get_rawdata())
                     except:
                         continue
             else:
@@ -593,11 +592,14 @@ class DocumentAnalyzer:
         print(f"{infoS} Performing HTML analysis...")
         soup_analysis = BeautifulSoup(allstr, "html.parser")
 
-        # Dump javascript
-        self.html_dump_javascript(soup_obj=soup_analysis)
-
         # Check for malicious code patterns
         self.html_detect_malicious_code(given_buffer=allstr)
+
+        # Fetch url values
+        self.html_fetch_urls(given_buffer=allstr)
+
+        # Dump javascript
+        self.html_dump_javascript(soup_obj=soup_analysis)
 
         # Check for input points
         self.html_check_input_points(soup_obj=soup_analysis)
@@ -628,9 +630,7 @@ class DocumentAnalyzer:
             if un_dat != []:
                 for escape in un_dat:
                     deobf = urllib.parse.unquote(escape)
-                    with open(f"sc0pe_decoded_unescape-{len(deobf)}.bin", "w") as ff:
-                        ff.write(deobf)
-                    print(f"{infoS} Data saved into: [bold green]sc0pe_decoded_unescape-{len(deobf)}.bin[white]")
+                    self.output_writer(out_file=f"sc0pe_decoded_unescape-{len(deobf)}.bin", mode="w", buffer=deobf)
 
                     # After extracting the data also we need to scan it!
                     print(f"\n{infoS} Performing analysis against [bold yellow]sc0pe_decoded_unescape-{len(deobf)}.bin[white]")
@@ -641,6 +641,20 @@ class DocumentAnalyzer:
                         self.html_detect_malicious_code(given_buffer=deobf)
                         self.html_check_suspicious_files(given_buffer=deobf)
 
+    def html_fetch_urls(self, given_buffer):
+        print(f"\n{infoS} Checking URL values...")
+        url_vals = []
+        regx = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", given_buffer)
+        if regx != []:
+            url_table = Table()
+            url_table.add_column("[bold green]URL Values", justify="center")
+            for url in regx:
+                if url not in url_vals:
+                    url_table.add_row(url)
+                    url_vals.append(url)
+            print(url_table)
+        else:
+            print(f"{errorS} There is no URL value found!")
 
     def chk_b64(self, given_buffer):
         keywords_to_check = [r"function", r"_0x", r"parseInt", r"script", r"var", r"document", r"src", r"atob", r"eval"]
@@ -665,7 +679,7 @@ class DocumentAnalyzer:
                             if key_count != 0:
                                 if len(decoded.decode()) >= 150:
                                     print(f"\n{infoS} Warning length of the decoded data is bigger than as we expected!")
-                                    self.write_buf_to_file(buffer=decoded.decode())
+                                    self.output_writer(out_file=f"sc0pe_decoded_javascript-{len(decoded.decode())}.js", mode="w", buffer=decoded.decode())
                                 else:
                                     decc.append(decoded.decode())
                             else:
@@ -684,7 +698,7 @@ class DocumentAnalyzer:
                             if key_count != 0:
                                 if len(decoded.decode()) >= 150:
                                     print(f"\n{infoS} Warning length of the decoded data is bigger than as we expected!")
-                                    self.write_buf_to_file(buffer=decoded.decode())
+                                    self.output_writer(out_file=f"sc0pe_decoded_javascript-{len(decoded.decode())}.js", mode="w", buffer=decoded.decode())
                                 else:
                                     decc.append(decoded.decode())
                             else:
@@ -713,9 +727,7 @@ class DocumentAnalyzer:
                         mal_ind += 1
 
                 if mal_ind != 0 and len(jav_buf) > 0:
-                    with open(f"sc0pe_carved_javascript-{len(jav_buf)}.js", "w") as ff:
-                        ff.write(jav_buf)
-                    print(f"{infoS} Data saved into: [bold green]sc0pe_carved_javascript-{len(jav_buf)}.js[white]")
+                    self.output_writer(out_file=f"sc0pe_carved_javascript-{len(jav_buf)}.js", mode="w", buffer=jav_buf)
         else:
             print(f"{errorS} There is no Javascript found!")
     def html_detect_malicious_code(self, given_buffer):
@@ -723,7 +735,7 @@ class DocumentAnalyzer:
         print(f"\n{infoS} Performing detection of the malicious code patterns...")
         mind = 0
         for mc in self.mal_code:
-            mtc = re.findall(mc, given_buffer)
+            mtc = re.findall(mc, given_buffer, re.IGNORECASE)
             if mtc != []:
                 mind += 1
                 self.mal_code[mc]["count"] = len(mtc)
@@ -821,11 +833,151 @@ class DocumentAnalyzer:
         if pind != 0:
             print(f"\n{infoS} Looks like we found powershell code patterns!")
             print(powe_table)
-        
-    def write_buf_to_file(self, buffer):
-        with open(f"sc0pe_decoded_javascript-{len(buffer)}.js", "w") as ff:
+
+    def output_writer(self, out_file, mode, buffer):
+        with open(out_file, mode) as ff:
             ff.write(buffer)
-        print(f"[bold yellow]>>>>[white] Decoded data saved into: [bold green]sc0pe_decoded_javascript-{len(buffer)}.js[white]\n")
+        print(f"{infoS} Data saved as: [bold yellow]{out_file}[white]")
+
+    def check_exploit_patterns(self, buffer):
+        # Check equation.3 pattern
+        chk_ex = re.findall(r'ion.3'.encode(), bytes.fromhex(buffer), re.IGNORECASE)
+        if chk_ex != []:
+            print(f"{infoS} This file contains possible [bold green]CVE-2017-11882[white] exploit. Performing extraction...")
+            self.pat_ct += 1
+            self.output_writer(out_file=f"sc0pe_extracted_exploit-{len(buffer)}.bin", mode="wb", buffer=binascii.unhexlify(buffer))
+
+        # Check equation.2 pattern
+        chk_ex = re.findall(r'ion.2'.encode(), bytes.fromhex(buffer), re.IGNORECASE)
+        if chk_ex != []:
+            print(f"{infoS} This file contains possible [bold green]CVE-2017-11882[white] exploit. Performing extraction...")
+            self.pat_ct += 1
+            self.output_writer(out_file=f"sc0pe_extracted_exploit-{len(buffer)}.bin", mode="wb", buffer=binascii.unhexlify(buffer))
+
+        # Check OLE10naTiVE pattern
+        chk_ex = re.findall(r"OLE10naTiVE".encode(), bytes.fromhex(buffer).replace(b"\x00", b""), re.IGNORECASE)
+        if chk_ex != []:
+            print(f"{infoS} This file contains possible [bold green]CVE-2017-11882[white] exploit. Performing extraction...")
+            self.pat_ct += 1
+            self.output_writer(out_file=f"sc0pe_extracted_exploit-{len(buffer)}.bin", mode="wb", buffer=binascii.unhexlify(buffer))
+
+        # Check vbscript
+        chk_ex = re.findall(r'(script|Create|vbscript|Function)'.encode(), bytes.fromhex(buffer), re.IGNORECASE)
+        if chk_ex != []:
+            print(f"{infoS} This file contains possible [bold green]VBScript[white] file. Performing extraction...")
+            self.pat_ct += 1
+            self.output_writer(out_file=f"sc0pe_extracted_script-{len(buffer)}.bin", mode="wb", buffer=binascii.unhexlify(buffer))
+
+    def rtf_check_exploit_main(self, buffer):
+        # This method is for detecting \binxxx based patterns
+        chek = re.findall(r'\\bin'.encode(), buffer, re.IGNORECASE)
+        if chek != []:
+            bin_sec = re.findall(r'[a-f0-9]+\\bin[a-f0-9]+'.encode(), buffer, re.IGNORECASE)
+            if bin_sec != []:
+                if len(bin_sec[-1]) > 15:
+                    remove = re.findall(r'\\bin[0]+'.encode(), bin_sec[-1], re.IGNORECASE)
+                    finalbuffer = bin_sec[-1].replace(remove[0], b"")
+                    print(f"{infoS} Looks like we found [bold green]\\binxxx[white] pattern. Attempting to identify and extraction...")
+                    self.rtf_check_exploit_parse(exploit_buffer=finalbuffer)
+
+        # This method is for detecting {\\?\\objudate} based patterns
+        chek = re.findall(r'{\\[^}]+\\objupdate}'.encode(), buffer, re.IGNORECASE)
+        if chek != []: # This is for preventing catastrophic backtrace issues
+            bin_sec = re.findall(r'([0-9a-fA-F]+){\\[^}]+\\objupdate}([0-9a-fA-F]+)'.encode(), buffer, re.IGNORECASE)
+            if bin_sec != []:
+                print(f"{infoS} Looks like we found [bold green]\\objupdate[white] pattern. Attempting to identify and extraction...")
+                self.rtf_check_exploit_parse(exploit_buffer=bin_sec[0][0]+bin_sec[0][1])
+
+        # This method is for detecting {\\objupdate} based patterns
+        chek = re.findall(r'{\\objupdate\}'.encode(), buffer, re.IGNORECASE)
+        if chek != []:
+            bin_sec = re.findall(r'([a-f0-9]+){\\objupdate}([a-f0-9]+)'.encode(), buffer, re.IGNORECASE)
+            if bin_sec != []:
+                print(f"{infoS} Looks like we found [bold green]\\objupdate[white] pattern. Attempting to identify and extraction...")
+                self.rtf_check_exploit_parse(exploit_buffer=bin_sec[0][0]+bin_sec[0][1])
+
+        # This method is for detecting \\objdata based patterns
+        chek = re.findall(r'\\objdata[a-f0-9]+'.encode(), buffer, re.IGNORECASE)
+        if chek != []:
+            bin_sec = re.findall(r'\\objdata([a-f0-9]+)'.encode(), buffer, re.IGNORECASE)
+            if bin_sec != []:
+                # Looking for hex data existence
+                for bsec in bin_sec:
+                    if len(bsec) > 15:
+                        self.rtf_check_exploit_parse(exploit_buffer=bsec)
+
+        # This method is for detecting \\ods based patterns
+        chek = re.findall(r'{\\ods[a-f0-9]+'.encode(), buffer, re.IGNORECASE)
+        if chek != []:
+            bin_sec = re.findall(r'{\\ods([a-f0-9]+)}([a-f0-9]+)'.encode(), buffer, re.IGNORECASE)
+            if bin_sec != []:
+                self.rtf_check_exploit_parse(exploit_buffer=bin_sec[0][0]+bin_sec[0][1])
+            
+    def rtf_check_exploit_parse(self, exploit_buffer):
+        if len(exploit_buffer) % 2 == 0:
+            self.check_exploit_patterns(buffer=exploit_buffer.decode())
+        else:
+            if exploit_buffer.decode()[0] == "0":
+                new_bin_sec = exploit_buffer.decode()[1:]
+                self.check_exploit_patterns(buffer=new_bin_sec)
+            elif exploit_buffer.decode()[0] == "f":
+                new_bin_sec = exploit_buffer.decode()[1:]
+                self.check_exploit_patterns(buffer=new_bin_sec)
+            else:
+                pass
+
+    def RTFAnalysis(self):
+        # Scan file buffer for interesting patterns
+        print(f"{infoS} Performing detection of the malicious code patterns...")
+        mal_ind = 0
+        for pat in self.mal_rtf_code:
+            scan_pattern = pat
+            if "\\" in scan_pattern:
+                scan_pattern = re.escape(scan_pattern)
+            regx = re.findall(scan_pattern, allstr)
+            if regx != []:
+                mal_ind += 1
+                self.mal_rtf_code[pat]["count"] = len(regx)
+        if mal_ind != 0:
+            att_types = []
+            rtf_table = Table()
+            rtf_table.add_column("[bold green]Pattern", justify="center")
+            rtf_table.add_column("[bold green]Description", justify="center")
+            rtf_table.add_column("[bold green]Count", justify="center")
+
+            for pat in self.mal_rtf_code:
+                if self.mal_rtf_code[pat]["count"] != 0:
+                    rtf_table.add_row(str(pat), str(self.mal_rtf_code[pat]["description"]), str(self.mal_rtf_code[pat]["count"]))
+
+                    if self.mal_rtf_code[pat]["type"] not in att_types:
+                        att_types.append(self.mal_rtf_code[pat]["type"])
+            print(rtf_table)
+            print(f"{infoS} Keywords for this sample: [bold red]{att_types}[white]")
+
+            # Check for suspicious unescape pattern
+            if self.mal_rtf_code["unescape"]["count"] != 0:
+                unesc = re.findall(r'unescape\(\s*\'([^\']*)\'\s*\)', allstr)
+                if unesc != []:
+                    print(f"\n{infoS} Looks like we have obfuscated value via [bold green]unescape[white]. Performing deobfuscation...")
+                    for un in unesc:
+                        deobf = urllib.parse.unquote(un)
+                        self.output_writer(out_file=f"sc0pe_deobfuscated_unescape-{len(deobf)}.bin", mode="w", buffer=deobf)
+        else:
+            print(f"{errorS} There is no malicious pattern found!")
+
+        # Exploit detection and extraction
+        print(f"\n{infoS} Performing embedded exploit/script detection...")
+        fbuffer = open(self.targetFile, "rb").read()
+        buf_trim = fbuffer.replace(b"\r", b"").replace(b"\t", b"").replace(b"\n", b"").replace(b" ", b"")
+        print(f"{infoS} Looking for embedded binary sections...")
+        self.rtf_check_exploit_main(buffer=buf_trim)
+        if self.pat_ct == 0:
+            print(f"{errorS} There is no suspicious embedded exploit/script pattern detected!")
+
+        # Perform Yara scan
+        print(f"\n{infoS} Performing YARA rule matching...")
+        self.DocumentYara()
+
 
 # Execution area
 try:
@@ -839,8 +991,10 @@ try:
         docObj.OneNoteAnalysis()
     elif  ext == "html":
         docObj.HTMLanalysis()
+    elif ext == "rtf":
+        docObj.RTFAnalysis()
     elif ext == "unknown":
-        print(f"{errorS} Analysis tecnique is not implemented for now. Please send the file to the developer for further analysis.")
+        print(f"{errorS} Analysis technique is not implemented for now. Please send the file to the developer for further analysis.")
     else:
         print(f"{errorS} File format is not supported.")
 except:
