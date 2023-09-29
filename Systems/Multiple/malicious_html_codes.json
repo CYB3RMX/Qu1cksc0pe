@@ -53,5 +53,15 @@
         "description": "The 'fromCharCode' method is used to create a string from a sequence of Unicode values. Attackers might use it to obfuscate malicious strings.",
         "type": "obfuscation",
         "count": 0
+    },
+    "pass-btn": {
+        "description": "This pattern is frequently seen in phishing pages.",
+        "type": "phishing",
+        "count":0
+    },
+    "Enter password": {
+        "description": "This pattern is frequently seen in phishing pages.",
+        "type": "phishing",
+        "count":0
     }
 }

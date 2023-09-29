@@ -41,31 +41,19 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/14839679-5751-4f8a-81e0-34c96c607842)
 
 # Updates
+<b>29/09/2023</b>
+- [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe is now able to analyze ```Rich Text Format (.rtf)``` documents. You can perform:
+- Detection and extraction of embedded exploits/scripts from malicious .rtf documents. (CVE-2017-11882)
+- Detection of malicious patterns.
+
+https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/eb5ef083-7669-4575-b587-657c44b97c1d
+
 <b>17/09/2023</b>
 - [X] Compatibility has been added for Windows. Qu1cksc0pe can now run on Windows 10 or 11!
 - [x] Lots of improvements and bug fixes.
 
 <b>01/09/2023</b>
 - [X] ```Android Dynamic Analyzer``` module is significantly upgraded.
-
-<b>29/08/2023</b>
-- [X] ```Android Dynamic Analyzer``` module is upgraded. Now Qu1cksc0pe also can perform categorized pattern scanning against application memory dumps!
-
-https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/b6d42911-c977-4869-9549-3586a8f69126
-
-<b>26/08/2023</b>
-- [X] ```Android Dynamic Analyzer``` module is upgraded. Now you can also perform analysis against heavily obfuscated samples to!
-
-https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/131b334c-0320-4a0a-8b4e-4759e26851dc
-
-<b>23/08/2023</b>
-- [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now perform analysis against memory dump of an android application. You can get:
-- Possible C2 addresses at runtime.
-- Socket connections.
-- Created services.
-- Methods used by target application.
-
-https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/3251dc28-7c97-4a82-aa6b-a981fb6da13e
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)

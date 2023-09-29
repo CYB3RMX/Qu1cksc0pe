@@ -1,0 +1,57 @@
+{
+    "%28%22%45%6E%61%62%6C%65%20%65%64%69%74%69%6E%67%22%29": {
+        "description": "This pattern is commonly used by malwares. It detects the string ('Enable editing') in obfuscated form.",
+        "type": "obfuscation",
+        "count": 0
+    },
+    "Enable editing": {
+        "description": "Encourages users to enable macros or editing in RTF documents, often used in malicious contexts.",
+        "type": "phishing",
+        "count": 0
+    },
+    "\\objhtml": {
+        "description": "This pattern is used to identify embedded HTML objects in RTF documents.",
+        "type": "embedding",
+        "count": 0
+    },
+    "\\objdata": {
+        "description": "This pattern identifies embedded binary data objects in RTF documents.",
+        "type": "embedding",
+        "count": 0
+    },
+    "\\bin": {
+        "description": "This pattern is used to identify binary data in RTF documents.",
+        "type": "binary",
+        "count": 0
+    },
+    "\\objautlink": {
+        "description": "This pattern identifies automatic links to external content within RTF documents.",
+        "type": "link",
+        "count": 0
+    },
+    "unescape": {
+        "description": "The 'unescape' function is used to decode URI-encoded characters. It can be exploited by attackers to decode malicious content encoded in URLs.",
+        "type": "obfuscation",
+        "count": 0
+    },
+    "document.write": {
+        "description": "The 'document.write' method is used to dynamically write content to a document. Attackers might use it to inject malicious content into a page.",
+        "type": "attack",
+        "count": 0
+    },
+    "No: 20724414": {
+        "description": "This pattern is frequently seen in most of malicious RTF documents.",
+        "type": "common malicious pattern",
+        "count": 0
+    },
+    "%4E%6F%3A%20%32%30%37%32%34%34%31%34": {
+        "description": "This pattern is frequently seen in most of malicious RTF documents.",
+        "type": "obfuscation",
+        "count": 0
+    },
+    "passwordhash": {
+        "description": "There might be a password protection!",
+        "type": "anti-analysis",
+        "count": 0
+    }
+}

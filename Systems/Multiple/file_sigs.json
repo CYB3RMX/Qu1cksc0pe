@@ -79,5 +79,10 @@
         "patterns": [
             "4d534346000000"
         ]
+    },
+    "Rich Text Format": {
+        "patterns": [
+            "7b5c72746631"
+        ]
     }
 }
