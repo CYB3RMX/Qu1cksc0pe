@@ -140,6 +140,7 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 - Portable Document Format (.pdf)
 - OneNote Documents (.one)
 - HTML Documents (.htm, .html)
+- Rich Text Format Documents (.rtf)
 
 <b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_document --docs```<br>
 ![docs](https://user-images.githubusercontent.com/42123683/189416778-f7f93d49-7ff0-4eb5-9898-53e63e5833a1.gif)
