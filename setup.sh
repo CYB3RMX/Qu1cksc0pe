@@ -81,27 +81,6 @@ else
     echo -en "${info} ${green}pyOneNote${default} is already exist...\n"
 fi
 
-# Check for PyExifTool
-echo -en "${info} Setting up ${green}PyExifTool${default}...\n"
-# Check for exiftool command existence
-if [ ! -f "/usr/bin/exiftool" ]; then
-    echo -e "${error} Whoops! ${green}exiftool${default} command is not exist in your system!"
-    echo -en "${yellow}>>> ${default}Looks like I need your sudo permissions :3\n"
-    sudo ${package_manager} libimage-exiftool-perl
-    echo -en "${success} Done!\n"
-else
-    echo -en "${info} ${green}exiftool${default} command is already exist...\n"
-fi
-
-# Cloning and installing pyexiftool 
-echo -en "${info} Cloning ${green}PyExifTool${default}...\n"
-git clone https://github.com/smarnach/pyexiftool.git
-echo -en "${yellow}>>> ${default}Using sudo again...\n"
-cd pyexiftool
-sudo python setup.py install
-cd ..
-sudo rm -rf pyexiftool
-
 # Setting up sc0pe_helper module
 echo -en "${yellow}>>> ${default}Just one more...\n"
 sudo cp Modules/lib/sc0pe_helper.py /usr/lib/python3/dist-packages/

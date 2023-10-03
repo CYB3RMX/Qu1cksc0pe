@@ -112,7 +112,6 @@ console_commands = NestedCompleter.from_nested_dict({
     "document": None,
     "domain": None,
     "language": None,
-    "metadata": None,
     "packer": None,
     "resource-scan": None,
     "sigcheck": None,
@@ -317,15 +316,6 @@ try:
                 os.system(command)
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
-
-        # Metadata analyzer
-        elif con_command == "metadata":
-            if os.path.exists(".target-file.txt"):
-                foldername = open(".target-file.txt", "r").read()
-                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}metadata.py \"{filename}\""
-                os.system(command)
-            else:
-                print(f"{errorS} You must specify target folder with [bold green]set target-folder[white] command.")
 
         # Packer Detection
         elif con_command == "resource-scan":
