@@ -145,9 +145,6 @@ parser.add_argument("--key_init", required=False,
 parser.add_argument("--lang", required=False,
                     help="Detect programming language.",
                     action="store_true")
-parser.add_argument("--metadata", required=False,
-                    help="Get exif/metadata information.",
-                    action="store_true")
 parser.add_argument("--mitre", required=False,
                     help="Generate MITRE ATT&CK table for target sample (Windows samples for now.).",
                     action="store_true")
@@ -345,17 +342,6 @@ def Qu1cksc0pe():
         # Handling --folder argument
         if args.folder is not None:
             print("[bold white on red][blink]--resource[/blink] argument is not supported for folder analyzing!\n")
-            sys.exit(1)
-
-    # metadata
-    if args.metadata:
-        # Handling --file argument
-        if args.file is not None:
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}metadata.py \"{args.file}\""
-            os.system(command)
-        # Handling --folder argument
-        if args.folder is not None:
-            print("[bold white on red][blink]--metadata[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
 
     # MITRE ATT&CK

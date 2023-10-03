@@ -25,12 +25,6 @@ except:
     sys.exit(1)
 
 try:
-    from quark.forensic import Forensic
-except:
-    print("Error: >quark-engine< module not found.")
-    sys.exit(1)
-
-try:
     import pyaxmlparser
 except:
     print("Error: >pyaxmlparser< module not found.")
@@ -280,24 +274,60 @@ def PerformJAR(targetAPK):
             # Print area
             PrintCategs()
 
-# Scan files with quark-engine
-def Quarked(targetAPK):
-    not_found_indicator = 0
-    print(f"\n{infoS} Extracting IP addresses and URLs. Please wait...")
-    # Parsing phase
-    forensic = Forensic(targetAPK)
+def pattern_scanner_ex(regex, target_files, target_type, value_array):
+    for url in track(range(len(target_files)), description=f"Processing {target_type}..."):
+        try:
+            source_buffer = open(target_files[url], "r").read()
+            url_regex = re.findall(regex, source_buffer)
+            if url_regex != []:
+                for val in url_regex:
+                    if val not in value_array:
+                        if "<" in val:
+                            value_array.append(val.split("<")[0])
+                        else:
+                            value_array.append(val)
+        except:
+            continue
 
+def pattern_scanner(target_pattern):
+    extracted_values = []
+    path = f"TargetAPK{path_seperator}sources{path_seperator}"
+    fnames = sc0pehelper.recursive_dir_scan(path)
+    if fnames != []:
+        pattern_scanner_ex(regex=target_pattern,
+                           target_files=fnames,
+                           target_type="sources",
+                           value_array=extracted_values
+        )
+    path = f"TargetAPK{path_seperator}resources{path_seperator}"
+    fnames = sc0pehelper.recursive_dir_scan(path)
+    if fnames != []:
+        pattern_scanner_ex(regex=target_pattern,
+                           target_files=fnames,
+                           target_type="resources",
+                           value_array=extracted_values
+        )
+
+    if extracted_values != []:
+        return extracted_values
+    else:
+        return []
+
+# Scan files for url and ip patterns
+def Get_IP_URL(targetAPK):
+    print(f"\n{infoS} Looking for possible IP address patterns. Please wait...")
+    ip_vals = pattern_scanner(target_pattern=r"^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$")
     # Extract ip addresses from file
-    ipTables = Table()
-    ipTables.add_column("[bold green]IP Address", justify="center")
-    ipTables.add_column("[bold green]Country", justify="center")
-    ipTables.add_column("[bold green]City", justify="center")
-    ipTables.add_column("[bold green]Region", justify="center")
-    ipTables.add_column("[bold green]ISP", justify="center")
-    ipTables.add_column("[bold green]Proxy", justify="center")
-    ipTables.add_column("[bold green]Hosting", justify="center")
-    if len(forensic.get_ip()) != 0:
-        for ips in forensic.get_ip():
+    if ip_vals != []:
+        ipTables = Table()
+        ipTables.add_column("[bold green]IP Address", justify="center")
+        ipTables.add_column("[bold green]Country", justify="center")
+        ipTables.add_column("[bold green]City", justify="center")
+        ipTables.add_column("[bold green]Region", justify="center")
+        ipTables.add_column("[bold green]ISP", justify="center")
+        ipTables.add_column("[bold green]Proxy", justify="center")
+        ipTables.add_column("[bold green]Hosting", justify="center")
+        for ips in ip_vals:
             if ips[0] != '0':
                 data = requests.get(f"http://ip-api.com/json/{ips}?fields=status,message,country,countryCode,region,regionName,city,isp,proxy,hosting")
                 if data.json()['status'] != 'fail':
@@ -311,20 +341,19 @@ def Quarked(targetAPK):
                     )
         print(ipTables)
     else:
-        not_found_indicator += 1
+        print(f"{errorS} There is no possible IP address pattern found!")
     
-    # Extract domains from file
-    domainTable = Table()
-    domainTable.add_column("[bold green]Extracted URL\'s", justify="center")
-    if len(forensic.get_url()) != 0:
-        for urls in forensic.get_url():
-            domainTable.add_row(str(urls))
-        print(domainTable)
+    # Extract url values
+    print(f"\n{infoS} Looking for URL values. Please wait...")
+    url_vals = pattern_scanner(target_pattern=r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
+    if url_vals != []:
+        urltable = Table()
+        urltable.add_column("[bold green]Extracted URL Values", justify="center")
+        for uv in url_vals:
+            urltable.add_row(str(uv))
+        print(urltable)
     else:
-        not_found_indicator += 1
-
-    if not_found_indicator == 2:
-        print("\n[bold white on red]There is no Email or IP string found in target file!\n")
+        print(f"{errorS} There is no URL pattern found!")
 
 # Permission analyzer
 def Analyzer(parsed):
@@ -514,8 +543,8 @@ if __name__ == '__main__':
         print(f"\n{infoS} Performing source code analysis...")
         ScanSource(targetAPK)
 
-        # Quark scanner
-        Quarked(targetAPK)
+        # IP and URL value scan
+        Get_IP_URL(targetAPK)
 
         # Print reports
         if sys.argv[2] == "True":

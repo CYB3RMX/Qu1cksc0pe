@@ -9,6 +9,17 @@ $infoS = "$cyan[$red*$cyan]$default"
 $errorS = "$cyan[$red!$cyan]$default"
 $succesS = "$cyan[$red+$cyan]$default"
 
+# Checking for python
+if (Get-Command python -ErrorAction SilentlyContinue){
+    Write-Host "$infoS Fetching Python version..."
+    $python_version = (Get-Command python).Version.ToString(2).Replace(".", "")
+} else {
+    Write-Host "$errorS Looks like you don't have$green Python$default. Quitting!"
+    Write-Host "$infoS You need to install Python$green 3.10 or higher$default version!"
+    sleep 3
+    exit
+}
+
 # Python module installation
 if (Get-Command pip -ErrorAction SilentlyContinue) {
     Write-Host "$infoS Installing necessary Python modules..."
@@ -107,42 +118,7 @@ if (Test-Path "$env:LOCALAPPDATA\programs\Python\Python310\Lib\site-packages\sc0
     Write-Host "$succesS$green sc0pe_helper$default is already exist."
 } else {
     Write-Host "$infoS Copying$green sc0pe_helper$default..."
-    Copy-Item -Path .\Modules\lib\sc0pe_helper.py -Destination "$env:LOCALAPPDATA\programs\Python\Python310\Lib\site-packages\"
-}
-
-# Checking exiftool command
-Write-Host "`n$infoS Checking$green exiftool$default command..."
-if (Get-Command exiftool -ErrorAction SilentlyContinue) {
-    Write-Host "$succesS$green exiftool$default command is already exist."
-} else {
-    Write-Host "$infoS Fetching version information..."
-    $ver = Invoke-WebRequest -Uri "https://exiftool.org/ver.txt"
-    $verz = $ver.Content
-    Write-Host "$infoS Downloading$green exiftool$default command..."
-    wget "https://exiftool.org/exiftool-$verz.zip" -O exiftool.zip
-    Write-Host "$infoS Extracting archive..."
-    Expand-Archive -Path .\exiftool.zip -DestinationPath .\exiftool
-    Write-Host "$infoS Installing command..."
-    Move-Item -Path ".\exiftool\exiftool(-k).exe" -Destination .
-    Rename-Item -Path ".\exiftool(-k).exe" -NewName ".\exiftool.exe"
-    Copy-Item -Path ".\exiftool.exe" -Destination "C:\Windows\System32"
-    Write-Host "$infoS Removing junk files..."
-    Remove-Item -Path .\exiftool.zip -Force -Recurse
-    Remove-Item -Path .\exiftool -Force -Recurse
-    Remove-Item -Path ".\exiftool.exe" -Force -Recurse
-}
-
-# Check for PyExifTool
-Write-Host "`n$infoS Checking$green PyExifTool$default..."
-if (dir "$env:LOCALAPPDATA\programs\Python\Python310\Lib\site-packages\" | findstr "PyExifTool") {
-    Write-Host "$succesS$green PyExifTool$default is already exist."
-} else {
-    Write-Host "$infoS Installing$green PyExifTool$default..."
-    git clone "https://github.com/smarnach/pyexiftool.git"
-    cd .\pyexiftool
-    python .\setup.py install
-    cd ..
-    Remove-Item -Path .\pyexiftool -Force -Recurse
+    Copy-Item -Path .\Modules\lib\sc0pe_helper.py -Destination "$env:LOCALAPPDATA\programs\Python\Python$python_version\Lib\site-packages\"
 }
 
 # Installing android platform tools

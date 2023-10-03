@@ -38,9 +38,13 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ```
 
 # Screenshot
-![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/14839679-5751-4f8a-81e0-34c96c607842)
+![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/a637d9cb-697f-4797-a45f-57f1d4420e17)
 
 # Updates
+<b>04/10/2023</b>
+- [X] Improvements on ```Android Static Analyzer```
+- [X] Bug fixes.
+
 <b>29/09/2023</b>
 - [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe is now able to analyze ```Rich Text Format (.rtf)``` documents. You can perform:
 - Detection and extraction of embedded exploits/scripts from malicious .rtf documents. (CVE-2017-11882)
@@ -51,9 +55,6 @@ https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/eb5ef083-7669-4575-b587-65
 <b>17/09/2023</b>
 - [X] Compatibility has been added for Windows. Qu1cksc0pe can now run on Windows 10 or 11!
 - [x] Lots of improvements and bug fixes.
-
-<b>01/09/2023</b>
-- [X] ```Android Dynamic Analyzer``` module is significantly upgraded.
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
@@ -68,9 +69,9 @@ https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/eb5ef083-7669-4575-b587-65
 
 # Setup and Installation
 <br><b>Necessary Dependencies</b>:
+- <i>Python ```3.10``` or higher versions.</i>
 - ```VirusTotal API Key``` => <i>Performing VirusTotal based analysis.</i>
 - ```Strings``` => <i>Necessary for static analysis.</i>
-- ```PyExifTool``` => <i>Metadata extraction.</i>
 - ```Jadx``` => <i>Performing source code and resource analysis.</i>
 - ```PyOneNote``` => <i>OneNote document analysis.</i>
 - ```Mono``` => <i>Performing .Net binary analysis.</i>
