@@ -114,7 +114,7 @@ if (Get-Command pyonenote.exe -ErrorAction SilentlyContinue) {
 
 # Copying sc0pe_helper
 Write-Host "`n$infoS Checking$green sc0pe_helper$default"
-if (Test-Path "$env:LOCALAPPDATA\programs\Python\Python310\Lib\site-packages\sc0pe_helper.py") {
+if (Test-Path "$env:LOCALAPPDATA\programs\Python\Python$python_version\Lib\site-packages\sc0pe_helper.py") {
     Write-Host "$succesS$green sc0pe_helper$default is already exist."
 } else {
     Write-Host "$infoS Copying$green sc0pe_helper$default..."

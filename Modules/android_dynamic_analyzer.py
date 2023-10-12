@@ -47,6 +47,7 @@ sc0pe_path = open(".path_handler", "r").read()
 
 # Compatibility
 homeD = os.path.expanduser("~")
+py_version = sys.version_info[1]
 sc0pe_helper_path = "/usr/lib/python3/dist-packages/sc0pe_helper.py"
 path_seperator = "/"
 setup_scr = "setup.sh"
@@ -54,7 +55,7 @@ strings_param = "--all"
 adb_path = distutils.spawn.find_executable("adb")
 del_com = "rm -rf"
 if sys.platform == "win32":
-    sc0pe_helper_path = f"{homeD}\\appdata\\local\\programs\\python\\python310\\lib\\site-packages\\sc0pe_helper.py"
+    sc0pe_helper_path = f"{homeD}\\appdata\\local\\programs\\python\\python3{py_version}\\lib\\site-packages\\sc0pe_helper.py"
     path_seperator = "\\"
     setup_scr = "setup.ps1"
     strings_param = "-a"

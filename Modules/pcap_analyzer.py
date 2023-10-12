@@ -4,6 +4,7 @@ import re
 import os
 import sys
 import binascii
+import distutils.spawn
 
 try:
     from rich import print
@@ -22,6 +23,12 @@ except:
 #--------------------------------------------- Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
+
+# Get python binary
+if distutils.spawn.find_executable("python3"):
+    py_binary = "python3"
+else:
+    py_binary = "python"
 
 # Compatibility
 path_seperator = "/"
@@ -145,7 +152,7 @@ class PcapAnalyzer:
         if valid_offsets != []:
             print(f"{infoS} This PCAP file contains [bold red]{len(valid_offsets)}[white] possible executable files!!")
             print(f"{infoS} Executing [bold green]SignatureAnalyzer[white] for embedded file extraction...")
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}sigChecker.py \"{self.pcap_file}\""
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}sigChecker.py \"{self.pcap_file}\""
             os.system(command)
         else:
             print(f"{errorS} There is no executable file pattern found!")

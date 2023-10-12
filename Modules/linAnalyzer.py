@@ -27,11 +27,12 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # Compatibility
 homeD = os.path.expanduser("~")
+py_version = sys.version_info[1]
 sc0pe_helper_path = "/usr/lib/python3/dist-packages/sc0pe_helper.py"
 path_seperator = "/"
 setup_scr = "setup.sh"
 if sys.platform == "win32":
-    sc0pe_helper_path = f"{homeD}\\appdata\\local\\programs\\python\\python310\\lib\\site-packages\\sc0pe_helper.py"
+    sc0pe_helper_path = f"{homeD}\\appdata\\local\\programs\\python\\python3{py_version}\\lib\\site-packages\\sc0pe_helper.py"
     path_seperator = "\\"
     setup_scr = "setup.ps1"
 
