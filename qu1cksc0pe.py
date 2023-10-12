@@ -63,8 +63,15 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 # Gathering username
 username = getpass.getuser()
 
+# Get python binary
+if distutils.spawn.find_executable("python3"):
+    py_binary = "python3"
+else:
+    py_binary = "python"
+
 # Make Qu1cksc0pe work on Windows, Linux, OSX
 homeD = os.path.expanduser("~")
+py_version = sys.version_info[1]
 path_seperator = "/"
 allA = "--all" # strings parameter
 sc0pe_helper_path = "/usr/lib/python3/dist-packages/sc0pe_helper.py"
@@ -74,7 +81,7 @@ if sys.platform == "darwin":
 elif sys.platform == "win32":
     path_seperator = "\\"
     allA = "-a"
-    sc0pe_helper_path = f"{homeD}\\appdata\\local\\programs\\python\\python310\\lib\\site-packages\\sc0pe_helper.py"
+    sc0pe_helper_path = f"{homeD}\\appdata\\local\\programs\\python\\python3{py_version}\\lib\\site-packages\\sc0pe_helper.py"
     setup_scr = "setup.ps1"
 else:
     pass
@@ -112,7 +119,7 @@ else:
     sys.exit(1)
 
 # Banner
-os.system(f"python {sc0pe_path}{path_seperator}Modules{path_seperator}banners.py")
+os.system(f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}banners.py")
 
 # Argument crating, parsing and handling
 parser = argparse.ArgumentParser()
@@ -172,24 +179,24 @@ def BasicAnalyzer(analyzeFile):
     if "Windows Executable" in fileType or ".msi" in fileType or ".dll" in fileType or ".exe" in fileType:
         print(f"{infoS} Target OS: [bold green]Windows[white]\n")
         if args.report:
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}winAnalyzer.py \"{analyzeFile}\" True"
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}winAnalyzer.py \"{analyzeFile}\" True"
         else:
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}winAnalyzer.py \"{analyzeFile}\" False"
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}winAnalyzer.py \"{analyzeFile}\" False"
         os.system(command)
 
     # Linux Analysis
     elif "ELF" in fileType:
         print(f"{infoS} Target OS: [bold green]Linux[white]\n")
         if args.report:
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}linAnalyzer.py \"{analyzeFile}\" True"
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}linAnalyzer.py \"{analyzeFile}\" True"
         else:
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}linAnalyzer.py \"{analyzeFile}\" False"
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}linAnalyzer.py \"{analyzeFile}\" False"
         os.system(command)
 
     # MacOSX Analysis
     elif "Mach-O" in fileType:
         print(f"{infoS} Target OS: [bold green]OSX[white]\n")
-        command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}osXAnalyzer.py \"{analyzeFile}\""
+        command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}osXAnalyzer.py \"{analyzeFile}\""
         os.system(command)
 
     # Android Analysis
@@ -205,38 +212,38 @@ def BasicAnalyzer(analyzeFile):
         if look.is_valid_APK() == True:
             print(f"{infoS} Target OS: [bold green]Android[white]")
             if args.report:
-                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}apkAnalyzer.py \"{analyzeFile}\" True APK"
+                command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}apkAnalyzer.py \"{analyzeFile}\" True APK"
             else:
-                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}apkAnalyzer.py \"{analyzeFile}\" False APK"
+                command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}apkAnalyzer.py \"{analyzeFile}\" False APK"
             os.system(command)
             # APP Security
             choice = str(input(f"\n{infoC} Do you want to check target app\'s security? This process will take a while.[Y/n]: "))
             if choice == "Y" or choice == "y":
-                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}apkSecCheck.py"
+                command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}apkSecCheck.py"
                 os.system(command)
             else:
                 pass
         else:
             # If given file is a JAR file then run JAR file analysis
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}apkAnalyzer.py \"{analyzeFile}\" False JAR"
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}apkAnalyzer.py \"{analyzeFile}\" False JAR"
             os.system(command)
 
     # Pcap analysis
     elif "pcap" in fileType or "capture file" in fileType:
         print(f"{infoS} Performing [bold green]PCAP[while] analysis...\n")
-        command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}pcap_analyzer.py \"{analyzeFile}\""
+        command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}pcap_analyzer.py \"{analyzeFile}\""
         os.system(command)
 
     # Powershell analysis
     elif ".ps1" in analyzeFile:
         print(f"{infoS} Performing [bold green]Powershell Script[white] analysis...\n")
-        command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}powershell_analyzer.py \"{analyzeFile}\""
+        command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}powershell_analyzer.py \"{analyzeFile}\""
         os.system(command)
 
     # Email file analysis
     elif "email message" in fileType or "message/rfc822" in fileType:
         print(f"{infoS} Performing [bold green]Email File[white] analysis...\n")
-        command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}email_analyzer.py \"{analyzeFile}\""
+        command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}email_analyzer.py \"{analyzeFile}\""
         os.system(command)
     else:
         print("\n[bold white on red]File type not supported. Make sure you are analyze executable files or document files.")
@@ -263,14 +270,14 @@ def Qu1cksc0pe():
                 if args.archive:
                     # Because why not!
                     print(f"{infoS} Analyzing: [bold green]{args.file}[white]")
-                    command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}archiveAnalyzer.py \"{args.file}\""
+                    command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}archiveAnalyzer.py \"{args.file}\""
                     os.system(command)
                     sys.exit(0)
 
                 # Check for embedded executables by default!
                 if not args.sigcheck:
                     print(f"{infoS} Executing [bold green]SignatureAnalyzer[white] module...")
-                    command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}sigChecker.py \"{args.file}\""
+                    command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}sigChecker.py \"{args.file}\""
                     os.system(command)
                     sys.exit(0)
         else:
@@ -292,7 +299,7 @@ def Qu1cksc0pe():
         # Handling --file argument
         if args.file is not None:
             print(f"{infoS} Analyzing: [bold green]{args.file}[white]")
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}archiveAnalyzer.py \"{args.file}\""
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}archiveAnalyzer.py \"{args.file}\""
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
@@ -304,7 +311,7 @@ def Qu1cksc0pe():
         # Handling --file argument
         if args.file is not None:
             print(f"{infoS} Analyzing: [bold green]{args.file}[white]")
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}document_analyzer.py \"{args.file}\""
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}document_analyzer.py \"{args.file}\""
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
@@ -315,18 +322,18 @@ def Qu1cksc0pe():
     if args.hashscan:
         # Handling --file argument
         if args.file is not None:
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}hashScanner.py \"{args.file}\" --normal"
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}hashScanner.py \"{args.file}\" --normal"
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}hashScanner.py {args.folder} --multiscan"
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}hashScanner.py {args.folder} --multiscan"
             os.system(command)
 
     # File signature scanner
     if args.sigcheck:
         # Handling --file argument
         if args.file is not None:
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}sigChecker.py \"{args.file}\""
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}sigChecker.py \"{args.file}\""
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
@@ -337,7 +344,7 @@ def Qu1cksc0pe():
     if args.resource:
         # Handling --file argument
         if args.file is not None:
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}resourceChecker.py \"{args.file}\""
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}resourceChecker.py \"{args.file}\""
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
@@ -348,7 +355,7 @@ def Qu1cksc0pe():
     if args.mitre:
         # Handling --file argument
         if args.file is not None:
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}mitre.py \"{args.file}\""
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}mitre.py \"{args.file}\""
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
@@ -359,7 +366,7 @@ def Qu1cksc0pe():
     if args.lang:
         # Handling --file argument
         if args.file is not None:
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}languageDetect.py \"{args.file}\""
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}languageDetect.py \"{args.file}\""
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
@@ -382,7 +389,7 @@ def Qu1cksc0pe():
                 print("[bold]Please get your API key from -> [bold green][a]https://www.virustotal.com/[/a]\n")
                 sys.exit(1)
             else:
-                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}VTwrapper.py {apik[0]} \"{args.file}\""
+                command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}VTwrapper.py {apik[0]} \"{args.file}\""
                 os.system(command)
         # Handling --folder argument
         if args.folder is not None:
@@ -393,18 +400,18 @@ def Qu1cksc0pe():
     if args.packer:
         # Handling --file argument
         if args.file is not None:
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}packerAnalyzer.py --single \"{args.file}\""
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}packerAnalyzer.py --single \"{args.file}\""
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}packerAnalyzer.py --multiscan {args.folder}"
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}packerAnalyzer.py --multiscan {args.folder}"
             os.system(command)
 
     # domain extraction
     if args.domain:
         # Handling --file argument
         if args.file is not None:
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}domainCatcher.py"
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}domainCatcher.py"
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
@@ -415,7 +422,7 @@ def Qu1cksc0pe():
     if args.watch:
         # Handling --file argument
         if args.file is not None:
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}emulator.py \"{args.file}\""
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}emulator.py \"{args.file}\""
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:
@@ -424,7 +431,7 @@ def Qu1cksc0pe():
 
     # Interactive shell
     if args.console:
-        command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}console.py"
+        command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}console.py"
         os.system(command)
 
     # Virtual environment setup
@@ -433,7 +440,7 @@ def Qu1cksc0pe():
 
     # Database update
     if args.db_update:
-        command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}hashScanner.py --db_update"
+        command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}hashScanner.py --db_update"
         os.system(command)
 
     # entering VT API key

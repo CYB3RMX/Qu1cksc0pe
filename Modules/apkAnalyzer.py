@@ -7,6 +7,7 @@ import os
 import getpass
 import configparser
 import requests
+import distutils.spawn
 from datetime import date
 
 # Module handling
@@ -50,13 +51,20 @@ infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 foundS = f"[bold cyan][[bold red]+[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
+# Get python binary
+if distutils.spawn.find_executable("python3"):
+    py_binary = "python3"
+else:
+    py_binary = "python"
+
 # Compatibility
 homeD = os.path.expanduser("~")
+py_version = sys.version_info[1]
 sc0pe_helper_path = "/usr/lib/python3/dist-packages/sc0pe_helper.py"
 path_seperator = "/"
 setup_scr = "setup.sh"
 if sys.platform == "win32":
-    sc0pe_helper_path = f"{homeD}\\appdata\\local\\programs\\python\\python310\\lib\\site-packages\\sc0pe_helper.py"
+    sc0pe_helper_path = f"{homeD}\\appdata\\local\\programs\\python\\python3{py_version}\\lib\\site-packages\\sc0pe_helper.py"
     path_seperator = "\\"
     setup_scr = "setup.ps1"
 
@@ -536,7 +544,7 @@ if __name__ == '__main__':
 
         # Malware family detection
         print(f"\n{infoS} Performing malware family detection. Please wait!!")
-        command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}andro_familydetect.py \"{targetAPK}\""
+        command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}andro_familydetect.py \"{targetAPK}\""
         os.system(command)
 
         # Source code analysis zone

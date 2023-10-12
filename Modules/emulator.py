@@ -5,6 +5,7 @@ import sys
 import time
 import math
 import requests
+import distutils.spawn
 from subprocess import Popen, PIPE
 
 try:
@@ -49,6 +50,12 @@ infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 
 # Target file
 targetFile = sys.argv[1]
+
+# Get python binary
+if distutils.spawn.find_executable("python3"):
+    py_binary = "python3"
+else:
+    py_binary = "python"
 
 # Compatibility
 path_seperator = "/"
@@ -168,7 +175,7 @@ class DynamicAnalyzer:
                     sys.exit(1)
         # ------Android emulation side-------
         elif target_os == "Android":
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}android_dynamic_analyzer.py \"{targetFile}\""
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}android_dynamic_analyzer.py \"{targetFile}\""
             os.system(command)
         else:
             print(f"{errorS} Unsupported OS.")

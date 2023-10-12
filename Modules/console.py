@@ -56,6 +56,12 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 # Path variable
 sc0pe_path = open(".path_handler", "r").read()
 
+# Get python binary
+if distutils.spawn.find_executable("python3"):
+    py_binary = "python3"
+else:
+    py_binary = "python"
+
 # User home detection and compatibility
 homeD = os.path.expanduser("~")
 path_seperator = "/"
@@ -183,7 +189,7 @@ try:
                 fileType = str(pr.magic_file(filename))
                 if "Windows Executable" in fileType or ".msi" in fileType or ".dll" in fileType or ".exe" in fileType:
                     print(f"{infoS} Target OS: [bold green]Windows[white]\n")
-                    command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}winAnalyzer.py \"{filename}\""
+                    command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}winAnalyzer.py \"{filename}\""
                     os.system(command)
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
@@ -198,7 +204,7 @@ try:
                     if distutils.spawn.find_executable("strings"):
                         str_proc = subprocess.run(f"strings {strings_param} \"{filename}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                         print(f"{infoS} Target OS: [bold green]Linux[white]\n")
-                        command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}linAnalyzer.py \"{filename}\""
+                        command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}linAnalyzer.py \"{filename}\""
                         os.system(command)
                         os.remove(f"{sc0pe_path}{path_seperator}temp.txt")
                     else:
@@ -217,7 +223,7 @@ try:
                     if distutils.spawn.find_executable("strings"):
                         str_proc = subprocess.run(f"strings {strings_param} \"{filename}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                         print(f"{infoS} Target OS: [bold green]OSX[white]\n")
-                        command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}osXAnalyzer.py \"{filename}\""
+                        command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}osXAnalyzer.py \"{filename}\""
                         os.system(command)
                         os.remove(f"{sc0pe_path}{path_seperator}temp.txt")
                     else:
@@ -238,7 +244,7 @@ try:
                         if distutils.spawn.find_executable("strings"):
                             str_proc = subprocess.run(f"strings {strings_param} \"{filename}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                             print(f"{infoS} Target OS: [bold green]Android[white]")    
-                            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}apkAnalyzer.py \"{filename}\""
+                            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}apkAnalyzer.py \"{filename}\""
                             os.system(command)
                             os.remove(f"{sc0pe_path}{path_seperator}temp.txt")
                         else:
@@ -255,7 +261,7 @@ try:
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
                 print(f"{infoS} Analyzing: [bold green]{filename}[white]")
-                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}document_analyzer.py \"{filename}\""
+                command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}document_analyzer.py \"{filename}\""
                 os.system(command)
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
@@ -266,7 +272,7 @@ try:
                 filename = open(".target-file.txt", "r").read()
                 if distutils.spawn.find_executable("strings"):
                     str_proc = subprocess.run(f"strings {strings_param} \"{filename}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-                    command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}domainCatcher.py \"{filename}\""
+                    command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}domainCatcher.py \"{filename}\""
                     os.system(command)
                     os.remove(f"{sc0pe_path}{path_seperator}temp.txt")
                 else:
@@ -281,7 +287,7 @@ try:
                 filename = open(".target-file.txt", "r").read()
                 if distutils.spawn.find_executable("strings"):
                     str_proc = subprocess.run(f"strings {strings_param} \"{filename}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-                    command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}languageDetect.py \"{filename}\""
+                    command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}languageDetect.py \"{filename}\""
                     os.system(command)
                     os.remove(f"{sc0pe_path}{path_seperator}temp.txt")
                 else:
@@ -294,7 +300,7 @@ try:
         elif con_command == "packer":
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
-                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}packerAnalyzer.py \"{filename}\" --single"
+                command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}packerAnalyzer.py \"{filename}\" --single"
                 os.system(command)
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
@@ -303,7 +309,7 @@ try:
         elif con_command == "hash-scan":
             if os.path.exists(".target-folder.txt"):
                 foldername = open(".target-folder.txt", "r").read()
-                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}hashScanner.py {foldername} --multiscan"
+                command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}hashScanner.py {foldername} --multiscan"
                 os.system(command)
             else:
                 print(f"{errorS} You must specify target folder with [bold green]set target-folder[white] command.")
@@ -312,7 +318,7 @@ try:
         elif con_command == "sigcheck":
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
-                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}sigChecker.py \"{filename}\""
+                command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}sigChecker.py \"{filename}\""
                 os.system(command)
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
@@ -321,7 +327,7 @@ try:
         elif con_command == "resource-scan":
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
-                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}resourceChecker.py \"{filename}\""
+                command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}resourceChecker.py \"{filename}\""
                 os.system(command)
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
@@ -357,13 +363,12 @@ try:
                 print(f"{errorS} Please get your API key from -> [bold green]https://www.virustotal.com/[white]")
                 sys.exit(1)
             else:
-                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}VTwrapper.py {apik[0]} \"{filename}\""
+                command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}VTwrapper.py {apik[0]} \"{filename}\""
                 os.system(command)
 
         # Wrong command
         else:
             print(f"{errorS} Wrong command :(")
 
-except Exception as err:
-    print(err)
+except:
     sys.exit(1)

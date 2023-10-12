@@ -5,6 +5,7 @@ import re
 import sys
 import email
 import subprocess
+import distutils.spawn
 
 try:
     from rich import print
@@ -23,6 +24,12 @@ except:
 # Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
+
+# Get python binary
+if distutils.spawn.find_executable("python3"):
+    py_binary = "python3"
+else:
+    py_binary = "python"
 
 # Compatibility
 path_seperator = "/"
@@ -75,19 +82,19 @@ class EmailAnalyzer:
         if "Microsoft Office Word" in parsed_type or "Microsoft Excel" in parsed_type or "PDF" in parsed_type:
             print(f"\n{infoS} Attachment Type: [bold green]Document[white]")
             print(f"{infoS} Executing: [bold green]DocumentAnalyzer[white] against [bold cyan]{target_attach}[white]")
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}document_analyzer.py \"{target_attach}\""
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}document_analyzer.py \"{target_attach}\""
             os.system(command)
         # Analyze executable files and anothers
         elif "executable" in parsed_type:
             if "PE" in parsed_type or ".Net" in parsed_type:
                 print(f"\n{infoS} Attachment Type: [bold green]Windows Executable[white]")
                 print(f"{infoS} Executing: [bold green]WindowsAnalyzer[white] against [bold cyan]{target_attach}[white]")
-                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}winAnalyzer.py \"{target_attach}\""
+                command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}winAnalyzer.py \"{target_attach}\""
                 os.system(command)
             elif "ELF" in parsed_type:
                 print(f"\n{infoS} Attachment Type: [bold green]Linux/Unix Executable[white]")
                 print(f"{infoS} Executing: [bold green]LinuxAnalyzer[white] against [bold cyan]{target_attach}[white]")
-                command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}linAnalyzer.py \"{target_attach}\""
+                command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}linAnalyzer.py \"{target_attach}\""
                 os.system(command)
             else:
                 print(f"{errorS} Executable type not supported!\n")
@@ -95,11 +102,11 @@ class EmailAnalyzer:
         elif "archive data" in parsed_type:
             print(f"\n{infoS} Attachment Type: [bold green]Archive File[white]")
             print(f"{infoS} Executing: [bold green]ArchiveAnalyzer[white] against [bold cyan]{target_attach}[white]")
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}archiveAnalyzer.py \"{target_attach}\""
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}archiveAnalyzer.py \"{target_attach}\""
             os.system(command)
         else:
             print(f"\n{infoS} Executing: [bold green]SignatureAnalyzer[white] against [bold cyan]{target_attach}[white]")
-            command = f"python {sc0pe_path}{path_seperator}Modules{path_seperator}sigChecker.py \"{target_attach}\""
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}sigChecker.py \"{target_attach}\""
             os.system(command)
 
     def check_blacklist_domain(self, target_email):

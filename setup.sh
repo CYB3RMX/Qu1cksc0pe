@@ -46,6 +46,15 @@ else
     echo -en "${info} ${green}sc0pe_Base${default} folder is already exist in ${green}/home/$USER${default}...\n"
 fi
 
+# Check for ADB command
+if command -v adb &>/dev/null; then
+    echo -en "${success} ${green}ADB${default} command is already exist!"
+else
+    echo -en "${error} ADB command is not installed on this system. Installing it for you..."
+    sudo ${package_manager} adb
+    echo -en "${success} Done!\n"
+fi
+
 # Downloading and setup Jadx from Github if its not exist in sc0pe_Base folder
 if [ ! -d "/home/$USER/sc0pe_Base/jadx" ]; then
     echo -en "${info} Downloading Jadx...\n"
