@@ -63,6 +63,7 @@ language_dict = {
     }
 }
 
+
 # This function scans special strings in binary files
 def LanguageDetect():
     print(f"{infoS} Performing language detection. Please wait!!")
@@ -77,7 +78,7 @@ def LanguageDetect():
         for pat in language_dict[key]["patterns"]:
             try:
                 matches = re.findall(pat, str(allStrings))
-                if matches != []:
+                if matches:
                     language_dict[key]["occurence"] += len(matches)
                     indicator += 1
             except:
@@ -101,6 +102,7 @@ def LanguageDetect():
         print(f"{errorS} Programming language couldn\'t detected. This file is might be obfuscated!\n")
         sys.exit(1)
 
+
 # This function analyses if given file is an executable file
 def ExecutableCheck(fileName):
     exe_indicator = 0
@@ -117,9 +119,11 @@ def ExecutableCheck(fileName):
     except:
         pass
 
+
 # Execution
-if ExecutableCheck(fileName) == True:
+if ExecutableCheck(fileName):
     LanguageDetect()
 else:
     print(f"{errorS} Please scan executable files.\n")
     sys.exit(1)
+    
