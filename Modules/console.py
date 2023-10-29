@@ -93,9 +93,11 @@ console_output = [
     ('class:input', ''),
 ]
 
+
 # File path completer
 def complete(text, state):
     return (glob.glob(text+"*")+[None])[state]
+
 
 readline.set_completer_delims(" \t\n;")
 readline.parse_and_bind("tab: complete")
@@ -241,7 +243,7 @@ try:
                 fileType = str(pr.magic_file(filename))
                 if "PK" in fileType and "Java archive" in fileType:
                     look = pyaxmlparser.APK(filename)
-                    if look.is_valid_APK() == True:
+                    if look.is_valid_APK():
                         if distutils.spawn.find_executable("strings"):
                             str_proc = subprocess.run(f"strings {strings_param} \"{filename}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                             print(f"{infoS} Target OS: [bold green]Android[white]")    
@@ -315,7 +317,7 @@ try:
             else:
                 print(f"{errorS} You must specify target folder with [bold green]set target-folder[white] command.")
 
-         # File signature analysis
+        # File signature analysis
         elif con_command == "sigcheck":
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
@@ -373,3 +375,4 @@ try:
 
 except:
     sys.exit(1)
+    
