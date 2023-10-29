@@ -54,6 +54,7 @@ sc0pe_path = open(".path_handler", "r").read()
 # Target file
 targetFile = sys.argv[1]
 
+
 class ArchiveAnalyzer:
     def __init__(self, targetFile):
         self.targetFile = targetFile
@@ -167,7 +168,7 @@ class ArchiveAnalyzer:
         # Get all strings from file and search url patterns
         strings_buffer = subprocess.run(["strings", strings_param, self.url_target], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         url_occur = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", str(strings_buffer.stdout.decode().split("\n")))
-        if url_occur != []:
+        if url_occur:
             extract = []
             url_table = Table()
             url_table.add_column(f"[bold green]Embedded URL\'s in [bold red]{self.url_target}[white]", justify="center")
@@ -198,16 +199,16 @@ class ArchiveAnalyzer:
             try:
                 rules = yara.compile(f"{finalpath}{rul}")
                 tempmatch = rules.match(self.yara_target)
-                if tempmatch != []:
+                if tempmatch:
                     for matched in tempmatch:
-                        if matched.strings != []:
+                        if matched.strings:
                             if matched not in yara_matches:
                                 yara_matches.append(matched)
             except:
                 continue
 
         # Printing area
-        if yara_matches != []:
+        if yara_matches:
             yara_match_indicator += 1
             yaraTable = Table()
             yaraTable.add_column(f"[bold green]Matched YARA Rules for: [bold red]{self.yara_target}[white]", justify="center")
@@ -217,6 +218,7 @@ class ArchiveAnalyzer:
 
         if yara_match_indicator == 0:
             print(f"[bold white on red]There is no rules matched for {self.yara_target}")
+
 
 # Execution
 arch_analyzer = ArchiveAnalyzer(targetFile)
@@ -233,3 +235,4 @@ elif artype == "type_ace":
 else:
     print(f"{errorS} Archive type not supported.")
     sys.exit(1)
+    
