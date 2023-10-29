@@ -42,6 +42,7 @@ file_sigs = {'UPX': 'UPX0', 'AsPack': '.aspack', 'ConfuserEx v0.6.0': 'ConfuserE
             'UPX!': 'UPX!', 'Confuser v1.9.0.0': 'Confuser v1.9.0.0', 'PEtite': 'petite',
             'MPRESS_1': 'MPRESS1', 'MPRESS_2': 'MPRESS2H'}
 
+
 # YARA rule based scanner
 def YaraBased(target_file):
     # Indicator
@@ -56,15 +57,15 @@ def YaraBased(target_file):
         try:
             rules = yara.compile(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}Packer_Rules{path_seperator}{rul}")
             tempmatch = rules.match(target_file)
-            if tempmatch != []:
+            if tempmatch:
                 for matched in tempmatch:
-                    if matched.strings != []:
+                    if matched.strings:
                         yara_matches.append(matched)
         except:
             continue
 
     # Printing area
-    if yara_matches != []:
+    if yara_matches:
         yara_match_indicator += 1
         for rul in yara_matches:
             yaraTable = Table()
@@ -80,11 +81,12 @@ def YaraBased(target_file):
     if yara_match_indicator == 0:
         print(f"[bold white on red]There is no rules matched for {target_file}")
 
+
 # Simple analyzer function
 def Analyzer():
     # Getting file's all strings to analyze
     try:
-        if os.path.isfile(targetFile) == True:
+        if os.path.isfile(targetFile):
             data = open(targetFile, "rb").read()
         else:
             pass
@@ -113,6 +115,7 @@ def Analyzer():
     print("[bold magenta]>>>[white] Performing [bold green][blink]YARA Rule[/blink] [white]based scan...")
     YaraBased(target_file=targetFile)
 
+
 # Multiple analyzer function
 def MultiAnalyzer():
     # Creating summary table
@@ -122,20 +125,20 @@ def MultiAnalyzer():
     answers.add_column("[bold green]Packer Type", justify="center")
 
     # Handling folders
-    if os.path.isdir(targetFile) == True:
+    if os.path.isdir(targetFile):
         allFiles = os.listdir(targetFile)
         # How many files in that folder?
         filNum = 0
         for _ in allFiles:
             filNum += 1
-        # Lets scan them!!
+        # Let's scan them!!
         multipack = 0
         print("[bold red]>>>[white] Qu1cksc0pe scans everything under that folder for malicious things. [bold][blink]Please wait...[/blink]")
         for tf in tqdm(range(0, filNum), desc="Scanning..."):
             if allFiles[tf] != '':
                 scanme = f"{targetFile}{path_seperator}{allFiles[tf]}"
                 try:
-                    if os.path.isfile(scanme) == True:
+                    if os.path.isfile(scanme):
                         mulData = open(scanme, "rb").read()
                     else:
                         pass
@@ -155,6 +158,7 @@ def MultiAnalyzer():
             print(answers)
             print(" ")
 
+
 # Execute and clean up
 if __name__ == '__main__':
     if str(sys.argv[1]) == '--single':
@@ -169,3 +173,4 @@ if __name__ == '__main__':
             print("\n[bold white on red]Program terminated!\n")
     else:
         pass
+    
