@@ -140,12 +140,14 @@ allStrings = []
 for ssym in binary.symbols:
     allStrings.append(ssym.name)
 
+
 # Section content parser
 def ContentParser(sec_name, content_array):
     cont = ""
     for text in content_array:
         cont += chr(text)
     print(f"[bold magenta]>>[white] Section: [bold yellow]{sec_name}[white] | Content: [bold cyan]{cont}")
+
 
 # Binary security checker
 def SecCheck():
@@ -168,6 +170,7 @@ def SecCheck():
     linrep["security"]["NX"] = binary.has_nx
     linrep["security"]["PIE"] = binary.is_pie
 
+
 # General information
 def GeneralInformation():
     print(f"{infoS} General Informations about [bold green]{fileName}")
@@ -188,6 +191,7 @@ def GeneralInformation():
     linrep["number_of_segments"] = len(binary.segments)
     sc0pehelper.hash_calculator(fileName, linrep)
     SecCheck()
+
 
 # Gathering sections
 def SectionParser():
@@ -217,6 +221,7 @@ def SectionParser():
             )
     print(secTable)
 
+
 # Gathering segments
 def SegmentParser():
     segTable = Table(title="* Informations About Segments *", title_justify="center", title_style="bold italic cyan")
@@ -230,6 +235,7 @@ def SegmentParser():
             segTable.add_row(f"[bold red]{seg.type.name}", str(ssec))
             linrep["segments"].append(seg.type.name)
     print(segTable)
+
 
 # Analysis of Golang binaries
 def AnalyzeGolang():
@@ -258,12 +264,12 @@ def AnalyzeGolang():
     # Parse area
     for pk in go_pkgs:
         # Perform deep inspection for packages
-            # Parsing methods
+        # Parsing methods
         meth_table = Table(title="* Methods *", title_justify="center", title_style="bold italic cyan")
         meth_table.add_column("[bold green] Name", justify="center")
         meth_table.add_column("[bold green] Receiver", justify="center")
         meth_table.add_column("[bold green] Offset", justify="center")
-        if pk.methods != []:
+        if pk.methods:
             for meth in pk.methods:
                 meth_table.add_row(meth.name, meth.receiver, hex(meth.offset))
             print(meth_table)
@@ -274,7 +280,7 @@ def AnalyzeGolang():
         fun_table = Table(title="* Functions *", title_justify="center", title_style="bold italic cyan")
         fun_table.add_column("[bold green] Name", justify="center")
         fun_table.add_column("[bold green] Offset", justify="center")
-        if pk.functions != []:
+        if pk.functions:
             for func in pk.functions:
                 fun_table.add_row(func.name, hex(func.offset))
             print(fun_table)
@@ -284,12 +290,13 @@ def AnalyzeGolang():
     # Parsing imported libraries
     imp_table = Table(title="* Imported Libraries *", title_justify="center", title_style="bold italic cyan")
     imp_table.add_column("[bold green] Name", justify="center")
-    if go_imps != []:
+    if go_imps:
         for imp in go_imps:
             imp_table.add_row(imp.name)
         print(imp_table)
     else:
         print(f"\n[bold red]>>>[white] No imported libraries found\n")
+
 
 # Defining function
 def Analyzer():
@@ -300,9 +307,9 @@ def Analyzer():
             if elem in allStrings:
                 if elem != "":
                     Categs[key].append(elem)
-                    allFuncs +=1
+                    allFuncs += 1
     for key in Categs:
-        if Categs[key] != []:
+        if Categs[key]:
             if key == "Information Gathering" or key == "System/Persistence" or key == "Cryptography" or key == "Evasion":
                 tables = Table(title="* WARNING *", title_style="blink italic yellow", title_justify="center", style="yellow")
             else:
@@ -364,7 +371,7 @@ def Analyzer():
         if ".debug_" in sss.name:
             print(f"[bold red]>>>>[white] {sss.name}")
             debugs.append(sss.name)
-    if debugs != []:
+    if debugs:
         quest = str(input(f"\n>> Do you want to analyze debug strings?[Y/n]: "))
         if quest == "Y" or quest == "y":
             print()
@@ -413,6 +420,7 @@ def Analyzer():
         chc = str(input(">>> Do you want to perform special analysis[Y/n]?: "))
         if chc == "Y" or chc == "y":
             AnalyzeGolang()
+
 
 # Execute
 try:

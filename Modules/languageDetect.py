@@ -126,4 +126,3 @@ if ExecutableCheck(fileName):
 else:
     print(f"{errorS} Please scan executable files.\n")
     sys.exit(1)
-    
