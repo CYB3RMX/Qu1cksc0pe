@@ -187,5 +187,3 @@ elif randomBanner == 9:
     print(banner9)
 elif randomBanner == 10:
     print(banner10)
-else:
-    pass

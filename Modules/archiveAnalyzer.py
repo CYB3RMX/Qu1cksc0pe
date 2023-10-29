@@ -235,4 +235,3 @@ elif artype == "type_ace":
 else:
     print(f"{errorS} Archive type not supported.")
     sys.exit(1)
-    
