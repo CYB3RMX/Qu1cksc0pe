@@ -127,6 +127,7 @@ reportz = {
     "date": dformat,
 }
 
+
 def MultiYaraScanner(targetAPK):
     lib_files_indicator = 0
     # Configurating decompiler...
@@ -144,7 +145,7 @@ def MultiYaraScanner(targetAPK):
         # Scan for library files and analyze them
         path = f"TargetAPK{path_seperator}resources{path_seperator}"
         fnames = sc0pehelper.recursive_dir_scan(path)
-        if fnames != []:
+        if fnames:
             for extens in fnames:
                 if os.path.splitext(extens)[1] == ".so":
                     lib_files_indicator += 1
@@ -155,6 +156,7 @@ def MultiYaraScanner(targetAPK):
     else:
         print("[blink]Decompiler([bold green]JADX[white])[/blink] [white]not found. Skipping...")
 
+
 def PrintCategs():
     # Table for statistics about categories and components
     statTable = Table(title="* Statistics About Categories and Components *", title_style="bold magenta", title_justify="center")
@@ -164,7 +166,7 @@ def PrintCategs():
 
     # Parsing area
     for cat in categs:
-        if categs[cat] != []:
+        if categs[cat]:
             file_holder = []
             sanalTable = Table(title=f"* {cat} *", title_style="bold green", title_justify="center")
             sanalTable.add_column("Code/Pattern", justify="center")
@@ -180,6 +182,7 @@ def PrintCategs():
     # Print statistics table
     print(statTable)
 
+
 # Source code analysis
 def ScanSource(targetAPK):
     # Parsing main activity
@@ -190,7 +193,7 @@ def ScanSource(targetAPK):
     if os.path.exists(f"TargetAPK{path_seperator}"):
         path = f"TargetAPK{path_seperator}sources{path_seperator}"
         fnames = sc0pehelper.recursive_dir_scan(path)
-        if fnames != []:
+        if fnames:
             question = input(f"{infoC} Do you want to analyze all packages [Y/n]?: ")
             print(f"{infoS} Preparing source files...")
             target_source_files = []
@@ -225,15 +228,16 @@ def ScanSource(targetAPK):
         print("[bold white on red]Couldn\'t locate source codes. Did target file decompiled correctly?")
         print(f">>>[bold yellow] Hint: [white]Don\'t forget to specify decompiler path in [bold green]Systems{path_seperator}Android{path_seperator}libScanner.conf")
 
+
 # Following function will perform JAR file analysis
 def PerformJAR(targetAPK):
     # First we need to check if there is a META-INF file
     fbuf = open(targetAPK, "rb").read()
     chek = re.findall("META-INF", str(fbuf))
-    if chek != []:
+    if chek:
         print(f"{infoS} File Type: [bold green]JAR")
         chek = re.findall(".class", str(fbuf))
-        if chek != []:
+        if chek:
             # Configurating decompiler...
             conf = configparser.ConfigParser()
             conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Android{path_seperator}libScanner.conf")
@@ -282,6 +286,7 @@ def PerformJAR(targetAPK):
             # Print area
             PrintCategs()
 
+
 def pattern_scanner_ex(regex, target_files, target_type, value_array):
     for url in track(range(len(target_files)), description=f"Processing {target_type}..."):
         try:
@@ -297,11 +302,12 @@ def pattern_scanner_ex(regex, target_files, target_type, value_array):
         except:
             continue
 
+
 def pattern_scanner(target_pattern):
     extracted_values = []
     path = f"TargetAPK{path_seperator}sources{path_seperator}"
     fnames = sc0pehelper.recursive_dir_scan(path)
-    if fnames != []:
+    if fnames:
         pattern_scanner_ex(regex=target_pattern,
                            target_files=fnames,
                            target_type="sources",
@@ -309,24 +315,25 @@ def pattern_scanner(target_pattern):
         )
     path = f"TargetAPK{path_seperator}resources{path_seperator}"
     fnames = sc0pehelper.recursive_dir_scan(path)
-    if fnames != []:
+    if fnames:
         pattern_scanner_ex(regex=target_pattern,
                            target_files=fnames,
                            target_type="resources",
                            value_array=extracted_values
         )
 
-    if extracted_values != []:
+    if extracted_values:
         return extracted_values
     else:
         return []
+
 
 # Scan files for url and ip patterns
 def Get_IP_URL(targetAPK):
     print(f"\n{infoS} Looking for possible IP address patterns. Please wait...")
     ip_vals = pattern_scanner(target_pattern=r"^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$")
     # Extract ip addresses from file
-    if ip_vals != []:
+    if ip_vals:
         ipTables = Table()
         ipTables.add_column("[bold green]IP Address", justify="center")
         ipTables.add_column("[bold green]Country", justify="center")
@@ -354,7 +361,7 @@ def Get_IP_URL(targetAPK):
     # Extract url values
     print(f"\n{infoS} Looking for URL values. Please wait...")
     url_vals = pattern_scanner(target_pattern=r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
-    if url_vals != []:
+    if url_vals:
         urltable = Table()
         urltable.add_column("[bold green]Extracted URL Values", justify="center")
         for uv in url_vals:
@@ -362,6 +369,7 @@ def Get_IP_URL(targetAPK):
         print(urltable)
     else:
         print(f"{errorS} There is no URL pattern found!")
+
 
 # Permission analyzer
 def Analyzer(parsed):
@@ -399,13 +407,14 @@ def Analyzer(parsed):
     else:
         print(statistics)
 
+
 # Analyzing more deeply
 def DeepScan(parsed):
     # Getting features
     featStat = Table()
     featStat.add_column("[bold green]Features", justify="center")
     features = parsed.get_features()
-    if features != []:
+    if features:
         for ff in features:
             featStat.add_row(str(ff))
             reportz["features"].append(ff)
@@ -417,7 +426,7 @@ def DeepScan(parsed):
     activeStat = Table()
     activeStat.add_column("[bold green]Activities", justify="center")
     actos = parsed.get_activities()
-    if actos != []:
+    if actos:
         for aa in actos:
             activeStat.add_row(str(aa))
             reportz["activities"].append(aa)
@@ -429,37 +438,32 @@ def DeepScan(parsed):
     servStat = Table()
     servStat.add_column("[bold green]Services", justify="center")
     servv = parsed.get_services()
-    if servv != []:
+    if servv:
         for ss in servv:
             servStat.add_row(str(ss))
             reportz["services"].append(ss)
         print(servStat)
-    else:
-        pass
 
     # Receivers
     recvStat = Table()
     recvStat.add_column("[bold green]Receivers", justify="center")
     receive = parsed.get_receivers()
-    if receive != []:
+    if receive:
         for rr in receive:
             recvStat.add_row(str(rr))
             reportz["receivers"].append(rr)
         print(recvStat)
-    else:
-        pass
 
     # Providers
     provStat = Table()
     provStat.add_column("[bold green]Providers", justify="center")
     provids = parsed.get_providers()
-    if provids != []:
+    if provids:
         for pp in provids:
             provStat.add_row(str(pp))
             reportz["providers"].append(pp)
         print(provStat)
-    else:
-        pass
+
 
 def GeneralInformation(targetAPK):
     print(f"\n{infoS} General Informations about [bold green]{targetAPK}[white]")
@@ -491,14 +495,14 @@ def GeneralInformation(targetAPK):
     reportz["sdk_version"] = axmlTime.get_effective_target_sdk_version()
     reportz["main_activity"] = axmlTime.get_main_activity()
     try:
-        if axmlTime.get_libraries() != []:
+        if axmlTime.get_libraries():
             print("[bold red]>>>>[white] Libraries:")
             for libs in axmlTime.get_libraries():
                 print(f"[bold magenta]>>[white] {libs}")
                 reportz["libraries"].append(libs)
             print(" ")
 
-        if axmlTime.get_signature_names() != []:
+        if axmlTime.get_signature_names():
             print("[bold red]>>>>[white] Signatures:")
             for sigs in axmlTime.get_signature_names():
                 print(f"[bold magenta]>>[white] {sigs}")
@@ -506,6 +510,7 @@ def GeneralInformation(targetAPK):
             print(" ")
     except:
         pass
+
 
 # Execution
 if __name__ == '__main__':
@@ -559,3 +564,4 @@ if __name__ == '__main__':
             sc0pehelper.report_writer("android", reportz)
     except KeyboardInterrupt:
         print("\n[bold white on red]An error occured. Press [blink]CTRL+C[/blink] to exit.\n")
+        
