@@ -106,6 +106,7 @@ winrep = {
     "sections": {}
 }
 
+
 #------------------------------------ Defining function
 class WindowsAnalyzer:
     def __init__(self, target_file):
@@ -116,7 +117,7 @@ class WindowsAnalyzer:
         self.all_strings = open(f"{sc0pe_path}{path_seperator}temp.txt", "r").read().split("\n")
         self.blacklisted_patterns = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}dotnet_blacklisted_methods.txt", "r").read().split("\n")
 
-        # Check for windows file type
+        # Check for Windows file type
         self.exec_type = subprocess.run(["file", self.target_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if ".Net" in self.exec_type.stdout.decode():
             print(f"{infoS} File Type: [bold green].NET Executable[white]\n")
@@ -158,7 +159,7 @@ class WindowsAnalyzer:
                                 self.windows_imports_and_exports.append([api, hex(pos.start())])
                     except:
                         continue
-        if self.windows_imports_and_exports != []:
+        if self.windows_imports_and_exports:
             self.api_categorizer()
             self.dictcateg_parser()
         else:
@@ -175,7 +176,7 @@ class WindowsAnalyzer:
 
     def dictcateg_parser(self):
         for key in dictCateg:
-            if dictCateg[key] != []:
+            if dictCateg[key]:
                 # More important categories
                 if key == "Keyboard/Keylogging" or key == "Evasion/Bypassing" or key == "System/Persistence" or key == "Cryptography" or key == "Information Gathering":
                     tables = Table(title="* WARNING *", title_style="blink italic yellow", title_justify="center", style="yellow")
@@ -223,7 +224,7 @@ class WindowsAnalyzer:
         for spec in special:
             for pat in special[spec]["patterns"]:
                 ofs = re.findall(pat.encode(), self.executable_buffer)
-                if ofs != []:
+                if ofs:
                     spec_table.add_row(spec, pat, str(len(ofs)))
                     switch += 1
         if switch != 0:
@@ -244,12 +245,12 @@ class WindowsAnalyzer:
         # Search for keys in file buffer
         for key in reg_key_array:
             chk = re.findall(key, str(self.all_strings), re.IGNORECASE) # "re.IGNORECASE" in case of non case sensitive values
-            if chk != []:
+            if chk:
                 for pattern in chk:
                     if len(pattern) > 10 and pattern not in registry_keys:
                         registry_keys.append(pattern)
         # Print output
-        if registry_keys != []:
+        if registry_keys:
             for reg in registry_keys:
                 reg_table.add_row(reg)
             print(reg_table)
@@ -282,13 +283,13 @@ class WindowsAnalyzer:
         # Search for keys in file buffer
         for key in interesting_stuff:
             chk = re.findall(key, str(self.all_strings), re.IGNORECASE) # "re.IGNORECASE" in case of non case sensitive values
-            if chk != []:
+            if chk:
                 for pattern in chk:
                     if pattern not in intstf:
                         intstf.append(pattern)
 
         # Print output
-        if intstf != []:
+        if intstf:
             for stf in intstf:
                 if (stf in interesting_stuff) or (".cmd" in stf or ".bat" in stf or ".exe" in stf) or ("Select" in stf):
                     stuff_table.add_row(f"[bold red]{stf}[white]")
@@ -306,7 +307,7 @@ class WindowsAnalyzer:
         for pos in matches:
             if pos.start() != 0:
                 valid_offsets.append(pos.start())
-        if valid_offsets != []:
+        if valid_offsets:
             print(f"{infoS} There is possible [bold red]{len(valid_offsets)}[white] embedded PE file found!")
             print(f"{infoS} Execute: [bold green]python qu1cksc0pe.py --file {fileName} --sigcheck[white] to extract them!\n")
         else:
@@ -482,7 +483,7 @@ class WindowsAnalyzer:
         for family in dotnet_malware_pattern:
             for dotp in dotnet_malware_pattern[family]["patterns"]:
                 matcher = re.findall(dotp, str(class_names), re.IGNORECASE)
-                if matcher != []:
+                if matcher:
                     dotnet_malware_pattern[family]["occurence"] += len(matcher)
             if dotnet_malware_pattern[family]["occurence"] != 0:
                 dot_fam.add_row(family, str(dotnet_malware_pattern[family]["occurence"]))
@@ -509,6 +510,7 @@ class WindowsAnalyzer:
         print(f"\n{infoS} Performing YARA rule matching...")
         sc0pehelper.yara_rule_scanner("windows", fileName, config_path=f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf", report_object=winrep)
 
+
 # Execute
 windows_analyzer = WindowsAnalyzer(target_file=str(fileName))
 windows_analyzer.dll_files()
@@ -528,3 +530,4 @@ windows_analyzer.statistics_method()
 # Print reports
 if sys.argv[2] == "True":
     sc0pehelper.report_writer("windows", winrep)
+    
