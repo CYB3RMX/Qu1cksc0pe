@@ -1,17 +1,12 @@
 #!/usr/bin/env python3
 
-# module checking
-try:
-    import os
-    import sys
-    import argparse
-    import getpass
-    import configparser
-    import subprocess
-    import distutils.spawn
-except ImportError:
-    print("Missing modules detected!")
-    sys.exit(1)
+import os
+import sys
+import argparse
+import getpass
+import configparser
+import subprocess
+import distutils.spawn
 
 # Check python version
 if sys.version_info[0] == 2:
@@ -73,7 +68,7 @@ else:
 homeD = os.path.expanduser("~")
 py_version = sys.version_info[1]
 path_seperator = "/"
-allA = "--all" # strings parameter
+allA = "--all"  # strings parameter
 sc0pe_helper_path = "/usr/lib/python3/dist-packages/sc0pe_helper.py"
 setup_scr = "setup.sh"
 if sys.platform == "darwin":
@@ -83,8 +78,6 @@ elif sys.platform == "win32":
     allA = "-a"
     sc0pe_helper_path = f"{homeD}\\appdata\\local\\programs\\python\\python3{py_version}\\lib\\site-packages\\sc0pe_helper.py"
     setup_scr = "setup.ps1"
-else:
-    pass
 
 # Is Qu1cksc0pe installed??
 if os.name != "nt":
@@ -222,8 +215,6 @@ def BasicAnalyzer(analyzeFile):
             if choice == "Y" or choice == "y":
                 command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}apkSecCheck.py"
                 os.system(command)
-            else:
-                pass
         else:
             # If given file is a JAR file then run JAR file analysis
             command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}apkAnalyzer.py \"{analyzeFile}\" False JAR"
@@ -259,7 +250,7 @@ def Qu1cksc0pe():
         if os.path.exists(args.file):
             # Before doing something we need to check file size
             file_size = os.path.getsize(args.file)
-            if file_size < 52428800: # If given file smaller than 100MB
+            if file_size < 52428800:  # If given file smaller than 100MB
                 if distutils.spawn.find_executable("strings"):
                     str_proc = subprocess.run(f"strings {allA} \"{args.file}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                     if sys.platform != "win32":
