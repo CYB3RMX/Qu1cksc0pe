@@ -699,4 +699,3 @@ if os.path.isfile(targFile):
         print("\n[bold white on red]Target OS couldn\'t detected!\n")
 else:
     print("\n[bold white on red]Target file not found!\n")
-    

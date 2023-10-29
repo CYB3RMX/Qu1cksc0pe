@@ -51,6 +51,7 @@ if sys.platform == "win32":
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
+
 class SignatureChecker:
     def __init__(self, target_file):
         self.target_file = target_file
@@ -129,26 +130,26 @@ class SignatureChecker:
             print(sigTable)
 
         # Windows side
-        if mz_offsets != []:
+        if mz_offsets:
             choice = str(input(f"{infoC} Do you want to extract executable files from target file[Y/n]?: "))
             if choice == "Y" or choice == "y":
                 self.file_carver_for_windows_executables(mz_offsets)
 
         # ELF side
-        if elf_offsets != []:
+        if elf_offsets:
             choice = str(input(f"{infoC} Do you want to extract executable files from target file[Y/n]?: "))
             if choice == "Y" or choice == "y":
                 self.file_carver_for_elf_executables(elf_offsets)
 
     def search_possible_corrupt_mz_headers(self):
         print(f"\n{infoS} Looking for possible corrupted Windows executable patterns...")
-        POSSIBLE_HEADER = "4D5A" # Possible because of false positives
+        POSSIBLE_HEADER = "4D5A"  # Possible because of false positives
 
         # Check for headers
         mz_offsets = []
         find = re.finditer(binascii.unhexlify(POSSIBLE_HEADER), self.getbins_buffer)
         for pos in find:
-            if pos.start() % 512 == 0: # Check if the header is aligned
+            if pos.start() % 512 == 0:  # Check if the header is aligned
                 mz_offsets.append(pos.start())
 
         # Check possible corrupted MZ headers
@@ -178,7 +179,7 @@ class SignatureChecker:
                     exec_offset = mat.start()
                     exec_size = self.parse_pe_size(buffer_read)
                     detected_executables.append([exec_offset, exec_size])
-            if detected_executables != []:
+            if detected_executables:
                 print(f"\n{infoS} Performing embedded binary extraction...")
                 for binary in detected_executables:
                     print(f"\n{infoS} Carving executable file found on offset: [bold green]{binary[0]}[white] | Size: [bold green]{binary[1]}[white] bytes")
@@ -205,7 +206,8 @@ class SignatureChecker:
         target.close()
         sys.exit(0)
 
-    def parse_pe_size(self, pe_data):
+    @staticmethod
+    def parse_pe_size(pe_data):
         # Parse the PE header to retrieve the SizeOfImage field
         pe_header_offset = struct.unpack('<L', pe_data[0x3C:0x40])[0]
         size_of_image_offset = pe_header_offset + 0x50
@@ -219,6 +221,7 @@ class SignatureChecker:
                 with open(f"sc0pe_carved_ELF-{hex(ofs)}.bin", "wb") as ff:
                     ff.write(self.getbins_buffer[ofs:binary.eof_offset+ofs])
                 print(f"[bold magenta]>>>[white] Data saved into: [bold green]sc0pe_carved_ELF-{hex(ofs)}.bin")
+
 
 # Execution
 target_file = sys.argv[1]
