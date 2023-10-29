@@ -39,6 +39,7 @@ if sys.platform == "win32":
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
+
 class EmailAnalyzer:
     def __init__(self, target_file):
         self.target_file = target_file
@@ -60,7 +61,7 @@ class EmailAnalyzer:
                 with open(filename, 'wb') as attachment_file:
                     attachment_file.write(part.get_payload(decode=True))
         # If we have attachment lets analyze it!
-        if self.attachments != []:
+        if self.attachments:
             # Create a table
             attach_table = Table()
             attach_table.add_column("[bold green]Attachment Name[white]", justify="center")
@@ -74,7 +75,8 @@ class EmailAnalyzer:
         else:
             print(f"{errorS} There is no attachment found!\n")
 
-    def attachment_type_check(self, target_attach):
+    @staticmethod
+    def attachment_type_check(target_attach):
         # Check attachment type and perform analysis against it!
         attachment_type = subprocess.run(["file", target_attach], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         parsed_type = attachment_type.stdout.decode()
@@ -151,6 +153,7 @@ class EmailAnalyzer:
                 else:
                     os.system(f"powershell -c \"del {sc0pe_path}{path_seperator}{att} -Force -Recurse\"")
             print(f"{infoS} Cleaning up...")
+
 
 # Execution
 target_eml = sys.argv[1]
