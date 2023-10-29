@@ -8,13 +8,13 @@ import hashlib
 
 try:
     from rich import print
-except:
+except ImportError:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
 try:
     import pyaxmlparser
-except:
+except ImportError:
     print("Error: >pyaxmlparser< module not found.")
     sys.exit(1)
 
@@ -83,7 +83,7 @@ def HyMoqShark():
             for act_key in fam_data[key]:
                 for dat in fam_data[key][act_key]:
                     actreg = re.findall(dat, str(content))
-                    if actreg != []:
+                    if actreg:
                         scoreDict[key] += 1
         except:
             continue
@@ -137,7 +137,7 @@ def SpyNote():
             file_buffer = open(ff, "r").read()
             for pat in patternz:
                 occur = re.findall(pat, file_buffer)
-                if occur != []:
+                if occur:
                     patternz[pat] += 1
         except:
             continue
@@ -170,13 +170,13 @@ def Sova():
     if ex_count == 2:
         scoreDict["Sova"] += 1
 
-    # After that we also must checking the activities, services, receivers etc.
+    # After that we also must check the activities, services, receivers etc.
     name_count = 0
     for act_key in fam_data["Sova"]:
         try:
             for value in fam_data["Sova"][act_key]:
                 chk = re.findall(value, str(content))
-                if chk != []:
+                if chk:
                     name_count += 1
         except:
             continue
