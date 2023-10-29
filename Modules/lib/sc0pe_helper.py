@@ -18,11 +18,13 @@ path_seperator = "/"
 if sys.platform == "win32":
     path_seperator = "\\"
 
+
 class Sc0peHelper:
     def __init__(self, sc0pe_path):
         self.sc0pe_path = sc0pe_path
 
-    def cleanup_junks(self):
+    @staticmethod
+    def cleanup_junks():
         junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt", "TargetAPK/", "TargetSource/"]
         for junk in junkFiles:
             if os.path.exists(junk):
@@ -31,7 +33,8 @@ class Sc0peHelper:
                 else:
                     os.system(f"powershell -c \"del {junk} -Force -Recurse\"")
 
-    def setup_virtual_environment(self):
+    @staticmethod
+    def setup_virtual_environment():
         # Check if Qu1cksc0pe running in virtualenv
         print(f"{infoS} Checking if Qu1cksc0pe is running in virtual environment...")
         if sys.prefix != sys.base_prefix:
@@ -130,16 +133,16 @@ class Sc0peHelper:
             try:
                 rules = yara.compile(f"{finalpath}{rul}")
                 tempmatch = rules.match(self.filename)
-                if tempmatch != []:
+                if tempmatch:
                     for matched in tempmatch:
-                        if matched.strings != []:
+                        if matched.strings:
                             if matched not in yara_matches:
                                 yara_matches.append(matched)
             except:
                 continue
 
         # Printing area
-        if yara_matches != []:
+        if yara_matches:
             yara_match_indicator += 1
             for rul in yara_matches:
                 yaraTable = Table()
@@ -166,3 +169,4 @@ class Sc0peHelper:
             for ff in f_names:
                 fnames.append(os.path.join(root, ff))
         return fnames
+    
