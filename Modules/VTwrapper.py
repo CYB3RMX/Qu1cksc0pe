@@ -48,10 +48,12 @@ avArray = ['ALYac', 'APEX', 'AVG', 'Acronis', 'Ad-Aware',
            'Webroot', 'Yandex', 'Zillya', 'ZoneAlarm', 'Zoner', 'eGambit'
 ]
 
+
 # Function for calculate md5 hash for files
 def Hasher(targetFile):
     finalHash = hashlib.md5(open(targetFile, "rb").read()).hexdigest()
     return finalHash
+
 
 # Function for querying target file's hashes on VT
 def DoRequest(targetFile):
@@ -64,6 +66,7 @@ def DoRequest(targetFile):
         return vt_data.json()
     else:
         return None
+
 
 # Function for parsing report.txt
 def ReportParser(reportStr):
@@ -196,6 +199,7 @@ def ReportParser(reportStr):
                 print("\n[bold white on red]There is no IDS reports for target file.\n")
     else:
         print(f"{errorS} There is no report about the target hash. You need to upload it!")
+
 
 # Execution area
 reportstr = DoRequest(targetFile)
