@@ -564,4 +564,3 @@ if __name__ == '__main__':
             sc0pehelper.report_writer("android", reportz)
     except KeyboardInterrupt:
         print("\n[bold white on red]An error occured. Press [blink]CTRL+C[/blink] to exit.\n")
-        

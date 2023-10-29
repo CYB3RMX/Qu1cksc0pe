@@ -20,6 +20,7 @@ if sys.platform == "win32":
 else:
     path_seperator = "/"
 
+
 def ManifestAnalysis():
     # Obtaining manifest file
     try:
@@ -30,7 +31,7 @@ def ManifestAnalysis():
         print(f"{errorS} An error occured while parsing [bold green]AndroidManifest.xml[white]. Did your APK file decompiled correctly?")
         sys.exit(1)
 
-    # Gathering informations
+    # Gathering information
     app_data = manifest_root.findall("application")
     perm_data = manifest_root.findall("permission")
 
@@ -144,6 +145,7 @@ def ManifestAnalysis():
         print(f"{errorS} There is no entry about exported providers.")
     else:
         print(proTable)
+
 
 # Execution
 ManifestAnalysis()
