@@ -68,6 +68,7 @@ scoreDict = {
     "Other/Unknown": 0
 }
 
+
 # Defining function
 def Analyzer():
     # Creating tables
@@ -99,20 +100,21 @@ def Analyzer():
                 shLibs.append(sl)
 
     # Print all
-    if fHeaders != []:
+    if fHeaders:
         for i in fHeaders:
             fhead.add_row(i)
         print(fhead)
 
-    if shLibs != []:
+    if shLibs:
         for i in shLibs:
             shlib.add_row(i)
         print(shlib)
 
-    if lCommands != []:
+    if lCommands:
         for i in lCommands:
             lcom.add_row(i)
         print(lcom)
+
 
 # Defining categorized scanning
 def Categorized():
@@ -129,7 +131,7 @@ def Categorized():
 
     # Printing zone
     for key in dictCateg:
-        if dictCateg[key] != []:
+        if dictCateg[key]:
 
             # More important categories
             if key == "Cryptography" or key == "Information Gathering":
@@ -179,6 +181,7 @@ def Categorized():
         print("[blink bold white on red]This file might be obfuscated or encrypted. [white]Try [bold green][i]--packer[/i] [white]to scan this file for packers.")
         print("[bold]You can also use [green][i]--hashscan[/i] [white]to scan this file.")
         sys.exit(0)
+
 
 # Execution
 Analyzer()

@@ -137,4 +137,3 @@ if target_os == "windows":
     manls.perform_windows_mitre()
 else:
     print(f"{errorS} MITRE ATT&CK analysis is only for Windows binaries now!")
-    
