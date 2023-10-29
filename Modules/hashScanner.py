@@ -54,7 +54,7 @@ infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # Gathering username
-username = getpass.getuser() # NOTE: If you run program as sudo your username will be "root" !!
+username = getpass.getuser()  # NOTE: If you run program as sudo your username will be "root" !!
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
@@ -76,6 +76,7 @@ else:
 # Configurating installation directory
 install_dir = f"{homeD}{path_seperator}sc0pe_Base"
 
+
 def Downloader():
     local_database = f"{install_dir}{path_seperator}HashDB"
     dbUrl = "https://raw.githubusercontent.com/CYB3RMX/MalwareHashDB/main/HashDB"
@@ -94,8 +95,9 @@ def Downloader():
     except:
         sys.exit(0)
 
+
 def DatabaseCheck():
-    if os.path.isfile(f"{install_dir}{path_seperator}HashDB") == False:
+    if not os.path.isfile(f"{install_dir}{path_seperator}HashDB"):
         print("[blink bold white on red]Local signature database not found!!")
         choose = str(input(f"{green}=>{white} Would you like to download it [Y/n]?: "))
         if choose == "Y" or choose == "y":
@@ -103,6 +105,7 @@ def DatabaseCheck():
         else:
             print("\n[bold white on red]Without local database [blink]--hashscan[/blink] [white]will not work!!\n")
             sys.exit(1)
+
 
 # Hashing with md5
 def GetHash(targetFile):
@@ -115,6 +118,7 @@ def GetHash(targetFile):
         pass
     return hashMd5.hexdigest()
 
+
 # Accessing hash database content
 if os.path.exists(f"{install_dir}{path_seperator}HashDB"):
     hashbase = sqlite3.connect(f"{install_dir}{path_seperator}HashDB")
@@ -122,7 +126,8 @@ if os.path.exists(f"{install_dir}{path_seperator}HashDB"):
 else:
     DatabaseCheck()
 
-# Check for if database is up to date
+
+# Check if database is up-to-date
 def UpToDate():
     print("[bold]Checking for database state...")
     try:
@@ -136,6 +141,7 @@ def UpToDate():
             print("[bold magenta]>>>[bold white] You should use [bold green]'--db_update' [bold white]argument to update your malware hash database.\n")
     except:
         print("[bold white on red]An error occured while connecting to Github!!")
+
 
 # Updating database
 def DatabaseUpdate():
@@ -157,6 +163,7 @@ def DatabaseUpdate():
         print(f"[bold magenta]>>>[white] Make sure [bold green]{setup_scr}[white] script is worked successfully!")
         print(f"[bold magenta]>>>[white] If you don\'t want to execute [bold green]{setup_scr}[white] then try this: [bold green]python qu1cksc0pe.py --file your_sample --hashscan[white]")
 
+
 # Handling single scans
 def NormalScan():
     # Hashing
@@ -170,20 +177,21 @@ def NormalScan():
     # Total hashes
     database_content = dbcursor.execute(f"SELECT * FROM HashDB").fetchall()
 
-    # Printing informations
+    # Printing information
     print(f"[bold cyan]>>>[white] Total Hashes: [bold green]{len(database_content)}")
     print(f"[bold cyan]>>>[white] File Name: [bold green]{targetFile}")
     print(f"[bold cyan]>>>[white] Target Hash: [bold green]{targetHash}")
 
     # Finding target hash in the database_content
     db_answer = dbcursor.execute(f"SELECT * FROM HashDB where hash='{targetHash}'").fetchall()
-    if db_answer != []:
+    if db_answer:
         answTable.add_row(f"[bold red]{db_answer[0][0]}", f"[bold red]{db_answer[0][1]}")
         print(answTable)
     else:
         print("\n[bold white on red]Target hash is not in our database!!")
         print("[bold magenta]>>>[bold white] Try [green]--analyze[white] and [green]--vtFile[white] instead.\n")
     hashbase.close()
+
 
 # Handling multiple scans
 def MultipleScan():
@@ -214,7 +222,7 @@ def MultipleScan():
     )
 
     # Handling folders
-    if os.path.isdir(targetFile) == True:
+    if os.path.isdir(targetFile):
         # Get all files under that directory recursively...
         print("[bold red]>>>[bold white] Qu1cksc0pe gathering all files under that directory recursively. [bold blink]Please wait...")
         scanfiles = Table()
@@ -326,6 +334,7 @@ def MultipleScan():
     with open("sc0pe_hashscan_report.json", "w") as rp_file:
         json.dump(scan_report, rp_file, indent=4)
 
+
 if __name__ == '__main__':
     # File handling
     if str(sys.argv[1]) == '--db_update':
@@ -339,3 +348,4 @@ if __name__ == '__main__':
     else:
         UpToDate()
         MultipleScan()
+        
