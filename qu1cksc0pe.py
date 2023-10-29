@@ -88,7 +88,7 @@ else:
 
 # Is Qu1cksc0pe installed??
 if os.name != "nt":
-    if os.path.exists("/usr/bin/qu1cksc0pe") == True and os.path.exists(f"/etc/qu1cksc0pe.conf") == True:
+    if os.path.exists("/usr/bin/qu1cksc0pe") and os.path.exists(f"/etc/qu1cksc0pe.conf"):
         # Parsing new path and write into handler
         sc0peConf = configparser.ConfigParser()
         sc0peConf.read(f"/etc/qu1cksc0pe.conf")
@@ -171,6 +171,7 @@ parser.add_argument("--vtFile", required=False,
                     action="store_true")
 args = parser.parse_args()
 
+
 # Basic analyzer function that handles single and multiple scans
 def BasicAnalyzer(analyzeFile):
     print(f"{infoS} Analyzing: [bold green]{analyzeFile}[white]")
@@ -209,7 +210,7 @@ def BasicAnalyzer(analyzeFile):
             print(f"{errorS} An error occured while parsing the file. Maybe [bold green]AndroidManifest.xml[white] is corrupted?")
             sys.exit(1)
 
-        if look.is_valid_APK() == True:
+        if look.is_valid_APK():
             print(f"{infoS} Target OS: [bold green]Android[white]")
             if args.report:
                 command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}apkAnalyzer.py \"{analyzeFile}\" True APK"
