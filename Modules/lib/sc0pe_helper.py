@@ -169,4 +169,3 @@ class Sc0peHelper:
             for ff in f_names:
                 fnames.append(os.path.join(root, ff))
         return fnames
-    

@@ -66,6 +66,7 @@ content = checktarg.get_activities()
 content += checktarg.get_services()
 content += checktarg.get_receivers()
 
+
 # Function for computing hashes
 def GetSHA256(file_name):
     hash_256 = hashlib.sha256()
@@ -74,6 +75,7 @@ def GetSHA256(file_name):
             hash_256.update(chunk)
     ff.close()
     return str(hash_256.hexdigest())
+
 
 # Function for detecting: Hydra MoqHao SharkBot families
 def HyMoqShark():
@@ -88,6 +90,7 @@ def HyMoqShark():
         except:
             continue
 
+
 # Helper function for parsing: FluBot family
 def ParseFlu(arrayz):
     counter = 0
@@ -95,6 +98,7 @@ def ParseFlu(arrayz):
         if el[0:2] == ".p" and len(el) == 10:
             counter += 1
     return counter
+
 
 # Function for detecting: FluBot family
 def FluBot():
@@ -112,6 +116,7 @@ def FluBot():
     rec = re.findall(r".p[a-z0-9]{0,9}", str(checktarg.get_receivers()))
     if ParseFlu(rec) != 0 and ParseFlu(rec) == len(checktarg.get_receivers()):
         scoreDict["FluBot"] += 1
+
 
 # Function for detecting: SpyNote family
 def SpyNote():
@@ -151,7 +156,8 @@ def SpyNote():
     if occount != 0:
         scoreDict["SpyNote"] += 1
 
-# Fnction for detecting: Sova family
+
+# Function for detecting: Sova family
 def Sova():
     # Analyzing resources
     resource_data = {
@@ -204,6 +210,7 @@ def CheckFamily():
         print(f"[bold red]>>>[white] Possible Malware Family: [bold green]{sort_score[0][0]}[white]")
     else:
         print(f"{errorS} Couldn\'t detect malware family.")
+
 
 # Execute
 if os.path.exists("TargetAPK"):
