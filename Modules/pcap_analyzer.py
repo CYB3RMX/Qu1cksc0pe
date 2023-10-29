@@ -38,6 +38,7 @@ if sys.platform == "win32":
 #--------------------------------------------- Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
+
 class PcapAnalyzer:
     def __init__(self, pcap_file):
         self.pcap_file = pcap_file
@@ -127,7 +128,7 @@ class PcapAnalyzer:
         print(f"\n{infoS} Performing analysis of interesting strings. It will take a while please wait...")
         for stuff in track(range(len(interesting_stuff)), description="Processing buffer..."):
             matches = re.findall(interesting_stuff[stuff].encode(), self.all_content)
-            if matches != []:
+            if matches:
                 for mm in matches:
                     try:
                         if mm not in extracted_data:
@@ -149,13 +150,14 @@ class PcapAnalyzer:
             for pat in regex:
                 if pat.start() not in valid_offsets:
                     valid_offsets.append(pat.start())
-        if valid_offsets != []:
+        if valid_offsets:
             print(f"{infoS} This PCAP file contains [bold red]{len(valid_offsets)}[white] possible executable files!!")
             print(f"{infoS} Executing [bold green]SignatureAnalyzer[white] for embedded file extraction...")
             command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}sigChecker.py \"{self.pcap_file}\""
             os.system(command)
         else:
             print(f"{errorS} There is no executable file pattern found!")
+
 
 # Execution
 target_pcap = sys.argv[1]
