@@ -65,8 +65,10 @@ if sys.platform == "win32":
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
+
 class DynamicAnalyzer:
-    def detect_target_os(self):
+    @staticmethod
+    def detect_target_os():
         print(f"{infoS} Performing OS detection...")
         ftype = str(pr.magic_file(targetFile))
         if "Windows Executable" in ftype or ".msi" in ftype or ".dll" in ftype or ".exe" in ftype:
@@ -78,7 +80,8 @@ class DynamicAnalyzer:
         else:
             return "Unsupported OS"
 
-    def env_downloader(self, target_os, target_arch):
+    @staticmethod
+    def env_downloader(target_os, target_arch):
         local_database = f"{sc0pe_path}{path_seperator}Systems{path_seperator}{target_os}{path_seperator}{target_arch}_{target_os.lower()}.tar.gz"
         dbUrl = f"https://media.githubusercontent.com/media/CYB3RMX/Emu-RootFS/main/{target_os}/{target_arch}_{target_os.lower()}.tar.gz"
         req = requests.get(dbUrl, stream=True)
@@ -94,7 +97,8 @@ class DynamicAnalyzer:
         except:
             sys.exit(0)
 
-    def archive_extractor(self, archive_file, target_os):
+    @staticmethod
+    def archive_extractor(archive_file, target_os):
         print(f"{infoS} Extracting rootfs archive...")
         os.chdir(f"{sc0pe_path}{path_seperator}Systems{path_seperator}{target_os}{path_seperator}")
         cmd = ["tar", "-xzf", f"{sc0pe_path}{path_seperator}Systems{path_seperator}{target_os}{path_seperator}{archive_file}"]
@@ -103,7 +107,8 @@ class DynamicAnalyzer:
         os.remove(f"{sc0pe_path}{path_seperator}Systems{path_seperator}{target_os}{path_seperator}{archive_file}")
         print(f"{infoS} Rootfs archive extracted.")
 
-    def init_qiling(self, target_file, target_os, target_arch):
+    @staticmethod
+    def init_qiling(target_file, target_os, target_arch):
         print(f"{infoS} Emulating {target_arch} {target_os}...")
         print(f"\n{infoS} Preparing emulator...")
         ql = Qiling([target_file], f"{sc0pe_path}{path_seperator}Systems{path_seperator}{target_os}{path_seperator}{target_arch}_{target_os.lower()}{path_seperator}")
@@ -177,6 +182,7 @@ class DynamicAnalyzer:
         else:
             print(f"{errorS} Unsupported OS.")
             sys.exit(1)
+
 
 # Execute
 emulator = DynamicAnalyzer()
