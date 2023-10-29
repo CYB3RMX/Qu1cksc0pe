@@ -9,13 +9,13 @@ import binascii
 
 try:
     import pefile as pf
-except:
+except ImportError:
     print("Error: >pefile< module not found.")
     sys.exit(1)
 
 try:
     import lief
-except:
+except ImportError:
     print("Error: >lief< module not found.")
     sys.exit(1)
 
@@ -23,13 +23,13 @@ try:
     from rich import print
     from rich.table import Table
     from rich.progress import track
-except:
+except ImportError:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
 try:
     from colorama import Fore, Style
-except:
+except ImportError:
     print("Error: >colorama< module not found.")
     sys.exit(1)
 

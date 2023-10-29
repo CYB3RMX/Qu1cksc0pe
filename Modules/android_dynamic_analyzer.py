@@ -13,20 +13,20 @@ import distutils.spawn
 
 try:
     import pyaxmlparser
-except:
+except ImportError:
     print("Error: >pyaxmlparser< module not found.")
     sys.exit(1)
 
 try:
     import frida
-except:
+except ImportError:
     print("Error: >frida< module not found.")
     sys.exit(1)
 
 try:
     from prompt_toolkit import prompt
     from prompt_toolkit.completion import WordCompleter
-except:
+except ImportError:
     print("Error: >prompt_toolkit< module not found.")
     sys.exit(1)
 
@@ -34,7 +34,7 @@ try:
     from rich import print
     from rich.progress import track
     from rich.table import Table
-except:
+except ImportError:
     print("Error: >rich< module not found.")
     sys.exit(1)
 

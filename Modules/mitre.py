@@ -8,13 +8,13 @@ import subprocess
 try:
     from rich import print
     from rich.table import Table
-except:
+except ImportError:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
 try:
     import pefile as pf
-except:
+except ImportError:
     print("Error: >pefile< module not found.")
     sys.exit(1)
 

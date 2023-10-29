@@ -12,21 +12,21 @@ from Crypto.Cipher import DES3
 # Testing pyaxmlparser existence
 try:
     import pyaxmlparser
-except:
+except ImportError:
     print("Error: >pyaxmlparser< module not found.")
     sys.exit(1)
 
 # Testing puremagic existence
 try:
     import puremagic as pr
-except:
+except ImportError:
     print("Error: >puremagic< module not found.")
     sys.exit(1)
 
 # Check for Pillow
 try:
     from PIL import Image
-except:
+except ImportError:
     print("Error: >Pillow< module not found.")
     sys.exit(1)
 
@@ -34,7 +34,7 @@ except:
 try:
     from rich import print
     from rich.table import Table
-except:
+except ImportError:
     print("Error: >rich< module not found.")
     sys.exit(1)
 

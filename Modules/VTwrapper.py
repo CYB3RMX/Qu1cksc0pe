@@ -9,7 +9,7 @@ import requests
 try:
     from rich import print
     from rich.table import Table
-except:
+except ImportError:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
@@ -20,12 +20,12 @@ infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 # Arguments
 try:
     apikey = str(sys.argv[1])
-except:
+except ImportError:
     print("[blink bold white on red]Please get your API key from [white]-> [bold green][a]https://www.virustotal.com/[/a]")
     sys.exit(1)
 try:
     targetFile = sys.argv[2]
-except:
+except ImportError:
     print("\n[bold white on red]Please enter your file!!\n")
     sys.exit(1)
 

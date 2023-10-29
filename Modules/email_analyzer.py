@@ -10,14 +10,14 @@ import distutils.spawn
 try:
     from rich import print
     from rich.table import Table
-except:
+except ImportError:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
 try:
     from pydnsbl import DNSBLDomainChecker, providers
     from pydnsbl.providers import BASE_DOMAIN_PROVIDERS, Provider
-except:
+except ImportError:
     print("Error: >pydnsbl< module not found.")
     sys.exit(1)
 

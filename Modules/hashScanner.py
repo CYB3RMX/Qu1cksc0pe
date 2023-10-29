@@ -12,14 +12,14 @@ from datetime import date
 
 try:
     import sqlite3
-except:
+except ImportError:
     print("Module: >sqlite3< not found.")
     sys.exit(1)
 
 # Module for progressbar
 try:
     from tqdm import tqdm
-except:
+except ImportError:
     print("Module: >tqdm< not found.")
     sys.exit(1)
 
@@ -31,13 +31,13 @@ try:
     from rich.layout import Layout
     from rich.text import Text
     from rich.panel import Panel
-except:
+except ImportError:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
 try:
     from colorama import Fore, Style
-except:
+except ImportError:
     print("Error: >colorama< module not found.")
     sys.exit(1)
 

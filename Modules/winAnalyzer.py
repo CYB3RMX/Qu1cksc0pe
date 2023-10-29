@@ -12,20 +12,20 @@ try:
     from rich import print
     from rich.table import Table
     from rich.progress import track
-except:
+except ImportError:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
 try:
     import pefile as pf
-except:
+except ImportError:
     print("Error: >pefile< module not found.")
     sys.exit(1)
 
 try:
     warnings.filterwarnings("ignore")
     import clr
-except:
+except ImportError:
     print("Error: >pythonnet< module not found.")
     print(f"[bold red]>>>[white] You can execute: [bold green]sudo apt install mono-complete && pip3 install pythonnet[white]")
     sys.exit(1)
@@ -33,7 +33,7 @@ except:
 try:
     import vivisect
     vivisect.logging.disable() # Suppressing error messages
-except:
+except ImportError:
     print("Error: >vivisect< module not found.")
     sys.exit(1)
 

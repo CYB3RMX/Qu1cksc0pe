@@ -17,13 +17,13 @@ from bs4 import BeautifulSoup
 try:
     from rich import print
     from rich.table import Table
-except:
+except ImportError:
     print("Error: >rich< not found.")
     sys.exit(1)
 
 try:
     import yara
-except:
+except ImportError:
     print("Error: >yara< module not found.")
     sys.exit(1)
 
@@ -33,7 +33,7 @@ try:
     from oletools.crypto import is_encrypted
     from oletools.oleid import OleID
     from olefile import isOleFile
-except:
+except ImportError:
     print("Error: >oletools< module not found.")
     print("Try 'sudo -H pip3 install -U oletools' command.")
     sys.exit(1)
@@ -42,14 +42,14 @@ except:
 try:
     from pdfminer.pdfparser import PDFParser
     from pdfminer.pdfdocument import PDFDocument
-except:
+except ImportError:
     print("Error: >pdfminer< module not found.")
     sys.exit(1)
 
 # Checking for pyOneNote module
 try:
     from pyOneNote.Main import OneDocment
-except:
+except ImportError:
     print("Error: >pyOneNote< module not found. Don\'t worry I can handle it...")
     os.system("pip install -U https://github.com/DissectMalware/pyOneNote/archive/master.zip --force")
     print("[bold yellow]Now try to re-execute program again!")

@@ -5,7 +5,7 @@ import sys
 try:
     from rich import print
     from rich.table import Table
-except:
+except ImportError:
     print("Error: >rich< module not found.")
     sys.exit(1)
 

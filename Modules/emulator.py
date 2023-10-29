@@ -10,37 +10,37 @@ from subprocess import Popen, PIPE
 
 try:
     from qiling import *
-except:
+except ImportError:
     print("Error: >qiling< module not found.")
     sys.exit(1)
 
 try:
     import lief
-except:
+except ImportError:
     print("Error: >lief< module not found.")
     sys.exit(1)
 
 try:
     from rich import print
-except:
+except ImportError:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
 try:
     import puremagic as pr
-except:
+except ImportError:
     print("Error: >puremagic< module not found.")
     sys.exit(1)
 
 try:
     import pefile as pf
-except:
+except ImportError:
     print("Error: >pefile< module not found.")
     sys.exit(1)
 
 try:
     from tqdm import tqdm
-except:
+except ImportError:
     print("Module: >tqdm< not found.")
     sys.exit(1)
 
@@ -66,9 +66,6 @@ if sys.platform == "win32":
 sc0pe_path = open(".path_handler", "r").read()
 
 class DynamicAnalyzer:
-    def __init__(self):
-        pass
-
     def detect_target_os(self):
         print(f"{infoS} Performing OS detection...")
         ftype = str(pr.magic_file(targetFile))

@@ -12,33 +12,33 @@ try:
     from prompt_toolkit.shortcuts import prompt
     from prompt_toolkit.completion import NestedCompleter
     from prompt_toolkit.styles import Style as prstyle
-except:
+except ImportError:
     print("Error: >prompt_toolkit< module not found.")
     sys.exit(1)
 
 # Testing puremagic existence
 try:
     import puremagic as pr
-except:
+except ImportError:
     print("Error: >puremagic< module not found.")
     sys.exit(1)
 
 # Testing pyaxmlparser existence
 try:
     import pyaxmlparser
-except:
+except ImportError:
     print("Error: >pyaxmlparser< module not found.")
     sys.exit(1)
 
 try:
     from rich import print
-except:
+except ImportError:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
 try:
     from colorama import Fore, Style
-except:
+except ImportError:
     print("Error: >colorama< module not found.")
     sys.exit(1)
 
@@ -96,6 +96,7 @@ console_output = [
 # File path completer
 def complete(text, state):
     return (glob.glob(text+"*")+[None])[state]
+
 readline.set_completer_delims(" \t\n;")
 readline.parse_and_bind("tab: complete")
 readline.set_completer(complete)

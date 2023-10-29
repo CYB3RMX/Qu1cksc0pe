@@ -10,13 +10,13 @@ try:
     from rich import print
     from rich.progress import track
     from rich.table import Table
-except:
+except ImportError:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
 try:
     import dpkt
-except:
+except ImportError:
     print("Error: >dpkt< module not found.")
     sys.exit(1)
 

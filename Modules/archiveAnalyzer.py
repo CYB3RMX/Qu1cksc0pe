@@ -11,25 +11,25 @@ import configparser
 try:
     from rich import print
     from rich.table import Table
-except:
+except ImportError:
     print("Error: >rich< not found.")
     sys.exit(1)
 
 try:
     import yara
-except:
+except ImportError:
     print("Error: >yara< module not found.")
     sys.exit(1)
 
 try:
     import rarfile
-except:
+except ImportError:
     print("Error: >rarfile< module not found.")
     sys.exit(1)
 
 try:
     import acefile
-except:
+except ImportError:
     print("Error: >acefile< module not found.")
     sys.exit(1)
 
@@ -57,6 +57,7 @@ targetFile = sys.argv[1]
 class ArchiveAnalyzer:
     def __init__(self, targetFile):
         self.targetFile = targetFile
+
     def check_archive_type(self):
         arch_type = subprocess.run(["file", self.targetFile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if "Zip archive data" in arch_type.stdout.decode():
@@ -67,6 +68,7 @@ class ArchiveAnalyzer:
             return "type_ace"
         else:
             return None
+
     def zip_file_analysis(self):
         # Parsing zip file
         zip_data = zipfile.ZipFile(self.targetFile)

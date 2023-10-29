@@ -5,14 +5,14 @@ import sys
 
 try:
     import puremagic as pr
-except:
+except ImportError:
     print("Error: >puremagic< module not found.")
     sys.exit(1)
 
 try:
     from rich import print
     from rich.table import Table
-except:
+except ImportError:
     print("Error: >rich< module not found.")
     sys.exit(1)
 

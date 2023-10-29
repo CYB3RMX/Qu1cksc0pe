@@ -5,19 +5,19 @@ import sys
 try:
     from rich import print
     from rich.table import Table
-except:
+except ImportError:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
 try:
     import lief
-except:
+except ImportError:
     print("Error: >lief< module not found.")
     sys.exit(1)
 
 try:
     import pygore
-except:
+except ImportError:
     print("Error: >pygore< module not found.")
     sys.exit(1)
 

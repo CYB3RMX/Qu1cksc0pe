@@ -6,7 +6,7 @@ import random
 # Module for colors
 try:
     from rich import print
-except:
+except ImportError:
     print("Error: >rich< module not found.")
     sys.exit(1)
 

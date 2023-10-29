@@ -6,20 +6,20 @@ import sys
 try:
     from rich import print
     from rich.table import Table
-except:
+except ImportError:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
 try:
     import yara
-except:
+except ImportError:
     print("Error: >yara< module not found.")
     sys.exit(1)
 
 # Module for progressbar
 try:
     from tqdm import tqdm
-except:
+except ImportError:
     print("Module: >tqdm< not found.")
     sys.exit(1)
 
