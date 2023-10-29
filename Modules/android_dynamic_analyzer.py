@@ -75,7 +75,7 @@ else:
 
 # Disabling pyaxmlparser's logs
 pyaxmlparser.core.log.disabled = True
-warnings.filterwarnings("ignore") # Suppressing another warnings
+warnings.filterwarnings("ignore")  # Suppressing another warnings
 
 # Initialize a dictionary to store the current state of the folders
 previous_states = {
@@ -107,6 +107,7 @@ categs = {
     "Cryptography": [], "Command Execution": [], "Anti-VM/Anti-Debug": [], "BOT Activity": []
 }
 
+
 class AndroidDynamicAnalyzer:
     def __init__(self, target_file):
         self.target_file = target_file
@@ -120,32 +121,20 @@ class AndroidDynamicAnalyzer:
         except:
             self.axmlobj = None
 
-    def search_package_name(self, package_name):
+    @staticmethod
+    def search_package_name(package_name):
         print(f"{infoS} Searching for existing installation...")
         exist_install = subprocess.check_output(f"{adb_path} shell pm list packages", shell=True).decode().split("\n")
-        matchh = re.findall(rf"{package_name}", str(exist_install))
-        if len(matchh) > 0:
+        match = re.findall(rf"{package_name}", str(exist_install))
+        if len(match) > 0:
             print(f"{infoS} Package found.")
             return True
         else:
             print(f"{infoS} Package not found.")
             return False
 
-    def create_frida_session(self, app_name, package_name):
-        try:
-            print(f"\n{infoS} Trying to connect USB device for performing memory dump against: [bold green]{app_name}[white]")
-            device_manager = frida.enumerate_devices()
-            device = device_manager[-1] # Usb connected device
-            proc_id = self.gather_process_id_android(app_name, package_name, device)
-            frida_session = frida.get_usb_device().attach(int(proc_id)) # Attach target app process
-            print(f"{infoS} Connection successfull...")
-            return frida_session
-        except:
-            print(f"{errorS} Error: Unable to create frida session! Make sure your USB device connected properly...")
-            print(f"{infoS} Hint: Make sure the target application [bold green]is running[white] on device! (If you sure about USB connection!)")
-            return None
-
-    def program_tracer(self, package_name, device):
+    @staticmethod
+    def program_tracer(package_name, device):
         print(f"{infoS} Now you can launch the app from your device. So you can see method class/calls etc.")
         temp_act = ""
         tmp_file = ""
@@ -204,7 +193,8 @@ class AndroidDynamicAnalyzer:
             print(f"{infoS} Closing tracer...")
             sys.exit(0)
 
-    def crawler_for_adb_analysis(self, target_directory):
+    @staticmethod
+    def crawler_for_adb_analysis(target_directory):
         if os.path.exists(f"{sc0pe_path}{path_seperator}{target_directory}"):
             # Create a simple table for better view
             dirTable = Table(title=f"* {target_directory} Directory *", title_justify="center", title_style="bold magenta")
@@ -213,7 +203,7 @@ class AndroidDynamicAnalyzer:
 
             # Crawl the directory
             dircontent = sc0pehelper.recursive_dir_scan(target_directory=f"{sc0pe_path}{path_seperator}{target_directory}")
-            if dircontent != []:
+            if dircontent:
                 print(f"\n[bold cyan][INFO][white] Crawling [bold green]{target_directory} [white]directory.")
                 for file in dircontent:
                     # Checking file types using "file" command
@@ -222,6 +212,20 @@ class AndroidDynamicAnalyzer:
 
                 # Print the table
                 print(dirTable)
+
+    def create_frida_session(self, app_name, package_name):
+        try:
+            print(f"\n{infoS} Trying to connect USB device for performing memory dump against: [bold green]{app_name}[white]")
+            device_manager = frida.enumerate_devices()
+            device = device_manager[-1]  # Usb connected device
+            proc_id = self.gather_process_id_android(app_name, package_name, device)
+            frida_session = frida.get_usb_device().attach(int(proc_id))  # Attach target app process
+            print(f"{infoS} Connection successfull...")
+            return frida_session
+        except:
+            print(f"{errorS} Error: Unable to create frida session! Make sure your USB device connected properly...")
+            print(f"{infoS} Hint: Make sure the target application [bold green]is running[white] on device! (If you sure about USB connection!)")
+            return None
 
     def target_app_crawler(self, package_name, device):
         time.sleep(3)
@@ -250,10 +254,11 @@ class AndroidDynamicAnalyzer:
             if previous_states[di]['changes'] != 0:
                 self.crawler_for_adb_analysis(di)
 
-        # There is a recursion so we fetch these directories every time
+        # There is a recursion, so we fetch these directories every time
         self.target_app_crawler(package_name, device)
 
-    def install_target_application(self, device, target_application):
+    @staticmethod
+    def install_target_application(device, target_application):
         install_cmd = [f"{adb_path}", "-s", f"{device}", "install", f"{target_application}"]
         install_cmdl = subprocess.Popen(install_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         install_cmdl.wait()
@@ -261,7 +266,9 @@ class AndroidDynamicAnalyzer:
             return True
         else:
             return None
-    def uninstall_target_application(self, device, package_name):
+
+    @staticmethod
+    def uninstall_target_application(device, package_name):
         uninstall_cmd = [f"{adb_path}", "-s", f"{device}", "uninstall", f"{package_name}"]
         uninstall_cmdl = subprocess.Popen(uninstall_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         uninstall_cmdl.wait()
@@ -270,7 +277,8 @@ class AndroidDynamicAnalyzer:
         else:
             return None
 
-    def enumerate_adb_devices(self):
+    @staticmethod
+    def enumerate_adb_devices():
         print(f"{infoS} Searching for devices...")
         device_index = []
         get_dev_cmd = [f"{adb_path}", "devices"]
@@ -338,7 +346,8 @@ class AndroidDynamicAnalyzer:
             print(f"{infoS} You can also use [bold green]Application Memory Analysis[white] option for these situations!")
             sys.exit(1)
 
-    def gather_process_id_android(self, target_app, package_name, device):
+    @staticmethod
+    def gather_process_id_android(target_app, package_name, device):
         # Look process for name
         for procs in device.enumerate_processes():
             if procs.name == target_app:
@@ -350,7 +359,8 @@ class AndroidDynamicAnalyzer:
                 return procs.pid
         return None
 
-    def save_to_file(self, agent, base, size):
+    @staticmethod
+    def save_to_file(agent, base, size):
         try:
             buffer = agent.read_bytes(base, size)
             filex = open("temp_dump.dmp", "ab")
@@ -358,6 +368,7 @@ class AndroidDynamicAnalyzer:
             filex.close()
         except:
             pass
+
     def split_data(self, agent, base, size, max_size):
         times = size/max_size
         diff = size % max_size
@@ -369,7 +380,8 @@ class AndroidDynamicAnalyzer:
         if diff != 0:
             self.save_to_file(agent, cr_base, diff)
 
-    def parse_frida_output(self):
+    @staticmethod
+    def parse_frida_output():
         # First we need to get frida-ps output
         command = "frida-ps -Uaij > package.json"
         os.system(command)
@@ -381,8 +393,9 @@ class AndroidDynamicAnalyzer:
 
         return jfile
 
-    def table_generator(self, data_array, data_type):
-        if data_array != []:
+    @staticmethod
+    def table_generator(data_array, data_type):
+        if data_array:
             data_table = Table()
             data_table.add_column("[bold green]Extracted Values", justify="center")
             for dmp in data_array:
@@ -391,9 +404,10 @@ class AndroidDynamicAnalyzer:
         else:
             print(f"{errorS} There is no pattern about {data_type}")
 
-    def check_adb_connection(self):
-        chek = subprocess.check_output(f"{adb_path} devices", shell=True)
-        if len(chek) != 26:
+    @staticmethod
+    def check_adb_connection():
+        check = subprocess.check_output(f"{adb_path} devices", shell=True)
+        if len(check) != 26:
             return True
         else:
             return None
@@ -432,7 +446,8 @@ class AndroidDynamicAnalyzer:
             print(f"{errorS} Wrong choice :(")
             sys.exit(1)
 
-    def perform_pattern_categorization(self, mem_dump_buf):
+    @staticmethod
+    def perform_pattern_categorization(mem_dump_buf):
         for code_categ in track(range(len(pattern_file)), description="Processing buffer..."):
             for patt in pattern_file[list(pattern_file.keys())[code_categ]]["patterns"]:
                 regx = re.findall(patt.encode(), mem_dump_buf)
@@ -446,7 +461,7 @@ class AndroidDynamicAnalyzer:
 
         # Parsing area
         for cat in categs:
-            if categs[cat] != []:
+            if categs[cat]:
                 sanalTable = Table(title=f"* {cat} *", title_style="bold green", title_justify="center")
                 sanalTable.add_column("Code/Pattern", justify="center")
                 for element in categs[cat]:
@@ -471,7 +486,8 @@ class AndroidDynamicAnalyzer:
                     print(f"{infoS} MainActivity: [bold green]{main_activity.split(' ')[1]}[white]")
                     return str(main_activity.split(" ")[1])
 
-    def save_dump_for_further(self, app_name):
+    @staticmethod
+    def save_dump_for_further(app_name):
         print(f"\n{infoS} Do you want to save dump file for further analysis (y/n)?")
         choice = str(input(">>>> Choice: "))
         if choice == "Y" or choice == "y":
@@ -480,7 +496,8 @@ class AndroidDynamicAnalyzer:
         else:
             os.system(f"{del_com} temp_dump.dmp")
 
-    def user_installed_packages(self):
+    @staticmethod
+    def user_installed_packages():
         plist = subprocess.run([f"{adb_path}", "shell", "pm", "list", "packages"], stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
         pack_l = plist.stdout.decode().split("\n")
         all_packs = []
@@ -517,7 +534,7 @@ class AndroidDynamicAnalyzer:
             app_name = self.axmlobj.get_app_name() # We need it for fetching process ID
             package_name = self.axmlobj.get_package()
 
-            # If we dont able to fetch app_name/package_name then look for installed applications list
+            # If we are not able to fetch app_name/package_name then look for installed applications list
             if app_name == '' or package_name == '':
                 print(f"\n{infoS} An error occured while fetching [bold green]application name/package name[white]. Looks like this sample has [bold red]anti-analysis[white] techniques.")
                 print(f"{infoS} By the way you can select your target application from here!")
@@ -550,7 +567,7 @@ class AndroidDynamicAnalyzer:
             print(f"{errorS} Target application not found on the device. Please install it and try again!")
             sys.exit(1)
 
-        # Locate main_activity: Helpfull against samples wiht corrupted manifest file
+        # Locate main_activity: Helpful against samples with corrupted manifest file
         main_act = self.locate_main_activity(package_name=package_name)
 
         # Starting frida session
@@ -587,7 +604,7 @@ class AndroidDynamicAnalyzer:
             dump_urls = []
             dont_need = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Android{path_seperator}blacklist_patterns.txt", "r").read().split("\n")
             matchs = re.findall(self.url_regex.encode(), dump_bufffer)
-            if matchs != []:
+            if matchs:
                 for url in matchs:
                     if url.decode() not in dump_urls:
                         dont_c = 0
@@ -611,7 +628,7 @@ class AndroidDynamicAnalyzer:
                 all_things += self.axmlobj.get_services()
                 our_regex = rf"{package_name}.[a-zA-Z0-9]*"
                 matchs = re.findall(our_regex.encode(), dump_bufffer)
-                if matchs != []:
+                if matchs:
                     for reg in matchs:
                         try:
                             if reg.decode() not in methodz:
@@ -627,12 +644,12 @@ class AndroidDynamicAnalyzer:
             print(f"\n{infoS} Looking for path values related to: [bold green]{package_name}[white]")
             path_vals = []
             matches = re.findall(rf"/data/data/{package_name}/[a-zA-Z0-9./_]*".encode(), dump_bufffer) # /data/data
-            if matches != []:
+            if matches:
                 for mat in matches:
                     if mat.decode() not in path_vals:
                         path_vals.append(mat.decode())
             matches = re.findall(rf"/data/user/0/{package_name}/[a-zA-Z0-9./_]*".encode(), dump_bufffer)
-            if matches != []:
+            if matches:
                 for mat in matches:
                     if mat.decode() not in path_vals:
                         path_vals.append(mat.decode())
@@ -648,7 +665,7 @@ class AndroidDynamicAnalyzer:
             print(f"\n{infoS} Looking for APK files. Please wait...")
             matchs = re.findall(r"[a-zA-Z0-9_.]*apk".encode(), dump_bufffer)
             apk_names = []
-            if matchs != []:
+            if matchs:
                 for apkn in matchs:
                     if apkn.decode() not in apk_names:
                         apk_names.append(apkn.decode())
@@ -659,7 +676,7 @@ class AndroidDynamicAnalyzer:
             print(f"\n{infoS} Checking for services started by: [bold green]{package_name}[white]")
             matchs = re.findall(r"(serviceStart: ServiceArgsData\{([^}]*)\})|(serviceCreate: CreateServiceData\{([^}]*)\})".encode(), dump_bufffer)
             sanitize_val = []
-            if matchs != []:
+            if matchs:
                 for tup in matchs:
                     for val in tup:
                         if package_name in val.decode():
@@ -698,6 +715,7 @@ class AndroidDynamicAnalyzer:
         else:
             print(f"{errorS} Wrong choice :(")
             sys.exit(1)
+
 
 # Execution
 androdyn = AndroidDynamicAnalyzer(target_file=str(sys.argv[1]))
