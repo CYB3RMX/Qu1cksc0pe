@@ -33,6 +33,7 @@ if sys.platform == "win32":
 #--------------------------------------------- Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
+
 class MitreAnalyzer:
     def __init__(self, target_file):
         self.target_file = target_file
@@ -82,7 +83,7 @@ class MitreAnalyzer:
         # Render tables
         tech_count = 0
         for tech in self.table_contents:
-            if self.table_contents[tech] != []:
+            if self.table_contents[tech]:
                 mtable = Table()
                 mtable.add_column(f"[bold green]{tech}", justify="center")
                 for content in self.table_contents[tech]:
@@ -117,7 +118,7 @@ class MitreAnalyzer:
                 for api in self.windows_api_list[categ]["apis"]:
                     try:
                         matcher = re.findall(api.encode(), binary_data, re.IGNORECASE)
-                        if matcher != []:
+                        if matcher:
                             if matcher[0] not in self.all_strings:
                                 self.all_strings.append(matcher[0])
                                 self.find_bytes += 1
@@ -128,6 +129,7 @@ class MitreAnalyzer:
         self.extract_windows_api_imports_exports()
         self.mitre_data_categorization(mitre_data=self.mitre_data_windows)
 
+
 # Execution
 manls = MitreAnalyzer(target_file=fileName)
 target_os = manls.check_target_os()
@@ -135,3 +137,4 @@ if target_os == "windows":
     manls.perform_windows_mitre()
 else:
     print(f"{errorS} MITRE ATT&CK analysis is only for Windows binaries now!")
+    
