@@ -203,7 +203,7 @@ def BasicAnalyzer(analyzeFile):
     # Android Analysis
     elif "PK" in fileType and "Java archive" in fileType:
 
-        # If given file is an valid APK file then run APK analysis
+        # If given file is a valid APK file then run APK analysis
         try:
             look = pyaxmlparser.APK(analyzeFile)
         except:
@@ -250,6 +250,7 @@ def BasicAnalyzer(analyzeFile):
         print("\n[bold white on red]File type not supported. Make sure you are analyze executable files or document files.")
         print("[bold]>>> If you want to scan document files try [bold green][i]--docs[/i] [white]argument.")
         sys.exit(1)
+
 
 # Main function
 def Qu1cksc0pe():
@@ -525,10 +526,12 @@ def Qu1cksc0pe():
             print("\n[bold white on red]Please use this argument as [blink]root[/blink]!!\n")
             sys.exit(1)
 
-# Exectuion area
+
+# Execution area
 try:
     Qu1cksc0pe()
     # Cleaning up...
     sc0pehelper.cleanup_junks()
 except:
     sc0pehelper.cleanup_junks()
+    
