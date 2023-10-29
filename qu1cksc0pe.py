@@ -9,7 +9,7 @@ try:
     import configparser
     import subprocess
     import distutils.spawn
-except:
+except ImportError:
     print("Missing modules detected!")
     sys.exit(1)
 
@@ -21,27 +21,27 @@ if sys.version_info[0] == 2:
 # Testing rich existence
 try:
     from rich import print
-except:
+except ImportError:
     print("Error: >rich< module not found.")
     sys.exit(1)
 
 # Testing puremagic existence
 try:
     import puremagic as pr
-except:
+except ImportError:
     print("Error: >puremagic< module not found.")
     sys.exit(1)
 
 # Testing pyaxmlparser existence
 try:
     import pyaxmlparser
-except:
+except ImportError:
     print("Error: >pyaxmlparser< module not found.")
     sys.exit(1)
 
 try:
     from colorama import Fore, Style
-except:
+except ImportError:
     print("Error: >colorama< module not found.")
     sys.exit(1)
 
