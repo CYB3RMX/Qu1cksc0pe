@@ -25,7 +25,7 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
-# Configurating strings parameter and make compatability
+# Configurating strings parameter and make compatibility
 path_seperator = "/"
 strings_param = "--all"
 if sys.platform == "darwin":
@@ -41,6 +41,7 @@ powershell_code_patterns = json.load(open(f"{sc0pe_path}{path_seperator}Systems{
 
 warnings.filterwarnings("ignore")
 
+
 class PowerShellAnalyzer:
     def __init__(self, target_file):
         self.target_file = target_file
@@ -54,7 +55,8 @@ class PowerShellAnalyzer:
         self.pattern_ascii = r'\[Byte\[\]\]\((\d+(?:,\d+)*)\)'
         self.pattern_hex = r'\[System\.Convert\]::fromHEXString\(\'([0-9a-fA-F]+)\'\)'
 
-    def save_data_into_file(self, output_file, data):
+    @staticmethod
+    def save_data_into_file(output_file, data):
         with open(output_file, "wb") as ff:
             ff.write(data)
         print(f"{infoS} Decoded payload saved into: [bold green]{output_file}[white]")
@@ -66,7 +68,7 @@ class PowerShellAnalyzer:
             pat_table.add_column(f"Extracted patterns about [bold green]{pat}[white]", justify="center")
             for code in powershell_code_patterns[pat]["patterns"]:
                 matchh = re.findall(code, str(self.all_strings), re.IGNORECASE)
-                if matchh != []:
+                if matchh:
                     pat_table.add_row(code)
                     powershell_code_patterns[pat]["occurence"] += 1
             if powershell_code_patterns[pat]["occurence"] != 0:
@@ -87,7 +89,7 @@ class PowerShellAnalyzer:
         exec_table.add_column(f"Extracted patterns about [bold green]Execution[white]", justify="center")
         for expat in exec_patterns:
             matchs = re.findall(expat, str(self.all_strings), re.IGNORECASE)
-            if matchs != []:
+            if matchs:
                 for mm in matchs:
                     exec_table.add_row(mm)
                     swc += 1
@@ -102,7 +104,7 @@ class PowerShellAnalyzer:
         path_table = Table()
         path_table.add_column("Extracted [bold green]PATH[white] values", justify="center")
         mathces = re.findall(path_regex, str(self.all_strings), re.IGNORECASE)
-        if mathces != []:
+        if mathces:
             for path in mathces:
                 path_table.add_row(path)
             print(path_table)
@@ -113,7 +115,7 @@ class PowerShellAnalyzer:
     def check_for_xor_key(self):
         pattern = r'-bxor\s+(\d+)'
         matches = re.findall(pattern, str(self.all_strings), re.IGNORECASE)
-        if matches != []:
+        if matches:
             return matches[0]
         else:
             return None
@@ -154,7 +156,7 @@ class PowerShellAnalyzer:
     def detect_and_carve_base64_payloads_xored(self):
         print(f"\n{infoS} Searching for: [bold green]BASE64 Encoded[white] payloads...")
         b64matches = re.findall(self.pattern_b64, str(self.all_strings), re.IGNORECASE)
-        if b64matches != []:
+        if b64matches:
             print(f"{infoS} We have a [bold green]BASE64[white] encoded payload. Performing decode and extract...")
             print(f"{infoS} Checking for XOR key...")
             xor_key = self.check_for_xor_key()
@@ -169,7 +171,7 @@ class PowerShellAnalyzer:
     def detect_and_carve_ascii_number_payloads_xored(self):
         print(f"\n{infoS} Searching for: [bold green]ASCII Numbers[white]...")
         asciinum = re.findall(self.pattern_ascii, str(self.all_strings), re.IGNORECASE)
-        if asciinum != []:
+        if asciinum:
             print(f"{infoS} We have an array of [bold green]ASCII Numbers[white]. Performing decode and extract...")
             print(f"{infoS} Checking for XOR key...")
             xor_key = self.check_for_xor_key()
@@ -184,7 +186,7 @@ class PowerShellAnalyzer:
     def detect_and_carve_hex_values_payloads_xored(self):
         print(f"\n{infoS} Searching for: [bold green]HEX Values[white]...")
         hexval = re.findall(self.pattern_hex, str(self.all_strings), re.IGNORECASE)
-        if hexval != []:
+        if hexval:
             print(f"{infoS} We have an array of [bold green]HEX Values[white]. Performing decode and extract...")
             print(f"{infoS} Checking for XOR key...")
             xor_key = self.check_for_xor_key()
@@ -203,7 +205,7 @@ class PowerShellAnalyzer:
         ascii_payload = re.findall(self.pattern_ascii, str(self.all_strings), re.IGNORECASE)
         hex_payload = re.findall(self.pattern_hex, str(self.all_strings), re.IGNORECASE)
         pe_payload = re.findall(r"4d5a90", str(self.all_strings), re.IGNORECASE)
-        if b64_payload != [] or ascii_payload != [] or hex_payload != [] or pe_payload != []:
+        if b64_payload or ascii_payload or hex_payload or pe_payload:
             if self.check_for_xor_key() is None:
                 print(f"{infoS} Looks like we have a possible [bold green]non-XOR\'ed[white] payload. Attempting to detect its type...")
                 self.detect_and_carve_b64_non_xored()
@@ -216,19 +218,19 @@ class PowerShellAnalyzer:
     def detect_and_carve_b64_non_xored(self):
         print(f"\n{infoS} Searching for: [bold green]BASE64 Encoded[white] payloads...")
         b64matches = re.findall(self.pattern_b64, str(self.all_strings), re.IGNORECASE)
-        if b64matches != []:
+        if b64matches:
             b64_data = base64.b64decode(b64matches[0][0])
             print(f"{infoS} We have a [bold green]BASE64[white] encoded payload. Performing decode and extract...")
             print(f"{infoS} Checking for compressed data presence...")
             deflatestream = re.findall(r'Io\.CoMpRESSiOn\.defLaTEstReam', str(self.all_strings), re.IGNORECASE)
             gzipstream = re.findall(r"IO\.Compression\.GZipStream", str(self.all_strings), re.IGNORECASE)
-            if deflatestream != []:
+            if deflatestream:
                 print(f"{infoS} Deflatestream data found! Attempting to decompress...")
                 decompress_obj = zlib.decompressobj(-zlib.MAX_WBITS)
                 decompressed_data = decompress_obj.decompress(b64_data)
                 output = io.BytesIO(decompressed_data).read().decode('ascii')
                 self.save_data_into_file(output_file="sc0pe_decoded_b64_payload.bin", data=output.encode())
-            elif gzipstream != []:
+            elif gzipstream:
                 print(f"{infoS} Gzip data found! Attempting to decompress...")
                 decompressed_data = gzip.decompress(b64_data)
                 self.save_data_into_file(output_file="sc0pe_decoded_b64_payload.bin", data=decompressed_data)
@@ -241,7 +243,7 @@ class PowerShellAnalyzer:
     def detect_and_carve_pe_executable_non_xored(self):
         print(f"\n{infoS} Searching for: [bold green]PE Executable[white] patterns...")
         pe_match = re.findall(r"4d5a90", str(self.all_strings), re.IGNORECASE)
-        if pe_match != []:
+        if pe_match:
             print(f"{infoS} Looks like we have possible [bold green]{len(pe_match)}[white] patterns. Attempting to extraction...")
             counter = 0
             for pat in self.all_strings:
@@ -252,7 +254,8 @@ class PowerShellAnalyzer:
         else:
             print(f"{errorS} There is no possible PE executable pattern found!\n")
 
-    def buffer_sanitizer(self, executable_buffer):
+    @staticmethod
+    def buffer_sanitizer(executable_buffer):
         # Unwanted characters
         unwanted = ['@', '\t', '\n', " ", "\'"]
         for uc in unwanted:
@@ -260,6 +263,7 @@ class PowerShellAnalyzer:
                 executable_buffer = executable_buffer.replace(uc, "")
 
         return executable_buffer
+
 
 # Execution
 target_pwsh = sys.argv[1]
