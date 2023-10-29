@@ -51,6 +51,7 @@ if sys.platform == "darwin" or sys.platform == "win32":
 else:
     strings_param = "--all"
 
+
 class ResourceScanner:
     def __init__(self, target_file):
         self.target_file = target_file
@@ -112,7 +113,7 @@ class ResourceScanner:
 
         # Count file types
         for fl in empty:
-            if "image" in fl: # Just get rid of them
+            if "image" in fl:  # Just get rid of them
                 pass
             elif "Dalvik" in fl or "C++ source" in fl or "C source" in fl or "ELF" in fl or "Bourne-Again shell" in fl or "executable" in fl or "JAR" in fl: # Worth to write on the table
                 for fname in empty[fl]:
@@ -147,7 +148,7 @@ class ResourceScanner:
                     for ddd in dictionary:
                         for regex in dictionary[ddd]:
                             matches = re.findall(regex, fcontent.decode())
-                            if matches != []:
+                            if matches:
                                 categs[ddd].append([matches[0], kfile])
             except:
                 continue
@@ -155,7 +156,7 @@ class ResourceScanner:
         # Output
         counter = 0
         for key in categs:
-            if categs[key] != []:
+            if categs[key]:
                 resTable = Table(title=f"* {key} *", title_style="bold green", title_justify="center")
                 resTable.add_column("Pattern", justify="center")
                 resTable.add_column("File", justify="center")
@@ -228,10 +229,10 @@ class ResourceScanner:
             strings_data = subprocess.run(["strings", strings_param, self.target_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         executable_buffer = ""
         for dat in strings_data.stdout.decode().split("\n"):
-            for pat in possible_patterns: # Look for methods
+            for pat in possible_patterns:  # Look for methods
                 for mpat in possible_patterns[pat]["patterns"]:
                     matcc = re.findall(mpat, dat)
-                    if matcc != []:
+                    if matcc:
                         print(f"{infoS} Found potential embedded PE executable pattern: [bold green]{mpat}")
                         executable_buffer = dat
                         target_method = pat
@@ -246,15 +247,11 @@ class ResourceScanner:
                     self.method_1_replace_split(r1="^", r2="!00", sp1="!", executable_buffer=executable_buffer)
                 elif target_pattern == r"4D-5A-90O":
                     self.method_1_replace_split(r1="O", r2="-00", sp1='-', executable_buffer=executable_buffer)
-                else:
-                    pass
 
             # Using method 2: Double replace
             elif target_method == "method_2":
                 if target_pattern == r"4D5A9ZZZ" and "YY" in executable_buffer:
                     self.method_2_double_replace(r1="ZZ", r2="0", r3="YY", r4="F", executable_buffer=executable_buffer)
-                else:
-                    pass
 
             # Using method 3: Reverse replace
             elif target_method == "method_3":
@@ -262,8 +259,6 @@ class ResourceScanner:
                     self.method_3_reverse_and_replace(r1="~", r2="0", executable_buffer=executable_buffer)
                 elif target_pattern == r"09~A5~D4":
                     self.method_3_reverse_and_replace(r1="~", r2="", executable_buffer=executable_buffer)
-                else:
-                    pass
 
             # Using method 4: Reverse and double replace
             elif target_method == "method_4":
@@ -277,42 +272,32 @@ class ResourceScanner:
                     self.method_4_reverse_and_double_replace(r1="ZZ", r2="00", r3="-", r4="", executable_buffer=executable_buffer)
                 elif target_pattern == r"\?3\?\?9A5D4":
                     self.method_4_reverse_and_double_replace(r1="--", r2="0", r3="?", r4="00", executable_buffer=executable_buffer)
-                else:
-                    pass
 
             # Using method 5: Triple replace
             elif target_method == "method_5":
                 if target_pattern == r"4D~5A~90O~":
                     self.method_5_triple_replace(r1="O", r2="-00", r3="~", r4="-", r5="-", r6="", executable_buffer=executable_buffer)
-                else:
-                    pass
             # Using method 6: Simple reverse
             elif target_method == "method_6":
                 if target_pattern == r"300009A5D4":
                     self.method_6_simple_reverse(executable_buffer=executable_buffer)
-                else:
-                    pass
             # Using method 7: Base64 and reverse
             elif target_method == "method_7":
                 if target_pattern == r"ABjAHUAZABvAHIAUAABAAEAIgAAAAAAbABsAGQAL":
                     self.method_7_base64_and_reverse(executable_buffer=executable_buffer)
-                else:
-                    pass
             # Using method 8: Simple replace
             elif target_method == "method_8":
                 if target_pattern == r"4D5A9ZZZZ3":
                     self.method_8_simple_replace(r1="ZZ", r2="00", executable_buffer=executable_buffer)
-                else:
-                    pass
             else:
                 print(f"{errorS} There is no method implemented for that data type!")
         else:
             print(f"{errorS} There is no embedded PE executable pattern found!\n")
 
     def method_1_replace_split(self, r1, r2, sp1, executable_buffer):
-        self.r1 = r1 # Replace 1
-        self.r2 = r2 # Replace 2
-        self.sp1 = sp1 # Split character
+        self.r1 = r1  # Replace 1
+        self.r2 = r2  # Replace 2
+        self.sp1 = sp1  # Split character
         self.executable_buffer = executable_buffer
 
         # First replace and split characters
@@ -329,11 +314,12 @@ class ResourceScanner:
 
         # Finally save data into file
         self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
+
     def method_2_double_replace(self, r1, r2, r3, r4, executable_buffer):
-        self.r1 = r1 # Replace 1
-        self.r2 = r2 # Replace 2
-        self.r3 = r3 # Replace 3
-        self.r4 = r4 # Replace 4
+        self.r1 = r1  # Replace 1
+        self.r2 = r2  # Replace 2
+        self.r3 = r3  # Replace 3
+        self.r4 = r4  # Replace 4
         self.executable_buffer = executable_buffer
 
         # Deobfuscation
@@ -344,9 +330,10 @@ class ResourceScanner:
 
         # Finally save data into file
         self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
+
     def method_3_reverse_and_replace(self, r1, r2, executable_buffer):
-        self.r1 = r1 # Replace 1
-        self.r2 = r2 # Replace 2
+        self.r1 = r1  # Replace 1
+        self.r2 = r2  # Replace 2
         self.executable_buffer = executable_buffer
 
         # Deobfuscation
@@ -357,11 +344,12 @@ class ResourceScanner:
 
         # Finally save data into file
         self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
+
     def method_4_reverse_and_double_replace(self, r1, r2, r3, r4, executable_buffer):
-        self.r1 = r1 # Replace 1
-        self.r2 = r2 # Replace 2
-        self.r3 = r3 # Replace 3
-        self.r4 = r4 # Replace 4
+        self.r1 = r1  # Replace 1
+        self.r2 = r2  # Replace 2
+        self.r3 = r3  # Replace 3
+        self.r4 = r4  # Replace 4
         self.executable_buffer = executable_buffer
 
         # Deobfuscation
@@ -372,13 +360,14 @@ class ResourceScanner:
 
         # Finally save data into file
         self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
+
     def method_5_triple_replace(self, r1, r2, r3, r4, r5, r6, executable_buffer):
-        self.r1 = r1 # Replace 1
-        self.r2 = r2 # Replace 2
-        self.r3 = r3 # Replace 3
-        self.r4 = r4 # Replace 4
-        self.r5 = r5 # Replace 5
-        self.r6 = r6 # Replace 6
+        self.r1 = r1  # Replace 1
+        self.r2 = r2  # Replace 2
+        self.r3 = r3  # Replace 3
+        self.r4 = r4  # Replace 4
+        self.r5 = r5  # Replace 5
+        self.r6 = r6  # Replace 6
         self.executable_buffer = executable_buffer
 
         # Deobfuscation
@@ -389,6 +378,7 @@ class ResourceScanner:
 
         # Save data
         self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
+
     def method_6_simple_reverse(self, executable_buffer):
         self.executable_buffer = executable_buffer
 
@@ -414,8 +404,8 @@ class ResourceScanner:
         print(f"{infoS} Data saved into: [bold green]sc0pe_carved_deobfuscated.exe[white]\n")
 
     def method_8_simple_replace(self, r1, r2, executable_buffer):
-        self.r1 = r1 # Replace 1
-        self.r2 = r2 # Replace 2
+        self.r1 = r1  # Replace 1
+        self.r2 = r2  # Replace 2
         self.executable_buffer = executable_buffer
 
         # Deobfuscation
@@ -437,6 +427,7 @@ class ResourceScanner:
                 self.executable_buffer = self.executable_buffer.replace(uc, "")
 
         return self.executable_buffer
+
     def windows_resource_scanner_split_data_carver_method(self):
         print(f"{infoS} Using Method 2: [bold yellow]Detecting and merging split data[white]")
         # Signature information we needed
@@ -497,7 +488,7 @@ class ResourceScanner:
         for rs in resource_sigs:
             find = re.finditer(binascii.unhexlify(resource_sigs[rs]["signature_start"]), target_executable_buffer)
             for pos in find:
-                if pos.start() != 0: # If there is another MZ pattern
+                if pos.start() != 0:  # If there is another MZ pattern
                     resource_sigs[rs]["offset_start"].append(pos.start())
                     founder_switch += 1
         # Locate end offsets
@@ -550,13 +541,13 @@ class ResourceScanner:
 
         # Calculating data size and carving
         if self.partition_name == "Zinc":
-            data_size = 8876 # Fixed size
+            data_size = 8876  # Fixed size
             carved_data = self.file_handler.read(data_size)
         elif self.partition_name == "Zar":
-            data_size = 18090 # Fixed size
+            data_size = 18090  # Fixed size
             carved_data = self.file_handler.read(data_size)
         elif self.partition_name == "Xar":
-            data_size = 18092 # Fixed size
+            data_size = 18092  # Fixed size
             carved_data = self.file_handler.read(data_size)
         else:
             data_size = self.end_offset - self.start_offset
@@ -564,6 +555,7 @@ class ResourceScanner:
 
         # Return carved data for deobfuscation phase
         return carved_data
+
     def windows_resource_scanner_bitmap_carver_method(self):
         print(f"{infoS} Using Method 3: [bold yellow]Extract PE file from Bitmap data[white]")
         # We need target executable buffer and file handler
@@ -588,8 +580,8 @@ class ResourceScanner:
             for offset in valid_offsets:
                 try:
                     pattern = bytes.fromhex(valid_offsets[offset][4:12].decode())
-                    reverz = pattern[::-1] # Little endian stuff
-                    size_of_file = int(binascii.hexlify(reverz), 16) # Convert to decimal
+                    reverz = pattern[::-1]  # Little endian stuff
+                    size_of_file = int(binascii.hexlify(reverz), 16)  # Convert to decimal
                     print(f"{infoS} Found a valid Bitmap file on: [bold green]{hex(offset)}[white] | Size: [bold magenta]{size_of_file}")
                     print(f"{infoS} Performing extraction. Please wait...")
                     data_carve = target_executable_buffer[offset:offset+size_of_file]
@@ -608,7 +600,8 @@ class ResourceScanner:
         else:
             print(f"{errorS} There is no valid Bitmap file pattern found!\n")
 
-    def bitmap_carver_1(self, image_handler):
+    @staticmethod
+    def bitmap_carver_1(image_handler):
         if os.path.exists("carved.bmp"):
             b_array = bytearray()
             for x in range(image_handler.width):
@@ -621,12 +614,12 @@ class ResourceScanner:
                     ff.write(b_array)
                 print(f"{infoS} Data saved into: [bold green]sc0pe_hidden_pe.exe[white]\n")
                 os.system("rm -rf carved.bmp")
-            else:
-                pass
-    def bitmap_carver_2(self, image_handler):
+
+    @staticmethod
+    def bitmap_carver_2(image_handler):
         if os.path.exists("carved.bmp"):
             width, height = image_handler.size
-            b_array = bytearray(width  * height)
+            b_array = bytearray(width * height)
             i = 0
             for x in range(width):
                 for y in range(height):
@@ -640,8 +633,6 @@ class ResourceScanner:
                     ff.write(b_array)
                 print(f"{infoS} Data saved into: [bold green]sc0pe_hidden_pe.exe[white]\n")
                 os.system("rm -rf carved.bmp")
-            else:
-                pass
 
     def windows_resource_scanner_locate_encrypted(self):
         print(f"{infoS} Using Method 4: [bold yellow]Locate and decrypt hidden PE file[white]")
@@ -666,7 +657,7 @@ class ResourceScanner:
             matchs = re.finditer(binascii.unhexlify(encrypted_sigs[artifact]["signature_start"]), target_executable_buffer)
             for mm in matchs:
                 offsets.append(mm.start())
-            if offsets != []:
+            if offsets:
                 founz += 1
                 print(f"{infoS} Carving encrypted resource on: [bold green]{hex(offsets[0])}[white] | Size: [bold green]{encrypted_sigs[artifact]['size_of_data']}")
                 carve_data = target_executable_buffer[offsets[0]:encrypted_sigs[artifact]["size_of_data"]+encrypted_sigs[artifact]["additional_bytes"]]
@@ -689,6 +680,7 @@ class ResourceScanner:
             cf.write(binascii.unhexlify(self.save_buffer))
         print(f"{infoS} Data saved into: [bold green]{self.output_name}[white]\n")
 
+
 # Execution zone
 targFile = sys.argv[1]
 resource_scan = ResourceScanner(targFile)
@@ -707,3 +699,4 @@ if os.path.isfile(targFile):
         print("\n[bold white on red]Target OS couldn\'t detected!\n")
 else:
     print("\n[bold white on red]Target file not found!\n")
+    
