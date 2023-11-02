@@ -1,9 +1,7 @@
 #!/usr/bin/python3
 
 import os
-import readline
 import sys
-import glob
 import distutils.spawn
 import subprocess
 
@@ -11,6 +9,7 @@ import subprocess
 try:
     from prompt_toolkit.shortcuts import prompt
     from prompt_toolkit.completion import NestedCompleter
+    from prompt_toolkit.completion import PathCompleter
     from prompt_toolkit.styles import Style as prstyle
 except:
     print("Error: >prompt_toolkit< module not found.")
@@ -57,10 +56,10 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 sc0pe_path = open(".path_handler", "r").read()
 
 # Get python binary
-if distutils.spawn.find_executable("python3"):
-    py_binary = "python3"
-else:
+if distutils.spawn.find_executable("python"):
     py_binary = "python"
+else:
+    py_binary = "python3"
 
 # User home detection and compatibility
 homeD = os.path.expanduser("~")
@@ -94,11 +93,7 @@ console_output = [
 ]
 
 # File path completer
-def complete(text, state):
-    return (glob.glob(text+"*")+[None])[state]
-readline.set_completer_delims(" \t\n;")
-readline.parse_and_bind("tab: complete")
-readline.set_completer(complete)
+path_completer = PathCompleter()
 
 # Message
 print(f"{infoS} Entering interactive shell mode...")
@@ -165,7 +160,7 @@ try:
 
         # Specifying target file
         elif con_command == "set target-file":
-            filename = str(input(f"{infoC} Enter full path of target file: "))
+            filename = str(prompt(">>> Enter full path of target file: ", completer=path_completer))
             if os.path.isfile(filename):
                 with open(".target-file.txt", "w") as tfile:
                     tfile.write(filename)
@@ -174,7 +169,7 @@ try:
 
         # Specifying target folder
         elif con_command == "set target-folder":
-            foldername = str(input(f"{infoC} Enter full path of target folder: "))
+            foldername = str(prompt(">>> Enter full path of target folder: ", completer=path_completer))
             if os.path.isdir(foldername):
                 with open(".target-folder.txt", "w") as tfolder:
                     tfolder.write(foldername)
