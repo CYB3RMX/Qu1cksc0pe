@@ -38,26 +38,23 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ```
 
 # Screenshot
-![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/a637d9cb-697f-4797-a45f-57f1d4420e17)
+![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/e2f9e84a-ddb2-451b-a5bf-0b01a5f90cde)
 
 # Updates
+<b>02/11/2023</b>
+- [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now analyze Windows processes. With this feature, you can obtain:
+- Network connections associated with a given process.
+- Windows API calls.
+- Command-line arguments, and more...
+
+https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/a2c84b8f-c12c-47ac-96e9-c345aeda1f54
+
 <b>12/10/2023</b>
 - [X] Bug fixes.
 
 <b>04/10/2023</b>
 - [X] Improvements on ```Android Static Analyzer```
 - [X] Bug fixes.
-
-<b>29/09/2023</b>
-- [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe is now able to analyze ```Rich Text Format (.rtf)``` documents. You can perform:
-- Detection and extraction of embedded exploits/scripts from malicious .rtf documents. (CVE-2017-11882)
-- Detection of malicious patterns.
-
-https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/eb5ef083-7669-4575-b587-657c44b97c1d
-
-<b>17/09/2023</b>
-- [X] Compatibility has been added for Windows. Qu1cksc0pe can now run on Windows 10 or 11!
-- [x] Lots of improvements and bug fixes.
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
@@ -198,16 +195,14 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 **Alert**
 > **You must connect a virtual device or physical device to your computer.**
 
-<br><b>Usage</b>: ```python qu1cksc0pe.py --file suspicious.apk --watch```<br>
+<br><b>Usage</b>: ```python qu1cksc0pe.py --watch```<br>
 
 https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/3251dc28-7c97-4a82-aa6b-a981fb6da13e
 
-## Binary Emulation
-**Alert**
-> **Binary emulator is not recommended for .NET analysis.**
+## Process Analysis
+<br><b>Usage</b>: ```python qu1cksc0pe.py --watch```<br>
 
-<br><b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_file --watch```<br>
-![animation](.animations/emulate.gif)
+https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/a2c84b8f-c12c-47ac-96e9-c345aeda1f54
 
 # References
 - <a href="https://www.linkedin.com/posts/mehmetalikerimoglu_qu1cksc0pe-all-in-one-static-malware-analysis-activity-6853239604439523328-B9dN/?trk=public_profile_like_view&originalSubdomain=tr">The Cyber Security Hub</a>

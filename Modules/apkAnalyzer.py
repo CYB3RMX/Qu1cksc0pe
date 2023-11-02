@@ -52,10 +52,10 @@ foundS = f"[bold cyan][[bold red]+[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # Get python binary
-if distutils.spawn.find_executable("python3"):
-    py_binary = "python3"
-else:
+if distutils.spawn.find_executable("python"):
     py_binary = "python"
+else:
+    py_binary = "python3"
 
 # Compatibility
 homeD = os.path.expanduser("~")

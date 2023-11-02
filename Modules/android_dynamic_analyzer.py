@@ -598,8 +598,10 @@ class AndroidDynamicAnalyzer:
                         # If not found append
                         if dont_c == 0:
                             dump_urls.append(url.decode())
-            # Print
-            self.table_generator(data_array=dump_urls, data_type="interesting URL\'s")
+                # Print
+                self.table_generator(data_array=dump_urls, data_type="interesting URL\'s")
+            else:
+                print(f"{errorS} There is no valid URL pattern found!")
 
             # Check for class names/methods
             if self.axmlobj:

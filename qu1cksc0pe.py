@@ -64,10 +64,10 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 username = getpass.getuser()
 
 # Get python binary
-if distutils.spawn.find_executable("python3"):
-    py_binary = "python3"
-else:
+if distutils.spawn.find_executable("python"):
     py_binary = "python"
+else:
+    py_binary = "python3"
 
 # Make Qu1cksc0pe work on Windows, Linux, OSX
 homeD = os.path.expanduser("~")
@@ -163,7 +163,7 @@ parser.add_argument("--resource", required=False,
 parser.add_argument("--report", required=False,
                     help="Export analysis reports into a file (JSON Format for now).", action="store_true")
 parser.add_argument("--watch", required=False,
-                    help="Perform dynamic analysis against Windows/Linux/Android files.", action="store_true")
+                    help="Perform dynamic analysis against Windows/Android files. (Linux will coming soon!!)", action="store_true")
 parser.add_argument("--sigcheck", required=False,
                     help="Scan file signatures in target file.", action="store_true")
 parser.add_argument("--vtFile", required=False,
@@ -418,16 +418,10 @@ def Qu1cksc0pe():
             print("[bold white on red][blink]--domain[/blink] argument is not supported for folder analyzing!\n")
             sys.exit(1)
 
-    # Strace
+    # Dynamic analysis
     if args.watch:
-        # Handling --file argument
-        if args.file is not None:
-            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}emulator.py \"{args.file}\""
-            os.system(command)
-        # Handling --folder argument
-        if args.folder is not None:
-            print("[bold white on red][blink]--watch[/blink] argument is not supported for folder analyzing!\n")
-            sys.exit(1)
+        command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}emulator.py"
+        os.system(command)
 
     # Interactive shell
     if args.console:
