@@ -3,6 +3,7 @@
 import re
 import os
 import sys
+import json
 import binascii
 import distutils.spawn
 
@@ -23,6 +24,11 @@ except:
 #--------------------------------------------- Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
+
+if not distutils.spawn.find_executable("ja3"):
+    print(f"{errorS} Error: [bold green]ja3[white] command not found!")
+    print(f"[bold red]>>>[white] Execute: [bold green]pip3 install pyja3[white]")
+    sys.exit(1)
 
 # Get python binary
 if distutils.spawn.find_executable("python"):
@@ -157,6 +163,44 @@ class PcapAnalyzer:
         else:
             print(f"{errorS} There is no executable file pattern found!")
 
+    def lookup_ja3_digest(self):
+        print(f"\n{infoS} Performing malicious [bold green]JA3 Digest[white] lookup. Please wait...")
+        os.system(f"ja3 {self.pcap_file} > out.json")
+        ja3_data = json.load(open("out.json"))
+        ja3_array = []
+
+        # Table for extracted data
+        jtable = Table()
+        jtable.add_column("[bold green]Extracted Digest Values", justify="center")
+
+        # Try to get ja3 digests
+        for ja in ja3_data:
+            if ja["ja3_digest"] not in ja3_array:
+                ja3_array.append(ja["ja3_digest"])
+                jtable.add_row(ja["ja3_digest"])
+
+        if ja3_array:
+            print(jtable)
+
+            # Parsing database
+            l_data = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}ja3_fingerprints.lst").read().split("\n")
+            digest_arr = []
+            for d in l_data:
+                if d.split(",")[0] not in digest_arr:
+                    digest_arr.append(d.split(",")[0])
+
+            # Perform lookup
+            j_count = 0
+            for jd in ja3_array:
+                if jd in digest_arr:
+                    j_count += 1
+                    j_type_index = digest_arr.index(jd)
+                    print(f"[bold magenta]>>>[white] JA3: [bold green]{jd}[white] ---> [bold red]{l_data[j_type_index].split(',')[1]}")
+
+            if j_count == 0:
+                print(f"\n{errorS} There is no malicious digest value found!")
+        os.system("rm -rf out.json")
+
 # Execution
 target_pcap = sys.argv[1]
 pcap_analyzer = PcapAnalyzer(target_pcap)
@@ -164,3 +208,4 @@ pcap_analyzer.search_urls()
 pcap_analyzer.search_dns_queries()
 pcap_analyzer.find_interesting_stuff()
 pcap_analyzer.detect_executables()
+pcap_analyzer.lookup_ja3_digest()

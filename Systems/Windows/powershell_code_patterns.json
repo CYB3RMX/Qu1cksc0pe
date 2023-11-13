@@ -7,13 +7,17 @@
             "-bxor",
             "fromHEXString",
             "System.Convert",
-            "sYsTem.io.comprEsSIOn.CoMPReSsIONmOdE"
+            "sYsTem.io.comprEsSIOn.CoMPReSsIONmOdE",
+            "EncodedCommand"
         ],
         "occurence": 0
     },
     "Evasion/Bypass": {
         "patterns": [
-            "Microsoft.Win32.UnsafeNativeMethods"
+            "Microsoft.Win32.UnsafeNativeMethods",
+            "Start-Job",
+            "-EP BYPASS",
+            "-ExecutionPolicy"
         ],
         "occurence": 0
     },
@@ -48,7 +52,11 @@
             "PowerShellTcp",
             "IPAddress",
             "Port",
-            "AcceptTcpClient"
+            "AcceptTcpClient",
+            "Invoke-WebRequest",
+            "Invoke-RestMethod",
+            "-Uri",
+            "System.Net.HTTPWebRequest"
         ],
         "occurence": 0
     }
