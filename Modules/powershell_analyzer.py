@@ -50,7 +50,9 @@ class PowerShellAnalyzer:
             self.all_strings = self.target_buffer_16bit.stdout.decode().split("\n")+self.target_buffer_normal.stdout.decode().split("\n")
         else:
             self.all_strings = self.target_buffer_normal.stdout.decode().split("\n")
-        self.pattern_b64 = r"\[(?i)sYsteM\.coNvert\]::FROmbaSe64StRiNG\(\s*[\'\"]([^']*)[\'\"]\s*\)|\[System\.Convert\]::FromBase64String\(\s*'([A-Za-z0-9+/=]+)'\s*\)"
+        self.pattern_b64 = [r"\[(?i)sYsteM\.coNvert\]::FROmbaSe64StRiNG\(\s*[\'\"]([^']*)[\'\"]\s*\)|\[System\.Convert\]::FromBase64String\(\s*'([A-Za-z0-9+/=]+)'\s*\)",
+                            r"[A-Za-z0-9+/=]+"
+                        ]
         self.pattern_ascii = r'\[Byte\[\]\]\((\d+(?:,\d+)*)\)'
         self.pattern_hex = r'\[System\.Convert\]::fromHEXString\(\'([0-9a-fA-F]+)\'\)'
 
@@ -153,7 +155,7 @@ class PowerShellAnalyzer:
 
     def detect_and_carve_base64_payloads_xored(self):
         print(f"\n{infoS} Searching for: [bold green]BASE64 Encoded[white] payloads...")
-        b64matches = re.findall(self.pattern_b64, str(self.all_strings), re.IGNORECASE)
+        b64matches = re.findall(self.pattern_b64[0], str(self.all_strings), re.IGNORECASE)
         if b64matches != []:
             print(f"{infoS} We have a [bold green]BASE64[white] encoded payload. Performing decode and extract...")
             print(f"{infoS} Checking for XOR key...")
@@ -199,7 +201,7 @@ class PowerShellAnalyzer:
     # ------------------------------------ non-XORED payload detection and extraction
     def check_for_non_xored_payloads_presence(self):
         print(f"{infoS} Performing [bold green]non-XOR\'ed[white] payload detection...")
-        b64_payload = re.findall(self.pattern_b64, str(self.all_strings), re.IGNORECASE)
+        b64_payload = re.findall(self.pattern_b64[0], str(self.all_strings), re.IGNORECASE)
         ascii_payload = re.findall(self.pattern_ascii, str(self.all_strings), re.IGNORECASE)
         hex_payload = re.findall(self.pattern_hex, str(self.all_strings), re.IGNORECASE)
         pe_payload = re.findall(r"4d5a90", str(self.all_strings), re.IGNORECASE)
@@ -214,8 +216,9 @@ class PowerShellAnalyzer:
             print(f"{errorS} There is no pattern about non-XOR\'ed payloads!\n")
 
     def detect_and_carve_b64_non_xored(self):
+        # This method is for: frombase64 type payloads
         print(f"\n{infoS} Searching for: [bold green]BASE64 Encoded[white] payloads...")
-        b64matches = re.findall(self.pattern_b64, str(self.all_strings), re.IGNORECASE)
+        b64matches = re.findall(self.pattern_b64[0], str(self.all_strings), re.IGNORECASE)
         if b64matches != []:
             b64_data = base64.b64decode(b64matches[0][0])
             print(f"{infoS} We have a [bold green]BASE64[white] encoded payload. Performing decode and extract...")
@@ -235,6 +238,23 @@ class PowerShellAnalyzer:
             else:
                 print(f"{infoS} There is no compression. Extracting payload anyway...")
                 self.save_data_into_file(output_file="sc0pe_decoded_b64_payload.bin", data=b64_data)
+        else:
+            print(f"{errorS} There is no pattern about BASE64 encoded payloads!\n")
+
+    def check_only_legit_base64(self):
+        print(f"\n{infoS} Searching for: [bold green]Normal BASE64[white] patterns...")
+        b64_match = re.findall(self.pattern_b64[1], str(self.all_strings), re.IGNORECASE)
+        if b64_match:
+            print(f"{infoS} We have a [bold green]BASE64[white] encoded payload. Performing decode and extract...")
+            for enc in b64_match:
+                try:
+                    decbf = base64.b64decode(enc)
+                    if len(decbf.decode()) > 10:
+                        with open(f"sc0pe_decoded_b64_{len(decbf.decode())}.bin", "w") as ff:
+                            ff.write(decbf.decode())
+                        print(f"{infoS} Decoded payload saved into: [bold green]sc0pe_decoded_b64_{len(decbf.decode())}.bin[white]")
+                except:
+                    continue
         else:
             print(f"{errorS} There is no pattern about BASE64 encoded payloads!\n")
 
@@ -269,3 +289,4 @@ pwsh_analyzer.extract_path_values()
 pwsh_analyzer.check_executions()
 pwsh_analyzer.find_payloads_xored()
 pwsh_analyzer.check_for_non_xored_payloads_presence()
+pwsh_analyzer.check_only_legit_base64()
