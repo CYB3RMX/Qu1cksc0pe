@@ -604,5 +604,11 @@
             "injects_to_disable",
             "INJECT Package"
         ]
+    },
+    "Obfuscation": {
+        "patterns": [
+            "npmanager",
+            "NPStringFog"
+        ]
     }
 }

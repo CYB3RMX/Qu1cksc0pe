@@ -90,10 +90,6 @@ else
     echo -en "${info} ${green}pyOneNote${default} is already exist...\n"
 fi
 
-# Setting up sc0pe_helper module
-echo -en "${yellow}>>> ${default}Just one more...\n"
-sudo cp Modules/lib/sc0pe_helper.py /usr/lib/python3/dist-packages/
-
 # Setting up "mono-complete"
 echo -en "${info} Setting up mono-complete\n"
 sudo ${package_manager} mono-complete

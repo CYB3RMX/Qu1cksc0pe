@@ -29,6 +29,9 @@ def ManifestAnalysis():
     except FileNotFoundError:
         print(f"{errorS} An error occured while parsing [bold green]AndroidManifest.xml[white]. Did your APK file decompiled correctly?")
         sys.exit(1)
+    except:
+        print(f"{errorS} It looks like the target [bold green]AndroidManifest.xml[white] is corrupted!!")
+        sys.exit(1)
 
     # Gathering informations
     app_data = manifest_root.findall("application")
