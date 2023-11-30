@@ -3,10 +3,13 @@
 import os
 import re
 import sys
+import yara
 import json
+import hashlib
 import warnings
 import binascii
 import subprocess
+import configparser
 
 try:
     from rich import print
@@ -43,26 +46,15 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # Compatibility
 homeD = os.path.expanduser("~")
-py_version = sys.version_info[1]
-sc0pe_helper_path = "/usr/lib/python3/dist-packages/sc0pe_helper.py"
 path_seperator = "/"
 setup_scr = "setup.sh"
 if sys.platform == "win32":
-    sc0pe_helper_path = f"{homeD}\\appdata\\local\\programs\\python\\python3{py_version}\\lib\\site-packages\\sc0pe_helper.py"
     path_seperator = "\\"
     setup_scr = "setup.ps1"
 
 #--------------------------------------------- Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 fileName = sys.argv[1]
-
-# Using helper library
-if os.path.exists(sc0pe_helper_path):
-    from sc0pe_helper import Sc0peHelper
-    sc0pehelper = Sc0peHelper(sc0pe_path)
-else:
-    print(f"{errorS} [bold green]sc0pe_helper[white] library not installed. You need to execute [bold green]{setup_scr}[white] script!")
-    sys.exit(1)
 
 # Loading dnlib.dll
 clr.AddReference(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}dnlib.dll")
@@ -106,7 +98,10 @@ winrep = {
     "sections": {}
 }
 
-#------------------------------------ Defining function
+#------------------------------------ Read and parse config file
+conf = configparser.ConfigParser()
+conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf")
+
 class WindowsAnalyzer:
     def __init__(self, target_file):
         self.target_file = target_file
@@ -115,6 +110,7 @@ class WindowsAnalyzer:
         self.executable_buffer = open(self.target_file, "rb").read()
         self.all_strings = open(f"{sc0pe_path}{path_seperator}temp.txt", "r").read().split("\n")
         self.blacklisted_patterns = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}dotnet_blacklisted_methods.txt", "r").read().split("\n")
+        self.rule_path = conf["Rule_PATH"]["rulepath"]
 
         # Check for windows file type
         self.exec_type = subprocess.run(["file", self.target_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -413,14 +409,85 @@ class WindowsAnalyzer:
             except:
                 continue
         print(fun_table)
-        
+
+    def hash_calculator(self, filename, report_object):
+        hashmd5 = hashlib.md5()
+        hashsha1 = hashlib.sha1()
+        hashsha256 = hashlib.sha256()
+        try:
+            with open(filename, "rb") as ff:
+                for chunk in iter(lambda: ff.read(4096), b""):
+                    hashmd5.update(chunk)
+            ff.close()
+            with open(filename, "rb") as ff:
+                for chunk in iter(lambda: ff.read(4096), b""):
+                    hashsha1.update(chunk)
+            ff.close()
+            with open(filename, "rb") as ff:
+                for chunk in iter(lambda: ff.read(4096), b""):
+                    hashsha256.update(chunk)
+            ff.close()
+        except:
+            pass
+        print(f"[bold red]>>>>[white] MD5: [bold green]{hashmd5.hexdigest()}")
+        print(f"[bold red]>>>>[white] SHA1: [bold green]{hashsha1.hexdigest()}")
+        print(f"[bold red]>>>>[white] SHA256: [bold green]{hashsha256.hexdigest()}")
+        report_object["hash_md5"] = hashmd5.hexdigest()
+        report_object["hash_sha1"] = hashsha1.hexdigest()
+        report_object["hash_sha256"] = hashsha256.hexdigest()
+
+    def yara_rule_scanner(self, filename, report_object):
+        yara_match_indicator = 0
+        finalpath = f"{sc0pe_path}{path_seperator}{self.rule_path}"
+        allRules = os.listdir(finalpath)
+
+        # This array for holding and parsing easily matched rules
+        yara_matches = []
+        for rul in allRules:
+            try:
+                rules = yara.compile(f"{finalpath}{rul}")
+                tempmatch = rules.match(filename)
+                if tempmatch != []:
+                    for matched in tempmatch:
+                        if matched.strings != []:
+                            if matched not in yara_matches:
+                                yara_matches.append(matched)
+            except:
+                continue
+
+        # Printing area
+        if yara_matches != []:
+            yara_match_indicator += 1
+            for rul in yara_matches:
+                yaraTable = Table()
+                print(f">>> Rule name: [i][bold magenta]{rul}[/i]")
+                yaraTable.add_column("Offset", style="bold green", justify="center")
+                yaraTable.add_column("Matched String/Byte", style="bold green", justify="center")
+                report_object["matched_rules"].append({str(rul): []})
+                for mm in rul.strings:
+                    yaraTable.add_row(f"{hex(mm[0])}", f"{str(mm[2])}")
+                    try:
+                        report_object["matched_rules"][-1][str(rul)].append({"offset": hex(mm[0]) ,"matched_pattern": mm[2].decode("ascii")})
+                    except:
+                        report_object["matched_rules"][-1][str(rul)].append({"offset": hex(mm[0]) ,"matched_pattern": str(mm[2])})
+                print(yaraTable)
+                print(" ")
+
+        if yara_match_indicator == 0:
+            print(f"[bold white on red]There is no rules matched for {filename}")
+
+    def report_writer(self, target_os, report_object):
+        with open(f"sc0pe_{target_os}_report.json", "w") as rp_file:
+            json.dump(report_object, rp_file, indent=4)
+        print(f"\n[bold magenta]>>>[bold white] Report file saved into: [bold blink yellow]sc0pe_{target_os}_report.json\n")
+
     def statistics_method(self):
         datestamp = self.gather_timestamp()
         print(f"\n[bold green]-> [white]Statistics for: [bold green][i]{self.target_file}[/i]")
         print(f"[bold magenta]>>[white] Time Date Stamp: [bold green][i]{datestamp}[/i]")
         winrep["filename"] = self.target_file
         winrep["timedatestamp"] = datestamp
-        sc0pehelper.hash_calculator(self.target_file, winrep)
+        self.hash_calculator(self.target_file, winrep)
         print(f"[bold magenta]>>[white] IMPHASH: [bold green]{self.binaryfile.get_imphash()}")
         winrep["imphash"] = self.binaryfile.get_imphash()
 
@@ -497,7 +564,7 @@ class WindowsAnalyzer:
         self.detect_embedded_PE()
         # Yara rule match
         print(f"\n{infoS} Performing YARA rule matching...")
-        sc0pehelper.yara_rule_scanner("windows", fileName, config_path=f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf", report_object=winrep)
+        self.yara_rule_scanner(fileName, report_object=winrep)
 
     def msi_file_analyzer(self):
         print(f"{infoS} Performing Microsoft Software Installer analysis...\n")
@@ -507,7 +574,7 @@ class WindowsAnalyzer:
         self.detect_embedded_PE()
         # Yara rule match
         print(f"\n{infoS} Performing YARA rule matching...")
-        sc0pehelper.yara_rule_scanner("windows", fileName, config_path=f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf", report_object=winrep)
+        self.yara_rule_scanner(fileName, report_object=winrep)
 
 # Execute
 windows_analyzer = WindowsAnalyzer(target_file=str(fileName))
@@ -519,7 +586,7 @@ windows_analyzer.detect_embedded_PE()
 
 # Yara rule match
 print(f"\n{infoS} Performing YARA rule matching...")
-sc0pehelper.yara_rule_scanner("windows", fileName, config_path=f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf", report_object=winrep)
+windows_analyzer.yara_rule_scanner(fileName, report_object=winrep)
 
 windows_analyzer.section_parser()
 windows_analyzer.analyze_via_viv()
@@ -527,4 +594,4 @@ windows_analyzer.statistics_method()
 
 # Print reports
 if sys.argv[2] == "True":
-    sc0pehelper.report_writer("windows", winrep)
+    windows_analyzer.report_writer("windows", winrep)

@@ -38,9 +38,13 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ```
 
 # Screenshot
-![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/e2f9e84a-ddb2-451b-a5bf-0b01a5f90cde)
+![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/1bf1b1d6-80f3-445d-996d-a4216a79a2e0)
 
 # Updates
+<b>30/11/2023</b>
+- [X] Improvements on ```Android Static Analyzer```
+- [X] The ```sc0pe_helper``` library has been removed due to setup and installation issues.
+
 <b>13/11/2023</b>
 - [X] Bug fixes and improvements.
 

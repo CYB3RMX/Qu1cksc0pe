@@ -47,15 +47,12 @@ sc0pe_path = open(".path_handler", "r").read()
 
 # Compatibility
 homeD = os.path.expanduser("~")
-py_version = sys.version_info[1]
-sc0pe_helper_path = "/usr/lib/python3/dist-packages/sc0pe_helper.py"
 path_seperator = "/"
 setup_scr = "setup.sh"
 strings_param = "--all"
 adb_path = distutils.spawn.find_executable("adb")
 del_com = "rm -rf"
 if sys.platform == "win32":
-    sc0pe_helper_path = f"{homeD}\\appdata\\local\\programs\\python\\python3{py_version}\\lib\\site-packages\\sc0pe_helper.py"
     path_seperator = "\\"
     setup_scr = "setup.ps1"
     strings_param = "-a"
@@ -65,16 +62,8 @@ if sys.platform == "win32":
     conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf")
     adb_path = conf["ADB_PATH"]["win_adb_path"]
 
-# Using helper library
-if os.path.exists(sc0pe_helper_path):
-    from sc0pe_helper import Sc0peHelper
-    sc0pehelper = Sc0peHelper(sc0pe_path)
-else:
-    print(f"{errorS} [bold green]sc0pe_helper[white] library not installed. You need to execute [bold green]{setup_scr}[white] script!")
-    sys.exit(1)
-
 # Disabling pyaxmlparser's logs
-pyaxmlparser.core.log.disabled = True
+pyaxmlparser.core.logging.disable()
 warnings.filterwarnings("ignore") # Suppressing another warnings
 
 # Initialize a dictionary to store the current state of the folders
@@ -104,7 +93,8 @@ categs = {
     "Windows Operations": [],
     "Persistence/Managing": [], "Network/Internet": [], "SSL Pining/Certificate Handling": [],
     "Dynamic Class/Dex Loading": [], "Java Reflection": [], "Root Detection": [],
-    "Cryptography": [], "Command Execution": [], "Anti-VM/Anti-Debug": [], "BOT Activity": []
+    "Cryptography": [], "Command Execution": [], "Anti-VM/Anti-Debug": [], "BOT Activity": [],
+    "Obfuscation": []
 }
 
 class AndroidDynamicAnalyzer:
@@ -119,6 +109,13 @@ class AndroidDynamicAnalyzer:
             self.axmlobj = pyaxmlparser.APK(self.target_file)
         except:
             self.axmlobj = None
+
+    def recursive_dir_scan(self, target_directory):
+        fnames = []
+        for root, d_names, f_names in os.walk(target_directory):
+            for ff in f_names:
+                fnames.append(os.path.join(root, ff))
+        return fnames
 
     def search_package_name(self, package_name):
         print(f"{infoS} Searching for existing installation...")
@@ -212,7 +209,7 @@ class AndroidDynamicAnalyzer:
             dirTable.add_column("Type", justify="center", style="bold green")
 
             # Crawl the directory
-            dircontent = sc0pehelper.recursive_dir_scan(target_directory=f"{sc0pe_path}{path_seperator}{target_directory}")
+            dircontent = self.recursive_dir_scan(target_directory=f"{sc0pe_path}{path_seperator}{target_directory}")
             if dircontent != []:
                 print(f"\n[bold cyan][INFO][white] Crawling [bold green]{target_directory} [white]directory.")
                 for file in dircontent:

@@ -71,17 +71,14 @@ else:
 
 # Make Qu1cksc0pe work on Windows, Linux, OSX
 homeD = os.path.expanduser("~")
-py_version = sys.version_info[1]
 path_seperator = "/"
 allA = "--all" # strings parameter
-sc0pe_helper_path = "/usr/lib/python3/dist-packages/sc0pe_helper.py"
 setup_scr = "setup.sh"
 if sys.platform == "darwin":
     allA = "-a"
 elif sys.platform == "win32":
     path_seperator = "\\"
     allA = "-a"
-    sc0pe_helper_path = f"{homeD}\\appdata\\local\\programs\\python\\python3{py_version}\\lib\\site-packages\\sc0pe_helper.py"
     setup_scr = "setup.ps1"
 else:
     pass
@@ -110,14 +107,6 @@ else:
     path_handler.close()
     libscan = configparser.ConfigParser()
 
-# Using helper library
-if os.path.exists(sc0pe_helper_path):
-    from sc0pe_helper import Sc0peHelper
-    sc0pehelper = Sc0peHelper(sc0pe_path)
-else:
-    print(f"{errorS} [bold green]sc0pe_helper[white] library not installed. You need to execute [bold green]{setup_scr}[white] script!")
-    sys.exit(1)
-
 # Banner
 os.system(f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}banners.py")
 
@@ -143,8 +132,6 @@ parser.add_argument("--domain", required=False,
 parser.add_argument("--hashscan", required=False,
                     help="Scan target file's hash in local database.",
                     action="store_true")
-parser.add_argument("--setup_venv", required=False,
-                    help="Setup Python virtual environment automatically.", action="store_true")
 parser.add_argument("--install", required=False,
                     help="Install or Uninstall Qu1cksc0pe.", action="store_true")
 parser.add_argument("--key_init", required=False,
@@ -201,16 +188,16 @@ def BasicAnalyzer(analyzeFile):
 
     # Android Analysis
     elif "PK" in fileType and "Java archive" in fileType:
+        print(f"{infoS} Target OS: [bold green]Android[white]")
 
-        # If given file is an valid APK file then run APK analysis
-        try:
-            look = pyaxmlparser.APK(analyzeFile)
-        except:
-            print(f"{errorS} An error occured while parsing the file. Maybe [bold green]AndroidManifest.xml[white] is corrupted?")
-            sys.exit(1)
+        # Extension parsing
+        file_name_trim = os.path.splitext(analyzeFile)
 
-        if look.is_valid_APK() == True:
-            print(f"{infoS} Target OS: [bold green]Android[white]")
+        # If given file is a JAR file then run JAR file analysis
+        if file_name_trim[-1] == ".jar": # Extension based detection
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}apkAnalyzer.py \"{analyzeFile}\" False JAR"
+            os.system(command)
+        else:
             if args.report:
                 command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}apkAnalyzer.py \"{analyzeFile}\" True APK"
             else:
@@ -223,10 +210,6 @@ def BasicAnalyzer(analyzeFile):
                 os.system(command)
             else:
                 pass
-        else:
-            # If given file is a JAR file then run JAR file analysis
-            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}apkAnalyzer.py \"{analyzeFile}\" False JAR"
-            os.system(command)
 
     # Pcap analysis
     elif "pcap" in fileType or "capture file" in fileType:
@@ -428,10 +411,6 @@ def Qu1cksc0pe():
         command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}console.py"
         os.system(command)
 
-    # Virtual environment setup
-    if args.setup_venv:
-        sc0pehelper.setup_virtual_environment()
-
     # Database update
     if args.db_update:
         command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}hashScanner.py --db_update"
@@ -495,10 +474,6 @@ def Qu1cksc0pe():
                 # Copying qu1cksc0pe.py file into /usr/bin/
                 print(f"{infoS} Copying [bold green]qu1cksc0pe.py[white] to [bold green]/usr/bin/[white] directory.")
                 os.system("cp qu1cksc0pe.py /usr/bin/qu1cksc0pe && chmod +x /usr/bin/qu1cksc0pe")
-
-                # Copying sc0pe_helper module to /usr/lib/python3/dist-packages/
-                print(f"{infoS} Copying [bold green]sc0pe_helper.py[white] to [bold green]/usr/lib/python3/dist-packages/[white] directory.")
-                os.system("cp Modules/lib/sc0pe_helper.py /usr/lib/python3/dist-packages/")
                 print(f"{infoS} Installation completed.")
             elif choose == 2:
                 print(f"\n{infoS} Looks like we have permission to uninstall. Let\'s begin...")
@@ -508,8 +483,6 @@ def Qu1cksc0pe():
                 os.system("rm -rf /etc/qu1cksc0pe.conf")
                 print(f"{infoS} Removing [bold green]/opt/Qu1cksc0pe[white] directory.")
                 os.system("rm -rf /opt/Qu1cksc0pe")
-                print(f"{infoS} Removing [bold green]sc0pe_helper[white] library.")
-                os.system("rm -rf /usr/lib/python3/dist-packages/sc0pe_helper.py")
                 print(f"{infoS} Uninstallation completed.")
             else:
                 print("\n[bold white on red]Wrong option. Quitting!!\n")
@@ -518,10 +491,19 @@ def Qu1cksc0pe():
             print("\n[bold white on red]Please use this argument as [blink]root[/blink]!!\n")
             sys.exit(1)
 
+def cleanup_junks():
+    junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt", "TargetAPK/", "TargetSource/"]
+    for junk in junkFiles:
+        if os.path.exists(junk):
+            if sys.platform != "win32":
+                os.system(f"rm -rf {junk}")
+            else:
+                os.system(f"powershell -c \"del {junk} -Force -Recurse\"")
+
 # Exectuion area
 try:
     Qu1cksc0pe()
     # Cleaning up...
-    sc0pehelper.cleanup_junks()
+    cleanup_junks()
 except:
-    sc0pehelper.cleanup_junks()
+    cleanup_junks()

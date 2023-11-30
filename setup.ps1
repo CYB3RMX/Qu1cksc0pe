@@ -112,15 +112,6 @@ if (Get-Command pyonenote.exe -ErrorAction SilentlyContinue) {
     pip install -U "https://github.com/DissectMalware/pyOneNote/archive/master.zip" --force
 }
 
-# Copying sc0pe_helper
-Write-Host "`n$infoS Checking$green sc0pe_helper$default"
-if (Test-Path "$env:LOCALAPPDATA\programs\Python\Python$python_version\Lib\site-packages\sc0pe_helper.py") {
-    Write-Host "$succesS$green sc0pe_helper$default is already exist."
-} else {
-    Write-Host "$infoS Copying$green sc0pe_helper$default..."
-    Copy-Item -Path .\Modules\lib\sc0pe_helper.py -Destination "$env:LOCALAPPDATA\programs\Python\Python$python_version\Lib\site-packages\"
-}
-
 # Installing android platform tools
 Write-Host "`n$infoS Checking$green Android Platform Tools$default..."
 if (Test-Path "$env:HOMEPATH\sc0pe_Base\platform-tools") {
