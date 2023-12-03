@@ -36,12 +36,13 @@ else
   pip3 install -r requirements.txt
 fi
 
-# Setting up sc0pe_Base folder in /home/$user if its not exist
+# Setting up sc0pe_Base folder in /home/$user if it doesn't exist
+SC0PE_DIR="/home/$USER/sc0pe_Base"
 echo -en "${info} Setting up ${green}sc0pe_Base${default} folder in ${green}/home/$USER${default}...\n"
 USER=$(whoami)
-if [ ! -d "/home/$USER/sc0pe_Base" ]; then
+if [ ! -d "$SC0PE_DIR" ]; then
     echo -en "${info} Creating ${green}sc0pe_Base${default} folder in ${green}/home/$USER${default}...\n"
-    mkdir /home/$USER/sc0pe_Base
+    mkdir "$SC0PE_DIR"
 else
     echo -en "${info} ${green}sc0pe_Base${default} folder is already exist in ${green}/home/$USER${default}...\n"
 fi
@@ -55,18 +56,16 @@ else
     echo -en "${success} Done!\n"
 fi
 
+JADX_DIR="$SC0PE_DIR/jadx"
 # Downloading and setup Jadx from Github if its not exist in sc0pe_Base folder
-if [ ! -d "/home/$USER/sc0pe_Base/jadx" ]; then
-    echo -en "${info} Downloading Jadx...\n"
-    wget "https://github.com/skylot/jadx/releases/download/v1.4.5/jadx-1.4.5.zip" -O jadx.zip
-    echo -en "${info} Unzipping Jadx...\n"
-    unzip -q jadx.zip -d jadx
-    echo -en "${info} Removing junks...\n"
-    rm -rf jadx.zip
-    echo -en "${info} Setting up Jadx...\n"
-    mv jadx/ /home/$USER/sc0pe_Base/
+if [ ! -d "$JADX_DIR" ]; then
+    echo -en "${info} Downloading and unzipping Jadx...\n"
+    wget "https://github.com/skylot/jadx/releases/download/v1.4.5/jadx-1.4.5.zip" -O - | unzip -q -d "$JADX_DIR"
+    echo -en "${info} Setting up Jadx...\n" # # Move Jadx to the desired location
+    mv "$JADX_DIR"/jadx-1.4.5/* "$JADX_DIR"
+    rm -rf "$JADX_DIR"/jadx-1.4.5
     echo -en "${info} Modifying Systems/Android/libScanner.conf...\n"
-    sed -i "s|/usr/bin/jadx|/home/$USER/sc0pe_Base/jadx/bin/jadx|g" Systems/Android/libScanner.conf
+    sed -i "s|/usr/bin/jadx|$JADX_DIR/bin/jadx|g" Systems/Android/libScanner.conf
     echo -en "${success} Done!\n"
 else
     echo -en "${info} Jadx is already exist in ${green}/home/$USER/sc0pe_Base${default}...\n"
