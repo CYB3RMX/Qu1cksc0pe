@@ -187,7 +187,7 @@ def BasicAnalyzer(analyzeFile):
         os.system(command)
 
     # Android Analysis
-    elif "PK" in fileType and "Java archive" in fileType:
+    elif ("PK" in fileType and "Java archive" in fileType) or "Dalvik (Android) executable" in fileType:
         print(f"{infoS} Target OS: [bold green]Android[white]")
 
         # Extension parsing
@@ -196,6 +196,9 @@ def BasicAnalyzer(analyzeFile):
         # If given file is a JAR file then run JAR file analysis
         if file_name_trim[-1] == ".jar": # Extension based detection
             command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}apkAnalyzer.py \"{analyzeFile}\" False JAR"
+            os.system(command)
+        elif "Dalvik (Android) executable" in fileType:
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}apkAnalyzer.py \"{analyzeFile}\" False DEX"
             os.system(command)
         else:
             if args.report:
