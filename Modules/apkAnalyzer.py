@@ -244,12 +244,12 @@ class APKAnalyzer:
         print(statTable)
 
     # Source code analysis
-    def ScanSource(self, axml_obj):
+    def ScanSource(self, axml_obj, target_package_name):
         # Parsing main activity
         if axml_obj:
             parsed_package = axml_obj.get_package().split(".")
         else:
-            parsed_package = package_names.split(".")
+            parsed_package = target_package_name.split(".")
 
         # Check for decompiled source
         if os.path.exists(f"TargetAPK{path_seperator}"):
@@ -257,7 +257,7 @@ class APKAnalyzer:
             fnames = self.recursive_dir_scan(path)
             if fnames != []:
                 question = input(f"{infoC} Do you want to analyze all packages [Y/n]?: ")
-                print(f"{infoS} Preparing source files...")
+                print(f"\n{infoS} Preparing source files...")
                 target_source_files = []
                 for sources in track(range(len(fnames)), description="Processing files..."):
                     if question == "Y" or question == "y" or question == "yes" or question == "Yes":
@@ -341,6 +341,14 @@ class APKAnalyzer:
                 # Print area
                 self.PrintCategs()
 
+    def analyze_dex_file(self):
+        # Get package name
+        packages = self.get_possible_package_names()
+
+        # After getting package name we need to perform source code analysis
+        if os.path.exists("TargetAPK"):
+            self.ScanSource(axml_obj=None, target_package_name=packages)
+
     def get_possible_package_names(self):
         print(f"\n{infoS} Looking for package name...")
         if os.path.exists("TargetAPK"):
@@ -351,34 +359,44 @@ class APKAnalyzer:
             subprocess.run(f"{self.decompiler_path} -q -d TargetAPK \"{self.full_path_file}\"", shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
         # Crawl and identify sources
-        tmpx = ""
-        dont_need = ["androidx", "android"]
-        possible_package_names = []
-        sources = self.recursive_dir_scan(target_directory=f"TargetAPK{path_seperator}sources{path_seperator}")
-        print(f"\n{infoS} Analyzing packages. Please wait...")
-        for sour in track(range(len(sources)), description="Analyzing..."):
-            target_source = sources[sour].replace(f"TargetAPK{path_seperator}sources{path_seperator}", "").split(path_seperator)
-            if target_source[0] in dont_need:
-                pass
-            else:
-                if ".java" not in target_source[2]:
-                    tmpx = f"{target_source[0]}.{target_source[1]}.{target_source[2]}"
+        if os.path.exists("TargetAPK"):
+            tmpx = ""
+            dont_need = ["androidx", "android", "kotlinx"]
+            possible_package_names = []
+            sources = self.recursive_dir_scan(target_directory=f"TargetAPK{path_seperator}sources{path_seperator}")
+            print(f"\n{infoS} Analyzing packages. Please wait...")
+            for sour in track(range(len(sources)), description="Analyzing..."):
+                try:
+                    target_source = sources[sour].replace(f"TargetAPK{path_seperator}sources{path_seperator}", "").split(path_seperator)
+                    if target_source[0] in dont_need:
+                        pass
+                    else:
+                        if ".java" not in target_source[2]:
+                            tmpx = f"{target_source[0]}.{target_source[1]}.{target_source[2]}"
+                        else:
+                            tmpx = f"{target_source[0]}.{target_source[1]}"
                 
-                if tmpx not in possible_package_names and tmpx != "":
-                    possible_package_names.append(tmpx)
+                        if tmpx not in possible_package_names and tmpx != "":
+                            possible_package_names.append(tmpx)
+                except:
+                    continue
 
-        # Handle multiple possibilities
-        if len(possible_package_names) > 1:
-            pack_table = Table()
-            pack_table.add_column("[bold green]Possible Package Names", justify="center")
-            for pp in possible_package_names:
-                pack_table.add_row(pp)
-            print(pack_table)
-            p_completer = WordCompleter(possible_package_names)
-            package_name = prompt("\n>>> Enter Target Package Name [Press TAB to auto-complete]: ", completer=p_completer)
-            return package_name
+            # Handle multiple possibilities
+            if len(possible_package_names) > 1:
+                pack_table = Table()
+                pack_table.add_column("[bold green]Possible Package Names", justify="center")
+                for pp in possible_package_names:
+                    pack_table.add_row(pp)
+                print(pack_table)
+                p_completer = WordCompleter(possible_package_names)
+                package_name = prompt("\n>>> Enter Target Package Name [Press TAB to auto-complete]: ", completer=p_completer)
+                return package_name
+            else:
+                return possible_package_names[0]
         else:
-            return possible_package_names[0]
+            print("\n[bold white on red]An error occured while decompiling the file. Please check configuration file and modify the [blink]Decompiler[/blink] option.")
+            print(f"[bold white]>>> Configuration file path: [bold green]Systems{path_seperator}Android{path_seperator}libScanner.conf")
+            return None
 
     def pattern_scanner_ex(self, regex, target_files, target_type, value_array):
         for url in track(range(len(target_files)), description=f"Processing {target_type}..."):
@@ -453,10 +471,13 @@ class APKAnalyzer:
         print(f"\n{infoS} Looking for URL values. Please wait...")
         url_vals = self.pattern_scanner(target_pattern=r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
         if url_vals != []:
+            sanitizer = []
             urltable = Table()
             urltable.add_column("[bold green]Extracted URL Values", justify="center")
             for uv in url_vals:
-                urltable.add_row(str(uv))
+                if str(uv) not in sanitizer:
+                    urltable.add_row(str(uv))
+                    sanitizer.append(uv)
             print(urltable)
         else:
             print(f"{errorS} There is no URL pattern found!")
@@ -641,16 +662,26 @@ if __name__ == '__main__':
 
         # Check for JAR file
         if sys.argv[3] == "JAR":
-            apka.PerformJAR(targetAPK)
+            apka.PerformJAR()
+            sys.exit(0)
+
+        # Check for DEX file
+        if sys.argv[3] == "DEX":
+            apka.analyze_dex_file()
             sys.exit(0)
 
         # Get axml object
         try:
             axml_obj = pyaxmlparser.APK(targetAPK)
+            # In case of package name parsing issues
+            if axml_obj.get_package() == '':
+                print(f"\n{errorS} It looks like the target [bold green]AndroidManifest.xml[white] is corrupted!!")
+                axml_obj = None
+                package_names = apka.get_possible_package_names()
         except:
+            print(f"\n{errorS} It looks like the target [bold green]AndroidManifest.xml[white] is corrupted!!")
             axml_obj = None
             package_names = apka.get_possible_package_names()
-
 
         # General informations
         apka.GeneralInformation(targetAPK, axml_obj)
@@ -687,7 +718,10 @@ if __name__ == '__main__':
 
         # Source code analysis zone
         print(f"\n{infoS} Performing source code analysis...")
-        apka.ScanSource(axml_obj)
+        if axml_obj:
+            apka.ScanSource(axml_obj, target_package_name=None)
+        else:
+            apka.ScanSource(axml_obj=None, target_package_name=package_names)
 
         # IP and URL value scan
         apka.Get_IP_URL()

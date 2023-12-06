@@ -24,7 +24,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps us
 | Windows Executables (.exe, .dll, .msi, .bin) | Static, Dynamic |
 | Linux Executables (.elf, .bin) | Static, Dynamic |
 | MacOS Executables (mach-o) | Static |
-| Android Files (.apk, .jar) | Static, Dynamic(for now .apk only) |
+| Android Files (.apk, .jar, .dex) | Static, Dynamic(for now .apk only) |
 | Golang Binaries (Linux) | Static |
 | Document Files | Static |
 | Archive Files (.zip, .rar, .ace) | Static |
@@ -41,6 +41,9 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/1bf1b1d6-80f3-445d-996d-a4216a79a2e0)
 
 # Updates
+<b>06/12/2023</b>
+- [X] Improvements on ```Android Static Analyzer```
+
 <b>30/11/2023</b>
 - [X] Improvements on ```Android Static Analyzer```
 - [X] The ```sc0pe_helper``` library has been removed due to setup and installation issues.
