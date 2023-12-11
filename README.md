@@ -41,23 +41,16 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/1bf1b1d6-80f3-445d-996d-a4216a79a2e0)
 
 # Updates
+<b>11/12/2023</b>
+- [X] Improvements on installation modules.
+- [X] Bug fixes.
+
 <b>06/12/2023</b>
 - [X] Improvements on ```Android Static Analyzer```
 
 <b>30/11/2023</b>
 - [X] Improvements on ```Android Static Analyzer```
 - [X] The ```sc0pe_helper``` library has been removed due to setup and installation issues.
-
-<b>13/11/2023</b>
-- [X] Bug fixes and improvements.
-
-<b>02/11/2023</b>
-- [X] <b><i>NEW FEATURE!!</i></b>: Qu1cksc0pe can now analyze Windows processes. With this feature, you can obtain:
-- Network connections associated with a given process.
-- Windows API calls.
-- Command-line arguments, and more...
-
-https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/a2c84b8f-c12c-47ac-96e9-c345aeda1f54
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
@@ -85,7 +78,10 @@ bash setup.sh
 
 # If you want to install Qu1cksc0pe on your system just execute the following commands.
 bash setup.sh
-sudo python qu1cksc0pe.py --install
+python qu1cksc0pe.py --install
+
+# To prevent interpreter errors after installation, use dos2unix.
+dos2unix /usr/bin/qu1cksc0pe
 
 # Or you can use Qu1cksc0pe from Docker!
 docker build -t qu1cksc0pe .

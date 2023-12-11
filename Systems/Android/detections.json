@@ -199,7 +199,11 @@
             "vnc_backlight_off",
             "vnc_overlay_enabled",
             "vnc_screen",
-            "vnc_sound_off"
+            "vnc_sound_off",
+            "VNC_IS_FIRST_RUN",
+            "VNC_CHANNEL_ID",
+            "VNCActivity",
+            "VNC_INSTALL_REQUIRED"
         ]
     },
     "Keylogging": {
@@ -493,7 +497,8 @@
             "getSystemClassLoader",
             "ClassLoader",
             "\"patch.ring0.run\"",
-            "System.loadLibrary"
+            "System.loadLibrary",
+            "DexFile.loadDex"
         ]
     },
     "Java Reflection": {
@@ -509,7 +514,11 @@
             "check_su_binary",
             "\"/data/su_test\"",
             "/system/app/Superuser.apk",
-            "\"to shell exec which for find su :\""
+            "\"to shell exec which for find su :\"",
+            "/system/xbin/su",
+            "/sbin/su",
+            "/sbin/magisk",
+            "/cache/magisk.log"
         ]
     },
     "Cryptography": {
@@ -588,7 +597,8 @@
             "/dev/socket/genyd",
             "/dev/socket/baseband_genyd",
             "isEmulator",
-            "isDebuggerConnected"
+            "isDebuggerConnected",
+            "de.robv.android.xposed.XposedBridge"
         ]
     },
     "BOT Activity": {
@@ -608,7 +618,8 @@
     "Obfuscation": {
         "patterns": [
             "npmanager",
-            "NPStringFog"
+            "NPStringFog",
+            "ApkProtector"
         ]
     }
 }
