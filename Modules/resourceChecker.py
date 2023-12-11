@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 
 import os
 import re
@@ -39,7 +39,7 @@ except:
     sys.exit(1)
 
 # Disabling pyaxmlparser's logs
-pyaxmlparser.core.log.disabled = True
+pyaxmlparser.core.logging.disable()
 
 # Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"

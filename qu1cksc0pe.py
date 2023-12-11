@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 
 # module checking
 try:
@@ -32,21 +32,11 @@ except:
     print("Error: >puremagic< module not found.")
     sys.exit(1)
 
-# Testing pyaxmlparser existence
-try:
-    import pyaxmlparser
-except:
-    print("Error: >pyaxmlparser< module not found.")
-    sys.exit(1)
-
 try:
     from colorama import Fore, Style
 except:
     print("Error: >colorama< module not found.")
     sys.exit(1)
-
-# Disabling pyaxmlparser's logs
-pyaxmlparser.core.log.disabled = True
 
 # Colors
 red = Fore.LIGHTRED_EX
@@ -440,59 +430,8 @@ def Qu1cksc0pe():
             print(f"{errorS} This feature is not suitable for Windows systems for now!")
             sys.exit(1)
 
-        print(f"{infoS} Checking permissions...")
-        if os.getuid() == 0:
-            print(f"{infoS} User: [bold green]root[white]\n")
-            print(f"[bold cyan][[bold red]1[bold cyan]][white] Install Qu1cksc0pe.")
-            print(f"[bold cyan][[bold red]2[bold cyan]][white] Uninstall Qu1cksc0pe")
-            choose = int(input(f"\n{green}>>>>{white} "))
-            if choose == 1:
-                print(f"\n{infoS} Looks like we have permission to install. Let\'s begin...")
-
-                # Installing python dependencies...
-                print(f"{infoS} Installing Python dependencies...")
-                os.system("pip3 install -r requirements.txt")
-
-                # Configurating Qu1cksc0pe's config file
-                print(f"{infoS} Creating configuration file in [bold green]/etc[white] directory")
-                conFile = configparser.ConfigParser()
-                conFile["Qu1cksc0pe_PATH"] = {"sc0pe": "/opt/Qu1cksc0pe"}
-                with open (f"/etc/qu1cksc0pe.conf", "w") as cfile:
-                    conFile.write(cfile)
-                os.system(f"chown {username}:{username} /etc/qu1cksc0pe.conf")
-
-                # Copying Qu1cksc0pe's to /opt directory
-                print(f"{infoS} Copying files to [bold green]/opt[white] directory.")
-                os.system("cd ../ && cp -r Qu1cksc0pe /opt/")
-                os.system(f"chown {username}:{username} /opt/Qu1cksc0pe")
-
-                # Configurating ApkAnalyzer module's config file
-                print(f"{infoS} Configurating [bold green]libScanner.conf[white] file.")
-                libscan = configparser.ConfigParser()
-                libscan.read("/opt/Qu1cksc0pe/Systems/Android/libScanner.conf")
-                libscan["Rule_PATH"]["rulepath"] = f"/opt/Qu1cksc0pe/Systems/Android/YaraRules/"
-                with open("/opt/Qu1cksc0pe/Systems/Android/libScanner.conf", "w") as ff:
-                    libscan.write(ff)
-
-                # Copying qu1cksc0pe.py file into /usr/bin/
-                print(f"{infoS} Copying [bold green]qu1cksc0pe.py[white] to [bold green]/usr/bin/[white] directory.")
-                os.system("cp qu1cksc0pe.py /usr/bin/qu1cksc0pe && chmod +x /usr/bin/qu1cksc0pe")
-                print(f"{infoS} Installation completed.")
-            elif choose == 2:
-                print(f"\n{infoS} Looks like we have permission to uninstall. Let\'s begin...")
-                print(f"{infoS} Removing [bold green]/usr/bin/qu1cksc0pe[white] file.")
-                os.system("rm -rf /usr/bin/qu1cksc0pe")
-                print(f"{infoS} Removing [bold green]/etc/qu1cksc0pe.conf[white] file.")
-                os.system("rm -rf /etc/qu1cksc0pe.conf")
-                print(f"{infoS} Removing [bold green]/opt/Qu1cksc0pe[white] directory.")
-                os.system("rm -rf /opt/Qu1cksc0pe")
-                print(f"{infoS} Uninstallation completed.")
-            else:
-                print("\n[bold white on red]Wrong option. Quitting!!\n")
-                sys.exit(1)
-        else:
-            print("\n[bold white on red]Please use this argument as [blink]root[/blink]!!\n")
-            sys.exit(1)
+        command = f"sudo bash {sc0pe_path}{path_seperator}Modules{path_seperator}installer.sh {sc0pe_path} {username}"
+        os.system(command)
 
 def cleanup_junks():
     junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt", "TargetAPK/", "TargetSource/"]

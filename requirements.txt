@@ -23,3 +23,4 @@ pythonnet
 pydnsbl
 vivisect
 pycryptodome
+bs4
