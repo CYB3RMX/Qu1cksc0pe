@@ -59,6 +59,9 @@ installer(){
     cd $sc0pe_path && cp qu1cksc0pe.py /usr/bin/qu1cksc0pe && chmod +x /usr/bin/qu1cksc0pe
     chown $normal_user:$normal_user /usr/bin/qu1cksc0pe
 
+    # Check dos2unix
+    dos2unix /usr/bin/qu1cksc0pe
+
     echo -en "$success Installation completed.\n"
 }
 

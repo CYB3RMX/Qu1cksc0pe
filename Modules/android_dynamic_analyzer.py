@@ -58,9 +58,9 @@ if sys.platform == "win32":
     strings_param = "-a"
     del_com = "del"
     # Get adb path for windows
-    conf = configparser.ConfigParser()
-    conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf")
-    adb_path = conf["ADB_PATH"]["win_adb_path"]
+    adb_conf = configparser.ConfigParser()
+    adb_conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf")
+    adb_path = adb_conf["ADB_PATH"]["win_adb_path"]
 
 # Disabling pyaxmlparser's logs
 pyaxmlparser.core.logging.disable()
@@ -77,6 +77,10 @@ previous_states = {
         "changes": 0
     },
     "/app_DynamicOptDex": {
+        "contents": [],
+        "changes": 0
+    },
+    "/cache": {
         "contents": [],
         "changes": 0
     }
@@ -101,6 +105,7 @@ class AndroidDynamicAnalyzer:
     def __init__(self, target_file):
         self.target_file = target_file
         self.PERMS = "rw-"
+        self.target_dirs = ["/files", "/shared_prefs", "/app_DynamicOptDex", "/cache"]
         self.MAX_SIZE = 20971520
         self.url_regex = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
         self.ip_addr_regex = r"^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$"
@@ -143,7 +148,7 @@ class AndroidDynamicAnalyzer:
             return None
 
     def program_tracer(self, package_name, device):
-        print(f"{infoS} Now you can launch the app from your device. So you can see method class/calls etc.")
+        print(f"{infoS} Now you can launch the app from your device. So you can see method class/calls etc.\n")
         temp_act = ""
         tmp_file = ""
         tmp_file2 = ""
@@ -159,46 +164,45 @@ class AndroidDynamicAnalyzer:
                 f_calls = re.findall(r"(/data/user/0/{}[a-zA-Z0-9_\-/]+)".format(package_name), payload)
                 if len(f_calls) != 0:
                     if tmp_file != f_calls[-1]:
-                        print(f"[bold red][FILE CALL] [bold green]{f_calls[-1]}")
+                        print(f"[bold red][FILE CALL] [white]{f_calls[-1]}")
                         tmp_file = f_calls[-1]
 
                 # File calls for /data/data/
                 f_calls = re.findall(r"(/data/data/{}[a-zA-Z0-9_\-/]+)".format(package_name), payload)
                 if len(f_calls) != 0:
                     if tmp_file2 != f_calls[-1]:
-                        print(f"[bold red][FILE CALL] [bold green]{f_calls[-1]}")
+                        print(f"[bold red][FILE CALL] [white]{f_calls[-1]}")
                         tmp_file2 = f_calls[-1]
 
                 # Intent calls
                 i_calls = re.findall(r"android.intent.*", payload)
                 if len(i_calls) != 0:
                     if tmp_int != i_calls[-1]:
-                        print(f"[bold yellow][INTENT CALL] [bold green]{i_calls[-1]}")
+                        print(f"[bold yellow][INTENT CALL] [white]{i_calls[-1]}")
                         tmp_int = i_calls[-1]
 
                 # Provider calls
                 p_calls = re.findall(r"android.provider.*", payload)
                 if len(p_calls) != 0:
                     if tmp_p != p_calls[-1]:
-                        print(f"[bold magenta][PROVIDER CALL] [bold green]{p_calls[-1]}")
+                        print(f"[bold magenta][PROVIDER CALL] [white]{p_calls[-1]}")
                         tmp_p = p_calls[-1]
 
                 # APP role calls
                 a_calls = re.findall(r"android.app.role.*", payload)
                 if len(a_calls) != 0:
                     if tmp_role != a_calls[-1]:
-                        print(f"[bold pink][APP ROLE CALL] [bold green]{a_calls[-1]}")
+                        print(f"[bold pink][APP ROLE CALL] [white]{a_calls[-1]}")
                         tmp_role = a_calls[-1]
 
                 # Method calls
                 m_calls = re.findall(r"ActivityManager:.*cmp={}/.*".format(package_name), payload)
                 if len(m_calls) != 0:
                     if temp_act != m_calls[-1]:
-                        print(f"[bold blue][METHOD CALL] [bold green]{m_calls[-1]}")
+                        print(f"[bold blue][METHOD CALL] [white]{m_calls[-1]}")
                         temp_act = m_calls[-1]
                 time.sleep(0.5)
         except:
-            print(f"{infoS} Closing tracer...")
             sys.exit(0)
 
     def crawler_for_adb_analysis(self, target_directory):
@@ -211,44 +215,47 @@ class AndroidDynamicAnalyzer:
             # Crawl the directory
             dircontent = self.recursive_dir_scan(target_directory=f"{sc0pe_path}{path_seperator}{target_directory}")
             if dircontent != []:
-                print(f"\n[bold cyan][INFO][white] Crawling [bold green]{target_directory} [white]directory.")
+                print(f"\n[bold cyan][INFO][white] Crawling [bold green]{str(target_directory)} [white]directory.")
                 for file in dircontent:
                     # Checking file types using "file" command
-                    file_type = subprocess.check_output(f"file {file}", shell=True).decode().split(":")[1].strip()
-                    dirTable.add_row(file.split(sc0pe_path)[1].split("//")[1], file_type)
+                    file_type = subprocess.check_output(f"file \"{file}\"", shell=True).decode().split(":")[1].strip()
+                    if "Dalvik dex" in file_type:
+                        dirTable.add_row(file.split(sc0pe_path)[1].split("//")[1], f"[bold red]{file_type}[white]")
+                    else:
+                        dirTable.add_row(file.split(sc0pe_path)[1].split("//")[1], f"[white]{file_type}")
 
                 # Print the table
                 print(dirTable)
+                print("")
 
     def target_app_crawler(self, package_name, device):
-        time.sleep(3)
-        target_dirs = ["/files", "/shared_prefs", "/app_DynamicOptDex"]
-
-        # First we need to fetch the directories
-        for di in target_dirs:
-            try:
-                adb_output = subprocess.check_output([f"{adb_path}", "-s", f"{device}", "pull", f"/data/data/{package_name}{di}"])
-                if "No such file" in adb_output.decode():
-                    continue
-                else:
-                    # Get the current state of the folder
-                    current_state = os.listdir(os.path.join(f"{sc0pe_path}", di.replace(f"{path_seperator}", "")))
-                    if previous_states[di]['contents'] != current_state:
-                        print(f"[bold cyan][INFO][white] {di} directory fetched.")
-                        previous_states[di]['contents'] = current_state
-                        previous_states[di]['changes'] += 1
+        while True:
+            time.sleep(1)
+            # First we need to fetch the directories
+            for di in self.target_dirs:
+                try:
+                    adb_output = subprocess.check_output([f"{adb_path}", "-s", f"{device}", "pull", f"/data/data/{package_name}{di}"])
+                    if "No such file" in adb_output.decode():
+                        continue
                     else:
-                        previous_states[di]['changes'] = 0
-            except:
-                pass
+                        # Get the current state of the folder
+                        if not os.path.exists("/etc/qu1cksc0pe.conf") and not os.path.exists("/usr/bin/qu1cksc0pe"):
+                            current_state = os.listdir(os.path.join(f"{sc0pe_path}", di.replace(f"{path_seperator}", "")))
+                        else:
+                            current_state = os.listdir(os.path.join(".", di.replace(f"{path_seperator}", "")))
+                        if previous_states[di]['contents'] != current_state:
+                            print(f"[bold cyan][INFO][white] {di} directory fetched.")
+                            previous_states[di]['contents'] = current_state
+                            previous_states[di]['changes'] += 1
+                        else:
+                            previous_states[di]['changes'] = 0
+                except:
+                    continue
 
-        # Now we can crawl the directories
-        for di in target_dirs:
-            if previous_states[di]['changes'] != 0:
-                self.crawler_for_adb_analysis(di)
-
-        # There is a recursion so we fetch these directories every time
-        self.target_app_crawler(package_name, device)
+            # Now we can crawl the directories
+            for di in self.target_dirs:
+                if previous_states[di]['changes'] != 0:
+                    self.crawler_for_adb_analysis(di)
 
     def install_target_application(self, device, target_application):
         install_cmd = [f"{adb_path}", "-s", f"{device}", "install", f"{target_application}"]
@@ -283,57 +290,79 @@ class AndroidDynamicAnalyzer:
 
     def analyze_apk_via_adb(self):
         if self.axmlobj:
-            if self.axmlobj.is_valid_APK():
-                package_name = self.axmlobj.get_package()
+            package_name = self.axmlobj.get_package()
+            # If the package_name is still "" or None we need to decompile it
+            if package_name == "" or package_name is None:
+                package_name = subprocess.check_output(f"aapt2 dump packagename \"{self.target_file}\"", shell=True, stderr=subprocess.PIPE).strip(b"\n").decode()
                 print(f"[bold magenta]>>>[white] Package name: [bold green]{package_name}\n")
-                # Gathering devices
-                device_indexes = self.enumerate_adb_devices()
+            else:
+                print(f"[bold magenta]>>>[white] Package name: [bold green]{package_name}\n")
+        else:
+            package_name = subprocess.check_output(f"aapt2 dump packagename \"{self.target_file}\"", shell=True, stderr=subprocess.PIPE).strip(b"\n").decode()
+            print(f"[bold magenta]>>>[white] Package name: [bold green]{package_name}\n")
 
-                # Print devices
-                if len(device_indexes) == 0:
-                    print(f"{errorS} No devices found. Try to connect a device and try again.\n{infoS} You can use [bold cyan]\"adb connect <device_ip>:<device_port>\"[white] to connect a device.")
-                    sys.exit(0)
-                else:
-                    print(f"{infoS} Available devices:")
-                    for device in device_indexes:
-                        print(f"[bold magenta]>>>[white] [bold yellow]{list(device.keys())[0]} [white]| [bold green]{list(device.values())[0]}")
+        # Remove old files
+        if not os.path.exists("/etc/qu1cksc0pe.conf") and not os.path.exists("/usr/bin/qu1cksc0pe"):
+            for rem in self.target_dirs:
+                if os.path.exists(f"{sc0pe_path}{rem}"):
+                    os.system(f"rm -rf {sc0pe_path}{rem}")
+        else:
+            for rem in self.target_dirs:
+                if os.path.exists(f".{rem}"):
+                    os.system(f"rm -rf .{rem}")
 
-                    # Select device
-                    dnum = int(input("\n>>> Select device: "))
-                    if dnum > len(device_indexes) - 1:
-                        print(f"{errorS} Invalid device number.")
-                        sys.exit(0)
-                    else:
-                        mbool = self.search_package_name(package_name)
-                        if not mbool:
-                            print(f"{infoS} Installing [bold yellow]{package_name} [white]on [bold yellow]{list(device_indexes[dnum].values())[0]}")
-                            install_state = self.install_target_application(device=str(list(device_indexes[dnum].values())[0]), target_application=self.target_file)
-                            if install_state:
-                                print(f"{infoS} [bold yellow]{package_name} [white]installed successfully.\n")
-                                tracer_thread = threading.Thread(target=self.program_tracer, args=(package_name, list(device_indexes[dnum].values())[0],))
-                                crawler_thread = threading.Thread(target=self.target_app_crawler, args=(package_name, list(device_indexes[dnum].values())[0],))
-                                tracer_thread.start()
-                                crawler_thread.start()
-                                tracer_thread.join()
-                                crawler_thread.join()
-                            else:
-                                print(f"{errorS} Installation failed.")
-                                print(f"\n{infoS} Trying to uninstall the existing app...\n")
-                                unstate = self.uninstall_target_application(device=str(list(device_indexes[dnum].values())[0]), package_name=package_name)
-                                if unstate:
-                                    print(f"{infoS} [bold yellow]{package_name} [white]uninstalled successfully.")
-                                    self.analyze_apk_via_adb(self.target_file)
-                        else:
-                            tracer_thread = threading.Thread(target=self.program_tracer, args=(package_name, list(device_indexes[dnum].values())[0],))
-                            crawler_thread = threading.Thread(target=self.target_app_crawler, args=(package_name, list(device_indexes[dnum].values())[0],))
+        # Gathering devices
+        device_indexes = self.enumerate_adb_devices()
+
+        # Print devices
+        if len(device_indexes) == 0:
+            print(f"{errorS} No devices found. Try to connect a device and try again.\n{infoS} You can use [bold cyan]\"adb connect <device_ip>:<device_port>\"[white] to connect a device.")
+            sys.exit(0)
+        else:
+            print(f"{infoS} Available devices:")
+            for device in device_indexes:
+                print(f"[bold magenta]>>>[white] [bold yellow]{list(device.keys())[0]} [white]| [bold green]{list(device.values())[0]}")
+
+            # Select device
+            dnum = int(input("\n>>> Select device: "))
+            if dnum > len(device_indexes) - 1:
+                print(f"{errorS} Invalid device number.")
+                sys.exit(0)
+            else:
+                mbool = self.search_package_name(package_name)
+                if not mbool:
+                    print(f"{infoS} Installing [bold yellow]{package_name} [white]on [bold yellow]{list(device_indexes[dnum].values())[0]}")
+                    install_state = self.install_target_application(device=str(list(device_indexes[dnum].values())[0]), target_application=self.target_file)
+                    if install_state:
+                        print(f"{infoS} [bold yellow]{package_name} [white]installed successfully.\n")
+                        tracer_thread = threading.Thread(target=self.program_tracer, args=(package_name, list(device_indexes[dnum].values())[0],))
+                        crawler_thread = threading.Thread(target=self.target_app_crawler, args=(package_name, list(device_indexes[dnum].values())[0],))
+                        try:
                             tracer_thread.start()
                             crawler_thread.start()
                             tracer_thread.join()
                             crawler_thread.join()
-        else:
-            print(f"{errorS} An error occured while parsing the target file. It might be corrupted or something...")
-            print(f"{infoS} You can also use [bold green]Application Memory Analysis[white] option for these situations!")
-            sys.exit(1)
+                        except:
+                            print(f"{infoS} Press [blink][bold yellow]CTRL+C[white][/blink] again to stop!")
+                            sys.exit(1)
+                    else:
+                        print(f"{errorS} Installation failed.")
+                        print(f"\n{infoS} Trying to uninstall the existing app...\n")
+                        unstate = self.uninstall_target_application(device=str(list(device_indexes[dnum].values())[0]), package_name=package_name)
+                        if unstate:
+                            print(f"{infoS} [bold yellow]{package_name} [white]uninstalled successfully.")
+                            self.analyze_apk_via_adb(self.target_file)
+                else:
+                    tracer_thread = threading.Thread(target=self.program_tracer, args=(package_name, list(device_indexes[dnum].values())[0],))
+                    crawler_thread = threading.Thread(target=self.target_app_crawler, args=(package_name, list(device_indexes[dnum].values())[0],))
+                    try:
+                        tracer_thread.start()
+                        crawler_thread.start()
+                        tracer_thread.join()
+                        crawler_thread.join()
+                    except:
+                        print(f"{infoS} Press [blink][bold yellow]CTRL+C[white][/blink] again to stop!")
+                        sys.exit(1)
 
     def gather_process_id_android(self, target_app, package_name, device):
         # Look process for name

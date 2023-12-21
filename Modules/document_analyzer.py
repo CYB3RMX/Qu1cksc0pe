@@ -64,11 +64,22 @@ targetFile = sys.argv[1]
 
 # Compatibility
 path_seperator = "/"
+strings_param = "--all"
 if sys.platform == "win32":
     path_seperator = "\\"
+    strings_param = "-a"
+elif sys.platform == "darwin":
+    strings_param = "-a"
+else:
+    pass
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
+
+# Perform strings
+_ = subprocess.run(f"strings {strings_param} \"{targetFile}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+if sys.platform != "win32":
+    _ = subprocess.run(f"strings {strings_param} -e l {targetFile} >> temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
 
 # All strings
 allstr = open("temp.txt", "r").read()

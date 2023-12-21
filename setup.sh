@@ -82,6 +82,13 @@ else
     echo -en "${info} ${green}strings${default} command is already exist...\n"
 fi
 
+# Check for dos2unix
+if [ ! -f "/usr/bin/dos2unix" ]; then
+    echo -en "${info} Installing ${green}dos2unix${default} command...\n"
+    sudo ${package_manager} dos2unix
+    echo -en "${success} Done!\n"
+fi
+
 # Check for pyOneNote
 if [ ! -f "/home/$USER/.local/bin/pyonenote" ]; then
     echo -en "${info} Cloning ${green}pyOneNote${default}...\n"

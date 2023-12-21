@@ -5,6 +5,7 @@ import sys
 import yara
 import json
 import hashlib
+import subprocess
 import configparser
 
 try:
@@ -30,13 +31,27 @@ except:
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
+# Target file
+target_file = sys.argv[1]
+
 # Compatibility
 homeD = os.path.expanduser("~")
 path_seperator = "/"
+strings_param = "--all"
 setup_scr = "setup.sh"
 if sys.platform == "win32":
     path_seperator = "\\"
     setup_scr = "setup.ps1"
+    strings_param = "-a"
+elif sys.platform == "darwin":
+    strings_param = "-a"
+else:
+    pass
+
+# Perform strings
+_ = subprocess.run(f"strings {strings_param} \"{target_file}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+if sys.platform != "win32":
+    _ = subprocess.run(f"strings {strings_param} -e l {target_file} >> temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()

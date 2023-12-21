@@ -2,6 +2,7 @@
 
 import re
 import sys
+import subprocess
 
 try:
     import puremagic as pr
@@ -23,6 +24,20 @@ fileName = str(sys.argv[1])
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 foundS = f"[bold cyan][[bold red]+[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
+
+# Compatibility
+strings_param = "--all"
+if sys.platform == "win32":
+   strings_param = "-a"
+elif sys.platform == "darwin":
+   strings_param = "-a"
+else:
+   pass
+
+# Perform strings
+_ = subprocess.run(f"strings {strings_param} \"{fileName}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+if sys.platform != "win32":
+    _ = subprocess.run(f"strings {strings_param} -e l {fileName} >> temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
 
 # All strings
 allStrings = open("temp.txt", "r").read().split("\n")
