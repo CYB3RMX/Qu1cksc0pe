@@ -70,9 +70,18 @@ else:
 homeD = os.path.expanduser("~")
 path_seperator = "/"
 setup_scr = "setup.sh"
+strings_param = "--all"
 if sys.platform == "win32":
     path_seperator = "\\"
     setup_scr = "setup.ps1"
+    strings_param = "-a"
+elif sys.platform == "darwin":
+    strings_param = "-a"
+else:
+    pass
+
+# Getting target APK
+targetAPK = sys.argv[1]
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
@@ -80,6 +89,12 @@ sc0pe_path = open(".path_handler", "r").read()
 # necessary variables
 danger = 0
 normal = 0
+
+# Perform strings
+_ = subprocess.run(f"strings {strings_param} \"{targetAPK}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+if sys.platform != "win32":
+    _ = subprocess.run(f"strings {strings_param} -e l {targetAPK} >> temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+
 
 # Gathering all strings from file
 allStrings = open("temp.txt", "r").read().split('\n')
@@ -654,9 +669,6 @@ class APKAnalyzer:
 # Execution
 if __name__ == '__main__':
     try:
-        # Getting target APK
-        targetAPK = sys.argv[1]
-
         # Create object
         apka = APKAnalyzer(target_file=targetAPK)
 

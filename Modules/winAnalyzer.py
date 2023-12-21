@@ -48,9 +48,15 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 homeD = os.path.expanduser("~")
 path_seperator = "/"
 setup_scr = "setup.sh"
+strings_param = "--all"
 if sys.platform == "win32":
     path_seperator = "\\"
     setup_scr = "setup.ps1"
+    strings_param = "-a"
+elif sys.platform == "darwin":
+    strings_param = "-a"
+else:
+    pass
 
 #--------------------------------------------- Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
@@ -102,13 +108,18 @@ winrep = {
 conf = configparser.ConfigParser()
 conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf")
 
+# Perform strings
+_ = subprocess.run(f"strings {strings_param} \"{fileName}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+if sys.platform != "win32":
+    _ = subprocess.run(f"strings {strings_param} -e l {fileName} >> temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+
 class WindowsAnalyzer:
     def __init__(self, target_file):
         self.target_file = target_file
         self.allFuncs = 0
         self.windows_imports_and_exports = []
         self.executable_buffer = open(self.target_file, "rb").read()
-        self.all_strings = open(f"{sc0pe_path}{path_seperator}temp.txt", "r").read().split("\n")
+        self.all_strings = open("temp.txt", "r").read().split("\n")
         self.blacklisted_patterns = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}dotnet_blacklisted_methods.txt", "r").read().split("\n")
         self.rule_path = conf["Rule_PATH"]["rulepath"]
 

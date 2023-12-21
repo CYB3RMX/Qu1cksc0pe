@@ -127,9 +127,9 @@ class AndroidFamilyDetect:
 
         # Search for patterns
         patternz = {
-            "/Config/sys/apps/tch": 0, 
-            "App Helper": 0, 
-            "SCDir": 0, 
+            "/Config/sys/apps/tch": 0,
+            "App Helper": 0,
+            "SCDir": 0,
             "/Config/sys/apps/rc": 0,
             "/exit/chat/": 0,
             "root@": 0,

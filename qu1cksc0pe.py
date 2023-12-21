@@ -234,11 +234,7 @@ def Qu1cksc0pe():
             # Before doing something we need to check file size
             file_size = os.path.getsize(args.file)
             if file_size < 52428800: # If given file smaller than 100MB
-                if distutils.spawn.find_executable("strings"):
-                    str_proc = subprocess.run(f"strings {allA} \"{args.file}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-                    if sys.platform != "win32":
-                        str_proc = subprocess.run(f"strings {allA} -e l {args.file} >> temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-                else:
+                if not distutils.spawn.find_executable("strings"):
                     print("[bold white on red][blink]strings[/blink] command not found. You need to install it.")
                     sys.exit(1)
             else:
@@ -387,7 +383,7 @@ def Qu1cksc0pe():
     if args.domain:
         # Handling --file argument
         if args.file is not None:
-            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}domainCatcher.py"
+            command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}domainCatcher.py \"{args.file}\""
             os.system(command)
         # Handling --folder argument
         if args.folder is not None:

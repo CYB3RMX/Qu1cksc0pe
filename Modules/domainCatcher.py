@@ -2,6 +2,7 @@
 
 import re
 import sys
+import subprocess
 
 # Module for colors
 try:
@@ -9,6 +10,23 @@ try:
 except:
     print("Error: >rich< module not found.")
     sys.exit(1)
+
+# Target file
+target_file = sys.argv[1]
+
+# Compatibility
+strings_param = "--all"
+if sys.platform == "win32":
+   strings_param = "-a"
+elif sys.platform == "darwin":
+   strings_param = "-a"
+else:
+   pass
+
+# Perform strings
+_ = subprocess.run(f"strings {strings_param} \"{target_file}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+if sys.platform != "win32":
+    _ = subprocess.run(f"strings {strings_param} -e l {target_file} >> temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
 
 # All strings
 allStrings = open("temp.txt", "r").read().split('\n')
