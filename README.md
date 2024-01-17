@@ -41,16 +41,9 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/1bf1b1d6-80f3-445d-996d-a4216a79a2e0)
 
 # Updates
-<b>21/12/2023</b>
+<b>17/01/2024</b>
 - [X] Improvements on ```Android Dynamic Analyzer``` module.
 - [X] Bug fixes.
-
-<b>11/12/2023</b>
-- [X] Improvements on installation modules.
-- [X] Bug fixes.
-
-<b>06/12/2023</b>
-- [X] Improvements on ```Android Static Analyzer```
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)

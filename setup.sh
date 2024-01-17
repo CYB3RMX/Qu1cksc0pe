@@ -58,7 +58,7 @@ fi
 # Downloading and setup Jadx from Github if its not exist in sc0pe_Base folder
 if [ ! -d "/home/$USER/sc0pe_Base/jadx" ]; then
     echo -en "${info} Downloading Jadx...\n"
-    wget "https://github.com/skylot/jadx/releases/download/v1.4.5/jadx-1.4.5.zip" -O jadx.zip
+    wget "https://github.com/skylot/jadx/releases/download/v1.4.7/jadx-1.4.7.zip" -O jadx.zip
     echo -en "${info} Unzipping Jadx...\n"
     unzip -q jadx.zip -d jadx
     echo -en "${info} Removing junks...\n"
