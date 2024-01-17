@@ -12,7 +12,6 @@ prompt_toolkit==3.0.19
 frida-tools
 lief
 pygore
-qiling
 pdfminer.six
 requests
 rarfile

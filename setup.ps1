@@ -55,7 +55,7 @@ if (Test-Path "$env:HOMEPATH\sc0pe_Base\jadx") {
     Write-Host "$succesS$green Jadx$default is already exist.`n"
 } else {
     Write-Host "$infoS Downloading$green Jadx$default..."
-    wget "https://github.com/skylot/jadx/releases/download/v1.4.5/jadx-1.4.5.zip" -O jadx.zip
+    wget "https://github.com/skylot/jadx/releases/download/v1.4.7/jadx-1.4.7.zip" -O jadx.zip
     Write-Host "$infoS Extracting archive..."
     Expand-Archive -Path .\jadx.zip -DestinationPath .\jadx
     Write-Host "$infoS Removing junk files..."
