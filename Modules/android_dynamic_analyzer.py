@@ -83,6 +83,10 @@ previous_states = {
     "/cache": {
         "contents": [],
         "changes": 0
+    },
+    "/app_apk": {
+        "contents": [],
+        "changes": 0
     }
 }
 
@@ -105,7 +109,7 @@ class AndroidDynamicAnalyzer:
     def __init__(self, target_file):
         self.target_file = target_file
         self.PERMS = "rw-"
-        self.target_dirs = ["/files", "/shared_prefs", "/app_DynamicOptDex", "/cache"]
+        self.target_dirs = ["/files", "/shared_prefs", "/app_DynamicOptDex", "/cache", "/app_apk"]
         self.MAX_SIZE = 20971520
         self.url_regex = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
         self.ip_addr_regex = r"^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$"
