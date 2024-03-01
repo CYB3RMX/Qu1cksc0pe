@@ -173,7 +173,7 @@ def BasicAnalyzer(analyzeFile):
     # MacOSX Analysis
     elif "Mach-O" in fileType:
         print(f"{infoS} Target OS: [bold green]OSX[white]\n")
-        command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}osXAnalyzer.py \"{analyzeFile}\""
+        command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}apple_analyzer.py \"{analyzeFile}\""
         os.system(command)
 
     # Android Analysis

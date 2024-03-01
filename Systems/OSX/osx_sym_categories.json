@@ -1,0 +1,76 @@
+{
+    "Networking/Web": {
+        "patterns": [
+            "http2clientConnPool",
+            "dialCall",
+            "clientStream",
+            "http2clientStream",
+            "clientHelloMsg",
+            "serverHelloMsg",
+            "http2addConnCall"
+        ],
+        "occurence": 0
+    },
+    "Cryptography/SSL Handling": {
+        "patterns": [
+            "InsecureAlgorithmError",
+            "PublicKeyAlgorithm",
+            "SignatureAlgorithm",
+            "CheckSignatureFrom",
+            "SecCertificateCopyData",
+            "SecCertificateCreateWithData",
+            "SecPolicyCreateSSL",
+            "SecTrustCreateWithCertificates",
+            "SecTrustEvaluateWithError",
+            "SecTrustGetCertificateAtIndex",
+            "SecTrustGetCertificateCount",
+            "SecTrustSetVerifyDate",
+            "encodeString",
+            "decodeString"
+        ],
+        "occurence": 0
+    },
+    "Information Gathering": {
+        "patterns": [
+            "getenv",
+            "geteuid",
+            "getegid",
+            "getrlimit",
+            "getnetconfig",
+            "Setenv",
+            "Environ",
+            "LookupEnv"
+        ],
+        "occurence": 0
+    },
+    "Memory Management": {
+        "patterns": [
+            "alloc",
+            "calloc",
+            "dealloc",
+            "malloc",
+            "realloc",
+            "memset",
+            "memcmp"
+        ],
+        "occurence": 0
+    },
+    "Process/Execution": {
+        "patterns": [
+            "processInfo",
+            "processName",
+            "SysProcAttr",
+            "CmdError",
+            "CombinedOutput",
+            "StdinPipe",
+            "StdoutPipe",
+            "StderrPipe",
+            "LookPath",
+            "FindProcess",
+            "StartProcess",
+            "SyscallError",
+            "ProcAttr"
+        ],
+        "occurence": 0
+    }
+}

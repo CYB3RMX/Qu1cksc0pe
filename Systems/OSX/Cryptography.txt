@@ -1,4 +1,0 @@
-encode:
-decode:
-encodeString:
-decodeString:
