@@ -218,7 +218,7 @@ try:
                     if distutils.spawn.find_executable("strings"):
                         str_proc = subprocess.run(f"strings {strings_param} \"{filename}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                         print(f"{infoS} Target OS: [bold green]OSX[white]\n")
-                        command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}osXAnalyzer.py \"{filename}\""
+                        command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}apple_analyzer.py \"{filename}\""
                         os.system(command)
                         os.remove(f"{sc0pe_path}{path_seperator}temp.txt")
                     else:
