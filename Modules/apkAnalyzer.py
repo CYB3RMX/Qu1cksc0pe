@@ -232,13 +232,7 @@ class APKAnalyzer:
                 print("")
 
     # Source code analysis
-    def ScanSource(self, axml_obj, target_package_name):
-        # Parsing main activity
-        if axml_obj:
-            parsed_package = axml_obj.get_package().split(".")
-        else:
-            parsed_package = target_package_name.split(".")
-
+    def ScanSource(self):
         # Check for decompiled source
         if os.path.exists(f"TargetAPK{path_seperator}"):
             # Prepare source files
@@ -343,17 +337,27 @@ class APKAnalyzer:
                 self.print_file_report(file_report_obj=file_report)
 
     def analyze_dex_file(self):
-        # Get package name
-        packages = self.get_possible_package_names()
-
-        # After getting package name we need to perform source code analysis
         if os.path.exists("TargetAPK"):
-            self.ScanSource(axml_obj=None, target_package_name=packages)
+            self.ScanSource()
+        else:
+            print(f"{infoS} Decompiling target file...")
+            os.system(f"{self.decompiler_path} -q -d TargetAPK \"{self.full_path_file}\"")
+            self.ScanSource()
 
     def get_possible_package_names(self):
         print(f"\n{infoS} Looking for package name...")
-        package_name = subprocess.run(f"aapt2 dump packagename \"{self.target_file}\"", shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-        return package_name.stdout.decode()
+        # Handle aapt2 errors and get package_name anyway
+        package_name_proc = subprocess.run(f"aapt2 dump packagename \"{self.target_file}\"", shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        if package_name_proc.returncode == 0:
+            package_name = package_name_proc.stdout.decode().strip('\n')
+            return package_name
+        else:
+            try:
+                # Get package_name from error message
+                package_name = re.findall(r"com.[a-z0-9]*.[a-z0-9]*", package_name_proc.stderr.decode())[0]
+                return package_name
+            except:
+                return None
 
     def pattern_scanner_ex(self, regex, target_files, target_type, value_array):
         for url in track(range(len(target_files)), description=f"Processing {target_type}..."):
@@ -672,10 +676,7 @@ if __name__ == '__main__':
 
         # Source code analysis zone
         print(f"\n{infoS} Performing source code analysis...")
-        if axml_obj:
-            apka.ScanSource(axml_obj, target_package_name=None)
-        else:
-            apka.ScanSource(axml_obj=None, target_package_name=package_names)
+        apka.ScanSource()
 
         # IP and URL value scan
         apka.Get_IP_URL()

@@ -7,7 +7,6 @@ try:
     import argparse
     import getpass
     import configparser
-    import subprocess
     import distutils.spawn
 except:
     print("Missing modules detected!")
@@ -171,7 +170,7 @@ def BasicAnalyzer(analyzeFile):
         os.system(command)
 
     # MacOSX Analysis
-    elif "Mach-O" in fileType:
+    elif "Mach-O" in fileType or '\\xca\\xfe\\xba\\xbe' in fileType:
         print(f"{infoS} Target OS: [bold green]OSX[white]\n")
         command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}apple_analyzer.py \"{analyzeFile}\""
         os.system(command)
