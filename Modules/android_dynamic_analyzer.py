@@ -292,17 +292,28 @@ class AndroidDynamicAnalyzer:
                 dindex += 1
         return device_index
 
+    def _package_name_handler(self):
+        # Handle aapt2 errors and get package_name anyway
+        package_name_proc = subprocess.run(f"aapt2 dump packagename \"{self.target_file}\"", shell=True, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+        if package_name_proc.returncode == 0:
+            package_name = package_name_proc.stdout.decode().strip('\n')
+            return package_name
+        else:
+            # Get package_name from error message
+            package_name = re.findall(r"com.[a-z0-9]*.[a-z0-9]*", package_name_proc.stderr.decode())[0]
+            return package_name
+
     def analyze_apk_via_adb(self):
         if self.axmlobj:
             package_name = self.axmlobj.get_package()
             # If the package_name is still "" or None we need to decompile it
             if package_name == "" or package_name is None:
-                package_name = subprocess.check_output(f"aapt2 dump packagename \"{self.target_file}\"", shell=True, stderr=subprocess.PIPE).strip(b"\n").decode()
+                package_name = self._package_name_handler()
                 print(f"[bold magenta]>>>[white] Package name: [bold green]{package_name}\n")
             else:
                 print(f"[bold magenta]>>>[white] Package name: [bold green]{package_name}\n")
         else:
-            package_name = subprocess.check_output(f"aapt2 dump packagename \"{self.target_file}\"", shell=True, stderr=subprocess.PIPE).strip(b"\n").decode()
+            package_name = self._package_name_handler()
             print(f"[bold magenta]>>>[white] Package name: [bold green]{package_name}\n")
 
         # Remove old files

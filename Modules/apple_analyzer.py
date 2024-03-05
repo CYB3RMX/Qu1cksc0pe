@@ -50,6 +50,7 @@ dict_categ = {
 class AppleAnalyzer:
     def __init__(self):
         self._target_binary_buff = open(target_file, "rb").read()
+        self.wmocha_object = None # By default
 
     def _check_ipa_file(self):
         # Most common patterns
@@ -69,6 +70,7 @@ class AppleAnalyzer:
         wm = Wh1teM0cha(target_file)
         try:
             wm.get_binary_info()
+            self.wmocha_object = wm
             return True
         except:
             return False
@@ -76,11 +78,24 @@ class AppleAnalyzer:
     def check_target_type(self):
         # This method is for checking if the target file is .ipa or .macho
         if self._check_macho_binary():
-            self.analyze_macho_binary(target_file)
+            self.analyze_macho_binary()
         elif self._check_ipa_file():
-            self.analyze_ipa_file()
+            print(f"{infoS} This feature will release coming soon!")
+            #self.analyze_ipa_file()
         else:
             print(f"{errorS} Unknown file type!")
+
+    def parse_libraries(self):
+        library_dict = self.wmocha_object.get_dylib_names()
+        if library_dict:
+            ltable = Table()
+            ltable.add_column("[bold green]Dynamic Libraries",justify="center")
+            for lib in library_dict:
+                if "/Security" in lib["libname"].decode() or "/libresolv" in lib["libname"].decode() or "/libSystem" in lib["libname"].decode():
+                    ltable.add_row(f"[bold red]{lib['libname'].decode()} (Possible malicious purposes!)[white]")
+                else:
+                    ltable.add_row(lib["libname"].decode())
+            print(ltable)
 
     def _perform_pattern_analysis(self):
         osx_patterns = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}OSX{path_seperator}osx_sym_categories.json"))
@@ -114,11 +129,10 @@ class AppleAnalyzer:
                     statistics.add_row(key, str(len(dict_categ[key])))
         print(statistics)
 
-    def analyze_macho_binary(self, target_binary):
+    def analyze_macho_binary(self):
         # Print binary info first
         print(f"{infoS} Binary Information")
-        wm = Wh1teM0cha(target_binary)
-        binary_info = wm.get_binary_info()
+        binary_info = self.wmocha_object.get_binary_info()
         for key in binary_info:
             print(f"[bold magenta]>>>>[white] {key}: [bold green]{binary_info[key]}")
 
@@ -132,9 +146,9 @@ class AppleAnalyzer:
         seg_table.add_column("[bold green]vmaddr", justify="center")
         seg_table.add_column("[bold green]vmsize", justify="center")
         seg_table.add_column("[bold green]filesize", justify="center")
-        segments = wm.get_segments()
+        segments = self.wmocha_object.get_segments()
         for seg in segments:
-            seg_inf = wm.segment_info(seg["segment_name"].decode())
+            seg_inf = self.wmocha_object.segment_info(seg["segment_name"].decode())
             seg_table.add_row(seg["segment_name"].decode(), seg_inf["offset"], seg_inf["cmd"], seg_inf["cmdsize"],
                               seg_inf["vmaddr"], seg_inf["vmsize"], seg_inf["filesize"])
         print(seg_table)
@@ -146,10 +160,10 @@ class AppleAnalyzer:
         sec_table.add_column("[bold green]segment", justify="center")
         sec_table.add_column("[bold green]offset", justify="center")
         sec_table.add_column("[bold green]size", justify="center")
-        sections = wm.get_sections()
+        sections = self.wmocha_object.get_sections()
         for sec in sections:
             try:
-                sec_inf = wm.section_info(sec["section_name"].decode())
+                sec_inf = self.wmocha_object.section_info(sec["section_name"].decode())
                 if "__gosymtab" in sec["section_name"].decode() or "__gopclntab" in sec["section_name"].decode() or "__go_buildinfo" in sec["section_name"].decode():
                     sec_table.add_row(f"[bold red]{sec['section_name'].decode()}[white]", sec_inf["segment_name"].decode(), 
                                       sec_inf["offset"].decode(), sec_inf["size"].decode())
@@ -159,6 +173,10 @@ class AppleAnalyzer:
             except:
                 continue
         print(sec_table)
+
+        # Analyze libraries
+        print(f"\n{infoS} Analyzing libraries...")
+        self.parse_libraries()
 
         # Pattern scanner
         print(f"\n{infoS} Performing pattern scan...")
