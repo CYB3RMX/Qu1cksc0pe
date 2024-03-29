@@ -136,7 +136,7 @@ class PowerShellAnalyzer:
             byte_arr = bytearray(base64.b64decode(payload))
             for byt in range(len(byte_arr)):
                 byte_arr[byt] = byte_arr[byt] ^ int(xor_key)
-            self.save_data_into_file(output_file="sc0pe_decoded_b64_payload.bin", data=byte_arr)
+            self.save_data_into_file(output_file="qu1cksc0pe_decoded_b64_payload.bin", data=byte_arr)
         elif payload_type == "ascii":
             temp_array = []
             for num in payload:
@@ -144,12 +144,12 @@ class PowerShellAnalyzer:
             byte_arr = bytearray(temp_array)
             for byt in range(len(byte_arr)):
                 byte_arr[byt] = byte_arr[byt] ^ int(xor_key)
-            self.save_data_into_file(output_file="sc0pe_decoded_ascii_numbers_payload.bin", data=byte_arr)
+            self.save_data_into_file(output_file="qu1cksc0pe_decoded_ascii_numbers_payload.bin", data=byte_arr)
         elif payload_type == "hex":
             byte_arr = bytearray(binascii.unhexlify(payload))
             for byt in range(len(byte_arr)):
                 byte_arr[byt] = byte_arr[byt] ^ int(xor_key)
-            self.save_data_into_file(output_file="sc0pe_decoded_hex_values_payload.bin", data=byte_arr)
+            self.save_data_into_file(output_file="qu1cksc0pe_decoded_hex_values_payload.bin", data=byte_arr)
         else:
             pass
 
@@ -230,14 +230,14 @@ class PowerShellAnalyzer:
                 decompress_obj = zlib.decompressobj(-zlib.MAX_WBITS)
                 decompressed_data = decompress_obj.decompress(b64_data)
                 output = io.BytesIO(decompressed_data).read().decode('ascii')
-                self.save_data_into_file(output_file="sc0pe_decoded_b64_payload.bin", data=output.encode())
+                self.save_data_into_file(output_file="qu1cksc0pe_decoded_b64_payload.bin", data=output.encode())
             elif gzipstream != []:
                 print(f"{infoS} Gzip data found! Attempting to decompress...")
                 decompressed_data = gzip.decompress(b64_data)
-                self.save_data_into_file(output_file="sc0pe_decoded_b64_payload.bin", data=decompressed_data)
+                self.save_data_into_file(output_file="qu1cksc0pe_decoded_b64_payload.bin", data=decompressed_data)
             else:
                 print(f"{infoS} There is no compression. Extracting payload anyway...")
-                self.save_data_into_file(output_file="sc0pe_decoded_b64_payload.bin", data=b64_data)
+                self.save_data_into_file(output_file="qu1cksc0pe_decoded_b64_payload.bin", data=b64_data)
         else:
             print(f"{errorS} There is no pattern about BASE64 encoded payloads!\n")
 
@@ -250,9 +250,9 @@ class PowerShellAnalyzer:
                 try:
                     decbf = base64.b64decode(enc)
                     if len(decbf.decode()) > 10:
-                        with open(f"sc0pe_decoded_b64_{len(decbf.decode())}.bin", "w") as ff:
+                        with open(f"qu1cksc0pe_decoded_b64_{len(decbf.decode())}.bin", "w") as ff:
                             ff.write(decbf.decode())
-                        print(f"{infoS} Decoded payload saved into: [bold green]sc0pe_decoded_b64_{len(decbf.decode())}.bin[white]")
+                        print(f"{infoS} Decoded payload saved into: [bold green]qu1cksc0pe_decoded_b64_{len(decbf.decode())}.bin[white]")
                 except:
                     continue
         else:
@@ -267,7 +267,7 @@ class PowerShellAnalyzer:
             for pat in self.all_strings:
                 if "4D5A90" in pat and "=" in pat:
                     sanitized = self.buffer_sanitizer(executable_buffer=pat.split("=")[1])
-                    self.save_data_into_file(output_file=f"sc0pe_extracted_pe_{counter}.exe", data=binascii.unhexlify(sanitized))
+                    self.save_data_into_file(output_file=f"qu1cksc0pe_extracted_pe_{counter}.exe", data=binascii.unhexlify(sanitized))
                     counter += 1
         else:
             print(f"{errorS} There is no possible PE executable pattern found!\n")

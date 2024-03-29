@@ -41,14 +41,11 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/1bf1b1d6-80f3-445d-996d-a4216a79a2e0)
 
 # Updates
+<b>29/03/2024</b>
+- [X] Improvements on ```Signature Analyzer``` module.
+
 <b>05/03/2024</b>
 - [X] Bug fixes and improvements.
-
-<b>01/03/2024</b>
-- [X] Improvements on ```Apple Analyzer``` module.
-
-<b>13/02/2024</b>
-- [X] Improvements on ```Android Dynamic Analyzer``` module.
 
 # Available On
 ![blackarch](https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png)
