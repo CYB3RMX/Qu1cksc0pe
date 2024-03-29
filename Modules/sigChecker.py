@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import json
+import mmap
 import struct
 import binascii
 
@@ -70,19 +71,20 @@ class SignatureChecker:
             try:
                 data_to_trim = self.getbins.read()
                 carve_size = self.parse_pe_size(data_to_trim)
-                print(f"\n{infoS} Carving executable file found on offset: [bold green]{off}[white] | Size: [bold green]{carve_size}[white] bytes")
-                pfile = pf.PE(data=data_to_trim) # Using pefile for PE trim
+                if carve_size:
+                    print(f"\n{infoS} Carving executable file found on offset: [bold green]{off}[white] | Size: [bold green]{carve_size}[white] bytes")
+                    pfile = pf.PE(data=data_to_trim) # Using pefile for PE trim
             except:
                 continue
 
             # Creating dump files
             try:
-                dumpfile = open(f"sc0pe_carved-{off}.bin", "wb")
+                dumpfile = open(f"qu1cksc0pe_carved-{off}.bin", "wb")
                 buffer_to_write = pfile.trim()
                 dumpfile.write(buffer_to_write)
                 dumpfile.close()
                 pfile.close()
-                print(f"[bold magenta]>>>[white] Data saved into: [bold green]sc0pe_carved-{off}.bin")
+                print(f"[bold magenta]>>>[white] Data saved into: [bold green]qu1cksc0pe_carved-{off}.bin")
             except:
                 continue
 
@@ -171,30 +173,31 @@ class SignatureChecker:
         pattern = b'\x4D\x5A\x90\x00'
         detected_executables = []
         with open(self.target_file, "rb") as target:
-            for _ in track(range(0, self.target_file_size, 1024), description="Processing buffer..."):
-                buffer_read = target.read(1024)
-                matches = re.finditer(pattern, buffer_read)
-                for mat in matches:
-                    exec_offset = mat.start()
-                    exec_size = self.parse_pe_size(buffer_read)
-                    detected_executables.append([exec_offset, exec_size])
+            mmfl = mmap.mmap(target.fileno(), 0, access=mmap.ACCESS_READ)
+            mzoffsetslst = list(re.finditer(pattern, mmfl))
+            for fnd in track(range(len(mzoffsetslst)), description="Processing buffer..."):
+                mmfl.seek(mzoffsetslst[fnd].start())
+                buffer_read = mmfl.read(1024)
+                exec_size = self.parse_pe_size(buffer_read)
+                if exec_size:
+                    detected_executables.append([mzoffsetslst[fnd].start(), exec_size])
             if detected_executables != []:
                 print(f"\n{infoS} Performing embedded binary extraction...")
                 for binary in detected_executables:
                     print(f"\n{infoS} Carving executable file found on offset: [bold green]{binary[0]}[white] | Size: [bold green]{binary[1]}[white] bytes")
-                    target.seek(binary[0])
+                    mmfl.seek(binary[0])
                     binary_buffer_size = binary[1]
                     try:
-                        pfile = pf.PE(data=target.read(binary_buffer_size))
+                        pfile = pf.PE(data=mmfl.read(binary_buffer_size))
                     except:
                         continue
                     # Creating dump files
                     try:
-                        dumpfile = open(f"sc0pe_carved-{binary[0]}.bin", "wb")
+                        dumpfile = open(f"qu1cksc0pe_carved-{binary[0]}.bin", "wb")
                         buffer_to_write = pfile.trim()
                         if len(buffer_to_write) >= 52428800:
                             print(f"\n{infoS} Looks like the carved file is larger than 50MB. You need to re-execute program against the carved file!\n")
-                        print(f"[bold magenta]>>>[white] Data saving into: [bold green]sc0pe_carved-{binary[0]}.bin[white] | Size: [bold green]{len(buffer_to_write)}[white]")
+                        print(f"[bold magenta]>>>[white] Data saving into: [bold green]qu1cksc0pe_carved-{binary[0]}.bin[white] | Size: [bold green]{len(buffer_to_write)}[white]")
                         dumpfile.write(buffer_to_write)
                         dumpfile.close()
                         pfile.close()
@@ -203,22 +206,26 @@ class SignatureChecker:
             else:
                 print(f"\n{errorS} There is nothing found to extract!\n")
         target.close()
+        mmfl.close()
         sys.exit(0)
 
     def parse_pe_size(self, pe_data):
         # Parse the PE header to retrieve the SizeOfImage field
-        pe_header_offset = struct.unpack('<L', pe_data[0x3C:0x40])[0]
-        size_of_image_offset = pe_header_offset + 0x50
-        size_of_image = struct.unpack('<L', pe_data[size_of_image_offset:size_of_image_offset + 4])[0]
-        return size_of_image
+        try:
+            pe_header_offset = struct.unpack('<L', pe_data[0x3C:0x40])[0]
+            size_of_image_offset = pe_header_offset + 0x50
+            size_of_image = struct.unpack('<L', pe_data[size_of_image_offset:size_of_image_offset + 4])[0]
+            return size_of_image
+        except:
+            return None
 
     def file_carver_for_elf_executables(self, offset_array):
         for ofs in offset_array:
             binary = lief.parse(self.getbins_buffer[ofs:])
             if binary is not None:
-                with open(f"sc0pe_carved_ELF-{hex(ofs)}.bin", "wb") as ff:
+                with open(f"qu1cksc0pe_carved_ELF-{hex(ofs)}.bin", "wb") as ff:
                     ff.write(self.getbins_buffer[ofs:binary.eof_offset+ofs])
-                print(f"[bold magenta]>>>[white] Data saved into: [bold green]sc0pe_carved_ELF-{hex(ofs)}.bin")
+                print(f"[bold magenta]>>>[white] Data saved into: [bold green]qu1cksc0pe_carved_ELF-{hex(ofs)}.bin")
 
 # Execution
 target_file = sys.argv[1]

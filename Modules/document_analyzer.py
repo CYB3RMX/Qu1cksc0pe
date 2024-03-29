@@ -405,10 +405,10 @@ class DocumentAnalyzer:
         # Extract embedded files
         print(f"\n{infoS} Performing embedded file extraction...")
         for key in efs.keys():
-            with open(f"sc0pe_carved-{key}{efs[key]['extension']}", "wb") as binfile:
+            with open(f"qu1cksc0pe_carved-{key}{efs[key]['extension']}", "wb") as binfile:
                 binfile.write(efs[key]["content"])
             binfile.close()
-            print(f"[bold magenta]>>>[white] Embedded file saved as: [bold green]sc0pe_carved-{key}{efs[key]['extension']}[white]")
+            print(f"[bold magenta]>>>[white] Embedded file saved as: [bold green]qu1cksc0pe_carved-{key}{efs[key]['extension']}[white]")
 
         # Perform Yara scan
         print(f"\n{infoS} Performing YARA rule matching...")
@@ -553,7 +553,7 @@ class DocumentAnalyzer:
                                     if regex != []:
                                         print(f"{infoS} Possible [bold green]{categ}[white] detected at [bold green]ObjectID[white]: [bold yellow]{obj}[white]")
                                         print(f"{infoS} Attempting to extraction...")
-                                        self.output_writer(out_file=f"sc0pe_carved-{categ}-{obj}.bin", mode="wb", buffer=object_data)
+                                        self.output_writer(out_file=f"qu1cksc0pe_carved-{categ}-{obj}.bin", mode="wb", buffer=object_data)
 
                         # Check for /URI object
                         if "URI" in str(doc.getobj(obj)):
@@ -586,9 +586,9 @@ class DocumentAnalyzer:
                             print(f"{infoS} Checking for compression...")
                             try:
                                 decompressed = zlib.decompress(doc.getobj(obj).get_rawdata())
-                                self.output_writer(out_file=f"sc0pe_embedded_decompressed_file-{obj}.bin", mode="wb", buffer=decompressed)
+                                self.output_writer(out_file=f"qu1cksc0pe_embedded_decompressed_file-{obj}.bin", mode="wb", buffer=decompressed)
                             except:
-                                self.output_writer(out_file=f"sc0pe_embedded_file-{obj}.bin", mode="wb", buffer=doc.getobj(obj).get_rawdata())
+                                self.output_writer(out_file=f"qu1cksc0pe_embedded_file-{obj}.bin", mode="wb", buffer=doc.getobj(obj).get_rawdata())
                     except:
                         continue
             else:
@@ -641,10 +641,10 @@ class DocumentAnalyzer:
             if un_dat != []:
                 for escape in un_dat:
                     deobf = urllib.parse.unquote(escape)
-                    self.output_writer(out_file=f"sc0pe_decoded_unescape-{len(deobf)}.bin", mode="w", buffer=deobf)
+                    self.output_writer(out_file=f"qu1cksc0pe_decoded_unescape-{len(deobf)}.bin", mode="w", buffer=deobf)
 
                     # After extracting the data also we need to scan it!
-                    print(f"\n{infoS} Performing analysis against [bold yellow]sc0pe_decoded_unescape-{len(deobf)}.bin[white]")
+                    print(f"\n{infoS} Performing analysis against [bold yellow]qu1cksc0pe_decoded_unescape-{len(deobf)}.bin[white]")
                     if "html" in deobf:
                         new_soup = BeautifulSoup(deobf, "html.parser")
                         self.html_check_input_points(soup_obj=new_soup)
@@ -690,7 +690,7 @@ class DocumentAnalyzer:
                             if key_count != 0:
                                 if len(decoded.decode()) >= 150:
                                     print(f"\n{infoS} Warning length of the decoded data is bigger than as we expected!")
-                                    self.output_writer(out_file=f"sc0pe_decoded_javascript-{len(decoded.decode())}.js", mode="w", buffer=decoded.decode())
+                                    self.output_writer(out_file=f"qu1cksc0pe_decoded_javascript-{len(decoded.decode())}.js", mode="w", buffer=decoded.decode())
                                 else:
                                     decc.append(decoded.decode())
                             else:
@@ -709,7 +709,7 @@ class DocumentAnalyzer:
                             if key_count != 0:
                                 if len(decoded.decode()) >= 150:
                                     print(f"\n{infoS} Warning length of the decoded data is bigger than as we expected!")
-                                    self.output_writer(out_file=f"sc0pe_decoded_javascript-{len(decoded.decode())}.js", mode="w", buffer=decoded.decode())
+                                    self.output_writer(out_file=f"qu1cksc0pe_decoded_javascript-{len(decoded.decode())}.js", mode="w", buffer=decoded.decode())
                                 else:
                                     decc.append(decoded.decode())
                             else:
@@ -738,7 +738,7 @@ class DocumentAnalyzer:
                         mal_ind += 1
 
                 if mal_ind != 0 and len(jav_buf) > 0:
-                    self.output_writer(out_file=f"sc0pe_carved_javascript-{len(jav_buf)}.js", mode="w", buffer=jav_buf)
+                    self.output_writer(out_file=f"qu1cksc0pe_carved_javascript-{len(jav_buf)}.js", mode="w", buffer=jav_buf)
         else:
             print(f"{errorS} There is no Javascript found!")
     def html_detect_malicious_code(self, given_buffer):
@@ -856,28 +856,28 @@ class DocumentAnalyzer:
         if chk_ex != []:
             print(f"{infoS} This file contains possible [bold green]CVE-2017-11882[white] exploit. Performing extraction...")
             self.pat_ct += 1
-            self.output_writer(out_file=f"sc0pe_extracted_exploit-{len(buffer)}.bin", mode="wb", buffer=binascii.unhexlify(buffer))
+            self.output_writer(out_file=f"qu1cksc0pe_extracted_exploit-{len(buffer)}.bin", mode="wb", buffer=binascii.unhexlify(buffer))
 
         # Check equation.2 pattern
         chk_ex = re.findall(r'ion.2'.encode(), bytes.fromhex(buffer), re.IGNORECASE)
         if chk_ex != []:
             print(f"{infoS} This file contains possible [bold green]CVE-2017-11882[white] exploit. Performing extraction...")
             self.pat_ct += 1
-            self.output_writer(out_file=f"sc0pe_extracted_exploit-{len(buffer)}.bin", mode="wb", buffer=binascii.unhexlify(buffer))
+            self.output_writer(out_file=f"qu1cksc0pe_extracted_exploit-{len(buffer)}.bin", mode="wb", buffer=binascii.unhexlify(buffer))
 
         # Check OLE10naTiVE pattern
         chk_ex = re.findall(r"OLE10naTiVE".encode(), bytes.fromhex(buffer).replace(b"\x00", b""), re.IGNORECASE)
         if chk_ex != []:
             print(f"{infoS} This file contains possible [bold green]CVE-2017-11882[white] exploit. Performing extraction...")
             self.pat_ct += 1
-            self.output_writer(out_file=f"sc0pe_extracted_exploit-{len(buffer)}.bin", mode="wb", buffer=binascii.unhexlify(buffer))
+            self.output_writer(out_file=f"qu1cksc0pe_extracted_exploit-{len(buffer)}.bin", mode="wb", buffer=binascii.unhexlify(buffer))
 
         # Check vbscript
         chk_ex = re.findall(r'(script|Create|vbscript|Function)'.encode(), bytes.fromhex(buffer), re.IGNORECASE)
         if chk_ex != []:
             print(f"{infoS} This file contains possible [bold green]VBScript[white] file. Performing extraction...")
             self.pat_ct += 1
-            self.output_writer(out_file=f"sc0pe_extracted_script-{len(buffer)}.bin", mode="wb", buffer=binascii.unhexlify(buffer))
+            self.output_writer(out_file=f"qu1cksc0pe_extracted_script-{len(buffer)}.bin", mode="wb", buffer=binascii.unhexlify(buffer))
 
     def rtf_check_exploit_main(self, buffer):
         # This method is for detecting \binxxx based patterns
@@ -972,7 +972,7 @@ class DocumentAnalyzer:
                     print(f"\n{infoS} Looks like we have obfuscated value via [bold green]unescape[white]. Performing deobfuscation...")
                     for un in unesc:
                         deobf = urllib.parse.unquote(un)
-                        self.output_writer(out_file=f"sc0pe_deobfuscated_unescape-{len(deobf)}.bin", mode="w", buffer=deobf)
+                        self.output_writer(out_file=f"qu1cksc0pe_deobfuscated_unescape-{len(deobf)}.bin", mode="w", buffer=deobf)
         else:
             print(f"{errorS} There is no malicious pattern found!")
 

@@ -328,7 +328,7 @@ class ResourceScanner:
         sanitized_data = self.buffer_sanitizer(executable_buffer=output_buffer)
 
         # Finally save data into file
-        self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
+        self.save_data_into_file("qu1cksc0pe_carved_deobfuscated.exe", sanitized_data)
     def method_2_double_replace(self, r1, r2, r3, r4, executable_buffer):
         self.r1 = r1 # Replace 1
         self.r2 = r2 # Replace 2
@@ -343,7 +343,7 @@ class ResourceScanner:
         sanitized_data = self.buffer_sanitizer(executable_buffer=self.executable_buffer)
 
         # Finally save data into file
-        self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
+        self.save_data_into_file("qu1cksc0pe_carved_deobfuscated.exe", sanitized_data)
     def method_3_reverse_and_replace(self, r1, r2, executable_buffer):
         self.r1 = r1 # Replace 1
         self.r2 = r2 # Replace 2
@@ -356,7 +356,7 @@ class ResourceScanner:
         sanitized_data = self.buffer_sanitizer(executable_buffer=self.executable_buffer)
 
         # Finally save data into file
-        self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
+        self.save_data_into_file("qu1cksc0pe_carved_deobfuscated.exe", sanitized_data)
     def method_4_reverse_and_double_replace(self, r1, r2, r3, r4, executable_buffer):
         self.r1 = r1 # Replace 1
         self.r2 = r2 # Replace 2
@@ -371,7 +371,7 @@ class ResourceScanner:
         sanitized_data = self.buffer_sanitizer(executable_buffer=self.executable_buffer)
 
         # Finally save data into file
-        self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
+        self.save_data_into_file("qu1cksc0pe_carved_deobfuscated.exe", sanitized_data)
     def method_5_triple_replace(self, r1, r2, r3, r4, r5, r6, executable_buffer):
         self.r1 = r1 # Replace 1
         self.r2 = r2 # Replace 2
@@ -388,7 +388,7 @@ class ResourceScanner:
         sanitized_data = self.buffer_sanitizer(executable_buffer=self.executable_buffer)
 
         # Save data
-        self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
+        self.save_data_into_file("qu1cksc0pe_carved_deobfuscated.exe", sanitized_data)
     def method_6_simple_reverse(self, executable_buffer):
         self.executable_buffer = executable_buffer
 
@@ -399,7 +399,7 @@ class ResourceScanner:
         sanitized_data = self.buffer_sanitizer(executable_buffer=revz)
 
         # Save data
-        self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
+        self.save_data_into_file("qu1cksc0pe_carved_deobfuscated.exe", sanitized_data)
 
     def method_7_base64_and_reverse(self, executable_buffer):
         self.executable_buffer = executable_buffer
@@ -409,9 +409,9 @@ class ResourceScanner:
         final_buffer = decode1[::-1]
 
         # Save data
-        with open("sc0pe_carved_deobfuscated.exe", "wb") as ff:
+        with open("qu1cksc0pe_carved_deobfuscated.exe", "wb") as ff:
             ff.write(final_buffer)
-        print(f"{infoS} Data saved into: [bold green]sc0pe_carved_deobfuscated.exe[white]\n")
+        print(f"{infoS} Data saved into: [bold green]qu1cksc0pe_carved_deobfuscated.exe[white]\n")
 
     def method_8_simple_replace(self, r1, r2, executable_buffer):
         self.r1 = r1 # Replace 1
@@ -425,7 +425,7 @@ class ResourceScanner:
         sanitized_data = self.buffer_sanitizer(executable_buffer=self.executable_buffer)
 
         # Save data
-        self.save_data_into_file("sc0pe_carved_deobfuscated.exe", sanitized_data)
+        self.save_data_into_file("qu1cksc0pe_carved_deobfuscated.exe", sanitized_data)
 
     def buffer_sanitizer(self, executable_buffer):
         self.executable_buffer = executable_buffer
@@ -534,7 +534,7 @@ class ResourceScanner:
                                 output_buffer += binascii.hexlify(byte_array)
 
             # After retrieve and obfuscate all data we need to save it!
-            self.save_data_into_file("sc0pe_carved_deobfuscated_split.exe", output_buffer)
+            self.save_data_into_file("qu1cksc0pe_carved_deobfuscated_split.exe", output_buffer)
         else:
             print(f"{errorS} There is no split data found!\n")
 
@@ -617,9 +617,9 @@ class ResourceScanner:
                     b_array.append(red)
             if b"4d5a90" in binascii.hexlify(b_array):
                 print(f"{infoS} Hidden PE file found. Extracting...")
-                with open("sc0pe_hidden_pe.exe", "wb") as ff:
+                with open("qu1cksc0pe_hidden_pe.exe", "wb") as ff:
                     ff.write(b_array)
-                print(f"{infoS} Data saved into: [bold green]sc0pe_hidden_pe.exe[white]\n")
+                print(f"{infoS} Data saved into: [bold green]qu1cksc0pe_hidden_pe.exe[white]\n")
                 os.system("rm -rf carved.bmp")
             else:
                 pass
@@ -636,9 +636,9 @@ class ResourceScanner:
                     i += 1
             if b"4d5a90" in binascii.hexlify(b_array):
                 print(f"{infoS} Hidden PE file found. Extracting...")
-                with open("sc0pe_hidden_pe.exe", "wb") as ff:
+                with open("qu1cksc0pe_hidden_pe.exe", "wb") as ff:
                     ff.write(b_array)
-                print(f"{infoS} Data saved into: [bold green]sc0pe_hidden_pe.exe[white]\n")
+                print(f"{infoS} Data saved into: [bold green]qu1cksc0pe_hidden_pe.exe[white]\n")
                 os.system("rm -rf carved.bmp")
             else:
                 pass
@@ -675,9 +675,9 @@ class ResourceScanner:
                 barr = bytearray(carve_data)
                 cipher = DES3.new(key, DES3.MODE_ECB)
                 decr = cipher.decrypt(barr)
-                with open(f"sc0pe_carved_decrypted-{hex(offsets[0])}.exe", "wb") as ff:
+                with open(f"qu1cksc0pe_carved_decrypted-{hex(offsets[0])}.exe", "wb") as ff:
                     ff.write(decr)
-                print(f"{infoS} Data saved into: [bold green]sc0pe_carved_decrypted-{hex(offsets[0])}.exe[white]\n")
+                print(f"{infoS} Data saved into: [bold green]qu1cksc0pe_carved_decrypted-{hex(offsets[0])}.exe[white]\n")
         if founz == 0:
             print(f"{errorS} There is no encrypted PE pattern found!\n")
 
