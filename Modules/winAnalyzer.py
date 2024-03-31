@@ -101,6 +101,8 @@ winrep = {
     "categories": {},
     "matched_rules": [],
     "linked_dll": [],
+    "pdb_file_name": "",
+    "debug_signature": "",
     "sections": {}
 }
 
@@ -526,6 +528,17 @@ class WindowsAnalyzer:
             print("[bold]You can also use [green][i]--hashscan[/i] [white]to scan this file.")
             sys.exit(0)
 
+    def get_debug_information(self):
+        try:
+            debug_buffer = self.binaryfile.DIRECTORY_ENTRY_DEBUG[0].entry
+            print(f"\n{infoS} Parsing DEBUG information...")
+            print(f"[bold magenta]>>>[white] PDB Name: [bold green]{debug_buffer.PdbFileName.decode()}")
+            winrep["pdb_file_name"] = debug_buffer.PdbFileName.decode()
+            print(f"[bold magenta]>>>[white] Debug Signature: [bold green]{debug_buffer.Signature_String}")
+            winrep["debug_signature"] = debug_buffer.Signature_String
+        except AttributeError:
+            print(f"{errorS} There is no information about DEBUG section!")
+            
     def dotnet_file_analyzer(self):
         print(f"{infoS} Performing .NET analysis...")
 
@@ -585,6 +598,9 @@ class WindowsAnalyzer:
         except:
             pass
 
+        # Get debug information
+        self.get_debug_information()
+
         # Yara rule match
         print(f"\n{infoS} Performing YARA rule matching...")
         self.yara_rule_scanner(fileName, report_object=winrep)
@@ -606,6 +622,7 @@ class WindowsAnalyzer:
 # Execute
 windows_analyzer = WindowsAnalyzer(target_file=str(fileName))
 windows_analyzer.dll_files()
+windows_analyzer.get_debug_information()
 windows_analyzer.scan_for_special_artifacts()
 windows_analyzer.check_for_valid_registry_keys()
 windows_analyzer.check_for_interesting_stuff()
