@@ -26,3 +26,6 @@ Caller
 get_Choupa
 GetKeyState
 GetKeyboardState
+hideconsole
+OFF_Encrypt
+Infectrandomusbfile

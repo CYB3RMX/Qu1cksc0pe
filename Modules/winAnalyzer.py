@@ -96,7 +96,7 @@ winrep = {
     "hash_sha1": "",
     "hash_sha256": "",
     "imphash": "",
-    "all_imports": 0,
+    "all_imports_exports": 0,
     "categorized_imports": 0,
     "categories": {},
     "matched_rules": [],
@@ -198,7 +198,7 @@ class WindowsAnalyzer:
                         pass
                     else:
                         tables.add_row(f"[bold red]{func[0]}", f"[bold red]{func[1]}")
-                        winrep["categories"][key].append(func[0])
+                        winrep["categories"][key].append(func)
                 print(tables)
 
     def dll_files(self):
@@ -488,9 +488,9 @@ class WindowsAnalyzer:
             print(f"[bold white on red]There is no rules matched for {filename}")
 
     def report_writer(self, target_os, report_object):
-        with open(f"sc0pe_{target_os}_report.json", "w") as rp_file:
+        with open(f"sc0pe_{target_os}_{winrep['hash_sha256']}_report.json", "w") as rp_file:
             json.dump(report_object, rp_file, indent=4)
-        print(f"\n[bold magenta]>>>[bold white] Report file saved into: [bold blink yellow]sc0pe_{target_os}_report.json\n")
+        print(f"\n[bold magenta]>>>[bold white] Report file saved into: [bold blink yellow]sc0pe_{target_os}_{winrep['hash_sha256']}_report.json\n")
 
     def statistics_method(self):
         datestamp = self.gather_timestamp()
@@ -573,9 +573,25 @@ class WindowsAnalyzer:
         self.check_for_valid_registry_keys()
         self.check_for_interesting_stuff()
         self.detect_embedded_PE()
+        self.analyze_via_viv()
+
+        # Try to parse target via pefile for get more information
+        try:
+            print(f"\n{infoS} Parsing section information...")
+            self.section_parser()
+
+            print(f"\n{infoS} Checking linked DLL files...")
+            self.dll_files()
+        except:
+            pass
+
         # Yara rule match
         print(f"\n{infoS} Performing YARA rule matching...")
         self.yara_rule_scanner(fileName, report_object=winrep)
+        self.statistics_method()
+        # Print reports
+        if sys.argv[2] == "True":
+            self.report_writer("windows", winrep)
 
     def msi_file_analyzer(self):
         print(f"{infoS} Performing Microsoft Software Installer analysis...\n")
