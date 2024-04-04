@@ -985,6 +985,9 @@ class DocumentAnalyzer:
         if self.pat_ct == 0:
             print(f"{errorS} There is no suspicious embedded exploit/script pattern detected!")
 
+        # Get url values
+        self.html_fetch_urls(allstr)
+
         # Perform Yara scan
         print(f"\n{infoS} Performing YARA rule matching...")
         self.DocumentYara()

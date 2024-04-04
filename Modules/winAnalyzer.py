@@ -5,6 +5,7 @@ import re
 import sys
 import yara
 import json
+import sqlite3
 import hashlib
 import warnings
 import binascii
@@ -536,8 +537,23 @@ class WindowsAnalyzer:
             winrep["pdb_file_name"] = debug_buffer.PdbFileName.decode()
             print(f"[bold magenta]>>>[white] Debug Signature: [bold green]{debug_buffer.Signature_String}")
             winrep["debug_signature"] = debug_buffer.Signature_String
+
+            # Check if the signature string in our database
+            sig_base = sqlite3.connect(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows_debug_signatures")
+            sig_cursor = sig_base.cursor()
+
+            # 1. Check signature first
+            exist = sig_cursor.execute(f"SELECT * FROM debug_signatures where signature=\"{debug_buffer.Signature_String}\"").fetchall()
+            if exist:
+                print(f"[bold red][blink]>> DANGER >>[/blink][white] Debug signature associated with: [bold red]{exist[0][0]}")
+            else:
+                # 2. Check pdb name
+                pdb_name = debug_buffer.PdbFileName.decode().strip("\x00")
+                exist = sig_cursor.execute(f"SELECT * FROM debug_signatures where pdb_name=\"{pdb_name}\"").fetchall()
+                if exist:
+                    print(f"[bold red][blink]>> DANGER >>[/blink][white] Debug signature associated with: [bold red]{exist[0][0]}")
         except AttributeError:
-            print(f"{errorS} There is no information about DEBUG section!")
+            print(f"\n{errorS} There is no information about DEBUG section!")
             
     def dotnet_file_analyzer(self):
         print(f"{infoS} Performing .NET analysis...")
