@@ -446,7 +446,8 @@ def main():
         cleanup_junks()
 
 
-# This is the entrypoint when directly running this module
-# as a standalone module (as opposed to a lib)
+# This is the entrypoint when directly running
+# this module as a standalone program
+# (as opposed to it being imported/ran like a lib)
 if __name__ == "__main__":
     main()
