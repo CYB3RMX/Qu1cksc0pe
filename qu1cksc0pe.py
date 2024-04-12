@@ -100,51 +100,33 @@ else:
 os.system(f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}banners.py")
 
 # Argument crating, parsing and handling
+ARG_NAMES_TO_KWARG_OPTS = {
+    "file": {"help": "Specify a file to scan or analyze."},
+    "folder": {"help": "Specify a folder to scan or analyze."},
+    "analyze": {"help": "Analyze target file.", "action": "store_true"},
+    "archive": {"help": "Analyze archive files.", "action": "store_true"},
+    "console": {"help": "Use Qu1cksc0pe on interactive shell.", "action": "store_true"},
+    "db_update": {"help": "Update malware hash database.", "action": "store_true"},
+    "docs": {"help": "Analyze document files.", "action": "store_true"},
+    "domain": {"help": "Extract URLs and IP addresses from file.", "action": "store_true"},
+    "hashscan": {"help": "Scan target file's hash in local database.", "action": "store_true"},
+    "install": {"help": "Install or Uninstall Qu1cksc0pe.", "action": "store_true"},
+    "key_init": {"help": "Enter your VirusTotal API key.", "action": "store_true"},
+    "lang": {"help": "Detect programming language.", "action": "store_true"},
+    "mitre": {"help": "Generate MITRE ATT&CK table for target sample (Windows samples for now.).", "action": "store_true"},
+    "packer": {"help": "Check if your file is packed with common packers.", "action": "store_true"},
+    "resource": {"help": "Analyze resources in target file", "action": "store_true"},
+    "report": {"help": "Export analysis reports into a file (JSON Format for now).", "action": "store_true"},
+    "watch": {"help": "Perform dynamic analysis against Windows/Android files. (Linux will coming soon!!)", "action": "store_true"},
+    "sigcheck": {"help": "Scan file signatures in target file.", "action": "store_true"},
+    "vtFile": {"help": "Scan your file with VirusTotal API.", "action": "store_true"}
+}
+
 parser = argparse.ArgumentParser()
-parser.add_argument("--file", required=False,
-                    help="Specify a file to scan or analyze.")
-parser.add_argument("--folder", required=False,
-                    help="Specify a folder to scan or analyze.")
-parser.add_argument("--analyze", required=False,
-                    help="Analyze target file.", action="store_true")
-parser.add_argument("--archive", required=False, help="Analyze archive files.",
-                    action="store_true")
-parser.add_argument("--console", required=False,
-                    help="Use Qu1cksc0pe on interactive shell.", action="store_true")
-parser.add_argument("--db_update", required=False,
-                    help="Update malware hash database.", action="store_true")
-parser.add_argument("--docs", required=False, help="Analyze document files.",
-                    action="store_true")
-parser.add_argument("--domain", required=False,
-                    help="Extract URLs and IP addresses from file.",
-                    action="store_true")
-parser.add_argument("--hashscan", required=False,
-                    help="Scan target file's hash in local database.",
-                    action="store_true")
-parser.add_argument("--install", required=False,
-                    help="Install or Uninstall Qu1cksc0pe.", action="store_true")
-parser.add_argument("--key_init", required=False,
-                    help="Enter your VirusTotal API key.", action="store_true")
-parser.add_argument("--lang", required=False,
-                    help="Detect programming language.",
-                    action="store_true")
-parser.add_argument("--mitre", required=False,
-                    help="Generate MITRE ATT&CK table for target sample (Windows samples for now.).",
-                    action="store_true")
-parser.add_argument("--packer", required=False,
-                    help="Check if your file is packed with common packers.",
-                    action="store_true")
-parser.add_argument("--resource", required=False,
-                    help="Analyze resources in target file", action="store_true")
-parser.add_argument("--report", required=False,
-                    help="Export analysis reports into a file (JSON Format for now).", action="store_true")
-parser.add_argument("--watch", required=False,
-                    help="Perform dynamic analysis against Windows/Android files. (Linux will coming soon!!)", action="store_true")
-parser.add_argument("--sigcheck", required=False,
-                    help="Scan file signatures in target file.", action="store_true")
-parser.add_argument("--vtFile", required=False,
-                    help="Scan your file with VirusTotal API.",
-                    action="store_true")
+for arg_name, cfg in ARG_NAMES_TO_KWARG_OPTS.items():
+    if not "required" in cfg:
+        cfg["required"] = False
+    parser.add_argument("--" + arg_name, **cfg)
 args = parser.parse_args()
 
 # Basic analyzer function that handles single and multiple scans
