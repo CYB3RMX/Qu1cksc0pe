@@ -20,22 +20,22 @@ if sys.version_info[0] == 2:
 # Testing rich existence
 try:
     from rich import print
-except ModuleNotFoundError:
+except ModuleNotFoundError as e:
     print("Error: >rich< module not found.")
-    sys.exit(1)
+    raise e
 
 # Testing puremagic existence
 try:
     import puremagic as pr
-except ModuleNotFoundError:
+except ModuleNotFoundError as e:
     print("Error: >puremagic< module not found.")
-    sys.exit(1)
+    raise e
 
 try:
     from colorama import Fore, Style
-except ModuleNotFoundError:
+except ModuleNotFoundError as e:
     print("Error: >colorama< module not found.")
-    sys.exit(1)
+    raise e
 
 # Colors
 red = Fore.LIGHTRED_EX
