@@ -440,7 +440,5 @@ def cleanup_junks():
 # Exectuion area
 try:
     Qu1cksc0pe()
-    # Cleaning up...
-    cleanup_junks()
-except:
+finally:
     cleanup_junks()
