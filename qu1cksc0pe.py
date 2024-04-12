@@ -8,6 +8,7 @@ try:
     import getpass
     import configparser
     import distutils.spawn
+    import shutil
 except:
     print("Missing modules detected!")
     sys.exit(1)
@@ -432,10 +433,10 @@ def cleanup_junks():
     junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt", "TargetAPK/", "TargetSource/"]
     for junk in junkFiles:
         if os.path.exists(junk):
-            if sys.platform != "win32":
-                os.system(f"rm -rf {junk}")
-            else:
-                os.system(f"powershell -c \"del {junk} -Force -Recurse\"")
+            try: # assume simple file
+                os.unlink(junk)
+            except OSError: # try this for directories
+                shutil.rmtree(junk)
 
 # Exectuion area
 try:
