@@ -438,10 +438,17 @@ def cleanup_junks():
             except OSError: # try this for directories
                 shutil.rmtree(junk)
 
-# Exectuion area
-try:
-    Qu1cksc0pe()
-    # Cleaning up...
-    cleanup_junks()
-except:
-    cleanup_junks()
+def main():
+    try:
+        Qu1cksc0pe()
+        # Cleaning up...
+        cleanup_junks()
+    except:
+        cleanup_junks()
+
+
+# This is the entrypoint when directly running
+# this module as a standalone program
+# (as opposed to it being imported/ran like a lib)
+if __name__ == "__main__":
+    main()
