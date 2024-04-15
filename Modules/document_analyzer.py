@@ -142,8 +142,8 @@ class DocumentAnalyzer:
                 print(f">>> Rule name: [i][bold magenta]{rul}[/i]")
                 yaraTable.add_column("Offset", style="bold green", justify="center")
                 yaraTable.add_column("Matched String/Byte", style="bold green", justify="center")
-                for mm in rul.strings:
-                    yaraTable.add_row(f"{hex(mm[0])}", f"{str(mm[2])}")
+                for matched_pattern in rul.strings:
+                    yaraTable.add_row(f"{hex(matched_pattern.instances[0].offset)}", f"{str(matched_pattern.instances[0].matched_data)}")
                 print(yaraTable)
                 print(" ")
 

@@ -7,10 +7,10 @@ colorama
 oletools
 pefile
 pyaxmlparser
-yara-python==3.11.0
-prompt_toolkit==3.0.19
+yara-python==4.5.0
+prompt_toolkit==3.0.43
 frida-tools
-lief
+lief==0.13.2
 pygore
 pdfminer.six
 requests

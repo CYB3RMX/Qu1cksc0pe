@@ -478,12 +478,12 @@ class WindowsAnalyzer:
                 yaraTable.add_column("Offset", style="bold green", justify="center")
                 yaraTable.add_column("Matched String/Byte", style="bold green", justify="center")
                 report_object["matched_rules"].append({str(rul): []})
-                for mm in rul.strings:
-                    yaraTable.add_row(f"{hex(mm[0])}", f"{str(mm[2])}")
+                for matched_pattern in rul.strings:
+                    yaraTable.add_row(f"{hex(matched_pattern.instances[0].offset)}", f"{str(matched_pattern.instances[0].matched_data)}")
                     try:
-                        report_object["matched_rules"][-1][str(rul)].append({"offset": hex(mm[0]) ,"matched_pattern": mm[2].decode("ascii")})
+                        report_object["matched_rules"][-1][str(rul)].append({"offset": hex(matched_pattern.instances[0].offset), "matched_pattern": matched_pattern.instances[0].matched_data.decode("ascii")})
                     except:
-                        report_object["matched_rules"][-1][str(rul)].append({"offset": hex(mm[0]) ,"matched_pattern": str(mm[2])})
+                        report_object["matched_rules"][-1][str(rul)].append({"offset": hex(matched_pattern.instances[0].offset), "matched_pattern": str(matched_pattern.instances[0].matched_data)})
                 print(yaraTable)
                 print(" ")
 
@@ -602,7 +602,11 @@ class WindowsAnalyzer:
         self.check_for_valid_registry_keys()
         self.check_for_interesting_stuff()
         self.detect_embedded_PE()
-        self.analyze_via_viv()
+
+        try:
+            self.analyze_via_viv()
+        except:
+            print(f"{errorS} An error occured while analyzing functions! This file might have some [bold red]anti-analysis[white] technique!")
 
         # Try to parse target via pefile for get more information
         try:
@@ -649,7 +653,12 @@ print(f"\n{infoS} Performing YARA rule matching...")
 windows_analyzer.yara_rule_scanner(fileName, report_object=winrep)
 
 windows_analyzer.section_parser()
-windows_analyzer.analyze_via_viv()
+
+try:
+    windows_analyzer.analyze_via_viv()
+except:
+    print(f"{errorS} An error occured while analyzing functions! This file might have some [bold red]anti-analysis[white] technique!")
+
 windows_analyzer.statistics_method()
 
 # Print reports
