@@ -532,9 +532,10 @@ class WindowsAnalyzer:
     def get_debug_information(self):
         try:
             debug_buffer = self.binaryfile.DIRECTORY_ENTRY_DEBUG[0].entry
+            pdb_name = debug_buffer.PdbFileName.decode().strip("\x00")
             print(f"\n{infoS} Parsing DEBUG information...")
-            print(f"[bold magenta]>>>[white] PDB Name: [bold green]{debug_buffer.PdbFileName.decode()}")
-            winrep["pdb_file_name"] = debug_buffer.PdbFileName.decode()
+            print(f"[bold magenta]>>>[white] PDB Name: [bold green]{pdb_name}")
+            winrep["pdb_file_name"] = pdb_name
             print(f"[bold magenta]>>>[white] Debug Signature: [bold green]{debug_buffer.Signature_String}")
             winrep["debug_signature"] = debug_buffer.Signature_String
 
@@ -542,16 +543,28 @@ class WindowsAnalyzer:
             sig_base = sqlite3.connect(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows_debug_signatures")
             sig_cursor = sig_base.cursor()
 
+            # Create table for pretty output
+            debug_table = Table(title="* Associated Signatures *", title_justify="center", title_style="bold italic cyan")
+            debug_table.add_column("[bold green]PDB Name", justify="center")
+            debug_table.add_column("[bold green]Signature", justify="center")
+
             # 1. Check signature first
             exist = sig_cursor.execute(f"SELECT * FROM debug_signatures where signature=\"{debug_buffer.Signature_String}\"").fetchall()
             if exist:
-                print(f"[bold red][blink]>> DANGER >>[/blink][white] Debug signature associated with: [bold red]{exist[0][0]}")
+                debug_table.add_row(exist[0][0], exist[0][1])
+                print(debug_table)
             else:
                 # 2. Check pdb name
-                pdb_name = debug_buffer.PdbFileName.decode().strip("\x00")
-                exist = sig_cursor.execute(f"SELECT * FROM debug_signatures where pdb_name=\"{pdb_name}\"").fetchall()
+                # Now we use "LIKE" statement for better detection capability
+                if "\\" in pdb_name:
+                    pdb_name_query = pdb_name.split("\\")[-1]
+                else:
+                    pdb_name_query = pdb_name
+                exist = sig_cursor.execute(f"SELECT * FROM debug_signatures where pdb_name like \"%{pdb_name_query}%\"").fetchall()
                 if exist:
-                    print(f"[bold red][blink]>> DANGER >>[/blink][white] Debug signature associated with: [bold red]{exist[0][0]}")
+                    for answ in exist:
+                        debug_table.add_row(answ[0], answ[1])
+                    print(debug_table)
         except AttributeError:
             print(f"\n{errorS} There is no information about DEBUG section!")
             
