@@ -71,8 +71,8 @@ def YaraBased(target_file):
             print(f">>> Rule name: [i][bold magenta]{rul}[/i]")
             yaraTable.add_column("[bold green]Offset", justify="center")
             yaraTable.add_column("[bold green]Matched String/Byte", justify="center")
-            for mm in rul.strings:
-                yaraTable.add_row(f"{hex(mm[0])}", f"{str(mm[2])}")
+            for matched_pattern in rul.strings:
+                yaraTable.add_row(f"{hex(matched_pattern.instances[0].offset)}", f"{str(matched_pattern.instances[0].matched_data)}")
             print(yaraTable)
             print(" ")
 
@@ -110,7 +110,7 @@ def Analyzer():
     else:
         print(packTable)
 
-    print("[bold magenta]>>>[white] Performing [bold green][blink]YARA Rule[/blink] [white]based scan...")
+    print("\n[bold magenta]>>>[white] Performing [bold green][blink]YARA Rule[/blink] [white]based scan...")
     YaraBased(target_file=targetFile)
 
 # Multiple analyzer function

@@ -238,12 +238,12 @@ class LinuxAnalyzer:
                 yaraTable.add_column("Offset", style="bold green", justify="center")
                 yaraTable.add_column("Matched String/Byte", style="bold green", justify="center")
                 report_object["matched_rules"].append({str(rul): []})
-                for mm in rul.strings:
-                    yaraTable.add_row(f"{hex(mm[0])}", f"{str(mm[2])}")
+                for matched_pattern in rul.strings:
+                    yaraTable.add_row(f"{hex(matched_pattern.instances[0].offset)}", f"{str(matched_pattern.instances[0].matched_data)}")
                     try:
-                        report_object["matched_rules"][-1][str(rul)].append({"offset": hex(mm[0]) ,"matched_pattern": mm[2].decode("ascii")})
+                        report_object["matched_rules"][-1][str(rul)].append({"offset": hex(matched_pattern.instances[0].offset), "matched_pattern": matched_pattern.instances[0].matched_data.decode("ascii")})
                     except:
-                        report_object["matched_rules"][-1][str(rul)].append({"offset": hex(mm[0]) ,"matched_pattern": str(mm[2])})
+                        report_object["matched_rules"][-1][str(rul)].append({"offset": hex(matched_pattern.instances[0].offset), "matched_pattern": str(matched_pattern.instances[0].matched_data)})
                 print(yaraTable)
                 print(" ")
 
