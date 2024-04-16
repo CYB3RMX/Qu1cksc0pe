@@ -21,22 +21,22 @@ if sys.version_info[0] == 2:
 # Testing rich existence
 try:
     from rich import print
-except:
+except ModuleNotFoundError as e:
     print("Error: >rich< module not found.")
-    sys.exit(1)
+    raise e
 
 # Testing puremagic existence
 try:
     import puremagic as pr
-except:
+except ModuleNotFoundError as e:
     print("Error: >puremagic< module not found.")
-    sys.exit(1)
+    raise e
 
 try:
     from colorama import Fore, Style
-except:
+except ModuleNotFoundError as e:
     print("Error: >colorama< module not found.")
-    sys.exit(1)
+    raise e
 
 # Colors
 red = Fore.LIGHTRED_EX
@@ -423,9 +423,7 @@ def cleanup_junks():
 def main():
     try:
         Qu1cksc0pe()
-        # Cleaning up...
-        cleanup_junks()
-    except:
+    finally: # ensure cleanup irrespective of errors
         cleanup_junks()
 
 
