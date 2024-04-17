@@ -1,5 +1,5 @@
 # Create environment
-FROM ubuntu:latest
+FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Istanbul
 
@@ -22,4 +22,4 @@ RUN apt clean
 
 # RE-Enter app directory
 WORKDIR /app
-ENTRYPOINT ["/app/qu1cksc0pe.py"]
+ENTRYPOINT ["python3", "/app/qu1cksc0pe.py"]
