@@ -125,8 +125,7 @@ ARG_NAMES_TO_KWARG_OPTS = {
 
 parser = argparse.ArgumentParser()
 for arg_name, cfg in ARG_NAMES_TO_KWARG_OPTS.items():
-    if not "required" in cfg:
-        cfg["required"] = False
+    cfg["required"] = cfg.get("required", False)
     parser.add_argument("--" + arg_name, **cfg)
 args = parser.parse_args()
 
