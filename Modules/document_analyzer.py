@@ -92,6 +92,48 @@ class DocumentAnalyzer:
         self.mal_code = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}malicious_html_codes.json"))
         self.mal_rtf_code = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}malicious_rtf_codes.json"))
         self.pat_ct = 0
+        self.rtf_exploit_pattern_dict = {
+            "bin": {
+                "name": "\\binxxx",
+                "detect_pattern": rb'\\bin',
+                "pattern": rb'[a-f0-9]+\\bin[a-f0-9]+',
+                "occurence": 0
+            },
+            "objupdate_1": {
+                "name": "\\objupdate",
+                "detect_pattern": rb'{\\[^}]+\\objupdate}',
+                "pattern": rb'([0-9a-fA-F]+){\\[^}]+\\objupdate}([0-9a-fA-F]+)',
+                "occurence": 0
+            },
+            "objupdate_2": {
+                "name": "\\objupdate",
+                "detect_pattern": rb'{\\objupdate\}',
+                "pattern": rb'([a-f0-9]+){\\objupdate}([a-f0-9]+)',
+                "occurence": 0
+            },
+            "objdata": {
+                "name": "\\objdata",
+                "detect_pattern": rb'\\objdata[a-f0-9]+',
+                "pattern": rb'\\objdata([a-f0-9]+)',
+                "occurence": 0
+            },
+            "ods": {
+                "name": "\\ods",
+                "detect_pattern": rb'{\\ods[a-f0-9]+',
+                "pattern": rb'{\\ods([a-f0-9]+)}([a-f0-9]+)',
+                "occurence": 0
+            }
+        }
+        self.rtf_exploit_extract_dict = {
+            "CVE-2017-11882": {
+                "pattern": [rb'ion.3', rb'ion.2', rb'OLE10naTiVE', rb'\x00i\x00o\x00n'],
+                "occurence": 0
+            },
+            "VBScript": {
+                "pattern": [rb'(script|Create|vbscript|Function)'],
+                "occurence": 0
+            }
+        }
 
     # Checking for file extension
     def CheckExt(self):
@@ -851,78 +893,50 @@ class DocumentAnalyzer:
         print(f"{infoS} Data saved as: [bold yellow]{out_file}[white]")
 
     def check_exploit_patterns(self, buffer):
-        # Check equation.3 pattern
-        chk_ex = re.findall(r'ion.3'.encode(), bytes.fromhex(buffer), re.IGNORECASE)
-        if chk_ex != []:
-            print(f"{infoS} This file contains possible [bold green]CVE-2017-11882[white] exploit. Performing extraction...")
-            self.pat_ct += 1
-            self.output_writer(out_file=f"qu1cksc0pe_extracted_exploit-{len(buffer)}.bin", mode="wb", buffer=binascii.unhexlify(buffer))
-
-        # Check equation.2 pattern
-        chk_ex = re.findall(r'ion.2'.encode(), bytes.fromhex(buffer), re.IGNORECASE)
-        if chk_ex != []:
-            print(f"{infoS} This file contains possible [bold green]CVE-2017-11882[white] exploit. Performing extraction...")
-            self.pat_ct += 1
-            self.output_writer(out_file=f"qu1cksc0pe_extracted_exploit-{len(buffer)}.bin", mode="wb", buffer=binascii.unhexlify(buffer))
-
-        # Check OLE10naTiVE pattern
-        chk_ex = re.findall(r"OLE10naTiVE".encode(), bytes.fromhex(buffer).replace(b"\x00", b""), re.IGNORECASE)
-        if chk_ex != []:
-            print(f"{infoS} This file contains possible [bold green]CVE-2017-11882[white] exploit. Performing extraction...")
-            self.pat_ct += 1
-            self.output_writer(out_file=f"qu1cksc0pe_extracted_exploit-{len(buffer)}.bin", mode="wb", buffer=binascii.unhexlify(buffer))
-
-        # Check vbscript
-        chk_ex = re.findall(r'(script|Create|vbscript|Function)'.encode(), bytes.fromhex(buffer), re.IGNORECASE)
-        if chk_ex != []:
-            print(f"{infoS} This file contains possible [bold green]VBScript[white] file. Performing extraction...")
-            self.pat_ct += 1
-            self.output_writer(out_file=f"qu1cksc0pe_extracted_script-{len(buffer)}.bin", mode="wb", buffer=binascii.unhexlify(buffer))
+        for exp_pattern in self.rtf_exploit_extract_dict:
+            for pattern in self.rtf_exploit_extract_dict[exp_pattern]["pattern"]:
+                chk_ex = re.findall(pattern, bytes.fromhex(buffer), re.IGNORECASE)
+                if chk_ex != []:
+                    print(f"{infoS} This file contains possible [bold green]{exp_pattern}[white] exploit. Performing extraction...")
+                    self.pat_ct += 1
+                    self.output_writer(out_file=f"qu1cksc0pe_extracted_exploit-{len(buffer)}.bin", mode="wb", buffer=binascii.unhexlify(buffer))
 
     def rtf_check_exploit_main(self, buffer):
-        # This method is for detecting \binxxx based patterns
-        chek = re.findall(r'\\bin'.encode(), buffer, re.IGNORECASE)
-        if chek != []:
-            bin_sec = re.findall(r'[a-f0-9]+\\bin[a-f0-9]+'.encode(), buffer, re.IGNORECASE)
-            if bin_sec != []:
-                if len(bin_sec[-1]) > 15:
-                    remove = re.findall(r'\\bin[0]+'.encode(), bin_sec[-1], re.IGNORECASE)
-                    finalbuffer = bin_sec[-1].replace(remove[0], b"")
-                    print(f"{infoS} Looks like we found [bold green]\\binxxx[white] pattern. Attempting to identify and extraction...")
-                    self.rtf_check_exploit_parse(exploit_buffer=finalbuffer)
+        # METHOD 1: Check common patterns
+        for exp_pattern in self.rtf_exploit_pattern_dict:
+            check = re.findall(self.rtf_exploit_pattern_dict[exp_pattern]["detect_pattern"], buffer, re.IGNORECASE)
+            if check != []:
+                self.rtf_exploit_pattern_dict[exp_pattern]["occurence"] += 1
+                bin_sec = re.findall(self.rtf_exploit_pattern_dict[exp_pattern]["pattern"], buffer, re.IGNORECASE)
 
-        # This method is for detecting {\\?\\objudate} based patterns
-        chek = re.findall(r'{\\[^}]+\\objupdate}'.encode(), buffer, re.IGNORECASE)
-        if chek != []: # This is for preventing catastrophic backtrace issues
-            bin_sec = re.findall(r'([0-9a-fA-F]+){\\[^}]+\\objupdate}([0-9a-fA-F]+)'.encode(), buffer, re.IGNORECASE)
-            if bin_sec != []:
-                print(f"{infoS} Looks like we found [bold green]\\objupdate[white] pattern. Attempting to identify and extraction...")
-                self.rtf_check_exploit_parse(exploit_buffer=bin_sec[0][0]+bin_sec[0][1])
+                # Parse and extract \binxxx based patterns
+                if bin_sec != [] and exp_pattern == "bin":
+                    if len(bin_sec[-1]) > 15:
+                        remove = re.findall(r'\\bin[0]+'.encode(), bin_sec[-1], re.IGNORECASE)
+                        finalbuffer = bin_sec[-1].replace(remove[0], b"")
+                        print(f"{infoS} Looks like we found [bold green]{self.rtf_exploit_pattern_dict[exp_pattern]['name']}[white] pattern. Attempting to identify and extraction...")
+                        self.rtf_check_exploit_parse(exploit_buffer=finalbuffer)
 
-        # This method is for detecting {\\objupdate} based patterns
-        chek = re.findall(r'{\\objupdate\}'.encode(), buffer, re.IGNORECASE)
-        if chek != []:
-            bin_sec = re.findall(r'([a-f0-9]+){\\objupdate}([a-f0-9]+)'.encode(), buffer, re.IGNORECASE)
-            if bin_sec != []:
-                print(f"{infoS} Looks like we found [bold green]\\objupdate[white] pattern. Attempting to identify and extraction...")
-                self.rtf_check_exploit_parse(exploit_buffer=bin_sec[0][0]+bin_sec[0][1])
+                # Parse and extract {\\?\\objudate} & {\\objupdate} & \\ods based patterns
+                if bin_sec != [] and (exp_pattern == "objupdate_1" or exp_pattern == "objupdate_2" or exp_pattern == "ods"):
+                    print(f"{infoS} Looks like we found [bold green]{self.rtf_exploit_pattern_dict[exp_pattern]['name']}[white] pattern. Attempting to identify and extraction...")
+                    self.rtf_check_exploit_parse(exploit_buffer=bin_sec[0][0]+bin_sec[0][1])
 
-        # This method is for detecting \\objdata based patterns
-        chek = re.findall(r'\\objdata[a-f0-9]+'.encode(), buffer, re.IGNORECASE)
-        if chek != []:
-            bin_sec = re.findall(r'\\objdata([a-f0-9]+)'.encode(), buffer, re.IGNORECASE)
-            if bin_sec != []:
-                # Looking for hex data existence
-                for bsec in bin_sec:
-                    if len(bsec) > 15:
-                        self.rtf_check_exploit_parse(exploit_buffer=bsec)
+                # Parse and extract \\objdata based patterns
+                if bin_sec != [] and exp_pattern == "objdata":
+                    print(f"{infoS} Looks like we found [bold green]{self.rtf_exploit_pattern_dict[exp_pattern]['name']}[white] pattern. Attempting to identify and extraction...")
+                    # Looking for hex data existence
+                    for bsec in bin_sec:
+                        if len(bsec) > 15:
+                            self.rtf_check_exploit_parse(exploit_buffer=bsec)
 
-        # This method is for detecting \\ods based patterns
-        chek = re.findall(r'{\\ods[a-f0-9]+'.encode(), buffer, re.IGNORECASE)
-        if chek != []:
-            bin_sec = re.findall(r'{\\ods([a-f0-9]+)}([a-f0-9]+)'.encode(), buffer, re.IGNORECASE)
-            if bin_sec != []:
-                self.rtf_check_exploit_parse(exploit_buffer=bin_sec[0][0]+bin_sec[0][1])
+        # METHOD 2: Read between brackets
+        get_brackets = re.findall(rb'}[a-f0-9]*}}}', buffer, re.IGNORECASE)
+        if get_brackets != []:
+            print(f"{infoS} Looks like we found [bold green]possible exploit between brackets[white]. Attempting to identify and extraction...")
+            self.pat_ct += 1
+            finalbuffer = binascii.unhexlify(get_brackets[0].replace(b'}', b''))
+            self.output_writer(out_file=f"qu1cksc0pe_extracted_exploit-{len(finalbuffer)}.bin", mode="wb", buffer=finalbuffer)
             
     def rtf_check_exploit_parse(self, exploit_buffer):
         if len(exploit_buffer) % 2 == 0:
