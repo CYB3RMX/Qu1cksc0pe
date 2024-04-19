@@ -98,6 +98,10 @@ else:
     libscan = configparser.ConfigParser()
 
 # Utility functions
+def err_exit(message):
+    print(message)
+    sys.exit(1)
+
 MODULE_PREFIX = f"{sc0pe_path}{path_seperator}Modules{path_seperator}"
 def execute_module(target, path=MODULE_PREFIX, invoker=py_binary):
     os.system(f"{invoker} {path}{target}")
@@ -198,9 +202,7 @@ def BasicAnalyzer(analyzeFile):
         print(f"{infoS} Performing [bold green]Email File[white] analysis...\n")
         execute_module(f"email_analyzer.py \"{analyzeFile}\"")
     else:
-        print("\n[bold white on red]File type not supported. Make sure you are analyze executable files or document files.")
-        print("[bold]>>> If you want to scan document files try [bold green][i]--docs[/i] [white]argument.")
-        sys.exit(1)
+        err_exit("\n[bold white on red]File type not supported. Make sure you are analyze executable files or document files.\n[bold]>>> If you want to scan document files try [bold green][i]--docs[/i] [white]argument.")
 
 # Main function
 def Qu1cksc0pe():
@@ -211,8 +213,7 @@ def Qu1cksc0pe():
             file_size = os.path.getsize(args.file)
             if file_size < 52428800: # If given file smaller than 100MB
                 if not distutils.spawn.find_executable("strings"):
-                    print("[bold white on red][blink]strings[/blink] command not found. You need to install it.")
-                    sys.exit(1)
+                    err_exit("[bold white on red][blink]strings[/blink] command not found. You need to install it.")
             else:
                 print(f"{infoS} Whoa!! Looks like we have a large file here.")
                 if args.archive:
@@ -227,8 +228,7 @@ def Qu1cksc0pe():
                     execute_module(f"sigChecker.py \"{args.file}\"")
                     sys.exit(0)
         else:
-            print("[bold white on red]Target file not found!\n")
-            sys.exit(1)
+            err_exit("[bold white on red]Target file not found!\n")
 
     # Analyze the target file
     if args.analyze:
@@ -237,8 +237,7 @@ def Qu1cksc0pe():
             BasicAnalyzer(analyzeFile=args.file)
         # Handling --folder argument
         if args.folder is not None:
-            print("[bold white on red][blink]--analyze[/blink] argument is not supported for folder analyzing!\n")
-            sys.exit(1)
+            err_exit("[bold white on red][blink]--analyze[/blink] argument is not supported for folder analyzing!\n")
 
     # Analyze archive files
     if args.archive:
@@ -248,8 +247,7 @@ def Qu1cksc0pe():
             execute_module(f"archiveAnalyzer.py \"{args.file}\"")
         # Handling --folder argument
         if args.folder is not None:
-            print("[bold white on red][blink]--docs[/blink] argument is not supported for folder analyzing!\n")
-            sys.exit(1)
+            err_exit("[bold white on red][blink]--docs[/blink] argument is not supported for folder analyzing!\n")
 
     # Analyze document files
     if args.docs:
@@ -259,8 +257,7 @@ def Qu1cksc0pe():
             execute_module(f"document_analyzer.py \"{args.file}\"")
         # Handling --folder argument
         if args.folder is not None:
-            print("[bold white on red][blink]--docs[/blink] argument is not supported for folder analyzing!\n")
-            sys.exit(1)
+            err_exit("[bold white on red][blink]--docs[/blink] argument is not supported for folder analyzing!\n")
 
     # Hash Scanning
     if args.hashscan:
@@ -278,8 +275,7 @@ def Qu1cksc0pe():
             execute_module(f"sigChecker.py \"{args.file}\"")
         # Handling --folder argument
         if args.folder is not None:
-            print("[bold white on red][blink]--sigcheck[/blink] argument is not supported for folder analyzing!\n")
-            sys.exit(1)
+            err_exit("[bold white on red][blink]--sigcheck[/blink] argument is not supported for folder analyzing!\n")
 
     # Resource analyzer
     if args.resource:
@@ -288,8 +284,7 @@ def Qu1cksc0pe():
             execute_module(f"resourceChecker.py \"{args.file}\"")
         # Handling --folder argument
         if args.folder is not None:
-            print("[bold white on red][blink]--resource[/blink] argument is not supported for folder analyzing!\n")
-            sys.exit(1)
+            err_exit("[bold white on red][blink]--resource[/blink] argument is not supported for folder analyzing!\n")
 
     # MITRE ATT&CK
     if args.mitre:
@@ -298,8 +293,7 @@ def Qu1cksc0pe():
             execute_module(f"mitre.py \"{args.file}\"")
         # Handling --folder argument
         if args.folder is not None:
-            print("[bold white on red][blink]--mitre[/blink] argument is not supported for folder analyzing!\n")
-            sys.exit(1)
+            err_exit("[bold white on red][blink]--mitre[/blink] argument is not supported for folder analyzing!\n")
 
     # Language detection
     if args.lang:
@@ -308,8 +302,7 @@ def Qu1cksc0pe():
             execute_module(f"languageDetect.py \"{args.file}\"")
         # Handling --folder argument
         if args.folder is not None:
-            print("[bold white on red][blink]--lang[/blink] argument is not supported for folder analyzing!\n")
-            sys.exit(1)
+            err_exit("[bold white on red][blink]--lang[/blink] argument is not supported for folder analyzing!\n")
 
     # VT File scanner
     if args.vtFile:
@@ -320,18 +313,15 @@ def Qu1cksc0pe():
                 directory = f"{homeD}{path_seperator}sc0pe_Base{path_seperator}sc0pe_VT_apikey.txt"
                 apik = open(directory, "r").read().split("\n")
             except:
-                print("[bold white on red]Use [blink]--key_init[/blink] to enter your key!\n")
-                sys.exit(1)
+                err_exit("[bold white on red]Use [blink]--key_init[/blink] to enter your key!\n")
             # if key is not valid quit
             if apik[0] == '' or apik[0] is None or len(apik[0]) != 64:
-                print("[bold]Please get your API key from -> [bold green][a]https://www.virustotal.com/[/a]\n")
-                sys.exit(1)
+                err_exit("[bold]Please get your API key from -> [bold green][a]https://www.virustotal.com/[/a]\n")
             else:
                 execute_module(f"VTwrapper.py {apik[0]} \"{args.file}\"")
         # Handling --folder argument
         if args.folder is not None:
-            print("[bold white on red]If you want to get banned from VirusTotal then do that :).\n")
-            sys.exit(1)
+            err_exit("[bold white on red]If you want to get banned from VirusTotal then do that :).\n")
 
     # packer detection
     if args.packer:
@@ -349,8 +339,7 @@ def Qu1cksc0pe():
             execute_module(f"domainCatcher.py \"{args.file}\"")
         # Handling --folder argument
         if args.folder is not None:
-            print("[bold white on red][blink]--domain[/blink] argument is not supported for folder analyzing!\n")
-            sys.exit(1)
+            err_exit("[bold white on red][blink]--domain[/blink] argument is not supported for folder analyzing!\n")
 
     # Dynamic analysis
     if args.watch:
@@ -382,8 +371,7 @@ def Qu1cksc0pe():
     # Install Qu1cksc0pe on your system!!
     if args.install:
         if sys.platform == "win32":
-            print(f"{errorS} This feature is not suitable for Windows systems for now!")
-            sys.exit(1)
+            err_exit(f"{errorS} This feature is not suitable for Windows systems for now!")
 
         execute_module(f"installer.sh {sc0pe_path} {username}", invoker="sudo bash")
 
