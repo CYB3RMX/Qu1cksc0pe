@@ -11,12 +11,13 @@ import binascii
 import subprocess
 import warnings
 
+from .utils import err_exit
+
 try:
     from rich import print
     from rich.table import Table
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 # Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"

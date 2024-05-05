@@ -9,34 +9,32 @@ import base64
 import hashlib
 from Crypto.Cipher import DES3
 
+from .utils import err_exit
+
 # Testing pyaxmlparser existence
 try:
     import pyaxmlparser
 except:
-    print("Error: >pyaxmlparser< module not found.")
-    sys.exit(1)
+    err_exit("Error: >pyaxmlparser< module not found.")
 
 # Testing puremagic existence
 try:
     import puremagic as pr
 except:
-    print("Error: >puremagic< module not found.")
-    sys.exit(1)
+    err_exit("Error: >puremagic< module not found.")
 
 # Check for Pillow
 try:
     from PIL import Image
 except:
-    print("Error: >Pillow< module not found.")
-    sys.exit(1)
+    err_exit("Error: >Pillow< module not found.")
 
 # Testing rich existence
 try:
     from rich import print
     from rich.table import Table
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 # Disabling pyaxmlparser's logs
 pyaxmlparser.core.logging.disable()
@@ -601,8 +599,7 @@ class ResourceScanner:
                         self.bitmap_carver_1(image_handler=img) # Testing for technique 1
                         self.bitmap_carver_2(image_handler=img) # Testing for technique 2
                     else:
-                        print(f"{errorS} An error occured while extracting Bitmap file!!\n")
-                        sys.exit(1)
+                        err_exit(f"{errorS} An error occured while extracting Bitmap file!!\n")
                 except:
                     continue
         else:

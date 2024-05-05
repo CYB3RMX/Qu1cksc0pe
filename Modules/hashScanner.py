@@ -10,18 +10,18 @@ import getpass
 import json
 from datetime import date
 
+from .utils import err_exit, user_confirm
+
 try:
     import sqlite3
 except:
-    print("Module: >sqlite3< not found.")
-    sys.exit(1)
+    err_exit("Module: >sqlite3< not found.")
 
 # Module for progressbar
 try:
     from tqdm import tqdm
 except:
-    print("Module: >tqdm< not found.")
-    sys.exit(1)
+    err_exit("Module: >tqdm< not found.")
 
 try:
     from rich import print
@@ -32,14 +32,12 @@ try:
     from rich.text import Text
     from rich.panel import Panel
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 try:
     from colorama import Fore, Style
 except:
-    print("Error: >colorama< module not found.")
-    sys.exit(1)
+    err_exit("Error: >colorama< module not found.")
 
 # Parsing date
 today = date.today()
@@ -97,12 +95,10 @@ def Downloader():
 def DatabaseCheck():
     if os.path.isfile(f"{install_dir}{path_seperator}HashDB") == False:
         print("[blink bold white on red]Local signature database not found!!")
-        choose = str(input(f"{green}=>{white} Would you like to download it [Y/n]?: "))
-        if choose == "Y" or choose == "y":
+        if user_confirm(f"{green}=>{white} Would you like to download it [Y/n]?: "):
             Downloader()
         else:
-            print("\n[bold white on red]Without local database [blink]--hashscan[/blink] [white]will not work!!\n")
-            sys.exit(1)
+            err_exit("\n[bold white on red]Without local database [blink]--hashscan[/blink] [white]will not work!!\n")
 
 # Hashing with md5
 def GetHash(targetFile):

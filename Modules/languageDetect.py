@@ -4,18 +4,18 @@ import re
 import sys
 import subprocess
 
+from .utils import err_exit
+
 try:
     import puremagic as pr
 except:
-    print("Error: >puremagic< module not found.")
-    sys.exit(1)
+    err_exit("Error: >puremagic< module not found.")
 
 try:
     from rich import print
     from rich.table import Table
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 # Getting name of the file for executable checker function
 fileName = str(sys.argv[1])
@@ -113,8 +113,7 @@ def LanguageDetect():
     print(langTable)
 
     if indicator == 0:
-        print(f"{errorS} Programming language couldn\'t detected. This file is might be obfuscated!\n")
-        sys.exit(1)
+        err_exit(f"{errorS} Programming language couldn\'t detected. This file is might be obfuscated!\n")
 
 # This function analyses if given file is an executable file
 def ExecutableCheck(fileName):
@@ -136,5 +135,4 @@ def ExecutableCheck(fileName):
 if ExecutableCheck(fileName) == True:
     LanguageDetect()
 else:
-    print(f"{errorS} Please scan executable files.\n")
-    sys.exit(1)
+    err_exit(f"{errorS} Please scan executable files.\n")

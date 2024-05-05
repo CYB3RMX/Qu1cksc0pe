@@ -6,17 +6,17 @@ import sys
 import json
 import hashlib
 
+from .utils import err_exit
+
 try:
     from rich import print
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 try:
     import pyaxmlparser
 except:
-    print("Error: >pyaxmlparser< module not found.")
-    sys.exit(1)
+    err_exit("Error: >pyaxmlparser< module not found.")
 
 # Disabling pyaxmlparser's logs
 pyaxmlparser.core.logging.disable()

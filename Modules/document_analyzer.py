@@ -13,19 +13,19 @@ import configparser
 import urllib.parse
 from bs4 import BeautifulSoup
 
+from .utils import err_exit, user_confirm
+
 # Checking for rich
 try:
     from rich import print
     from rich.table import Table
 except:
-    print("Error: >rich< not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< not found.")
 
 try:
     import yara
 except:
-    print("Error: >yara< module not found.")
-    sys.exit(1)
+    err_exit("Error: >yara< module not found.")
 
 # Checking for oletools
 try:
@@ -43,8 +43,7 @@ try:
     from pdfminer.pdfparser import PDFParser
     from pdfminer.pdfdocument import PDFDocument
 except:
-    print("Error: >pdfminer< module not found.")
-    sys.exit(1)
+    err_exit("Error: >pdfminer< module not found.")
 
 # Checking for pyOneNote module
 try:
@@ -349,8 +348,7 @@ class DocumentAnalyzer:
 
             # If there is macro we can extract it!
             if macro_state_vba != 0 or macro_state_xlm != 0:
-                choice = str(input("\n>>> Do you want to extract macros [Y/n]?: "))
-                if choice == "Y" or choice == "y":
+                if user_confirm("\n>>> Do you want to extract macros [Y/n]?: "):
                     print(f"{infoS} Attempting to extraction...\n")
                     if macro_state_vba != 0:
                         for mac in vbaparser.extract_all_macros():
@@ -430,8 +428,7 @@ class DocumentAnalyzer:
             doc_buffer = open(self.targetFile, "rb")
             onenote_obj = OneDocment(doc_buffer)
         except:
-            print(f"{errorS} An exception occured while reading data.")
-            sys.exit(1)
+            err_exit(f"{errorS} An exception occured while reading data.")
 
         # Analysis of embedded file
         embedTable = Table(title="* Embedded Files *", title_style="bold italic cyan", title_justify="center")
@@ -466,8 +463,7 @@ class DocumentAnalyzer:
             pdf = PDFParser(pdata)
             doc = PDFDocument(pdf)
         except Exception as er:
-            print(f"{errorS} Error: {er}")
-            sys.exit(1)
+            err_exit(f"{errorS} Error: {er}")
 
         # Gathering meta information
         print(f"\n{infoS} Gathering meta information...")
@@ -1026,5 +1022,4 @@ try:
     else:
         print(f"{errorS} File format is not supported.")
 except:
-    print(f"{errorS} An error occured while analyzing that file.")
-    sys.exit(1)
+    err_exit(f"{errorS} An error occured while analyzing that file.")
