@@ -3,25 +3,24 @@
 import os
 import sys
 
+from .utils import err_exit
+
 try:
     from rich import print
     from rich.table import Table
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 try:
     import yara
 except:
-    print("Error: >yara< module not found.")
-    sys.exit(1)
+    err_exit("Error: >yara< module not found.")
 
 # Module for progressbar
 try:
     from tqdm import tqdm
 except:
-    print("Module: >tqdm< not found.")
-    sys.exit(1)
+    err_exit("Module: >tqdm< not found.")
 
 # Compatibility
 path_seperator = "/"
@@ -89,8 +88,7 @@ def Analyzer():
         else:
             pass
     except:
-        print("[bold white on red]An error occured while opening the file.")
-        sys.exit(1)
+        err_exit("[bold white on red]An error occured while opening the file.")
 
     # Creating table
     packTable = Table()
@@ -140,8 +138,7 @@ def MultiAnalyzer():
                     else:
                         pass
                 except:
-                    print("[bold white on red]An error occured while opening the file.")
-                    sys.exit(1)
+                    err_exit("[bold white on red]An error occured while opening the file.")
 
                 # Scanning!
                 for pack in file_sigs:

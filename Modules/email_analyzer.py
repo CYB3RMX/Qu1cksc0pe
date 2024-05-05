@@ -7,19 +7,19 @@ import email
 import subprocess
 import distutils.spawn
 
+from .utils import err_exit
+
 try:
     from rich import print
     from rich.table import Table
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 try:
     from pydnsbl import DNSBLDomainChecker, providers
     from pydnsbl.providers import BASE_DOMAIN_PROVIDERS, Provider
 except:
-    print("Error: >pydnsbl< module not found.")
-    sys.exit(1)
+    err_exit("Error: >pydnsbl< module not found.")
 
 # Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"

@@ -4,12 +4,13 @@ import re
 import sys
 import subprocess
 
+from .utils import err_exit
+
 # Module for colors
 try:
     from rich import print
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 # Target file
 target_file = sys.argv[1]

@@ -11,32 +11,30 @@ import subprocess
 import configparser
 import distutils.spawn
 
+from .utils import err_exit, user_confirm
+
 try:
     import pyaxmlparser
 except:
-    print("Error: >pyaxmlparser< module not found.")
-    sys.exit(1)
+    err_exit("Error: >pyaxmlparser< module not found.")
 
 try:
     import frida
 except:
-    print("Error: >frida< module not found.")
-    sys.exit(1)
+    err_exit("Error: >frida< module not found.")
 
 try:
     from prompt_toolkit import prompt
     from prompt_toolkit.completion import WordCompleter
 except:
-    print("Error: >prompt_toolkit< module not found.")
-    sys.exit(1)
+    err_exit("Error: >prompt_toolkit< module not found.")
 
 try:
     from rich import print
     from rich.progress import track
     from rich.table import Table
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 # Legends
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
@@ -206,8 +204,8 @@ class AndroidDynamicAnalyzer:
                         print(f"[bold blue][METHOD CALL] [white]{m_calls[-1]}")
                         temp_act = m_calls[-1]
                 time.sleep(0.5)
-        except:
-            sys.exit(0)
+        except: # TODO only catch `Exception` or more specific subclass
+            sys.exit(0) # TODO should probably propagate errors instead of just burying them like this (or at least emit a useful message)
 
     def crawler_for_adb_analysis(self, target_directory):
         if os.path.exists(f"{sc0pe_path}{path_seperator}{target_directory}"):
@@ -331,8 +329,7 @@ class AndroidDynamicAnalyzer:
 
         # Print devices
         if len(device_indexes) == 0:
-            print(f"{errorS} No devices found. Try to connect a device and try again.\n{infoS} You can use [bold cyan]\"adb connect <device_ip>:<device_port>\"[white] to connect a device.")
-            sys.exit(0)
+            err_exit(f"{errorS} No devices found. Try to connect a device and try again.\n{infoS} You can use [bold cyan]\"adb connect <device_ip>:<device_port>\"[white] to connect a device.", arg_override=0)
         else:
             print(f"{infoS} Available devices:")
             for device in device_indexes:
@@ -341,8 +338,7 @@ class AndroidDynamicAnalyzer:
             # Select device
             dnum = int(input("\n>>> Select device: "))
             if dnum > len(device_indexes) - 1:
-                print(f"{errorS} Invalid device number.")
-                sys.exit(0)
+                err_exit(f"{errorS} Invalid device number.", arg_override=0)
             else:
                 mbool = self.search_package_name(package_name)
                 if not mbool:
@@ -358,8 +354,7 @@ class AndroidDynamicAnalyzer:
                             tracer_thread.join()
                             crawler_thread.join()
                         except:
-                            print(f"{infoS} Press [blink][bold yellow]CTRL+C[white][/blink] again to stop!")
-                            sys.exit(1)
+                            err_exit(f"{infoS} Press [blink][bold yellow]CTRL+C[white][/blink] again to stop!")
                     else:
                         print(f"{errorS} Installation failed.")
                         print(f"\n{infoS} Trying to uninstall the existing app...\n")
@@ -376,8 +371,7 @@ class AndroidDynamicAnalyzer:
                         tracer_thread.join()
                         crawler_thread.join()
                     except:
-                        print(f"{infoS} Press [blink][bold yellow]CTRL+C[white][/blink] again to stop!")
-                        sys.exit(1)
+                        err_exit(f"{infoS} Press [blink][bold yellow]CTRL+C[white][/blink] again to stop!")
 
     def gather_process_id_android(self, target_app, package_name, device):
         # Look process for name
@@ -470,8 +464,7 @@ class AndroidDynamicAnalyzer:
             package_name = prompt("\n>>> Enter Target Package Name [Press TAB to auto-complete]: ", completer=pack_completer)
             return [package_name, package_name]
         else:
-            print(f"{errorS} Wrong choice :(")
-            sys.exit(1)
+            err_exit(f"{errorS} Wrong choice :(")
 
     def perform_pattern_categorization(self, mem_dump_buf):
         for code_categ in track(range(len(pattern_file)), description="Processing buffer..."):
@@ -514,8 +507,7 @@ class AndroidDynamicAnalyzer:
 
     def save_dump_for_further(self, app_name):
         print(f"\n{infoS} Do you want to save dump file for further analysis (y/n)?")
-        choice = str(input(">>>> Choice: "))
-        if choice == "Y" or choice == "y":
+        if user_confirm(">>>> Choice: "):
             os.system(f"mv temp_dump.dmp mem_dump-{app_name}.dmp")
             print(f"{infoS} File saved as: [bold green]mem_dump-{app_name}.dmp[white]")
         else:
@@ -544,8 +536,7 @@ class AndroidDynamicAnalyzer:
         # Check for adb connection first
         con_state = self.check_adb_connection()
         if not con_state:
-            print(f"\n{errorS} You need to connect a device via adb first!\n")
-            sys.exit(1)
+            err_exit(f"\n{errorS} You need to connect a device via adb first!\n")
 
         # Check for junks if exist
         if os.path.exists("temp_dump.dmp"):
@@ -569,7 +560,7 @@ class AndroidDynamicAnalyzer:
                     print(f"\n{infoS} Application Name: [bold green]{app_name}[white]")
                     print(f"{infoS} Package Name: [bold green]{package_name}[white]\n")
                 else:
-                    sys.exit(1)
+                    sys.exit(1) # TODO
             else:
                 print(f"\n{infoS} Application Name: [bold green]{app_name}[white]")
                 print(f"{infoS} Package Name: [bold green]{package_name}[white]\n")
@@ -583,13 +574,12 @@ class AndroidDynamicAnalyzer:
                 print(f"\n{infoS} Application Name: [bold green]{app_name}[white]")
                 print(f"{infoS} Package Name: [bold green]{package_name}[white]\n")
             else:
-                sys.exit(1)
+                sys.exit(1) # TODO
 
         # Check if the target apk installed in system!
         is_installed = self.search_package_name(package_name)
         if not is_installed:
-            print(f"{errorS} Target application not found on the device. Please install it and try again!")
-            sys.exit(1)
+            err_exit(f"{errorS} Target application not found on the device. Please install it and try again!")
 
         # Locate main_activity: Helpfull against samples wiht corrupted manifest file
         main_act = self.locate_main_activity(package_name=package_name)
@@ -597,7 +587,7 @@ class AndroidDynamicAnalyzer:
         # Starting frida session
         frida_session = self.create_frida_session(app_name=app_name, package_name=package_name)
         if not frida_session:
-            sys.exit(1)
+            sys.exit(1) # TODO
 
         # Create script and agent
         script = frida_session.create_script(self.frida_script)
@@ -722,9 +712,8 @@ class AndroidDynamicAnalyzer:
                 # Keep the script running
                 sys.stdin.read()
             except:
-                print(f"\n{errorS} Program terminated!")
                 self.save_dump_for_further(app_name)
-                sys.exit(1)
+                err_exit(f"\n{errorS} Program terminated!")
 
             # Cleanup
             self.save_dump_for_further(app_name)
@@ -739,8 +728,7 @@ class AndroidDynamicAnalyzer:
         elif choice == 2:
             self.analyze_apk_memory_dump()
         else:
-            print(f"{errorS} Wrong choice :(")
-            sys.exit(1)
+            err_exit(f"{errorS} Wrong choice :(")
 
 # Execution
 androdyn = AndroidDynamicAnalyzer(target_file=str(sys.argv[1]))

@@ -3,12 +3,13 @@
 import sys
 import random
 
+from .utils import err_exit
+
 # Module for colors
 try:
     from rich import print
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 # Colors
 re = "[bold red]"

@@ -12,19 +12,19 @@ import binascii
 import subprocess
 import configparser
 
+from .utils import err_exit
+
 try:
     from rich import print
     from rich.table import Table
     from rich.progress import track
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 try:
     import pefile as pf
 except:
-    print("Error: >pefile< module not found.")
-    sys.exit(1)
+    err_exit("Error: >pefile< module not found.")
 
 try:
     warnings.filterwarnings("ignore")
@@ -38,8 +38,7 @@ try:
     import vivisect
     vivisect.logging.disable() # Suppressing error messages
 except:
-    print("Error: >vivisect< module not found.")
-    sys.exit(1)
+    err_exit("Error: >vivisect< module not found.")
 
 #--------------------------------------------- Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"

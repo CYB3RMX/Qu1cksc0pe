@@ -8,24 +8,23 @@ import hashlib
 import subprocess
 import configparser
 
+from .utils import err_exit, user_confirm
+
 try:
     from rich import print
     from rich.table import Table
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 try:
     import lief
 except:
-    print("Error: >lief< module not found.")
-    sys.exit(1)
+    err_exit("Error: >lief< module not found.")
 
 try:
     import pygore
 except:
-    print("Error: >pygore< module not found.")
-    sys.exit(1)
+    err_exit("Error: >pygore< module not found.")
 
 #--------------------------------------------- Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
@@ -446,9 +445,8 @@ class LinuxAnalyzer:
             if ".debug_" in sss.name:
                 print(f"[bold red]>>>>[white] {sss.name}")
                 debugs.append(sss.name)
-        if debugs != []:
-            quest = str(input(f"\n>> Do you want to analyze debug strings?[Y/n]: "))
-            if quest == "Y" or quest == "y":
+        if len(debugs) > 0:
+            if user_confirm(f"\n>> Do you want to analyze debug strings?[Y/n]: "):
                 print()
                 for ddd in debugs:
                     if ddd == ".debug_str":
@@ -492,8 +490,7 @@ class LinuxAnalyzer:
         # Look for interesting things
         if "runtime.goexit" in self.getStrings and "runtime.gopanic" in self.getStrings:
             print(f"\n{infoS} Qu1cksc0pe was identified this binary as [bold green]Golang[white] binary.")
-            chc = str(input(">>> Do you want to perform special analysis[Y/n]?: "))
-            if chc == "Y" or chc == "y":
+            if user_confirm(">>> Do you want to perform special analysis[Y/n]?: "):
                 self.AnalyzeGolang()
 
 # Execute
