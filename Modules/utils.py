@@ -1,5 +1,7 @@
 import sys
 
+from rich import print
+
 
 def user_confirm(question_text):
     return str(input(question_text)).lower() == "y"
