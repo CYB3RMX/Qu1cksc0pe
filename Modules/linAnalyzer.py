@@ -309,7 +309,7 @@ class LinuxAnalyzer:
     def yara_matches_to_patterninfo(patterns):
         out = []
         for pattern in patterns:
-            instance = matched_pattern.instances[0]
+            instance = pattern.instances[0]
             pattern_info = {"offset": hex(instance.offset)}
             try:
                 pattern_info["matched_pattern"] = instance.matched_data.decode("ascii")
