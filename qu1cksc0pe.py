@@ -103,7 +103,7 @@ from Modules.utils import err_exit
 
 MODULE_PREFIX = f"{sc0pe_path}{path_seperator}Modules{path_seperator}"
 def execute_module(target, path=MODULE_PREFIX, invoker=py_binary):
-    if [x for x in target.split(" ") if len(x) > 0][0].endswith(".py"):
+    if "python" in invoker or ".py" in target:
         DEV_NOTE = "[DEV NOTE]: when switching to import statements, remember to adjust any downstream imports! (e.g. `from .utils import err_exit` vs `from utils import err_exit`)"
         warnings.warn("Direct execution of Python files won't be supported much longer." + f" {DEV_NOTE}", PendingDeprecationWarning)
 
