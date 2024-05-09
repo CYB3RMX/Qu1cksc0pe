@@ -104,8 +104,7 @@ MODULE_PREFIX = f"{sc0pe_path}{path_seperator}Modules{path_seperator}"
 def execute_module(target, path=MODULE_PREFIX, invoker=py_binary):
     os.system(f"{invoker} {path}{target}")
 
-# Banner
-execute_module("banners.py")
+import Modules.banners # show a banner
 
 # Argument crating, parsing and handling
 ARG_NAMES_TO_KWARG_OPTS = {
@@ -151,10 +150,8 @@ def BasicAnalyzer(analyzeFile):
     # Linux Analysis
     elif "ELF" in fileType:
         print(f"{infoS} Target OS: [bold green]Linux[white]\n")
-        if args.report:
-            execute_module(f"linAnalyzer.py \"{analyzeFile}\" True")
-        else:
-            execute_module(f"linAnalyzer.py \"{analyzeFile}\" False")
+        import Modules.linAnalyzer as lina
+        lina.run(sc0pe_path, analyzeFile, emit_report=args.report)
 
     # MacOSX Analysis
     elif "Mach-O" in fileType or '\\xca\\xfe\\xba\\xbe' in fileType:
