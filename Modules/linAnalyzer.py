@@ -231,8 +231,10 @@ class LinuxAnalyzer:
         print(pkg_table)
 
         for pk in go_pkgs:
-            emit_table(pk.methods, "method", "Name", "Receiver", "Offset", row_extractor=lambda m: (m.name, m.receiver, hex(m.offset)), col_prefix="[bold green]")
-            emit_table(pk.functions, "function", "Name", "Offset", row_extractor=lambda f: (f.name, hex(f.offset)), col_prefix=["bold green"])
+            emit_table(pk.methods, "method", "Name", "Receiver", "Offset",
+                row_extractor=lambda m: (m.name, m.receiver, hex(m.offset)), col_prefix="[bold green]")
+            emit_table(pk.functions, "function", "Name", "Offset",
+                row_extractor=lambda f: (f.name, hex(f.offset)), col_prefix=["bold green"])
         emit_table(go_file.get_std_lib_packages(), "imported libraries",
             "[bold green]Name", row_extractor=lambda i:i.name)
 
@@ -260,9 +262,9 @@ class LinuxAnalyzer:
                 self.report["categories"][key].append(i)
 
                 try:
-                    score_per_cat[key] += 1
+                    score_per_cat[cat] += 1
                 except KeyError:
-                    score_per_cat[TOFO] = 1
+                    score_per_cat[cat] = 1
 
             print(single_cat_t)
 
@@ -325,7 +327,7 @@ class LinuxAnalyzer:
         Generate a blank report object.
 
         You can pass an argument to control the default value
-        for unset report keys. If nothing is passed, a certain
+        for untouched report keys. If nothing is passed, a certain
         string is used. It might be preferrable to pass
         `None`/""/a custom string instead.
         """
