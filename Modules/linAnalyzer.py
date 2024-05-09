@@ -165,7 +165,7 @@ class LinuxAnalyzer:
             if sec.name.strip() == "":
                 continue
             metadata = { # TODO consider OrderedDict type instead
-                "name": sec.name, "size": sec.size,
+                "name": sec.name, "size": str(sec.size),
                 "offset": str(hex(sec.offset)),
                 "virtual_address": str(hex(sec.virtual_address)),
                 "entropy": str(sec.entropy)
