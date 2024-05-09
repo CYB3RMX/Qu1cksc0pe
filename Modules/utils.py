@@ -36,6 +36,6 @@ def init_table(*col_names, style=None, col_prefix="", justify="center", **title_
 def user_confirm(question_text):
     return str(input(question_text)).lower() == "y"
 
-def stringify_bool(b, inverse=False):
-    prefix = "[bold green]" if b ^ inverse else "[bold red]"
+def stylize_bool(b, invert_style=False):
+    prefix = "[bold green]" if b ^ invert_style else "[bold red]"
     return prefix + repr(b)
