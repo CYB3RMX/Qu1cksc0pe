@@ -14,6 +14,21 @@ def err_exit(message, arg_override=1):
     print(message)
     sys.exit(arg_override)
 
+def emit_table(
+    item_li, item_name, *col_names,
+    row_extractor=lambda x:(x,), warn_on_empty=True,
+    **tinit_kwargs
+):
+    if len(item_li) == 0:
+        if warn_on_empty:
+            print(f"\n[bold red]>>>[white] No {item_name}s found\n")
+        return
+
+    t = init_table(*col_names, **tinit_kwargs, title=f"* {item_name.title()}s *")
+    for item in item_li:
+        t.add_row(*row_extractor(item))
+    print(t)
+
 def init_table(*col_names, style=None, col_prefix="", justify="center", **title_kwargs):
     """
     Initialize a `rich.table` `Table`, with defaults common for this project.
