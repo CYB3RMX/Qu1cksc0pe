@@ -8,7 +8,7 @@ import mmap
 import struct
 import binascii
 
-from .utils import err_exit, user_confirm
+from utils import err_exit, user_confirm
 
 try:
     import pefile as pf

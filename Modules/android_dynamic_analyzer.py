@@ -11,7 +11,7 @@ import subprocess
 import configparser
 import distutils.spawn
 
-from .utils import err_exit, user_confirm
+from utils import err_exit, user_confirm
 
 try:
     import pyaxmlparser

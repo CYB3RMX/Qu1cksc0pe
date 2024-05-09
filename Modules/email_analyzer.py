@@ -7,7 +7,7 @@ import email
 import subprocess
 import distutils.spawn
 
-from .utils import err_exit
+from utils import err_exit
 
 try:
     from rich import print

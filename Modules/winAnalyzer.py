@@ -12,7 +12,7 @@ import binascii
 import subprocess
 import configparser
 
-from .utils import err_exit
+from utils import err_exit
 
 try:
     from rich import print

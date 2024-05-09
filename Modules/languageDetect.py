@@ -4,7 +4,7 @@ import re
 import sys
 import subprocess
 
-from .utils import err_exit
+from utils import err_exit
 
 try:
     import puremagic as pr
