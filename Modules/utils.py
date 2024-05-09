@@ -19,6 +19,9 @@ def emit_table(
     row_extractor=lambda x:(x,), warn_on_empty=True,
     **tinit_kwargs
 ):
+    """
+    High level convenience util which entirely manages construction and subsequent display of a table.
+    """
     if len(item_li) == 0:
         if warn_on_empty:
             print(f"\n[bold red]>>>[white] No {item_name}s found\n")
