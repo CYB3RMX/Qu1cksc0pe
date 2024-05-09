@@ -13,7 +13,7 @@ import configparser
 import urllib.parse
 from bs4 import BeautifulSoup
 
-from .utils import err_exit, user_confirm
+from utils import err_exit, user_confirm
 
 # Checking for rich
 try:

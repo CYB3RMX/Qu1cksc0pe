@@ -9,7 +9,7 @@ import base64
 import hashlib
 from Crypto.Cipher import DES3
 
-from .utils import err_exit
+from utils import err_exit
 
 # Testing pyaxmlparser existence
 try:

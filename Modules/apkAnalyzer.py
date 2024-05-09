@@ -12,7 +12,7 @@ import subprocess
 import distutils.spawn
 from datetime import date
 
-from .utils import err_exit
+from utils import err_exit
 
 # Module handling
 try:

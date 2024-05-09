@@ -7,7 +7,7 @@ import json
 import binascii
 import distutils.spawn
 
-from .utils import err_exit, user_confirm
+from utils import err_exit, user_confirm
 
 try:
     from rich import print
