@@ -48,6 +48,9 @@ def init_table(*col_names, style=None, col_prefix="", justify="center", **title_
         t.add_column(col_prefix+name, style=style, justify=justify)
     return t
 
+def no_blanks(str_li):
+    return (x for x in str_li if len(x.strip()) > 0)
+
 def user_confirm(question_text):
     return str(input(question_text)).lower() == "y"
 
