@@ -3,13 +3,21 @@ import sys
 import json
 import yara
 import hashlib
+import warnings
 import subprocess
 import configparser
 
-from .utils import (
-    err_exit, emit_table, init_table,
-    no_blanks, user_confirm, stylize_bool,
-)
+try:
+    # by default, assume we're running as a module, inside a package
+    from .utils import (
+        err_exit, emit_table, init_table,
+        no_blanks, user_confirm, stylize_bool,
+    )
+except ImportError: # fallback for running as "raw" Python file
+    from utils import (
+        err_exit, emit_table, init_table,
+        no_blanks, user_confirm, stylize_bool,
+    )
 
 try:
     from rich import print
@@ -384,3 +392,14 @@ def run(sc0pe_path, target_file, emit_report=False):
     )
     lina.emit_general_information()
     lina.analyze(indicators_by_category, emit_report=emit_report)
+
+def main():
+    warnings.warn("Please opt for importing and directly calling the run function instead.", PendingDeprecationWarning)
+
+    from pathlib import Path
+    run(Path(__file__).parent.parent, # execute with autodeduced scope path
+        sys.argv[1], emit_reports=sys.argv[2])
+
+
+if __name__ == "__main__":
+    main()
