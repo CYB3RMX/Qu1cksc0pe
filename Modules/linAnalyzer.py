@@ -247,7 +247,7 @@ class LinuxAnalyzer:
             "[bold green]Name", row_extractor=lambda i:i.name)
 
     def analyze(self, indicators_by_category, emit_report=False):
-        """Execute all analyisis methods, including strings matching based on indicator input."""
+        """Execute all analysis methods, including strings matching based on indicator input."""
         categorized_func_count = 0
         self.report["filename"] = self.target_file
 
