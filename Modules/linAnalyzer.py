@@ -382,7 +382,7 @@ def run(sc0pe_path, target_file, emit_report=False):
     indicators_by_category = {}
     spath = f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}"
     for cat in CATEGORIES:
-        with open(spath + map_to_filename(cat) + ".txt") as catfile:
+        with open(spath + map_to_fname(cat) + ".txt") as catfile:
             indicators_by_category[cat] = catfile.read().split("\n")
 
     lina = LinuxAnalyzer(
