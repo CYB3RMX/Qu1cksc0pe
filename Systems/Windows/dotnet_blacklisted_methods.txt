@@ -29,3 +29,7 @@ GetKeyboardState
 hideconsole
 OFF_Encrypt
 Infectrandomusbfile
+CreateEncryptor
+CreateDecryptor
+GenerateIV
+GenerateKey
