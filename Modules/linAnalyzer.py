@@ -265,9 +265,9 @@ class LinuxAnalyzer:
 
             single_cat_t.add_column(f"Functions or Strings about [bold green]{cat}", justify="center")
             self.report["categories"].update({cat: []})
-            for match in no_blanks(matches):
-                single_cat_t.add_row(f"[bold red]{i}")
-                self.report["categories"][key].append(i)
+            for str_match in no_blanks(matches):
+                single_cat_t.add_row(f"[bold red]{str_match}")
+                self.report["categories"][cat].append(str_match)
 
                 try:
                     score_per_cat[cat] += 1
