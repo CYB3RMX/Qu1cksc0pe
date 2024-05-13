@@ -159,8 +159,9 @@ class WindowsAnalyzer:
                     continue
         except:
             binary_data = open(fileName, "rb").read()
-            for categ in windows_api_list:
-                for api in windows_api_list[categ]["apis"]:
+            for index in track(range(len(windows_api_list)), description="Analyzing.."):
+                current_categ = list(windows_api_list.keys())[index]
+                for api in windows_api_list[current_categ]["apis"]:
                     try:
                         matcher = re.finditer(api.encode(), binary_data, re.IGNORECASE)
                         for pos in matcher:

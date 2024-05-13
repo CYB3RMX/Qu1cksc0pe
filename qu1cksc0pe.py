@@ -216,6 +216,12 @@ def Qu1cksc0pe():
                     err_exit("[bold white on red][blink]strings[/blink] command not found. You need to install it.")
             else:
                 print(f"{infoS} Whoa!! Looks like we have a large file here.")
+                if args.analyze:
+                    choice = str(input(f"\n{infoC} Do you want to analyze this file anyway [y/N]?: "))
+                    if choice == "Y" or choice == "y":
+                        BasicAnalyzer(analyzeFile=args.file)
+                        sys.exit(0)
+
                 if args.archive:
                     # Because why not!
                     print(f"{infoS} Analyzing: [bold green]{args.file}[white]")
