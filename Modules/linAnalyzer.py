@@ -258,6 +258,9 @@ class LinuxAnalyzer:
 
         score_per_cat = {}
         for cat, matches in self.categorized_strmatches:
+            if len(matches) == 0:
+                continue
+
             if cat in ("Information Gathering", "System/Persistence", "Cryptography", "Evasion"):
                 single_cat_t = init_table(style="yellow", title="* WARNING *", title_style="blink italic yellow")
             else:
