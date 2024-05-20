@@ -257,7 +257,7 @@ class LinuxAnalyzer:
                 categorized_func_count += 1
 
         score_per_cat = {}
-        for cat, matches in self.categorized_strmatches:
+        for cat, matches in self.categorized_strmatches.items():
             if len(matches) == 0:
                 continue
 
