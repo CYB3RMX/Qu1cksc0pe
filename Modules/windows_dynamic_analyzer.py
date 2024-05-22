@@ -155,7 +155,7 @@ class WindowsDynamicAnalyzer:
                 for tpcmd in self.target_processes:
                     try:
                         if tpcmd not in report_obj["commandline_args"].keys():
-                            cmd_tp = psutil.Process(cmd_tp)
+                            cmd_tp = psutil.Process(tpcmd)
                             if len(cmd_tp.cmdline()) > 1:
                                 cmdl_t = []
                                 for cmc in cmd_tp.cmdline():

@@ -1,0 +1,38 @@
+{
+    "open": {
+        "target_arg": 0
+    },
+    "opendir": {
+        "target_arg": 0
+    },
+    "connect": {
+        "target_arg": 1
+    },
+    "bind": {
+        "target_arg": 1
+    },
+    "gethostbyname": {
+        "target_arg": 0
+    },
+    "gethostname": {
+        "target_arg": 0
+    },
+    "fopen": {
+        "target_arg": 0
+    },
+    "dlopen": {
+        "target_arg": 0
+    },
+    "htonl": {
+        "target_arg": 0
+    },
+    "accept": {
+        "target_arg": 1
+    },
+    "send": {
+        "target_arg": 0
+    },
+    "getdomainname": {
+        "target_arg": 0
+    }
+}

@@ -59,11 +59,17 @@ class DynamicAnalyzer:
         if sys.platform != "win32":
             print(f"\n{infoS} Dynamic Analysis Options")
             print(f"[bold cyan][[bold red]1[bold cyan]][white] Android")
+            print(f"[bold cyan][[bold red]2[bold cyan]][white] Linux")
             tos = int(input("\n>>> Select: "))
             if tos == 1:
                 print(f"\n{infoS} Target OS: [bold green]Android")
                 target_file = prompt("[>>>] Enter Full Path of The Target File [Press TAB to auto-complete]: ", completer=path_completer)
                 command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}android_dynamic_analyzer.py \"{target_file}\""
+                os.system(command)
+            elif tos == 2:
+                print(f"\n{infoS} Target OS: [bold green]Linux")
+                target_pid = input(f"{infoC} Enter target PID: ")
+                command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}linux_dynamic_analyzer.py {target_pid}"
                 os.system(command)
             else:
                 print(f"{errorS} Wrong option :(")
