@@ -180,7 +180,7 @@ class LinuxAnalyzer:
             }
             self.report["sections"].append(metadata)
             metadata["name"] = "[bold red]"+metadata["name"]
-            # since 3.6, dict objects guarantee insertion order preservation
+            # since 3.7, dict objects guarantee insertion order preservation
             section_t.add_row(*metadata.values()) # so this is ok for filling a row
 
         print(section_t)
