@@ -81,6 +81,7 @@ if os.name != "nt":
         sc0peConf = configparser.ConfigParser()
         sc0peConf.read(f"/etc/qu1cksc0pe.conf")
         sc0pe_path = str(sc0peConf["Qu1cksc0pe_PATH"]["sc0pe"])
+        sys.path.append(sc0pe_path)
         path_handler = open(".path_handler", "w")
         path_handler.write(sc0pe_path)
         path_handler.close()
