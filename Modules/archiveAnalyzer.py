@@ -7,31 +7,29 @@ import zipfile
 import subprocess
 import configparser
 
+from utils import err_exit
+
 # Checking for rich
 try:
     from rich import print
     from rich.table import Table
 except:
-    print("Error: >rich< not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< not found.")
 
 try:
     import yara
 except:
-    print("Error: >yara< module not found.")
-    sys.exit(1)
+    err_exit("Error: >yara< module not found.")
 
 try:
     import rarfile
 except:
-    print("Error: >rarfile< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rarfile< module not found.")
 
 try:
     import acefile
 except:
-    print("Error: >acefile< module not found.")
-    sys.exit(1)
+    err_exit("Error: >acefile< module not found.")
 
 # Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
@@ -229,5 +227,4 @@ elif artype == "type_ace":
     print(f"{infoS} Archive Type: [bold green]Ace Archive")
     arch_analyzer.ace_file_analysis()
 else:
-    print(f"{errorS} Archive type not supported.")
-    sys.exit(1)
+    err_exit(f"{errorS} Archive type not supported.")

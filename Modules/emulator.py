@@ -4,24 +4,23 @@ import os
 import sys
 import distutils.spawn
 
+from utils import err_exit
+
 try:
     from rich import print
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 try:
     from prompt_toolkit import prompt
     from prompt_toolkit.completion import PathCompleter
 except:
-    print("Error: >prompt_toolkit< module not found.")
-    sys.exit(1)
+    err_exit("Error: >prompt_toolkit< module not found.")
 
 try:
     from colorama import Fore, Style
 except:
-    print("Error: >colorama< module not found.")
-    sys.exit(1)
+    err_exit("Error: >colorama< module not found.")
 
 # Colors
 red = Fore.LIGHTRED_EX
@@ -72,8 +71,7 @@ class DynamicAnalyzer:
                 command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}linux_dynamic_analyzer.py {target_pid}"
                 os.system(command)
             else:
-                print(f"{errorS} Wrong option :(")
-                sys.exit(1)
+                err_exit(f"{errorS} Wrong option :(")
 
         # This area is for windows environment
         elif sys.platform == "win32":
@@ -92,11 +90,9 @@ class DynamicAnalyzer:
                 command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}windows_dynamic_analyzer.py {target_pid}"
                 os.system(command)
             else:
-                print(f"{errorS} Wrong option :(")
-                sys.exit(1)
+                err_exit(f"{errorS} Wrong option :(")
         else:
-            print(f"{errorS} This platform is not suitable for dynamic analysis feature!!")
-            sys.exit(1)
+            err_exit(f"{errorS} This platform is not suitable for dynamic analysis feature!!")
 
 # Execute
 emulator = DynamicAnalyzer()
@@ -104,5 +100,4 @@ try:
     print(f"{infoS} Performing Dynamic Analysis...")
     emulator.dynamic_analysis_main()
 except KeyboardInterrupt:
-    print(f"{errorS} Keyboard interrupt detected...")
-    sys.exit(1)
+    err_exit(f"{errorS} Keyboard interrupt detected...")

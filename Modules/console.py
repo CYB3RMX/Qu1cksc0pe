@@ -5,6 +5,8 @@ import sys
 import distutils.spawn
 import subprocess
 
+from utils import err_exit
+
 # Testing prompt_toolkit existence
 try:
     from prompt_toolkit.shortcuts import prompt
@@ -12,34 +14,29 @@ try:
     from prompt_toolkit.completion import PathCompleter
     from prompt_toolkit.styles import Style as prstyle
 except:
-    print("Error: >prompt_toolkit< module not found.")
-    sys.exit(1)
+    err_exit("Error: >prompt_toolkit< module not found.")
 
 # Testing puremagic existence
 try:
     import puremagic as pr
 except:
-    print("Error: >puremagic< module not found.")
-    sys.exit(1)
+    err_exit("Error: >puremagic< module not found.")
 
 # Testing pyaxmlparser existence
 try:
     import pyaxmlparser
 except:
-    print("Error: >pyaxmlparser< module not found.")
-    sys.exit(1)
+    err_exit("Error: >pyaxmlparser< module not found.")
 
 try:
     from rich import print
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 try:
     from colorama import Fore, Style
 except:
-    print("Error: >colorama< module not found.")
-    sys.exit(1)
+    err_exit("Error: >colorama< module not found.")
 
 # Colors
 red = Fore.LIGHTRED_EX
@@ -203,8 +200,7 @@ try:
                         os.system(command)
                         os.remove(f"{sc0pe_path}{path_seperator}temp.txt")
                     else:
-                        print(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
-                        sys.exit(1)
+                        err_exit(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
 
@@ -222,8 +218,7 @@ try:
                         os.system(command)
                         os.remove(f"{sc0pe_path}{path_seperator}temp.txt")
                     else:
-                        print(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
-                        sys.exit(1)
+                        err_exit(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
 
@@ -243,11 +238,9 @@ try:
                             os.system(command)
                             os.remove(f"{sc0pe_path}{path_seperator}temp.txt")
                         else:
-                            print(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
-                            sys.exit(1)
+                            err_exit(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
                 else:
-                    print(f"{errorS} Qu1cksc0pe doesn\'t support archive analysis for now ;)")
-                    sys.exit(1)
+                    err_exit(f"{errorS} Qu1cksc0pe doesn\'t support archive analysis for now ;)")
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
 
@@ -271,8 +264,7 @@ try:
                     os.system(command)
                     os.remove(f"{sc0pe_path}{path_seperator}temp.txt")
                 else:
-                    print(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
-                    sys.exit(1)
+                    err_exit(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
 
@@ -286,8 +278,7 @@ try:
                     os.system(command)
                     os.remove(f"{sc0pe_path}{path_seperator}temp.txt")
                 else:
-                    print(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
-                    sys.exit(1)
+                    err_exit(f"{errorS} [bold green]strings[white] command not found. You need to install it.")
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
 
@@ -350,13 +341,11 @@ try:
                 directory = f"{homeD}{path_seperator}sc0pe_Base{path_seperator}sc0pe_VT_apikey.txt"
                 apik = open(directory, "r").read().split("\n")
             except:
-                print(f"{errorS} Use key_init to enter your key.")
-                sys.exit(1)
+                err_exit(f"{errorS} Use key_init to enter your key.")
             # if key is not valid quit
             if apik[0] == '' or apik[0] is None or len(apik[0]) != 64:
                 print(apik[0])
-                print(f"{errorS} Please get your API key from -> [bold green]https://www.virustotal.com/[white]")
-                sys.exit(1)
+                err_exit(f"{errorS} Please get your API key from -> [bold green]https://www.virustotal.com/[white]")
             else:
                 command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}VTwrapper.py {apik[0]} \"{filename}\""
                 os.system(command)

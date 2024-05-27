@@ -12,14 +12,12 @@ try:
     from rich.text import Text
     from rich.panel import Panel
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 try:
     import frida
 except:
-    print("Error: >frida< module not found.")
-    sys.exit(1)
+    err_exit("Error: >frida< module not found.")
 
 # Legends
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
@@ -309,5 +307,4 @@ if __name__ == "__main__":
         print(f"\n{infoS} Monitoring PID: [bold green]{target_pid}[white]. ([bold blink yellow]Ctrl+C to stop![white])")
         main_app()
     except:
-        print(f"{errorS} Program terminated!")
-        sys.exit(1)
+        err_exit(f"{errorS} Program terminated!")

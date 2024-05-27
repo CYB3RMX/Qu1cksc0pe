@@ -9,6 +9,7 @@ try:
     import configparser
     import distutils.spawn
     import shutil
+    import warnings
 except:
     print("Missing modules detected!")
     sys.exit(1)
@@ -80,6 +81,7 @@ if os.name != "nt":
         sc0peConf = configparser.ConfigParser()
         sc0peConf.read(f"/etc/qu1cksc0pe.conf")
         sc0pe_path = str(sc0peConf["Qu1cksc0pe_PATH"]["sc0pe"])
+        sys.path.append(sc0pe_path)
         path_handler = open(".path_handler", "w")
         path_handler.write(sc0pe_path)
         path_handler.close()
@@ -98,16 +100,19 @@ else:
     libscan = configparser.ConfigParser()
 
 # Utility functions
-def err_exit(message):
-    print(message)
-    sys.exit(1)
+from Modules.utils import err_exit
 
 MODULE_PREFIX = f"{sc0pe_path}{path_seperator}Modules{path_seperator}"
 def execute_module(target, path=MODULE_PREFIX, invoker=py_binary):
+    if "python" in invoker or ".py" in target:
+        # TODO in the future, raise a ValueError/OSError (and remove the additional code below)
+        # instead of warning with a PendingDeprecationWarning
+        DEV_NOTE = "[DEV NOTE]: when switching to import statements, remember to adjust any downstream imports! (e.g. `from .utils import err_exit` vs `from utils import err_exit`)"
+        warnings.warn("Direct execution of Python files won't be supported much longer." + f" {DEV_NOTE}", PendingDeprecationWarning)
+
     os.system(f"{invoker} {path}{target}")
 
-# Banner
-execute_module("banners.py")
+import Modules.banners # show a banner
 
 # Argument crating, parsing and handling
 ARG_NAMES_TO_KWARG_OPTS = {
@@ -153,10 +158,8 @@ def BasicAnalyzer(analyzeFile):
     # Linux Analysis
     elif "ELF" in fileType:
         print(f"{infoS} Target OS: [bold green]Linux[white]\n")
-        if args.report:
-            execute_module(f"linAnalyzer.py \"{analyzeFile}\" True")
-        else:
-            execute_module(f"linAnalyzer.py \"{analyzeFile}\" False")
+        import Modules.linAnalyzer as lina
+        lina.run(sc0pe_path, analyzeFile, emit_report=args.report)
 
     # MacOSX Analysis
     elif "Mach-O" in fileType or '\\xca\\xfe\\xba\\xbe' in fileType:
