@@ -10,6 +10,13 @@ TABLE_TITLE_DEFAULTS = dict(
 )
 
 
+def get_argv(idx, default=None):
+    """Return the `sys.argv` value for the given index, defaulting on `None` or a supplied custom value."""
+    try:
+        return sys.argv[int(idx)]
+    except IndexError:
+        return default
+
 def err_exit(message, arg_override=1):
     print(message)
     sys.exit(arg_override)

@@ -12,7 +12,7 @@ import binascii
 import subprocess
 import configparser
 
-from utils import err_exit
+from utils import err_exit, get_argv
 
 try:
     from rich import print
@@ -638,7 +638,7 @@ class WindowsAnalyzer:
         self.yara_rule_scanner(fileName, report_object=winrep)
         self.statistics_method()
         # Print reports
-        if sys.argv[2] == "True":
+        if get_argv(2) == "True":
             self.report_writer("windows", winrep)
 
     def msi_file_analyzer(self):
@@ -674,5 +674,5 @@ except:
 windows_analyzer.statistics_method()
 
 # Print reports
-if sys.argv[2] == "True":
+if get_argv(2) == "True":
     windows_analyzer.report_writer("windows", winrep)
