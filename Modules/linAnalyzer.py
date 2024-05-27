@@ -10,12 +10,12 @@ import configparser
 try:
     # by default, assume we're running as a module, inside a package
     from .utils import (
-        err_exit, emit_table, init_table,
+        err_exit, get_argv, emit_table, init_table,
         no_blanks, user_confirm, stylize_bool,
     )
 except ImportError: # fallback for running as "raw" Python file
     from utils import (
-        err_exit, emit_table, init_table,
+        err_exit, get_argv, emit_table, init_table,
         no_blanks, user_confirm, stylize_bool,
     )
 
@@ -401,7 +401,7 @@ def main():
 
     from pathlib import Path
     run(Path(__file__).parent.parent, # execute with autodeduced scope path
-        sys.argv[1], emit_reports=sys.argv[2] == "True" if len(sys.argv) > 2 else False)
+        sys.argv[1], emit_reports=get_argv(2) == "True")
 
 
 if __name__ == "__main__":
