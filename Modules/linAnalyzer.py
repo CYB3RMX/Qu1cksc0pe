@@ -401,7 +401,7 @@ def main():
 
     from pathlib import Path
     run(Path(__file__).parent.parent, # execute with autodeduced scope path
-        sys.argv[1], emit_reports=sys.argv[2])
+        sys.argv[1], emit_reports=sys.argv[2] == "True" if len(sys.argv) > 2 else False)
 
 
 if __name__ == "__main__":
