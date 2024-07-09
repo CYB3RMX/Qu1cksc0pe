@@ -7,6 +7,8 @@ import warnings
 import subprocess
 import configparser
 
+from copy import deepcopy
+
 try:
     # by default, assume we're running as a module, inside a package
     from .utils import (
@@ -178,7 +180,7 @@ class LinuxAnalyzer:
                 "virtual_address": str(hex(sec.virtual_address)),
                 "entropy": str(sec.entropy)
             }
-            self.report["sections"].append(metadata)
+            self.report["sections"].append(deepcopy(metadata))
             metadata["name"] = "[bold red]"+metadata["name"]
             # since 3.7, dict objects guarantee insertion order preservation
             section_t.add_row(*metadata.values()) # so this is ok for filling a row
