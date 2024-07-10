@@ -8,31 +8,29 @@ import mmap
 import struct
 import binascii
 
+from utils import err_exit, user_confirm
+
 try:
     import pefile as pf
 except:
-    print("Error: >pefile< module not found.")
-    sys.exit(1)
+    err_exit("Error: >pefile< module not found.")
 
 try:
     import lief
 except:
-    print("Error: >lief< module not found.")
-    sys.exit(1)
+    err_exit("Error: >lief< module not found.")
 
 try:
     from rich import print
     from rich.table import Table
     from rich.progress import track
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 try:
     from colorama import Fore, Style
 except:
-    print("Error: >colorama< module not found.")
-    sys.exit(1)
+    err_exit("Error: >colorama< module not found.")
 
 # Colors
 red = Fore.LIGHTRED_EX
@@ -132,14 +130,12 @@ class SignatureChecker:
 
         # Windows side
         if mz_offsets != []:
-            choice = str(input(f"{infoC} Do you want to extract executable files from target file[Y/n]?: "))
-            if choice == "Y" or choice == "y":
+            if user_confirm(f"{infoC} Do you want to extract executable files from target file[Y/n]?: "):
                 self.file_carver_for_windows_executables(mz_offsets)
 
         # ELF side
         if elf_offsets != []:
-            choice = str(input(f"{infoC} Do you want to extract executable files from target file[Y/n]?: "))
-            if choice == "Y" or choice == "y":
+            if user_confirm(f"{infoC} Do you want to extract executable files from target file[Y/n]?: "):
                 self.file_carver_for_elf_executables(elf_offsets)
 
     def search_possible_corrupt_mz_headers(self):

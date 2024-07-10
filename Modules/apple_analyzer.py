@@ -4,18 +4,18 @@ import re
 import sys
 import json
 
+from utils import err_exit
+
 try:
     from wh1tem0cha import Wh1teM0cha
 except:
-    print("Error: >wh1tem0cha< module not found.")
-    sys.exit(1)
+    err_exit("Error: >wh1tem0cha< module not found.")
 
 try:
     from rich import print
     from rich.table import Table
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 # Compatibility
 path_seperator = "/"

@@ -5,13 +5,14 @@ import sys
 import hashlib
 import requests
 
+from utils import err_exit
+
 # Checking for rich existence
 try:
     from rich import print
     from rich.table import Table
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 # Legends
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
@@ -21,13 +22,11 @@ infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 try:
     apikey = str(sys.argv[1])
 except:
-    print("[blink bold white on red]Please get your API key from [white]-> [bold green][a]https://www.virustotal.com/[/a]")
-    sys.exit(1)
+    err_exit("[blink bold white on red]Please get your API key from [white]-> [bold green][a]https://www.virustotal.com/[/a]")
 try:
     targetFile = sys.argv[2]
 except:
-    print("\n[bold white on red]Please enter your file!!\n")
-    sys.exit(1)
+    err_exit("\n[bold white on red]Please enter your file!!\n")
 
 # An array for AV names
 avArray = ['ALYac', 'APEX', 'AVG', 'Acronis', 'Ad-Aware', 
@@ -112,8 +111,7 @@ def ReportParser(reportStr):
                         detect += 1
                         antiTable.add_row(av, reportStr["data"]["attributes"]["last_analysis_results"][av]["result"])
             else:
-                print(f"\n{errorS} Nothing found harmfull about that file.")
-                sys.exit(0)
+                err_exit(f"\n{errorS} Nothing found harmfull about that file.", arg_override=0)
         print(f"\n{infoS} Detection: [bold red]{detect}[white]/[bold red]{len(avArray)}[white]")
         print(antiTable)
 

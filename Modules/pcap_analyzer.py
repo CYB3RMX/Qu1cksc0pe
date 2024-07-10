@@ -7,19 +7,19 @@ import json
 import binascii
 import distutils.spawn
 
+from utils import err_exit, user_confirm
+
 try:
     from rich import print
     from rich.progress import track
     from rich.table import Table
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 try:
     import dpkt
 except:
-    print("Error: >dpkt< module not found.")
-    sys.exit(1)
+    err_exit("Error: >dpkt< module not found.")
 
 #--------------------------------------------- Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
@@ -111,8 +111,7 @@ class PcapAnalyzer:
             print(self.table_obj)
         elif self.given_data != [] and len(self.given_data) > 50:
             print(f"\n{infoS} We found [bold red]{len(self.given_data)}[white] valid {self.data_type}.")
-            choice = input(f">>> Do you want to print {len(self.given_data)} lines [y/n]?: ")
-            if choice == "y" or choice == "Y":
+            if user_confirm(f">>> Do you want to print {len(self.given_data)} lines [y/n]?: "):
                 print(self.table_obj)
         else:
             print(f"{errorS} There is no {self.data_type} found!")

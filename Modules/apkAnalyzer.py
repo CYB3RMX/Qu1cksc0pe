@@ -12,32 +12,30 @@ import subprocess
 import distutils.spawn
 from datetime import date
 
+from utils import err_exit
+
 # Module handling
 try:
     from androguard.core.bytecodes.apk import APK
 except:
-    print("Error: >androguard< module not found.")
-    sys.exit(1)
+    err_exit("Error: >androguard< module not found.")
 
 try:
     from rich import print
     from rich.table import Table
     from rich.progress import track
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 try:
     import pyaxmlparser
 except:
-    print("Error: >pyaxmlparser< module not found.")
-    sys.exit(1)
+    err_exit("Error: >pyaxmlparser< module not found.")
 
 try:
     from colorama import Fore, Style
 except:
-    print("Error: >colorama< module not found.")
-    sys.exit(1)
+    err_exit("Error: >colorama< module not found.")
 
 # Disabling pyaxmlparser's logs
 pyaxmlparser.core.logging.disable()
