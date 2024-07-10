@@ -24,3 +24,4 @@ vivisect
 pycryptodome
 bs4
 wh1tem0cha
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
