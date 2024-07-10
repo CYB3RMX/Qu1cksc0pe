@@ -3,12 +3,13 @@
 import sys
 import xml.etree.ElementTree as etr
 
+from utils import err_exit
+
 try:
     from rich import print
     from rich.table import Table
 except:
-    print("Error: >rich< module not found.")
-    sys.exit(1)
+    err_exit("Error: >rich< module not found.")
 
 # Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
@@ -27,11 +28,9 @@ def ManifestAnalysis():
         manifest_tree = etr.parse(manifest_path)
         manifest_root = manifest_tree.getroot()
     except FileNotFoundError:
-        print(f"{errorS} An error occured while parsing [bold green]AndroidManifest.xml[white]. Did your APK file decompiled correctly?")
-        sys.exit(1)
+        err_exit(f"{errorS} An error occured while parsing [bold green]AndroidManifest.xml[white]. Did your APK file decompiled correctly?")
     except:
-        print(f"{errorS} It looks like the target [bold green]AndroidManifest.xml[white] is corrupted!!")
-        sys.exit(1)
+        err_exit(f"{errorS} It looks like the target [bold green]AndroidManifest.xml[white] is corrupted!!")
 
     # Gathering informations
     app_data = manifest_root.findall("application")
