@@ -61,10 +61,13 @@ def init_table(*col_names, style=None, col_prefix="", justify="center", **title_
 def no_blanks(str_li):
     return (x for x in str_li if len(x.strip()) > 0)
 
-def user_confirm(question_text):
-    return str(
-        input(question_text)
-    ).lstrip().lower().startswith("y")
+def user_confirm(question_text, strict=False):
+    if strict:
+        return str(input(question_text)).lower() == "y"
+    else:
+        return str(
+            input(question_text)
+        ).lstrip().lower().startswith("y")
 
 def stylize_bool(b, invert_style=False):
     prefix = "[bold green]" if b ^ invert_style else "[bold red]"
