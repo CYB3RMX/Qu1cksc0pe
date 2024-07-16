@@ -77,7 +77,7 @@ class LinuxAnalyzer:
 
     def parse_section_content(self, sec_name):
         return "".join([chr(unicode_point)
-            for unicode_point in self.binary.get_section(sec_name).content])
+            for unicode_point in self.binary.get_section(sec_name).content if unicode_point != 0])
 
     def check_bin_security(self):
         binsec_t = init_table("[bold yellow]NX", "[bold yellow]PIE", title="* Security *")
