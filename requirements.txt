@@ -24,3 +24,4 @@ vivisect
 pycryptodome
 bs4
 wh1tem0cha
+setuptools>=70.0.0 # not directly required, pinned by Snyk to avoid a vulnerability
