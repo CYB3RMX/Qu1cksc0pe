@@ -136,14 +136,14 @@ ARG_NAMES_TO_KWARG_OPTS = {
     "no_banner": {"help": "Launch Qu1cksc0pe without showing a banner.", "action": "store_true"}
 }
 
-if not args.no_banner:
-    import Modules.banners # show a banner
-
 parser = argparse.ArgumentParser()
 for arg_name, cfg in ARG_NAMES_TO_KWARG_OPTS.items():
     cfg["required"] = cfg.get("required", False)
     parser.add_argument("--" + arg_name, **cfg)
 args = parser.parse_args()
+
+if not args.no_banner:
+    import Modules.banners # show a banner
 
 # Basic analyzer function that handles single and multiple scans
 def BasicAnalyzer(analyzeFile):
