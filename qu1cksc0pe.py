@@ -112,8 +112,6 @@ def execute_module(target, path=MODULE_PREFIX, invoker=py_binary):
 
     os.system(f"{invoker} {path}{target}")
 
-import Modules.banners # show a banner
-
 # Argument crating, parsing and handling
 ARG_NAMES_TO_KWARG_OPTS = {
     "file": {"help": "Specify a file to scan or analyze."},
@@ -134,7 +132,8 @@ ARG_NAMES_TO_KWARG_OPTS = {
     "report": {"help": "Export analysis reports into a file (JSON Format for now).", "action": "store_true"},
     "watch": {"help": "Perform dynamic analysis against Windows/Android files. (Linux will coming soon!!)", "action": "store_true"},
     "sigcheck": {"help": "Scan file signatures in target file.", "action": "store_true"},
-    "vtFile": {"help": "Scan your file with VirusTotal API.", "action": "store_true"}
+    "vtFile": {"help": "Scan your file with VirusTotal API.", "action": "store_true"},
+    "no_banner": {"help": "Launch Qu1cksc0pe without showing a banner.", "action": "store_true"}
 }
 
 parser = argparse.ArgumentParser()
@@ -142,6 +141,9 @@ for arg_name, cfg in ARG_NAMES_TO_KWARG_OPTS.items():
     cfg["required"] = cfg.get("required", False)
     parser.add_argument("--" + arg_name, **cfg)
 args = parser.parse_args()
+
+if not args.no_banner:
+    import Modules.banners # show a banner
 
 # Basic analyzer function that handles single and multiple scans
 def BasicAnalyzer(analyzeFile):
