@@ -917,7 +917,7 @@ class DocumentAnalyzer:
 
                         # Check if any non hex character exist in buffer
                         if b"}}" in remove_1:
-                            remove = re.findall(r'[a-z0-9]+\}\}'.encode(), remove_1, re.IGNORECASE)
+                            remove = re.findall(r'[a-z0-9]+\}\}|\}\}'.encode(), remove_1, re.IGNORECASE)
                             finalbuffer = remove_1.replace(remove[0], b"")
                         else:
                             finalbuffer = remove_1
