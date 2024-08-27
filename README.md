@@ -41,15 +41,8 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/1bf1b1d6-80f3-445d-996d-a4216a79a2e0)
 
 # Updates
-<b>22/05/2024</b>
-- [X] <b>Added New:</b> ```Linux Dynamic Analyzer``` module.
-
-<b>13/05/2024</b>
-- [X] Improvements on ```Windows Analyzer``` module.
-- [X] Bug fixes
-
-<b>18/04/2024</b>
-- [X] ```Document Analyzer``` module is significantly improved. Now it has better exploit detection capability.
+<b>27/08/2024</b>
+- [X] ```Document Analyzer``` module is improved. Now it has better exploit detection capability.
 
 # Available On
 <img width="400" src="https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png" alt="logo"><img width="400" src="https://user-images.githubusercontent.com/42123683/189416193-a709291f-be8f-469c-b649-c6201fa86677.jpeg" alt="logo">
