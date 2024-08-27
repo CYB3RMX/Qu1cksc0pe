@@ -95,7 +95,7 @@ class DocumentAnalyzer:
             "bin": {
                 "name": "\\binxxx",
                 "detect_pattern": rb'\\bin',
-                "pattern": rb'[a-f0-9]+\\bin[a-f0-9]+',
+                "pattern": rb'[a-f0-9\}]+\\bin[a-f0-9]+',
                 "occurence": 0
             },
             "objupdate_1": {
@@ -216,7 +216,11 @@ class DocumentAnalyzer:
         vba_chek = {}
 
         # Check if file is an VBA file
-        keywordz = ["Function", "Sub", "Dim", "End", "Document"]
+        keywordz = [
+            "Function", "Sub", "Dim", "End", "Document", "AutoOpen",
+            "AutoClose", "AutoExec", "Shell", "CreateObject", "WScript",
+            "VBScript", "Eval"
+        ]
         vbaTable = Table(title="* Matches *", title_style="bold italic cyan", title_justify="center")
         vbaTable.add_column("[bold green]Pattern", justify="center")
         vbaTable.add_column("[bold green]Count", justify="center")
@@ -906,20 +910,28 @@ class DocumentAnalyzer:
                 bin_sec = re.findall(self.rtf_exploit_pattern_dict[exp_pattern]["pattern"], buffer, re.IGNORECASE)
 
                 # Parse and extract \binxxx based patterns
-                if bin_sec != [] and exp_pattern == "bin":
-                    if len(bin_sec[-1]) > 15:
+                if self.pat_ct == 0 and (bin_sec != [] and exp_pattern == "bin"):
+                    if len(bin_sec[-1]) > 20:
                         remove = re.findall(r'\\bin[0]+'.encode(), bin_sec[-1], re.IGNORECASE)
-                        finalbuffer = bin_sec[-1].replace(remove[0], b"")
+                        remove_1 = bin_sec[-1].replace(remove[0], b"")
+
+                        # Check if any non hex character exist in buffer
+                        if b"}}" in remove_1:
+                            remove = re.findall(r'[a-z0-9]+\}\}'.encode(), remove_1, re.IGNORECASE)
+                            finalbuffer = remove_1.replace(remove[0], b"")
+                        else:
+                            finalbuffer = remove_1
+
                         print(f"{infoS} Looks like we found [bold green]{self.rtf_exploit_pattern_dict[exp_pattern]['name']}[white] pattern. Attempting to identify and extraction...")
                         self.rtf_check_exploit_parse(exploit_buffer=finalbuffer)
 
                 # Parse and extract {\\?\\objudate} & {\\objupdate} & \\ods based patterns
-                if bin_sec != [] and (exp_pattern == "objupdate_1" or exp_pattern == "objupdate_2" or exp_pattern == "ods"):
+                if self.pat_ct == 0 and (bin_sec != [] and (exp_pattern == "objupdate_1" or exp_pattern == "objupdate_2" or exp_pattern == "ods")):
                     print(f"{infoS} Looks like we found [bold green]{self.rtf_exploit_pattern_dict[exp_pattern]['name']}[white] pattern. Attempting to identify and extraction...")
                     self.rtf_check_exploit_parse(exploit_buffer=bin_sec[0][0]+bin_sec[0][1])
 
                 # Parse and extract \\objdata based patterns
-                if bin_sec != [] and exp_pattern == "objdata":
+                if self.pat_ct == 0 and (bin_sec != [] and exp_pattern == "objdata"):
                     print(f"{infoS} Looks like we found [bold green]{self.rtf_exploit_pattern_dict[exp_pattern]['name']}[white] pattern. Attempting to identify and extraction...")
                     # Looking for hex data existence
                     for bsec in bin_sec:
