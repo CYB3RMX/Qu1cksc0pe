@@ -63,16 +63,8 @@ else:
 # Make Qu1cksc0pe work on Windows, Linux, OSX
 homeD = os.path.expanduser("~")
 path_seperator = "/"
-allA = "--all" # strings parameter
-setup_scr = "setup.sh"
-if sys.platform == "darwin":
-    allA = "-a"
-elif sys.platform == "win32":
+if sys.platform == "win32":
     path_seperator = "\\"
-    allA = "-a"
-    setup_scr = "setup.ps1"
-else:
-    pass
 
 # Is Qu1cksc0pe installed??
 if os.name != "nt":

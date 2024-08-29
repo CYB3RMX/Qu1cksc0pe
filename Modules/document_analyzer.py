@@ -12,7 +12,6 @@ import subprocess
 import configparser
 import urllib.parse
 from bs4 import BeautifulSoup
-
 from utils import err_exit, user_confirm
 
 # Checking for rich
@@ -33,6 +32,7 @@ try:
     from oletools.crypto import is_encrypted
     from oletools.oleid import OleID
     from olefile import isOleFile
+    from olefile import OleFileIO
 except:
     print("Error: >oletools< module not found.")
     print("Try 'sudo -H pip3 install -U oletools' command.")
@@ -91,6 +91,7 @@ class DocumentAnalyzer:
         self.mal_code = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}malicious_html_codes.json"))
         self.mal_rtf_code = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}malicious_rtf_codes.json"))
         self.pat_ct = 0
+        self.is_ole_file = None
         self.rtf_exploit_pattern_dict = {
             "bin": {
                 "name": "\\binxxx",
@@ -203,7 +204,8 @@ class DocumentAnalyzer:
         jTable.add_column("[bold green]Count", justify="center")
         for key in keywordz:
             jstr = re.findall(key, str(self.binarydata))
-            jTable.add_row(key, str(len(jstr)))
+            if len(jstr) != 0:
+                jTable.add_row(key, str(len(jstr)))
             jar_chek.update({key: len(jstr)})
 
         # Condition for JAR file
@@ -226,7 +228,8 @@ class DocumentAnalyzer:
         vbaTable.add_column("[bold green]Count", justify="center")
         for key in keywordz:
             vbastr = re.findall(key, str(self.binarydata))
-            vbaTable.add_row(key, str(len(vbastr)))
+            if len(vbastr) != 0:
+                vbaTable.add_row(key, str(len(vbastr)))
             vba_chek.update({key: len(vbastr)})
 
         # Condition for VBA file
@@ -256,7 +259,7 @@ class DocumentAnalyzer:
             docTable = Table(title="* Document Structure *", title_style="bold italic cyan", title_justify="center")
             docTable.add_column("[bold green]File Name", justify="center")
             for df in document.namelist():
-                if ".bin" in df:
+                if ".bin" in df or "embeddings" in df:
                     docTable.add_row(f"[bold red]{df}")
                     bins.append(df)
                 else:
@@ -371,8 +374,10 @@ class DocumentAnalyzer:
         # Check for ole structures
         if isOleFile(self.targetFile) == True:
             print(f"{infoS} Ole File: [bold green]True[white]")
+            self.is_ole_file = True
         else:
             print(f"{infoS} Ole File: [bold red]False[white]")
+            self.is_ole_file = False
 
         # Check for encryption
         if is_encrypted(self.targetFile) == True:
@@ -386,6 +391,10 @@ class DocumentAnalyzer:
         # Perform Yara scan
         print(f"\n{infoS} Performing YARA rule matching...")
         self.DocumentYara()
+
+        # Perform Ole file analysis
+        if self.is_ole_file:
+            self.ole_stream_analysis()
 
         # VBA_MACRO scanner
         vbascan = OleID(self.targetFile)
@@ -405,6 +414,31 @@ class DocumentAnalyzer:
                         print(f"{infoS} VBA Macros: [bold red]Not Found[white]")
         else:
             self.MacroHunter()
+
+    # Ole Stream analysis
+    def ole_stream_analysis(self):
+        olfl = OleFileIO(self.targetFile)
+        olfl_table = Table(title="* Ole Directory *", title_style="bold italic cyan", title_justify="center")
+        olfl_table.add_column("[bold green]Name", justify="center")
+        olfl_table.add_column("[bold green]Size", justify="center")
+        print(f"\n{infoS} Performing [bold green]Ole[white] file analysis...")
+
+        # Enumerate directories
+        olfl_table.add_row(olfl.root.name, str(olfl.root.size))
+        dir_stream_buffer = b""
+        for drc in olfl.listdir():
+            dname = "/".join(drc)
+            olfl_table.add_row(dname, str(olfl.get_size(dname)))
+            dir_stream_buffer += olfl.openstream(dname).read()
+        print(olfl_table)
+
+        # Extract strings from streams
+        strings_base = re.findall(r"[^\x00-\x1F\x7F-\xFF]{4,}".encode(), dir_stream_buffer)
+        widestr = re.findall(r"(?:[\x20-\x7E]\x00){4,}".encode(), dir_stream_buffer)
+        for s in widestr: # Cleanup "\x00"
+            if b"\x00" in s:
+                strings_base.append(s.replace(b"\x00", b""))
+        self.html_fetch_urls(str(strings_base))
 
     # Onenote analysis
     def OneNoteAnalysis(self):
