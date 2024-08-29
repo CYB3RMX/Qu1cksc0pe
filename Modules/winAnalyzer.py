@@ -560,7 +560,7 @@ class WindowsAnalyzer:
                     pdb_name_query = pdb_name.split("\\")[-1]
                 else:
                     pdb_name_query = pdb_name
-                exist = sig_cursor.execute(f"SELECT * FROM debug_signatures where pdb_name like \"%{pdb_name_query}%\"").fetchall()
+                exist = sig_cursor.execute(f"SELECT * FROM debug_signatures where pdb_name like \'%{pdb_name_query}%\'").fetchall()
                 if exist:
                     for answ in exist:
                         debug_table.add_row(answ[0], answ[1])
