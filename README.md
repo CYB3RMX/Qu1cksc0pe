@@ -43,6 +43,7 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 # Updates
 <b>05/09/2024</b>
 - [X] Added new PDB signatures.
+- [X] Improvements on ```Windows Analyzer``` module.
 
 <b>29/08/2024</b>
 - [X] ```Document Analyzer``` module is improved. Now it has better exploit detection capability.
