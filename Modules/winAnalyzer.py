@@ -272,26 +272,26 @@ class WindowsAnalyzer:
         stuff_table = Table()
         stuff_table.add_column("[bold green]Interesting Patterns", justify="center")
         interesting_stuff = [
-            r"[a-zA-Z0-9_.]*pdb", r"[a-zA-Z0-9_.]*vbs", 
-            r"[a-zA-Z0-9_.]*vba", r"[a-zA-Z0-9_.]*vbe", 
-            r"[a-zA-Z0-9_.]*exe", r"[a-zA-Z0-9_.]*ps1",
-            r"[a-zA-Z0-9_.]*dll", r"[a-zA-Z0-9_.]*bat",
-            r"[a-zA-Z0-9_.]*cmd", r"[a-zA-Z0-9_.]*tmp",
-            r"[a-zA-Z0-9_.]*dmp", r"[a-zA-Z0-9_.]*cfg",
-            r"[a-zA-Z0-9_.]*lnk", r"[a-zA-Z0-9_.]*config",
-            r"[a-zA-Z0-9_.]*7z", r"[a-zA-Z0-9_.]*docx"
+            r"[a-zA-Z0-9_\-\\/:]+\.pdb", r"[a-zA-Z0-9_\-\\/:]+\.vbs", 
+            r"[a-zA-Z0-9_\-\\/:]+\.vba", r"[a-zA-Z0-9_\-\\/:]+\.vbe", 
+            r"[a-zA-Z0-9_\-\\/:]+\.exe", r"[a-zA-Z0-9_\-\\/:]+\.ps1",
+            r"[a-zA-Z0-9_\-\\/:]+\.dll", r"[a-zA-Z0-9_\-\\/:]+\.bat",
+            r"[a-zA-Z0-9_\-\\/:]+\.cmd", r"[a-zA-Z0-9_\-\\/:]+\.tmp",
+            r"[a-zA-Z0-9_\-\\/:]+\.dmp", r"[a-zA-Z0-9_\-\\/:]+\.cfg",
+            r"[a-zA-Z0-9_\-\\/:]+\.lnk", r"[a-zA-Z0-9_\-\\/:]+\.config",
+            r"[a-zA-Z0-9_\-\\/:]+\.7z", r"[a-zA-Z0-9_\-\\/:]+\.docx"
             r"SeLockMemoryPrivilege", r"SeShutdownPrivilege",
             r"SeChangeNotifyPrivilege", r"SeUndockPrivilege",
             r"SeIncreaseWorkingSetPrivilege", r"SeTimeZonePrivilege",
-            r"Select \* from \w+", r"VirtualBox", r"vmware"
+            r"Select \* from \w+", r"VirtualBox", r"vmware", r"syscall\.[a-zA-Z0-9]+"
         ]
 
         # Array for holding string values
         intstf = []
 
         # Search for keys in file buffer
-        for key in interesting_stuff:
-            chk = re.findall(key, str(self.all_strings), re.IGNORECASE) # "re.IGNORECASE" in case of non case sensitive values
+        for key in track(range(len(interesting_stuff)), description="Analyzing..."):
+            chk = re.findall(interesting_stuff[key], str(self.all_strings), re.IGNORECASE) # "re.IGNORECASE" in case of non case sensitive values
             if chk != []:
                 for pattern in chk:
                     if pattern not in intstf:
@@ -300,7 +300,7 @@ class WindowsAnalyzer:
         # Print output
         if intstf != []:
             for stf in intstf:
-                if (stf in interesting_stuff) or (".cmd" in stf or ".bat" in stf or ".exe" in stf) or ("Select" in stf):
+                if (stf in interesting_stuff) or (".cmd" in stf or ".bat" in stf or ".exe" in stf or "syscall" in stf) or ("Select" in stf):
                     stuff_table.add_row(f"[bold red]{stf}[white]")
                 else:
                     stuff_table.add_row(stf)
