@@ -551,7 +551,7 @@ class WindowsAnalyzer:
             # 1. Check signature first
             exist = sig_cursor.execute(f"SELECT * FROM debug_signatures where signature=\"{debug_buffer.Signature_String}\"").fetchall()
             if exist:
-                debug_table.add_row(exist[0][0], exist[0][1])
+                debug_table.add_row(f"[bold red]{exist[0][0]}[white]", f"[bold red]{exist[0][1]}[white]")
                 print(debug_table)
             else:
                 # 2. Check pdb name
@@ -563,7 +563,7 @@ class WindowsAnalyzer:
                 exist = sig_cursor.execute(f"SELECT * FROM debug_signatures where pdb_name like \'%{pdb_name_query}%\'").fetchall()
                 if exist:
                     for answ in exist:
-                        debug_table.add_row(answ[0], answ[1])
+                        debug_table.add_row(f"[bold red]{answ[0]}[white]", f"[bold red]{answ[1]}[white]")
                     print(debug_table)
         except AttributeError:
             print(f"\n{errorS} There is no information about DEBUG section!")
