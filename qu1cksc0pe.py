@@ -10,8 +10,8 @@ try:
     import distutils.spawn
     import shutil
     import warnings
-except:
-    print("Missing modules detected!")
+except Exception as e:
+    print(f"Missing modules detected!: {e}")
     sys.exit(1)
 
 # Check python version

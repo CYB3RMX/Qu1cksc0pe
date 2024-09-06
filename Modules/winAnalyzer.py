@@ -272,14 +272,14 @@ class WindowsAnalyzer:
         stuff_table = Table()
         stuff_table.add_column("[bold green]Interesting Patterns", justify="center")
         interesting_stuff = [
-            r"[a-zA-Z0-9_\-\\/:]+\.pdb", r"[a-zA-Z0-9_\-\\/:]+\.vbs", 
-            r"[a-zA-Z0-9_\-\\/:]+\.vba", r"[a-zA-Z0-9_\-\\/:]+\.vbe", 
-            r"[a-zA-Z0-9_\-\\/:]+\.exe", r"[a-zA-Z0-9_\-\\/:]+\.ps1",
-            r"[a-zA-Z0-9_\-\\/:]+\.dll", r"[a-zA-Z0-9_\-\\/:]+\.bat",
-            r"[a-zA-Z0-9_\-\\/:]+\.cmd", r"[a-zA-Z0-9_\-\\/:]+\.tmp",
-            r"[a-zA-Z0-9_\-\\/:]+\.dmp", r"[a-zA-Z0-9_\-\\/:]+\.cfg",
-            r"[a-zA-Z0-9_\-\\/:]+\.lnk", r"[a-zA-Z0-9_\-\\/:]+\.config",
-            r"[a-zA-Z0-9_\-\\/:]+\.7z", r"[a-zA-Z0-9_\-\\/:]+\.docx"
+            r'\b[a-zA-Z0-9_\-\\/:]+\.pdb', r'\b[a-zA-Z0-9_\-\\/:]+\.vbs', 
+            r'\b[a-zA-Z0-9_\-\\/:]+\.vba', r'\b[a-zA-Z0-9_\-\\/:]+\.vbe', 
+            r'\b[a-zA-Z0-9_\-\\/:]+\.exe', r'\b[a-zA-Z0-9_\-\\/:]+\.ps1',
+            r'\b[a-zA-Z0-9_\-\\/:]+\.dll', r'\b[a-zA-Z0-9_\-\\/:]+\.bat',
+            r'\b[a-zA-Z0-9_\-\\/:]+\.cmd', r'\b[a-zA-Z0-9_\-\\/:]+\.tmp',
+            r'\b[a-zA-Z0-9_\-\\/:]+\.dmp', r'\b[a-zA-Z0-9_\-\\/:]+\.cfg',
+            r'\b[a-zA-Z0-9_\-\\/:]+\.lnk', r'\b[a-zA-Z0-9_\-\\/:]+\.config',
+            r'\b[a-zA-Z0-9_\-\\/:]+\.7z', r'\b[a-zA-Z0-9_\-\\/:]+\.docx',
             r"SeLockMemoryPrivilege", r"SeShutdownPrivilege",
             r"SeChangeNotifyPrivilege", r"SeUndockPrivilege",
             r"SeIncreaseWorkingSetPrivilege", r"SeTimeZonePrivilege",
@@ -540,6 +540,7 @@ class WindowsAnalyzer:
             winrep["debug_signature"] = debug_buffer.Signature_String
 
             # Check if the signature string in our database
+            print(f"\n{infoS} Checking the target PDB in our malicious PDB database...")
             sig_base = sqlite3.connect(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows_debug_signatures")
             sig_cursor = sig_base.cursor()
 
@@ -567,6 +568,8 @@ class WindowsAnalyzer:
                     print(debug_table)
         except AttributeError:
             print(f"\n{errorS} There is no information about DEBUG section!")
+        except UnicodeDecodeError:
+            print(f"\n{errorS} PDB file name might be corrupted!")
             
     def dotnet_file_analyzer(self):
         print(f"{infoS} Performing .NET analysis...")
@@ -616,6 +619,9 @@ class WindowsAnalyzer:
         self.check_for_interesting_stuff()
         self.detect_embedded_PE()
 
+        # Get debug information
+        self.get_debug_information()
+
         try:
             self.analyze_via_viv()
         except:
@@ -630,9 +636,6 @@ class WindowsAnalyzer:
             self.dll_files()
         except:
             pass
-
-        # Get debug information
-        self.get_debug_information()
 
         # Yara rule match
         print(f"\n{infoS} Performing YARA rule matching...")

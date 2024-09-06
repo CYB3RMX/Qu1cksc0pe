@@ -33,3 +33,6 @@ CreateEncryptor
 CreateDecryptor
 GenerateIV
 GenerateKey
+LoadLibrary
+VirtualProtect
+GetProcAddress
