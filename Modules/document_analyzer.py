@@ -596,7 +596,7 @@ class DocumentAnalyzer:
             print(f"{errorS} There is no URL pattern found via regex!\n")
 
         # PDF Stream analysis
-        print(f"{infoS} Performing PDF stream analysis...")
+        print(f"\n{infoS} Performing PDF stream analysis...")
         print(f"{infoS} Analyzing total objects...")
         # Iterate over objects and analyze them!
         number_of_objects = 0

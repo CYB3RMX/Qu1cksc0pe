@@ -121,13 +121,14 @@ class PcapAnalyzer:
         stuff_table.add_column("[bold green]Interesting Strings", justify="center")
         extracted_data = []
         interesting_stuff = [
-            r"[a-zA-Z0-9_.]*pdb", r"[a-zA-Z0-9_.]*vbs", 
-            r"[a-zA-Z0-9_.]*vba", r"[a-zA-Z0-9_.]*vbe", 
-            r"[a-zA-Z0-9_.]*exe", r"[a-zA-Z0-9_.]*ps1",
-            r"[a-zA-Z0-9_.]*dll", r"[a-zA-Z0-9_.]*bat",
-            r"[a-zA-Z0-9_.]*cmd", r"[a-zA-Z0-9_.]*tmp",
-            r"[a-zA-Z0-9_.]*dmp", r"[a-zA-Z0-9_.]*cfg",
-            r"[a-zA-Z0-9_.]*lnk", r"[a-zA-Z0-9_.]*config"
+            r'\b[a-zA-Z0-9_\-\\/:]+\.pdb', r'\b[a-zA-Z0-9_\-\\/:]+\.vbs', 
+            r'\b[a-zA-Z0-9_\-\\/:]+\.vba', r'\b[a-zA-Z0-9_\-\\/:]+\.vbe', 
+            r'\b[a-zA-Z0-9_\-\\/:]+\.exe', r'\b[a-zA-Z0-9_\-\\/:]+\.ps1',
+            r'\b[a-zA-Z0-9_\-\\/:]+\.dll', r'\b[a-zA-Z0-9_\-\\/:]+\.bat',
+            r'\b[a-zA-Z0-9_\-\\/:]+\.cmd', r'\b[a-zA-Z0-9_\-\\/:]+\.tmp',
+            r'\b[a-zA-Z0-9_\-\\/:]+\.dmp', r'\b[a-zA-Z0-9_\-\\/:]+\.cfg',
+            r'\b[a-zA-Z0-9_\-\\/:]+\.lnk', r'\b[a-zA-Z0-9_\-\\/:]+\.config',
+            r'\b[a-zA-Z0-9_\-\\/:]+\.7z', r'\b[a-zA-Z0-9_\-\\/:]+\.docx'
         ]
         print(f"\n{infoS} Performing analysis of interesting strings. It will take a while please wait...")
         for stuff in track(range(len(interesting_stuff)), description="Processing buffer..."):
