@@ -41,15 +41,13 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/1bf1b1d6-80f3-445d-996d-a4216a79a2e0)
 
 # Updates
+<b>12/09/2024</b>
+- [X] Improvements on ```Linux Analyzer``` module.
+- [X] Added new PDB signatures.
+- [X] Added new YARA rule.
+
 <b>06/09/2024</b>
 - [X] Bug fixes and little improvements.
-
-<b>05/09/2024</b>
-- [X] Added new PDB signatures.
-- [X] Improvements on ```Windows Analyzer``` module.
-
-<b>29/08/2024</b>
-- [X] ```Document Analyzer``` module is improved. Now it has better exploit detection capability.
 
 # Available On
 <img width="400" src="https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png" alt="logo"><img width="400" src="https://user-images.githubusercontent.com/42123683/189416193-a709291f-be8f-469c-b649-c6201fa86677.jpeg" alt="logo">

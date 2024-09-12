@@ -40,12 +40,9 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # Compatibility
 path_seperator = "/"
-strings_param = "--all"
+strings_param = "-a"
 if sys.platform == "win32":
     path_seperator = "\\"
-    strings_param = "-a"
-elif sys.platform == "darwin":
-    strings_param = "-a"
 
 CATEGORIES = (
     "Networking",
@@ -58,7 +55,6 @@ CATEGORIES = (
     "Evasion",
     "Other/Unknown"
 )
-
 
 class LinuxAnalyzer:
     def __init__(self, base_path, target_file, rule_path, strings_lines):
@@ -74,6 +70,7 @@ class LinuxAnalyzer:
         _binary = lief.parse(target_file)
         self.symbol_names = [sym.name for sym in _binary.symbols]
         self.binary = _binary
+        self.is_go_binary = None
 
     def parse_section_content(self, sec_name):
         return "".join([chr(unicode_point)
@@ -140,7 +137,7 @@ class LinuxAnalyzer:
             self.report["matched_rules"].append({str(match): []})
             for pi in self.__class__.yara_matches_to_patterninfo(match.strings):
                 self.report["matched_rules"][-1][str(match)].append(pi)
-                yara_t.add_row(pi.values())
+                yara_t.add_row(str(pi["offset"]), str(pi["matched_pattern"]))
 
             print(yara_t)
             print(" ")
@@ -179,7 +176,11 @@ class LinuxAnalyzer:
                 "entropy": str(sec.entropy)
             }
             self.report["sections"].append(metadata.copy())
+            check_go = metadata["name"]
             metadata["name"] = "[bold red]"+metadata["name"]
+            # Check for go presence
+            if ".go" in check_go[:3]:
+                self.is_go_binary = True
             # since 3.7, dict objects guarantee insertion order preservation
             section_t.add_row(*metadata.values()) # so this is ok for filling a row
 
@@ -226,25 +227,33 @@ class LinuxAnalyzer:
     def golang_analyze(self):
         print(f"\n{infoS} Analyzing [bold green]Golang [white]binary...")
         go_file = pygore.GoFile(self.target_file)
-        print(f"\n{infoS} Parsing compiler information...")
-        comp = go_file.get_compiler_version()
-        print(f"[bold magenta]>>>[white] Compiler Version: [bold green]{comp.name}")
-        print(f"[bold magenta]>>>[white] Timestamp: [bold green]{comp.timestamp}")
+        try:
+            print(f"\n{infoS} Parsing compiler information...")
+            comp = go_file.get_compiler_version()
+            print(f"[bold magenta]>>>[white] Compiler Version: [bold green]{comp.name}")
+            print(f"[bold magenta]>>>[white] Timestamp: [bold green]{comp.timestamp}")
+        except:
+            print(f"{errorS} An error occured while parsing the compiler information!")
 
-        go_pkgs = go_file.get_packages()
-        print(f"\n{infoS} Performing deep inspection against target binary...")
-        pkg_table = init_table("Name", "FilePath", col_prefix="[bold green]", title="* Information About Packages *")
-        for pk in go_pkgs:
-            pkg_table.add_row(pk.name, pk.filepath)
-        print(pkg_table)
+        try:
+            go_pkgs = go_file.get_packages()
+            if go_pkgs:
+                print(f"\n{infoS} Performing deep inspection against target binary...")
+                pkg_table = init_table("Name", "FilePath", col_prefix="[bold green]", title="* Information About Packages *")
+                print(go_pkgs)
+                for pk in go_pkgs:
+                    pkg_table.add_row(pk.name, pk.filepath)
+                print(pkg_table)
 
-        for pk in go_pkgs:
-            emit_table(pk.methods, "method", "Name", "Receiver", "Offset",
-                row_extractor=lambda m: (m.name, m.receiver, hex(m.offset)), col_prefix="[bold green]")
-            emit_table(pk.functions, "function", "Name", "Offset",
-                row_extractor=lambda f: (f.name, hex(f.offset)), col_prefix=["bold green"])
-        emit_table(go_file.get_std_lib_packages(), "imported libraries",
-            "[bold green]Name", row_extractor=lambda i:i.name)
+                for pk in go_pkgs:
+                    emit_table(pk.methods, "method", "Name", "Receiver", "Offset",
+                        row_extractor=lambda m: (m.name, m.receiver, hex(m.offset)), col_prefix="[bold green]")
+                    emit_table(pk.functions, "function", "Name", "Offset",
+                        row_extractor=lambda f: (f.name, hex(f.offset)), col_prefix=["bold green"])
+                emit_table(go_file.get_std_lib_packages(), "imported libraries",
+                    "[bold green]Name", row_extractor=lambda i:i.name)
+        except:
+            print(f"{errorS} An error occured while analyzing the packages!")
 
     def analyze(self, indicators_by_category, emit_report=False):
         """Execute all analysis methods, including strings matching based on indicator input."""
@@ -304,6 +313,12 @@ class LinuxAnalyzer:
                 stats.add_row(cat, str(score))
         print(stats)
 
+        # run golang specific analysis if applicable
+        if self.is_go_binary:
+            print(f"\n{infoS} Qu1cksc0pe was identified this binary as [bold green]Golang[white] binary.")
+            if user_confirm(">>> Do you want to perform special analysis[Y/n]?: "):
+                self.golang_analyze()
+
         if categorized_func_count < 10:
             print("[blink bold white on red]This file might be obfuscated or encrypted. [white]Try [bold green][i]--packer[/i] [white]to scan this file for packers.")
             print("[bold]You can also use [green][i]--hashscan[/i] [white]to scan this file.")
@@ -311,12 +326,6 @@ class LinuxAnalyzer:
 
         if emit_report:
             self.save_report("linux")
-
-        # run golang specific analysis if applicable
-        if "runtime.goexit" in self.strings_output and "runtime.gopanic" in self.strings_output:
-            print(f"\n{infoS} Qu1cksc0pe was identified this binary as [bold green]Golang[white] binary.")
-            if user_confirm(">>> Do you want to perform special analysis[Y/n]?: "):
-                self.golang_analyze()
 
     @staticmethod
     def yara_matches_to_patterninfo(patterns):
