@@ -21,6 +21,7 @@ except ImportError: # fallback for running as "raw" Python file
 
 try:
     from rich import print
+    from rich.table import Table
 except:
     err_exit("Error: >rich< module not found.")
 
@@ -44,17 +45,17 @@ strings_param = "-a"
 if sys.platform == "win32":
     path_seperator = "\\"
 
-CATEGORIES = (
-    "Networking",
-    "File",
-    "Process",
-    "Memory Management",
-    "Information Gathering",
-    "System/Persistence",
-    "Cryptography",
-    "Evasion",
-    "Other/Unknown"
-)
+CATEGORIES = {
+    "Networking": [],
+    "File": [],
+    "Process": [],
+    "Memory Management": [],
+    "Information Gathering": [],
+    "System/Persistence": [],
+    "Cryptography": [],
+    "Evasion": [],
+    "Other/Unknown": []
+}
 
 class LinuxAnalyzer:
     def __init__(self, base_path, target_file, rule_path, strings_lines):
@@ -62,11 +63,7 @@ class LinuxAnalyzer:
         self.target_file = target_file
         self.rule_path = rule_path
         self.strings_output = strings_lines
-
         self.report = self.__class__.init_blank_report(default="")
-
-        self.categorized_strmatches = {cat: [] for cat in CATEGORIES}
-
         _binary = lief.parse(target_file)
         self.symbol_names = [sym.name for sym in _binary.symbols]
         self.binary = _binary
@@ -179,7 +176,7 @@ class LinuxAnalyzer:
             check_go = metadata["name"]
             metadata["name"] = "[bold red]"+metadata["name"]
             # Check for go presence
-            if ".go" in check_go[:3]:
+            if ".go" in check_go[:3] and check_go[:4] != ".got":
                 self.is_go_binary = True
             # since 3.7, dict objects guarantee insertion order preservation
             section_t.add_row(*metadata.values()) # so this is ok for filling a row
@@ -261,32 +258,23 @@ class LinuxAnalyzer:
         self.report["filename"] = self.target_file
 
         for category in indicators_by_category:
-            for indicator in (i for i in no_blanks(indicators_by_category[category]) if i in self.symbol_names):
-                self.categorized_strmatches[category].append(indicator)
-                categorized_func_count += 1
+            for func in indicators_by_category[category]["funcs"]:
+                if func in self.symbol_names:
+                    indicators_by_category[category]["occurence"] += 1
+                    CATEGORIES[category].append(func)
+                    categorized_func_count += 1
 
-        score_per_cat = {}
-        for cat, matches in self.categorized_strmatches.items():
-            if len(matches) == 0:
-                continue
-
-            if cat in ("Information Gathering", "System/Persistence", "Cryptography", "Evasion"):
-                single_cat_t = init_table(style="yellow", title="* WARNING *", title_style="blink italic yellow")
-            else:
-                single_cat_t = init_table()
-
-            single_cat_t.add_column(f"Functions or Strings about [bold green]{cat}", justify="center")
-            self.report["categories"].update({cat: []})
-            for str_match in no_blanks(matches):
-                single_cat_t.add_row(f"[bold red]{str_match}")
-                self.report["categories"][cat].append(str_match)
-
-                try:
-                    score_per_cat[cat] += 1
-                except KeyError:
-                    score_per_cat[cat] = 1
-
-            print(single_cat_t)
+        for cat in CATEGORIES:
+            if CATEGORIES[cat]:
+                if cat in str(["Information Gathering", "System/Persistence", "Cryptography", "Evasion"]):
+                    single_cat_t = Table(style="yellow", title="* WARNING *", title_style="blink italic yellow")
+                else:
+                    single_cat_t = Table()
+                single_cat_t.add_column(f"Functions or Strings about [bold green]{cat}", justify="center")
+                for func in CATEGORIES[cat]:
+                    single_cat_t.add_row(f"[bold red]{func}")
+                print(single_cat_t)
+        self.report["categories"] = CATEGORIES
 
         print(f"\n{infoS} Performing YARA rule matching...")
         self.yara_scan(self.target_file)
@@ -306,23 +294,23 @@ class LinuxAnalyzer:
         self.report["categorized_functions"] = categorized_func_count
         self.report["number_of_functions"] = len(self.symbol_names)
 
-        for cat, score in score_per_cat.items():
-            if cat == "System/Persistence" or cat == "Cryptography" or cat == "Information Gathering":
-                stats.add_row(f"[bold yellow]{cat}", f"[bold red]{score}")
-            else:
-                stats.add_row(cat, str(score))
-        print(stats)
-
         # run golang specific analysis if applicable
         if self.is_go_binary:
             print(f"\n{infoS} Qu1cksc0pe was identified this binary as [bold green]Golang[white] binary.")
             if user_confirm(">>> Do you want to perform special analysis[Y/n]?: "):
                 self.golang_analyze()
 
+        for cat in CATEGORIES:
+            if CATEGORIES[cat]:
+                if cat in str(["Information Gathering", "System/Persistence", "Cryptography", "Evasion"]):
+                    stats.add_row(f"[bold yellow]{cat}", f"[bold red]{len(CATEGORIES[cat])}")
+                else:
+                    stats.add_row(cat, str(len(CATEGORIES[cat])))
+        print(stats)
+
         if categorized_func_count < 10:
             print("[blink bold white on red]This file might be obfuscated or encrypted. [white]Try [bold green][i]--packer[/i] [white]to scan this file for packers.")
             print("[bold]You can also use [green][i]--hashscan[/i] [white]to scan this file.")
-            sys.exit(0)
 
         if emit_report:
             self.save_report("linux")
@@ -385,17 +373,7 @@ def run(sc0pe_path, target_file, emit_report=False):
         "Evasion": "Debug",
         "Other/Unknown": "Others"
     }
-    def map_to_fname(key): # maps to wordlist files
-        try:
-            return _special_cases[key]
-        except KeyError: # for now only "Networking" => "Networking"(.txt), but in the future all mappings will be handled like this
-            return key
-
-    indicators_by_category = {}
-    spath = f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}"
-    for cat in CATEGORIES:
-        with open(spath + map_to_fname(cat) + ".txt") as catfile:
-            indicators_by_category[cat] = catfile.read().split("\n")
+    indicators_by_category = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}linux_func_categories.json"))
 
     lina = LinuxAnalyzer(
         base_path=sc0pe_path, target_file=target_file,
@@ -410,7 +388,7 @@ def main():
 
     from pathlib import Path
     run(Path(__file__).parent.parent, # execute with autodeduced scope path
-        sys.argv[1], emit_reports=get_argv(2) == "True")
+        sys.argv[1], emit_report=get_argv(2) == "True")
 
 
 if __name__ == "__main__":
