@@ -9,7 +9,7 @@ import warnings
 import threading
 import subprocess
 import configparser
-import distutils.spawn
+import shutil
 
 from utils import err_exit, user_confirm
 
@@ -48,7 +48,7 @@ homeD = os.path.expanduser("~")
 path_seperator = "/"
 setup_scr = "setup.sh"
 strings_param = "--all"
-adb_path = distutils.spawn.find_executable("adb")
+adb_path = shutil.which("adb")
 del_com = "rm -rf"
 if sys.platform == "win32":
     path_seperator = "\\"
