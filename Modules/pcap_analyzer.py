@@ -5,7 +5,7 @@ import os
 import sys
 import json
 import binascii
-import distutils.spawn
+import shutil
 
 from utils import err_exit, user_confirm
 
@@ -25,13 +25,13 @@ except:
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
-if not distutils.spawn.find_executable("ja3"):
+if not shutil.which("ja3"):
     print(f"{errorS} Error: [bold green]ja3[white] command not found!")
     print(f"[bold red]>>>[white] Execute: [bold green]pip3 install pyja3[white]")
     sys.exit(1)
 
 # Get python binary
-if distutils.spawn.find_executable("python"):
+if shutil.which("python"):
     py_binary = "python"
 else:
     py_binary = "python3"

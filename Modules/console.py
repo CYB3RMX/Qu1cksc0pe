@@ -2,7 +2,7 @@
 
 import os
 import sys
-import distutils.spawn
+import shutil
 import subprocess
 
 from utils import err_exit
@@ -53,7 +53,7 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 sc0pe_path = open(".path_handler", "r").read()
 
 # Get python binary
-if distutils.spawn.find_executable("python"):
+if shutil.which("python"):
     py_binary = "python"
 else:
     py_binary = "python3"
@@ -193,7 +193,7 @@ try:
                 print(f"\n{infoS} Analyzing: [bold green]{filename}[white]")
                 fileType = str(pr.magic_file(filename))
                 if "ELF" in fileType:
-                    if distutils.spawn.find_executable("strings"):
+                    if shutil.which("strings"):
                         str_proc = subprocess.run(f"strings {strings_param} \"{filename}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                         print(f"{infoS} Target OS: [bold green]Linux[white]\n")
                         command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}linAnalyzer.py \"{filename}\""
@@ -211,7 +211,7 @@ try:
                 print(f"\n{infoS} Analyzing: [bold green]{filename}[white]")
                 fileType = str(pr.magic_file(filename))
                 if "Mach-O" in fileType:
-                    if distutils.spawn.find_executable("strings"):
+                    if shutil.which("strings"):
                         str_proc = subprocess.run(f"strings {strings_param} \"{filename}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                         print(f"{infoS} Target OS: [bold green]OSX[white]\n")
                         command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}apple_analyzer.py \"{filename}\""
@@ -231,7 +231,7 @@ try:
                 if "PK" in fileType and "Java archive" in fileType:
                     look = pyaxmlparser.APK(filename)
                     if look.is_valid_APK() == True:
-                        if distutils.spawn.find_executable("strings"):
+                        if shutil.which("strings"):
                             str_proc = subprocess.run(f"strings {strings_param} \"{filename}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                             print(f"{infoS} Target OS: [bold green]Android[white]")    
                             command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}apkAnalyzer.py \"{filename}\""
@@ -258,7 +258,7 @@ try:
         elif con_command == "domain":
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
-                if distutils.spawn.find_executable("strings"):
+                if shutil.which("strings"):
                     str_proc = subprocess.run(f"strings {strings_param} \"{filename}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                     command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}domainCatcher.py \"{filename}\""
                     os.system(command)
@@ -272,7 +272,7 @@ try:
         elif con_command == "language":
             if os.path.exists(".target-file.txt"):
                 filename = open(".target-file.txt", "r").read()
-                if distutils.spawn.find_executable("strings"):
+                if shutil.which("strings"):
                     str_proc = subprocess.run(f"strings {strings_param} \"{filename}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                     command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}languageDetect.py \"{filename}\""
                     os.system(command)
