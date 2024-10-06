@@ -7,7 +7,6 @@ try:
     import argparse
     import getpass
     import configparser
-    import distutils.spawn
     import shutil
     import warnings
 except Exception as e:
@@ -55,7 +54,7 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 username = getpass.getuser()
 
 # Get python binary
-if distutils.spawn.find_executable("python"):
+if shutil.which("python"):
     py_binary = "python"
 else:
     py_binary = "python3"
@@ -207,7 +206,7 @@ def Qu1cksc0pe():
             # Before doing something we need to check file size
             file_size = os.path.getsize(args.file)
             if file_size < 52428800: # If given file smaller than 100MB
-                if not distutils.spawn.find_executable("strings"):
+                if not shutil.which("strings"):
                     err_exit("[bold white on red][blink]strings[/blink] command not found. You need to install it.")
             else:
                 print(f"{infoS} Whoa!! Looks like we have a large file here.")
