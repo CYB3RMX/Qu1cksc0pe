@@ -5,7 +5,7 @@ import re
 import sys
 import email
 import subprocess
-import distutils.spawn
+import shutil
 
 from utils import err_exit
 
@@ -26,7 +26,7 @@ infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # Get python binary
-if distutils.spawn.find_executable("python"):
+if shutil.which("python"):
     py_binary = "python"
 else:
     py_binary = "python3"
