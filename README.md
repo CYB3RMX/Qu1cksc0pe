@@ -70,6 +70,9 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 - ```PyOneNote``` => <i>OneNote document analysis.</i>
 - ```Mono``` => <i>Performing .Net binary analysis.</i>
 
+> [!NOTE]
+> If you encounter issues with the Python modules, creating a Python virtual environment (python_venv) should resolve them.
+
 ```bash
 # You can simply execute the following command it will do everything for you!
 bash setup.sh
@@ -189,8 +192,8 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 
 # Dynamic Analysis
 ## Android Application Analysis
-**Alert**
-> **You must connect a virtual device or physical device to your computer.**
+> [!NOTE]
+> You must connect a virtual device or physical device to your computer.
 
 <br><b>Usage</b>: ```python qu1cksc0pe.py --watch```<br>
 
