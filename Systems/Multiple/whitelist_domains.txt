@@ -1,0 +1,9 @@
+schemas.openxmlformats.org
+schemas.microsoft.com
+purl.org
+www.w3.org
+go.microsoft.com
+ns.adobe.com
+www.adobe.com
+www.microsoft.com
+www.iec.ch
