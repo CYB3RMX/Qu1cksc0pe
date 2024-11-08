@@ -90,6 +90,7 @@ class DocumentAnalyzer:
         self.base64_pattern = r'(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})'
         self.mal_code = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}malicious_html_codes.json"))
         self.mal_rtf_code = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}malicious_rtf_codes.json"))
+        self.whitelist_domains = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}whitelist_domains.txt", "r").read()
         self.pat_ct = 0
         self.is_ole_file = None
         self.rtf_exploit_pattern_dict = {
@@ -281,7 +282,7 @@ class DocumentAnalyzer:
                     ddd = document.read(fff).decode()
                     linkz = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", ddd)
                     for lnk in linkz:
-                        if "schemas.openxmlformats.org" not in lnk and "schemas.microsoft.com" not in lnk and "purl.org" not in lnk and "www.w3.org" not in lnk and "go.microsoft.com" not in lnk:
+                        if lnk.split("/")[2] not in self.whitelist_domains:
                             exlinks.add_row(lnk)
                 except:
                     continue
@@ -450,7 +451,7 @@ class DocumentAnalyzer:
         url_match = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", allstr)
         if url_match != []:
             for lnk in url_match:
-                if "schemas.openxmlformats.org" not in lnk and "schemas.microsoft.com" not in lnk and "purl.org" not in lnk and "www.w3.org" not in lnk and "go.microsoft.com" not in lnk and "ns.adobe.com" not in lnk:
+                if lnk.split("/")[2] not in self.whitelist_domains:
                     print(f"[bold magenta]>>>[white] {lnk}")
                     urlswitch += 1
         
@@ -574,7 +575,7 @@ class DocumentAnalyzer:
         if len(linkz) != 0:
             lcontrol = []
             for l in linkz:
-                if "schemas.openxmlformats.org" not in l and "schemas.microsoft.com" not in l and "purl.org" not in l and "www.w3.org" not in l and "go.microsoft.com" not in l and "ns.adobe.com" not in l and "www.adobe.com" not in l and "www.microsoft.com" not in l:
+                if l.split("/")[2] not in self.whitelist_domains:
                     if l not in lcontrol:
                         if ")" in l:
                             if l.split(')')[0] not in lcontrol:
@@ -737,8 +738,12 @@ class DocumentAnalyzer:
             url_table.add_column("[bold green]URL Values", justify="center")
             for url in regx:
                 if url not in url_vals:
-                    url_table.add_row(url)
-                    url_vals.append(url)
+                    if url.split("/")[2].split("\'")[0] not in self.whitelist_domains:
+                        if "\'" in url: # Remove the single quote
+                            url_table.add_row(url.split("\'")[0])
+                        else:
+                            url_table.add_row(url)
+                        url_vals.append(url)
             print(url_table)
         else:
             print(f"{errorS} There is no URL value found!")
