@@ -123,6 +123,7 @@ class WindowsAnalyzer:
         self.executable_buffer = open(self.target_file, "rb").read()
         self.all_strings = open("temp.txt", "r").read().split("\n")
         self.blacklisted_patterns = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}dotnet_blacklisted_methods.txt", "r").read().split("\n")
+        self.sus_reg_keys = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}suspicious_registry_keys.txt", "r").read().split("\n")
         self.rule_path = conf["Rule_PATH"]["rulepath"]
 
         # Check for windows file type
@@ -246,7 +247,7 @@ class WindowsAnalyzer:
         # Defining table and patterns
         reg_table = Table()
         reg_table.add_column("[bold green]Registry Keys", justify="center")
-        reg_key_array = [r"SOFTWARE\\[A-Za-z0-9_\\]*", r"HKCU_[A-Za-z0-9_\\]*", r"HKLM_[A-Za-z0-9_\\]*", r"SYSTEM\\[A-Za-z0-9_\\]*"]
+        reg_key_array = [r"SOFTWARE\\[A-Za-z0-9_\\/\\\s]*", r"HKCU_[A-Za-z0-9_\\/\\\s]*", r"HKLM_[A-Za-z0-9_\\/\\\s]*", r"SYSTEM\\[A-Za-z0-9_\\/\\\s]*"]
 
         # Array for holding keys
         registry_keys = []
@@ -261,7 +262,10 @@ class WindowsAnalyzer:
         # Print output
         if registry_keys != []:
             for reg in registry_keys:
-                reg_table.add_row(reg)
+                if reg.upper() in self.sus_reg_keys:
+                    reg_table.add_row(f"[bold yellow]{reg} (SUSPICIOUS!)")
+                else:
+                    reg_table.add_row(reg)
             print(reg_table)
         else:
             print(f"{errorS} There is no pattern about registry keys!\n")

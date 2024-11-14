@@ -592,7 +592,7 @@ class DocumentAnalyzer:
             if uustr != 0:
                 print(urlTable)
             else:
-                print(f"{infoS} There is no interesting URL\'s found!\n")
+                print(f"{infoS} There is no URL pattern found via regex!\n")
         else:
             print(f"{errorS} There is no URL pattern found via regex!\n")
 
@@ -645,17 +645,12 @@ class DocumentAnalyzer:
                             get_url = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", str(doc.getobj(obj)))
                             if get_url != []:
                                 for ur in get_url:
-                                    if "'" in ur:
-                                        if ur.split("'")[0] not in ext_urls:
+                                    if "\'" in ur:
+                                        if ur.split("\'")[0] not in ext_urls:
                                             ext_urls.append(ur.split("'")[0])
                                     else:
                                         if ur not in ext_urls:
                                             ext_urls.append(ur)
-
-                            # Print all
-                            if ext_urls != []:
-                                for ext in ext_urls:
-                                    print(f"{infoS} Extracted URI from stream: [bold green]{ext}[white]")
 
                         # Check for /EmbeddedFile stream
                         if "EmbeddedFile" in str(doc.getobj(obj)) and "PDFStream" in str(doc.getobj(obj)):
@@ -670,6 +665,14 @@ class DocumentAnalyzer:
                         continue
             else:
                 pass
+
+        # Print all
+        if ext_urls != []:
+            urlTable = Table()
+            urlTable.add_column("[bold green]Extracted URI Values From Streams", justify="center")
+            for ext in ext_urls:
+                urlTable.add_row(ext)
+            print(urlTable)
 
         # Perform Yara scan
         print(f"\n{infoS} Performing YARA rule matching...")
