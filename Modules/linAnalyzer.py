@@ -189,7 +189,7 @@ class LinuxAnalyzer:
         section_names = [print(ts.format(sn=s.name)) or s.name for s in self.binary.sections if ".debug_" in s.name]
 
         if len(section_names) == 0:
-            print("[bold white on red]There aren't any debug sections in this binary!!")
+            print("[bold white on red]There is no debug sections in this binary!!")
             return
 
         if not user_confirm(f"\n>> Do you want to analyze debug strings?[Y/n]: "):
