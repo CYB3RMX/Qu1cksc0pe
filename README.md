@@ -41,6 +41,9 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/1bf1b1d6-80f3-445d-996d-a4216a79a2e0)
 
 # Updates
+<b>20/11/2024</b>
+- [X] Bug fix.
+
 <b>14/11/2024</b>
 - [X] Improvements on ```Windows Analyzer``` module.
 

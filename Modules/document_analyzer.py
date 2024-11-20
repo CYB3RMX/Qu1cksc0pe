@@ -280,7 +280,7 @@ class DocumentAnalyzer:
             for fff in document.namelist():
                 try:
                     ddd = document.read(fff).decode()
-                    linkz = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", ddd)
+                    linkz = re.findall(r"http[s]?://[a-zA-Z0-9./?=_%:-]*", ddd)
                     for lnk in linkz:
                         if lnk.split("/")[2] not in self.whitelist_domains:
                             exlinks.add_row(lnk)
