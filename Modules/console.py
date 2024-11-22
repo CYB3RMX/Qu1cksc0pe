@@ -181,7 +181,7 @@ try:
                 fileType = str(pr.magic_file(filename))
                 if "Windows Executable" in fileType or ".msi" in fileType or ".dll" in fileType or ".exe" in fileType:
                     print(f"{infoS} Target OS: [bold green]Windows[white]\n")
-                    command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}winAnalyzer.py \"{filename}\""
+                    command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}windows_static_analyzer.py \"{filename}\""
                     os.system(command)
             else:
                 print(f"{errorS} You must specify target file with [bold green]set target-file[white] command.")
@@ -196,7 +196,7 @@ try:
                     if shutil.which("strings"):
                         str_proc = subprocess.run(f"strings {strings_param} \"{filename}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                         print(f"{infoS} Target OS: [bold green]Linux[white]\n")
-                        command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}linAnalyzer.py \"{filename}\""
+                        command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}linux_static_analyzer.py \"{filename}\""
                         os.system(command)
                         os.remove(f"{sc0pe_path}{path_seperator}temp.txt")
                     else:
