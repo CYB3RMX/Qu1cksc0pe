@@ -126,7 +126,7 @@ class LinuxAnalyzer:
                 continue
 
         if len(recorded_matches) == 0:
-            print(f"[bold white on red]Not a single rule matched for {filename}");return
+            print(f"[bold white on red]There is no rule matched for {filename}");return
 
         for match in recorded_matches:
             print(f">>> Rule name: [i][bold magenta]{match}[/i]")
@@ -141,7 +141,7 @@ class LinuxAnalyzer:
 
     def emit_general_information(self):
         print(f"{infoS} General Informations about [bold green]{self.target_file}")
-        print(f"[bold red]>>>>[white] Machine Type: [bold green]{self.binary.header.machine_type.name}")
+        print(f"[bold red]>>>>[white] Machine Type: [bold green]{str(self.binary.header.machine_type).split('.')[-1]}")
         print(f"[bold red]>>>>[white] Binary Entrypoint: [bold green]{hex(self.binary.entrypoint)}")
         if self.binary.has_section(".interp"):
             interpreter = self.parse_section_content(".interp")
@@ -149,7 +149,7 @@ class LinuxAnalyzer:
             self.report["interpreter"] = interpreter
         print(f"[bold red]>>>>[white] Number of Sections: [bold green]{len(self.binary.sections)}")
         print(f"[bold red]>>>>[white] Number of Segments: [bold green]{len(self.binary.segments)}")
-        self.report["machine_type"] = self.binary.header.machine_type.name
+        self.report["machine_type"] = str(self.binary.header.machine_type).split('.')[-1]
         self.report["binary_entrypoint"] = str(hex(self.binary.entrypoint))
         self.report["number_of_sections"] = len(self.binary.sections)
         self.report["number_of_segments"] = len(self.binary.segments)
@@ -204,11 +204,14 @@ class LinuxAnalyzer:
             title="* Informations About Segments *")
 
         for seg in self.binary.segments:
-            if seg.type.name.strip() == "":
+            try:
+                if str(seg.type).split(".")[-1] == "":
+                    continue
+                sec_names = [s.name for s in seg.sections]
+                segments_t.add_row(f"[bold red]{str(seg.type).split('.')[-1]}", str(sec_names))
+                self.report["segments"].append(str(seg.type).split(".")[-1])
+            except:
                 continue
-            sec_names = [s.name for s in seg.sections]
-            segments_t.add_row(f"[bold red]{seg.type.name}", str(sec_names))
-            self.report["segments"].append(seg.type.name)
         print(segments_t)
 
     def list_libraries(self):

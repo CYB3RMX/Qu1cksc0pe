@@ -142,14 +142,14 @@ def BasicAnalyzer(analyzeFile):
     if "Windows Executable" in fileType or ".msi" in fileType or ".dll" in fileType or ".exe" in fileType:
         print(f"{infoS} Target OS: [bold green]Windows[white]\n")
         if args.report:
-            execute_module(f"winAnalyzer.py \"{analyzeFile}\" True")
+            execute_module(f"windows_static_analyzer.py \"{analyzeFile}\" True")
         else:
-            execute_module(f"winAnalyzer.py \"{analyzeFile}\" False")
+            execute_module(f"windows_static_analyzer.py \"{analyzeFile}\" False")
 
     # Linux Analysis
     elif "ELF" in fileType:
         print(f"{infoS} Target OS: [bold green]Linux[white]\n")
-        import Modules.linAnalyzer as lina
+        import Modules.linux_static_analyzer as lina
         lina.run(sc0pe_path, analyzeFile, emit_report=args.report)
 
     # MacOSX Analysis
