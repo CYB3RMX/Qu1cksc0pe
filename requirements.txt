@@ -11,7 +11,6 @@ yara-python==4.5.0
 prompt_toolkit==3.0.43
 frida-tools
 lief
-pygore
 pdfminer.six
 requests
 rarfile

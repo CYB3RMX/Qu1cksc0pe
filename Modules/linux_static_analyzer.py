@@ -6,6 +6,7 @@ import hashlib
 import warnings
 import subprocess
 import configparser
+from .go_binary_parser import GolangParser
 
 try:
     # by default, assume we're running as a module, inside a package
@@ -29,11 +30,6 @@ try:
     import lief
 except:
     err_exit("Error: >lief< module not found.")
-
-try:
-    import pygore
-except:
-    err_exit("Error: >pygore< module not found.")
 
 #--------------------------------------------- Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
@@ -68,6 +64,7 @@ class LinuxAnalyzer:
         self.symbol_names = [sym.name for sym in _binary.symbols]
         self.binary = _binary
         self.is_go_binary = None
+        self.categorized_func_count = 0
 
     def parse_section_content(self, sec_name):
         return "".join([chr(unicode_point)
@@ -224,40 +221,9 @@ class LinuxAnalyzer:
             self.report["libraries"].append(x)
         print(libs)
 
-    def golang_analyze(self):
-        print(f"\n{infoS} Analyzing [bold green]Golang [white]binary...")
-        go_file = pygore.GoFile(self.target_file)
-        try:
-            print(f"\n{infoS} Parsing compiler information...")
-            comp = go_file.get_compiler_version()
-            print(f"[bold magenta]>>>[white] Compiler Version: [bold green]{comp.name}")
-            print(f"[bold magenta]>>>[white] Timestamp: [bold green]{comp.timestamp}")
-        except:
-            print(f"{errorS} An error occured while parsing the compiler information!")
-
-        try:
-            go_pkgs = go_file.get_packages()
-            if go_pkgs:
-                print(f"\n{infoS} Performing deep inspection against target binary...")
-                pkg_table = init_table("Name", "FilePath", col_prefix="[bold green]", title="* Information About Packages *")
-                print(go_pkgs)
-                for pk in go_pkgs:
-                    pkg_table.add_row(pk.name, pk.filepath)
-                print(pkg_table)
-
-                for pk in go_pkgs:
-                    emit_table(pk.methods, "method", "Name", "Receiver", "Offset",
-                        row_extractor=lambda m: (m.name, m.receiver, hex(m.offset)), col_prefix="[bold green]")
-                    emit_table(pk.functions, "function", "Name", "Offset",
-                        row_extractor=lambda f: (f.name, hex(f.offset)), col_prefix=["bold green"])
-                emit_table(go_file.get_std_lib_packages(), "imported libraries",
-                    "[bold green]Name", row_extractor=lambda i:i.name)
-        except:
-            print(f"{errorS} An error occured while analyzing the packages!")
-
     def analyze(self, indicators_by_category, emit_report=False):
         """Execute all analysis methods, including strings matching based on indicator input."""
-        categorized_func_count = 0
+        
         self.report["filename"] = self.target_file
 
         for category in indicators_by_category:
@@ -265,7 +231,7 @@ class LinuxAnalyzer:
                 if func in self.symbol_names:
                     indicators_by_category[category]["occurence"] += 1
                     CATEGORIES[category].append(func)
-                    categorized_func_count += 1
+                    self.categorized_func_count += 1
 
         for cat in CATEGORIES:
             if CATEGORIES[cat]:
@@ -287,31 +253,35 @@ class LinuxAnalyzer:
         self.list_libraries()
         self.handle_debug_sections()
 
-        print(f"\n[bold green]->[white] Statistics for: [bold green][i]{self.target_file}[/i]")
-
-        stats = init_table("Categories", "Number of Functions or Strings")
-
-        stats.add_row("[bold green][i]All Functions[/i]", f"[bold green]{len(self.symbol_names)}")
-        stats.add_row("[bold green][i]Categorized Functions[/i]", f"[bold green]{categorized_func_count}")
-
-        self.report["categorized_functions"] = categorized_func_count
-        self.report["number_of_functions"] = len(self.symbol_names)
-
         # run golang specific analysis if applicable
         if self.is_go_binary:
             print(f"\n{infoS} Qu1cksc0pe was identified this binary as [bold green]Golang[white] binary.")
             if user_confirm(">>> Do you want to perform special analysis[Y/n]?: "):
-                self.golang_analyze()
+                golang_parser = GolangParser(self.target_file)
+                golang_parser.golang_analysis_main()
+                go_report = golang_parser.record_analysis_summary()
+                for key in go_report:
+                    if go_report[key] != []:
+                        CATEGORIES[key] += go_report[key]
+                        self.categorized_func_count += len(go_report[key])
+                        self.symbol_names += go_report[key]
 
-        for cat in CATEGORIES:
-            if CATEGORIES[cat]:
-                if cat in str(["Information Gathering", "System/Persistence", "Cryptography", "Evasion"]):
-                    stats.add_row(f"[bold yellow]{cat}", f"[bold red]{len(CATEGORIES[cat])}")
-                else:
-                    stats.add_row(cat, str(len(CATEGORIES[cat])))
-        print(stats)
+        if self.categorized_func_count != 0:
+            print(f"\n[bold green]->[white] Statistics for: [bold green][i]{self.target_file}[/i]")
+            stats = init_table("Categories", "Number of Functions or Strings")
+            stats.add_row("[bold green][i]All Functions[/i]", f"[bold green]{len(self.symbol_names)}")
+            stats.add_row("[bold green][i]Categorized Functions[/i]", f"[bold green]{self.categorized_func_count}")
+            self.report["categorized_functions"] = self.categorized_func_count
+            self.report["number_of_functions"] = len(self.symbol_names)
+            for cat in CATEGORIES:
+                if CATEGORIES[cat]:
+                    if cat in str(["Information Gathering", "System/Persistence", "Cryptography", "Evasion"]):
+                        stats.add_row(f"[bold yellow]{cat}", f"[bold red]{len(CATEGORIES[cat])}")
+                    else:
+                        stats.add_row(cat, str(len(CATEGORIES[cat])))
+            print(stats)
 
-        if categorized_func_count < 10:
+        if self.categorized_func_count > 0 and self.categorized_func_count < 10:
             print("[blink bold white on red]This file might be obfuscated or encrypted. [white]Try [bold green][i]--packer[/i] [white]to scan this file for packers.")
             print("[bold]You can also use [green][i]--hashscan[/i] [white]to scan this file.")
 
