@@ -41,14 +41,14 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/1bf1b1d6-80f3-445d-996d-a4216a79a2e0)
 
 # Updates
+<b>25/11/2024</b>
+- [X] Improvements on ```GolangAnalyzer``` module.
+
 <b>22/11/2024</b>
 - [X] Fix for compatibility issues in the Python module (```lief```)
 
 <b>20/11/2024</b>
 - [X] Bug fix.
-
-<b>14/11/2024</b>
-- [X] Improvements on ```Windows Analyzer``` module.
 
 # Available On
 <img width="400" src="https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png" alt="logo"><img width="400" src="https://user-images.githubusercontent.com/42123683/189416193-a709291f-be8f-469c-b649-c6201fa86677.jpeg" alt="logo">

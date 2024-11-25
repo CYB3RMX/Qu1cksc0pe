@@ -1,0 +1,162 @@
+{
+    "Networking": {
+        "patterns": [
+            "net/http",
+            "net/http/httputil",
+            "net/url",
+            "github.com/gorilla/websocket",
+            "github.com/jpillora/chisel/share/cnet",
+            "net.IPv4Mask",
+            "net.ParseCIDR",
+            "golang.org/x/net/dns/dnsmessage",
+            "SetsockoptInet4Addr",
+            "github.com/google/gopacket",
+            "github.com/anvie/port-scanner",
+            "golang.org/x/crypto/ssh",
+            "GetLocalIP",
+            "net.Dial",
+            "conn.Close",
+            "conn.LocalAddr",
+            "gateway.DiscoverGateway",
+            "net.InterfaceByName",
+            "SendDataTCP",
+            "SendDataUDP",
+            "http.Get",
+            "net.LookupIP",
+            "portscanner.NewPortScanner",
+            "GetOpenedPort",
+            "net.ResolveTCPAddr",
+            "net.ListenTCP",
+            "net.Listen",
+            "listen.Accept",
+            "ssh.Client",
+            "github.com/c-robinson/iplib",
+            "sock.Close",
+            "net.DialTimeout"
+        ],
+        "occurence": 0
+    },
+    "Cryptography": {
+        "patterns": [
+            "xorDecrypt",
+            "hex.DecodeString",
+            "hex.Decode",
+            "hex.init",
+            "aeshashbody",
+            "crypto/x509/pkix",
+            "crypto/sha1",
+            "crypto/x509/pkcs1",
+            "crypto/x509/pem_decrypt",
+            "crypto/aes",
+            "crypto/cipher",
+            "crypto/md5",
+            "crypto/sha256",
+            "crypto/rand",
+            "encoding/base64",
+            "encoding/binary",
+            "encoding/hex",
+            "GenerateIV",
+            "EncryptBytes",
+            "aes.NewCipher",
+            "cipher.NewCBCEncrypter",
+            "cipher.NewCBCDecrypter",
+            "DecryptBytes",
+            "md5.New",
+            "hex.EncodeToString",
+            "sha1.New",
+            "sha256.New",
+            "base64.StdEncoding.DecodeString",
+            "base64.StdEncoding.EncodeToString",
+            "Rot13"
+        ],
+        "occurence": 0
+    },
+    "Process": {
+        "patterns": [
+            "os/exec",
+            "exec.Error",
+            "exec.Command",
+            "os.Process",
+            "os.ProcessState",
+            "syscall.StartProcess",
+            "os.startProcess",
+            "runFromMemory",
+            "github.com/mitchellh/go-ps",
+            "killProcByPID",
+            "PkillName",
+            "kernel32.MustFindProc",
+            "cmd.CombinedOutput"
+        ],
+        "occurence": 0
+    },
+    "File": {
+        "patterns": [
+            "os.File",
+            "ioutil.WriteFile",
+            "exec.findExecutable",
+            "fs.FileMode.IsDir",
+            "exec.LookPath",
+            "os.Open",
+            "filepath.Join",
+            "filepath.Base",
+            "filepath.join",
+            "filepath.unixAbs",
+            "os.Remove",
+            "os.NewFile",
+            "os.OpenFile",
+            "os.WriteFile",
+            "os.Mkdir",
+            "syscall.Mkdir",
+            "os.ReadFile",
+            "github.com/mitchellh/go-homedir",
+            "FilePermissions",
+            "os.Stat"
+        ],
+        "occurence": 0
+    },
+    "Memory Management": {
+        "patterns": [
+            "syscall.Getpagesize",
+            "unsafe.Pointer",
+            "syscall.Mprotect",
+            "runtime.systemstack",
+            "runtime.stackcheck"
+        ],
+        "occurence": 0
+    },
+    "Information Gathering": {
+        "patterns": [
+            "github.com/anvie/port-scanner",
+            "github.com/mitchellh/go-ps",
+            "GetOpenedPort"
+        ],
+        "occurence": 0
+    },
+    "System/Persistence": {
+        "patterns": [
+            "addPersistentCommand",
+            "CreateUser"
+        ],
+        "occurence": 0
+    },
+    "Evasion": {
+        "patterns": [
+            "sandboxTmp",
+            "sandboxDisk",
+            "sandboxFilepath",
+            "systemd-detect-virt",
+            "SandboxProc",
+            "SandboxCpu",
+            "SandboxProcnum",
+            "pkillAv",
+            "syscall.Mprotect"
+        ],
+        "occurence": 0
+    },
+    "Dll/Resource Handling": {
+        "patterns": [
+            "syscall.MustLoadDLL"
+        ],
+        "occurence": 0
+    }
+}
