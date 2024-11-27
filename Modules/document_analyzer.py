@@ -150,6 +150,8 @@ class DocumentAnalyzer:
             return "html"
         elif ("Rich Text Format" in doc_type.stdout.decode() and binascii.unhexlify(b"7B5C72746631") in magic_buf) or (binascii.unhexlify(b"7B5C7274") in magic_buf):
             return "rtf"
+        elif "Zip archive" in doc_type.stdout.decode():
+            return "archive_type_doc"
         else:
             return "unknown"
 
@@ -1056,12 +1058,15 @@ class DocumentAnalyzer:
         print(f"\n{infoS} Performing YARA rule matching...")
         self.DocumentYara()
 
+    def archive_type_analyzer(self):
+        print(f"{infoS} Parsing contents of the target document...")
+        self.Structure()
 
 # Execution area
 try:
     docObj = DocumentAnalyzer(targetFile)
     ext = docObj.CheckExt()
-    if ext == "docscan":
+    if ext == "docscan" or ext == "archive_type_doc":
         docObj.BasicInfoGa()
     elif ext == "pdfscan":
         docObj.PDFAnalysis()
