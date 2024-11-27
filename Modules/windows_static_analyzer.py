@@ -427,6 +427,20 @@ class WindowsAnalyzer:
         else:
             print(f"\n{errorS} There is no stack string value found!\n")
 
+        # Extract tight strings
+        print(f"{infoS} Performing tight string extraction. Please wait...")
+        decode_features, _ = floss.main.find_decoding_function_features(viv, viv.getFunctions())
+        tight_loops = floss.main.get_functions_with_tightloops(decode_features)
+        tight_strings = floss.main.extract_tightstrings(viv, tight_loops, 4)
+        if tight_strings != []:
+            ss_table = Table()
+            ss_table.add_column("[bold green]Extracted Tight Strings", justify="center")
+            for ss in tight_strings:
+                ss_table.add_row(ss.string)
+            print(ss_table)
+        else:
+            print(f"\n{errorS} There is no tight string value found!\n")
+
         # String decoding via function emulation
         if len(viv.getFunctions()) >= 400:
             print(f"\n{infoS} Looks like we have [bold red]{len(viv.getFunctions())}[white] functions to emulate!!")
