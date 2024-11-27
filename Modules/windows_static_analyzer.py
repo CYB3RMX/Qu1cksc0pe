@@ -393,7 +393,12 @@ class WindowsAnalyzer:
         print(peStatistics)
 
     def decode_strings_floss(self, viv_obj):
-        decoded_strings = floss.main.decode_strings(viv_obj, viv_obj.getFunctions(), 4)
+        decode_features, _ = floss.main.find_decoding_function_features(viv_obj, viv_obj.getFunctions())
+        top_functions = floss.main.get_top_functions(decode_features, 20)
+        fvas_to_emulate = floss.main.get_function_fvas(top_functions)
+        fvas_tight_funcs = floss.main.get_tight_function_fvas(decode_features)
+        fvas_to_emulate = floss.main.append_unique(fvas_to_emulate, fvas_tight_funcs)
+        decoded_strings = floss.main.decode_strings(viv_obj, fvas_to_emulate, 4)
         if decoded_strings != []:
             ss_table = Table()
             ss_table.add_column("[bold green]Decoded Strings", justify="center")
