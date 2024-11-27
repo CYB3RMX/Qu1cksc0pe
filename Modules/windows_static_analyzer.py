@@ -35,12 +35,30 @@ except:
     sys.exit(1)
 
 try:
+    import floss
+except:
+    err_exit("Error: >flare-floss< module not found.")
+
+try:
     import vivisect
     vivisect.logging.disable() # Suppressing error messages
 except:
     err_exit("Error: >vivisect< module not found.")
 
+try:
+    from colorama import Fore, Style
+except ModuleNotFoundError as e:
+    print("Error: >colorama< module not found.")
+    raise e
+
+# Colors
+red = Fore.LIGHTRED_EX
+cyan = Fore.LIGHTCYAN_EX
+white = Style.RESET_ALL
+green = Fore.LIGHTGREEN_EX
+
 #--------------------------------------------- Legends
+infoC = f"{cyan}[{red}*{cyan}]{white}"
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
@@ -372,13 +390,48 @@ class WindowsAnalyzer:
                 continue
         print(peStatistics)
 
+    def decode_strings_floss(self, viv_obj):
+        decoded_strings = floss.main.decode_strings(viv_obj, viv_obj.getFunctions(), 4)
+        if decoded_strings != []:
+            ss_table = Table()
+            ss_table.add_column("[bold green]Decoded Strings", justify="center")
+            for ss in decoded_strings:
+                ss_table.add_row(ss.string)
+            print(ss_table)
+        else:
+            print(f"\n{errorS} There is no decoded string value found!")
+
     def analyze_via_viv(self):
-        print(f"\n{infoS} Extracting and parsing function informations. Please wait...")
+        print(f"\n{infoS} Performing analysis via Vivisect and Floss. Please wait...")
         viv = vivisect.VivWorkspace() # Creating workspace
         viv.loadFromFile(self.target_file)
         viv.analyze()
 
+        # Extract strings via flare-floss
+        print(f"{infoS} Performing stack string extraction. Please wait...")
+        selected_functions = floss.main.select_functions(viv, None)
+        stack_strings = floss.main.extract_stackstrings(viv, selected_functions, 4)
+        if stack_strings != []:
+            ss_table = Table()
+            ss_table.add_column("[bold green]Extracted Stack Strings", justify="center")
+            for ss in stack_strings:
+                ss_table.add_row(ss.string)
+            print(ss_table)
+        else:
+            print(f"\n{errorS} There is no stack string value found!\n")
+
+        # String decoding via function emulation
+        if len(viv.getFunctions()) >= 400:
+            print(f"\n{infoS} Looks like we have [bold red]{len(viv.getFunctions())}[white] functions to emulate!!")
+            choice = str(input(f"\n{infoC} Do you want to emulate functions and decode strings anyway? [Y/n]: "))
+            if choice == "Y" or choice == "y":
+                self.decode_strings_floss(viv)
+        else:
+            print(f"{infoS} Performing string decoding via function emulation. Please wait...")
+            self.decode_strings_floss(viv)
+
         # Get functions
+        print(f"\n{infoS} Extracting and parsing function informations. Please wait...")
         funcz = viv.getFunctions()
 
         # Perform basic analysis against functions

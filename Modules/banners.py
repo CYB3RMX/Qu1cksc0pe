@@ -29,7 +29,7 @@ banner1 = f"""
 {cy} \\_/\\_|\\___/ \\___/\\____/\\_| \\_/\\____/ \\____/\\___/\\_|   \\____/       {gr}@ @ @
                                                                       @
                                    {ye}|             |
-  {wh}All in One malware analysis tool.{ye}| {wh}By CYB3RMX_ {ye}| {wh}Version: {gr}1.8.4
+  {wh}All in One malware analysis tool.{ye}| {wh}By CYB3RMX_ {ye}| {wh}Version: {gr}1.8.5
   {ye}---------------------------------|             |{wh}\n
 """
 banner2=f"""
@@ -41,7 +41,7 @@ banner2=f"""
   {ma}dmmMMMMMMNmmNMMMMMMMMNmmNMMMMMMmmm   {wh}|                                         |
   {ma}NMMyoodMMMMMMMMMMMMMMMMMMMMdoosMMM   {wh}|    {gr}All in One malware analysis tool.    {wh}|
   {ma}NMM-  sMMMNNNNNNNNNNNNNNNMMy  .MMM   {wh}|                                         |
-  {ma}NMM-  sMMyvvvvvvvvvvvvvvsMMy  .MMM   {wh}|             {gr}Version{wh}: {ye}1.8.4              {wh}|
+  {ma}NMM-  sMMyvvvvvvvvvvvvvvsMMy  .MMM   {wh}|             {gr}Version{wh}: {ye}1.8.5              {wh}|
   {ma}ooo.  :ooooooo+    +ooooooo/   ooo   {wh}+-----------------|||||||-----------------+
            {ma}/MMMMN    mMMMM+                              {wh}|||||||
                                                          |||||||\n
@@ -69,7 +69,7 @@ I                                I
 + --------------I I------------- +
                 I I                 {gr}___QU1CKSC0PE___
                 {ye}I I
-             ____V_____              {ma}Version: {re}1.8.4{wh}\n\n
+             ____V_____              {ma}Version: {re}1.8.5{wh}\n\n
 """
 banner5=f"""
                         {re}* -------------------------------- *

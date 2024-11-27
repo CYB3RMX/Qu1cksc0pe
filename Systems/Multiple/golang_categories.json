@@ -4,6 +4,7 @@
             "net/http",
             "net/http/httputil",
             "net/url",
+            "net/http/httptest",
             "github.com/gorilla/websocket",
             "github.com/jpillora/chisel/share/cnet",
             "net.IPv4Mask",
@@ -32,7 +33,11 @@
             "ssh.Client",
             "github.com/c-robinson/iplib",
             "sock.Close",
-            "net.DialTimeout"
+            "net.DialTimeout",
+            "cnet.NewWebSocketConn",
+            "ssh.NewClientConn",
+            "httptest.NewServer",
+            "http.HandlerFunc"
         ],
         "occurence": 0
     },
@@ -45,6 +50,7 @@
             "aeshashbody",
             "crypto/x509/pkix",
             "crypto/sha1",
+            "crypto/tls",
             "crypto/x509/pkcs1",
             "crypto/x509/pem_decrypt",
             "crypto/aes",
@@ -67,7 +73,9 @@
             "sha256.New",
             "base64.StdEncoding.DecodeString",
             "base64.StdEncoding.EncodeToString",
-            "Rot13"
+            "Rot13",
+            "config.TLS.Key",
+            "ccrypto.FingerprintKey"
         ],
         "occurence": 0
     },
@@ -85,7 +93,8 @@
             "killProcByPID",
             "PkillName",
             "kernel32.MustFindProc",
-            "cmd.CombinedOutput"
+            "cmd.CombinedOutput",
+            "windows.CreateProcess"
         ],
         "occurence": 0
     },
@@ -110,7 +119,8 @@
             "os.ReadFile",
             "github.com/mitchellh/go-homedir",
             "FilePermissions",
-            "os.Stat"
+            "os.Stat",
+            "path/filepath"
         ],
         "occurence": 0
     },
@@ -149,13 +159,16 @@
             "SandboxCpu",
             "SandboxProcnum",
             "pkillAv",
-            "syscall.Mprotect"
+            "syscall.Mprotect",
+            "github.com/D3Ext/Hooka/evasion"
         ],
         "occurence": 0
     },
     "Dll/Resource Handling": {
         "patterns": [
-            "syscall.MustLoadDLL"
+            "syscall.MustLoadDLL",
+            "windows.NewLazyDLL",
+            "windows.NewLazySystemDLL"
         ],
         "occurence": 0
     }
