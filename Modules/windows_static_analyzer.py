@@ -392,12 +392,7 @@ class WindowsAnalyzer:
                 continue
         print(peStatistics)
 
-    def decode_strings_floss(self, viv_obj):
-        decode_features, _ = floss.main.find_decoding_function_features(viv_obj, viv_obj.getFunctions())
-        top_functions = floss.main.get_top_functions(decode_features, 20)
-        fvas_to_emulate = floss.main.get_function_fvas(top_functions)
-        fvas_tight_funcs = floss.main.get_tight_function_fvas(decode_features)
-        fvas_to_emulate = floss.main.append_unique(fvas_to_emulate, fvas_tight_funcs)
+    def decode_section(self, viv_obj, fvas_to_emulate):
         decoded_strings = floss.main.decode_strings(viv_obj, fvas_to_emulate, 4)
         if decoded_strings != []:
             ss_table = Table()
@@ -408,14 +403,28 @@ class WindowsAnalyzer:
         else:
             print(f"\n{errorS} There is no decoded string value found!")
 
+    def decode_strings_floss(self, viv_obj, decode_features):
+        top_functions = floss.main.get_top_functions(decode_features, 20)
+        fvas_to_emulate = floss.main.get_function_fvas(top_functions)
+        fvas_tight_funcs = floss.main.get_tight_function_fvas(decode_features)
+        fvas_to_emulate = floss.main.append_unique(fvas_to_emulate, fvas_tight_funcs)
+        if len(fvas_to_emulate) >= 150:
+            print(f"\n{infoS} Looks like we have [bold red]{len(fvas_to_emulate)}[white] functions to emulate!!")
+            choice = str(input(f"\n{infoC} Do you want to emulate functions and decode strings anyway? [Y/n]: "))
+            if choice == "Y" or choice == "y":
+                self.decode_section(viv_obj, fvas_to_emulate)
+        else:
+            self.decode_section(viv_obj, fvas_to_emulate)
+
     def analyze_via_viv(self):
-        print(f"\n{infoS} Performing analysis via Vivisect and Floss. Please wait...")
+        print(f"\n{infoS} Performing analysis via Vivisect and Floss...")
         viv = vivisect.VivWorkspace() # Creating workspace
+        print(f"{infoS} Initializing [bold green]viv.analyze[white]. Please wait...")
         viv.loadFromFile(self.target_file)
         viv.analyze()
 
         # Extract strings via flare-floss
-        print(f"{infoS} Performing stack string extraction. Please wait...")
+        print(f"{infoS} Performing [bold green]stack string[white] extraction. Please wait...")
         selected_functions = floss.main.select_functions(viv, None)
         stack_strings = floss.main.extract_stackstrings(viv, selected_functions, 4)
         if stack_strings != []:
@@ -428,7 +437,7 @@ class WindowsAnalyzer:
             print(f"\n{errorS} There is no stack string value found!\n")
 
         # Extract tight strings
-        print(f"{infoS} Performing tight string extraction. Please wait...")
+        print(f"\n{infoS} Performing [bold green]tight string[white] extraction. Please wait...")
         decode_features, _ = floss.main.find_decoding_function_features(viv, viv.getFunctions())
         tight_loops = floss.main.get_functions_with_tightloops(decode_features)
         tight_strings = floss.main.extract_tightstrings(viv, tight_loops, 4)
@@ -442,14 +451,8 @@ class WindowsAnalyzer:
             print(f"\n{errorS} There is no tight string value found!\n")
 
         # String decoding via function emulation
-        if len(viv.getFunctions()) >= 400:
-            print(f"\n{infoS} Looks like we have [bold red]{len(viv.getFunctions())}[white] functions to emulate!!")
-            choice = str(input(f"\n{infoC} Do you want to emulate functions and decode strings anyway? [Y/n]: "))
-            if choice == "Y" or choice == "y":
-                self.decode_strings_floss(viv)
-        else:
-            print(f"{infoS} Performing string decoding via function emulation. Please wait...")
-            self.decode_strings_floss(viv)
+        print(f"\n{infoS} Performing string decode via function emulation. Please wait...")
+        self.decode_strings_floss(viv, decode_features)
 
         # Get functions
         print(f"\n{infoS} Extracting and parsing function informations. Please wait...")
