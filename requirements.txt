@@ -24,3 +24,5 @@ vivisect
 pycryptodome
 bs4
 wh1tem0cha
+psutil
+pymem

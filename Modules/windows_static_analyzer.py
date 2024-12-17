@@ -658,43 +658,46 @@ class WindowsAnalyzer:
         self.gather_windows_imports_and_exports()
 
         # Load the assembly using dnlib
-        assembly = AssemblyDef.Load(self.target_file)
+        try:
+            assembly = AssemblyDef.Load(self.target_file)
 
-        class_names = []
-        print(f"\n{infoS} Extracting and analyzing classes...")
-        for module in assembly.Modules:
-            for typ in module.Types:
-                if "<" not in typ.FullName:
-                    class_names.append(typ.FullName)
-                    dotnet_table = Table()
-                    dotnet_table.add_column(f"Methods in Class: [bold green]{typ.FullName}[white]", justify="center")
-                    methodz = []
-                    for met in typ.Methods:
-                        if str(met.Name) not in methodz:
-                            methodz.append(str(met.Name))
-                            if str(met.Name) in self.blacklisted_patterns:
-                                dotnet_table.add_row(f"[bold red]{str(met.Name)}[white]")
-                            else:
-                                dotnet_table.add_row(str(met.Name))
-                    print(dotnet_table)
+            class_names = []
+            print(f"\n{infoS} Extracting and analyzing classes...")
+            for module in assembly.Modules:
+                for typ in module.Types:
+                    if "<" not in typ.FullName:
+                        class_names.append(typ.FullName)
+                        dotnet_table = Table()
+                        dotnet_table.add_column(f"Methods in Class: [bold green]{typ.FullName}[white]", justify="center")
+                        methodz = []
+                        for met in typ.Methods:
+                            if str(met.Name) not in methodz:
+                                methodz.append(str(met.Name))
+                                if str(met.Name) in self.blacklisted_patterns:
+                                    dotnet_table.add_row(f"[bold red]{str(met.Name)}[white]")
+                                else:
+                                    dotnet_table.add_row(str(met.Name))
+                        print(dotnet_table)
 
-        print(f"\n{infoS} Performing pattern analysis...")
-        fswc = 0
-        dot_fam = Table()
-        dot_fam.add_column(f"[bold green]Malware Family/Artifact", justify="center")
-        dot_fam.add_column(f"[bold green]Pattern Occurence", justify="center")
-        for family in dotnet_malware_pattern:
-            for dotp in dotnet_malware_pattern[family]["patterns"]:
-                matcher = re.findall(dotp, str(class_names), re.IGNORECASE)
-                if matcher != []:
-                    dotnet_malware_pattern[family]["occurence"] += len(matcher)
-            if dotnet_malware_pattern[family]["occurence"] != 0:
-                dot_fam.add_row(family, str(dotnet_malware_pattern[family]["occurence"]))
-                fswc += 1
-        if fswc != 0:
-            print(dot_fam)
-        else:
-            print(f"{errorS} Couldn\'t detect any pattern. This file might be obfuscated!\n")
+            print(f"\n{infoS} Performing pattern analysis...")
+            fswc = 0
+            dot_fam = Table()
+            dot_fam.add_column(f"[bold green]Malware Family/Artifact", justify="center")
+            dot_fam.add_column(f"[bold green]Pattern Occurence", justify="center")
+            for family in dotnet_malware_pattern:
+                for dotp in dotnet_malware_pattern[family]["patterns"]:
+                    matcher = re.findall(dotp, str(class_names), re.IGNORECASE)
+                    if matcher != []:
+                        dotnet_malware_pattern[family]["occurence"] += len(matcher)
+                if dotnet_malware_pattern[family]["occurence"] != 0:
+                    dot_fam.add_row(family, str(dotnet_malware_pattern[family]["occurence"]))
+                    fswc += 1
+            if fswc != 0:
+                print(dot_fam)
+            else:
+                print(f"{errorS} Couldn\'t detect any pattern. This file might be obfuscated!\n")
+        except:
+            print(f"\n{errorS} An error occured while parsing the .NET file. Continuing...\n")
 
         self.check_for_valid_registry_keys()
         self.check_for_interesting_stuff()

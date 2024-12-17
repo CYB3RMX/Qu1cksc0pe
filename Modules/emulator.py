@@ -86,8 +86,7 @@ class DynamicAnalyzer:
                 os.system(command)
             elif tos == 2:
                 print(f"\n{infoS} Target OS: [bold green]Windows")
-                target_pid = input(f"{infoC} Enter target PID: ")
-                command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}windows_dynamic_analyzer.py {target_pid}"
+                command = f"{py_binary} {sc0pe_path}{path_seperator}Modules{path_seperator}windows_dynamic_analyzer.py"
                 os.system(command)
             else:
                 err_exit(f"{errorS} Wrong option :(")
