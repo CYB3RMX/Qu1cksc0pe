@@ -41,6 +41,9 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
+<b>21/12/2024</b>
+- [X] Improvements on ```Windows Dynamic Analyzer``` module and the addition of new capabilities!
+
 <b>17/12/2024</b>
 - [X] Improvements on ```Windows Dynamic Analyzer``` module
 
@@ -198,7 +201,7 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 
 https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/3251dc28-7c97-4a82-aa6b-a981fb6da13e
 
-## Process Analysis
+## Windows Process Analysis
 <br><b>Usage</b>: ```python qu1cksc0pe.py --watch```<br>
 
 https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/a2c84b8f-c12c-47ac-96e9-c345aeda1f54
