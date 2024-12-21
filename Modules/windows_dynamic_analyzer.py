@@ -1,12 +1,12 @@
 import re
+import os
 import sys
 import json
 import psutil
 import asyncio
-import struct
-import binascii
 import warnings
 from utils import err_exit
+from windows_process_reader import WindowsProcessReader
 
 try:
     from rich import print
@@ -66,7 +66,7 @@ report_obj = {
     "network_connections": [],
     "api_calls": [],
     "commandline_args": {},
-    "process_ids": [],
+    "process_ids": {},
     "open_files": {},
     "loaded_modules": {},
     "extracted_urls": {}
@@ -76,6 +76,7 @@ class WindowsDynamicAnalyzer:
     def __init__(self, target_pid):
         self.target_pid = target_pid
         self.target_processes = []
+        self.dumped_files = []
         self.whitelist_domains = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}whitelist_domains.txt", "r").read().split("\n")
         self.frida_script = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}FridaScripts{path_seperator}sc0pe_windows_dynamic.js", "r").read()
         self.target_api_list = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows_api_trace_list.txt", "r").read().split("\n")
@@ -83,98 +84,64 @@ class WindowsDynamicAnalyzer:
         self.target_processes.append(self.target_pid)
 
     async def gather_processes(self, table_object):
+        tmp_rep = {
+            self.target_pid: {
+                "childs": []
+            }
+        }
         while True:
-            if self.proc_handler.children():
-                for chld in self.proc_handler.children():
-                    if chld.pid not in self.target_processes:
-                        # Handling table
-                        if len(table_object.columns[0]._cells) < 6:
-                            # Warn about dangerous processes
+            try:
+                if self.proc_handler.children() != []:
+                    for chld in self.proc_handler.children():
+                        # Add childs to tmp_rep first
+                        if chld.pid not in tmp_rep[self.target_pid]["childs"]:
+                            tmp_rep[self.target_pid]["childs"].append(chld.pid)
+
+                        # Check if the child process are dangerous
+                        if chld.pid not in self.target_processes:
                             if "cmd.exe" in chld.name() or "powershell.exe" in chld.name() or "rundll32.exe" in chld.name():
-                                table_object.add_row(f"[bold red]{chld.name()}[white]", f"[bold red]{chld.pid}[white]")
+                                self._update_table(table_object, f"[bold red]{chld.name()}[white]", f"[bold red]{str(chld.pid)}[white]")
                             else:
-                                table_object.add_row(chld.name(), str(chld.pid))
-                        else:
-                            ans_ind = len(table_object.columns[0]._cells)
-                            table_object.columns[0]._cells[ans_ind-1] = Text(str(chld.name()), style="bold italic cyan")
-                            table_object.columns[1]._cells[ans_ind-1] = Text(str(chld.pid), style="bold italic cyan")
+                                self._update_table(table_object, chld.name(), str(chld.pid))
+                            self.target_processes.append(chld.pid)
 
-                        # Report
-                        if (chld.pid, chld.name()) not in report_obj["process_ids"]:
-                            report_obj["process_ids"].append((chld.pid, chld.name()))
-                        self.target_processes.append(chld.pid)
-            else:
-                if str(self.proc_handler.pid) not in table_object.columns[1]._cells:
-                    table_object.add_row(self.proc_handler.name(), str(self.proc_handler.pid))
-
-                # Report
-                if (self.proc_handler.pid, self.proc_handler.name()) not in report_obj["process_ids"]:
-                    report_obj["process_ids"].append((self.proc_handler.pid, self.proc_handler.name()))
-            await asyncio.sleep(1)
+                    # Finally add the tmp_rep to the report_object
+                    if self.target_pid not in report_obj["process_ids"].keys():
+                        report_obj["process_ids"].update(tmp_rep)    
+                else:
+                    if str(self.proc_handler.pid) not in table_object.columns[1]._cells:
+                        self._update_table(table_object, self.proc_handler.name(), str(self.proc_handler.pid))
+                    if self.target_pid not in report_obj["process_ids"].keys():
+                        report_obj["process_ids"].update(tmp_rep)
+                await asyncio.sleep(0.5)
+            except psutil.NoSuchProcess:
+                continue
 
     async def enumerate_network_connections(self, table_object):
         while True:
-            if self.target_processes:
-
-                # Iterate over all pids and check their connections
-                for chldz in self.target_processes:
-                    try:
-                        proc_net = psutil.Process(chldz)
-                        chk_net = proc_net.net_connections()
-                        if chk_net:
-                            for conn in chk_net:
-
-                                # If there is a remote_address
-                                if "raddr" in str(conn):
-                                    try:
-                                        conn_str = f"{str(proc_net.pid)}|{proc_net.name()}|{conn.raddr.ip}:{conn.raddr.port}|{conn.status}"
-                                        if conn_str not in report_obj["network_connections"]:
-                                            parsed = conn_str.split("|")
-
-                                            # Handle table
-                                            if len(table_object.columns[0]._cells) < 14:
-                                                table_object.add_row(parsed[0], parsed[1], parsed[2], parsed[3])
-                                            else:
-                                                ans_ind = len(table_object.columns[0]._cells)
-                                                table_object.columns[0]._cells[ans_ind-1] = Text(str(parsed[0]), style="bold italic cyan")
-                                                table_object.columns[1]._cells[ans_ind-1] = Text(str(parsed[1]), style="bold italic cyan")
-                                                table_object.columns[2]._cells[ans_ind-1] = Text(str(parsed[2]), style="bold italic cyan")
-                                                table_object.columns[3]._cells[ans_ind-1] = Text(str(parsed[3]), style="bold italic cyan")
-
-                                            # Report
-                                            report_obj["network_connections"].append(conn_str)
-                                    except:
-                                        continue
-                    except:
-                        continue
-            await asyncio.sleep(1)
+            try:
+                for pid_n in self.target_processes:
+                    proc_net = psutil.Process(pid_n)
+                    if proc_net.net_connections() != []:
+                        for conn in proc_net.net_connections():
+                            if conn.raddr:
+                                conn_str = f"{proc_net.pid}|{proc_net.name()}|{conn.raddr.ip}:{conn.raddr.port}|{conn.status}"
+                                if conn_str not in report_obj["network_connections"]:
+                                    self._update_table(table_object, *conn_str.split("|"))
+                                    report_obj["network_connections"].append(conn_str)
+                await asyncio.sleep(0.5)
+            except psutil.NoSuchProcess:
+                continue
 
     async def check_alive_process(self):
         while True:
-            try:
-                # Check the main process
-                if self.target_pid in self.target_processes:
-                    main_proc = psutil.Process(self.target_pid)
-
-                if self.target_processes:
-                    for cid in self.target_processes:
-                        if self.target_pid != cid: # We dont need to check main process
-                            try:
-                                ckpr = psutil.Process(cid)
-                            except:
-                                self.target_processes.remove(cid) # Delete process if its ended
-            except:
-                try:
-                    self.target_processes.remove(self.target_pid) # If target_pid is no longer active
-                except:
-                    pass
-            await asyncio.sleep(1)
-
-    async def check_all_process(self):
-        while True:
-            if self.target_processes == []: # If there is no process terminate the monitor
+            if self.target_processes != []:
+                for tp in self.target_processes:
+                    if not psutil.pid_exists(tp):
+                        self.target_processes.remove(tp)
+            else:
                 sys.exit(0)
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.5)
 
     async def parse_cmdline_arguments(self):
         while True:
@@ -213,73 +180,56 @@ class WindowsDynamicAnalyzer:
             await asyncio.sleep(1)
 
     async def memory_dumper(self, table_obj):
-        dumped_files = []
+        self.dumped_files = []
         while True:
-            if self.target_processes != []:
-                for proc_pid in self.target_processes:
-                    try:
-                        # Get memory object of the target pid
-                        p_name = psutil.Process(int(proc_pid)).name()
-                        mem = pymem.Pymem(p_name)
-                        if f"{proc_pid}-{p_name}" in str(dumped_files):
-                            pass
-                        else:
-                            # Get MZ offsets and calculate image size
-                            mz_offsets = mem.pattern_scan_all(binascii.unhexlify("4D5A9000"), return_multiple=True)
-                            buffer = mem.read_bytes(mz_offsets[0], 512)
-                            pe_header_offset = struct.unpack("<L", buffer[0x3C:0x40])[0]
-                            size_of_image_offset = pe_header_offset + 0x50
-                            size_of_image = struct.unpack("<L", buffer[size_of_image_offset:size_of_image_offset + 4])[0]
-                            outfile_buffer = mem.read_bytes(mz_offsets[0], size_of_image)
-
-                            # Trim and sanitize output buffer
-                            pef = pf.PE(data=outfile_buffer)
-                            buffer_to_write = pef.trim()
-
-                            # Name output file and dump
-                            outfile_name = list(mem.list_modules())[0].name
-                            if outfile_name not in dumped_files:
-                                with open(f"qu1cksc0pe_dump-{proc_pid}-{outfile_name}", "wb") as ff:
-                                    ff.write(buffer_to_write)
-                                table_obj.add_row(str(proc_pid), outfile_name, str(size_of_image))
-                                dumped_files.append(outfile_name)
-                            pef.close()
-                    except:
-                        continue
+            for t_p in self.target_processes:
+                if f"qu1cksc0pe_memory_dump_{t_p}.bin" not in self.dumped_files:
+                    w_p_r = WindowsProcessReader(t_p)
+                    state = w_p_r.dump_memory()
+                    if state:
+                        self.dumped_files.append(f"qu1cksc0pe_memory_dump_{t_p}.bin")
+                        table_obj.add_row(str(t_p), f"qu1cksc0pe_memory_dump_{t_p}.bin", str(os.path.getsize(f"qu1cksc0pe_memory_dump_{t_p}.bin")))
             await asyncio.sleep(1)
 
     async def extract_url_from_memory(self, table_object):
         while True:
-            if self.target_processes != []:
-                for procp in self.target_processes:
-                    try:
-                        if procp not in report_obj["extracted_urls"].keys():
-                            memp = pymem.Pymem(psutil.Process(int(procp)).name())
-                            urls = memp.pattern_scan_all(rb"http[s]?://[a-zA-Z0-9./?=_%:-]*", return_multiple=True)
-                            pid_url = {
-                                procp: []
-                            }
+            try:
+                for tpu in self.target_processes:
+                    if tpu not in report_obj["extracted_urls"].keys():
+                        if os.path.exists(f"qu1cksc0pe_memory_dump_{tpu}.bin"):
+                            dump_buffer = open(f"qu1cksc0pe_memory_dump_{tpu}.bin", "rb").read()
+                            urls = re.findall(rb"http[s]?://[a-zA-Z0-9./?=_%:-]*", dump_buffer)
+                            tpu_url = {tpu: []}
                             for url in urls:
-                                data = memp.read_bytes(url, 128)
-                                buffer = re.findall(rb"http[s]?://[a-zA-Z0-9./?=_%:-]*", data)
-                                for buf in buffer:
-                                    check = 0
-                                    # Check valid url length
-                                    if (len(buf) >= 13) and (buf != b"http://" and buf != b"https://"):
-                                        # Check if the url is whitelisted
-                                        for wl in self.whitelist_domains:
-                                            if wl in str(buf.decode()):
-                                                check += 1
-                                        if (check == 0) and (buf.decode() not in pid_url[procp]):
-                                            if len(table_object.columns[0]._cells) < 15:
-                                                table_object.add_row(str(buf.decode()))
-                                            else:
-                                                ans_ind = len(table_object.columns[0]._cells)
-                                                table_object.columns[0]._cells[ans_ind-1] = Text(str(buf.decode()), style="bold italic cyan")
-                                            pid_url[procp].append(buf.decode())
-                            report_obj["extracted_urls"].update(pid_url)
-                    except:
-                        continue
+                                if self._is_valid_url(url) and url.decode() not in tpu_url[tpu]:
+                                    self._update_table(table_object, url.decode())
+                                    tpu_url[tpu].append(url.decode())
+                            report_obj["extracted_urls"].update(tpu_url)
+                await asyncio.sleep(1)
+            except Exception as e:
+                print(e)
+
+    async def scan_for_suspicious_directories(self, table_object):
+        suspicious_directories = ["\\AppData\\Local\\Temp", "\\AppData\\Roaming"] # Will be extended
+        logged_process = []
+        while True:
+            for proc_element in psutil.process_iter():
+                try:
+                    if proc_element.pid != 0:
+                        if proc_element.children() != []:
+                            for pec in proc_element.children():
+                                # Check suspicious directories
+                                for sd in suspicious_directories: # Not the best practice to implement but why not?
+                                    if (sd in pec.exe()) and (pec.name() not in logged_process):
+                                        table_object.add_row(str(pec.pid), pec.name(), pec.exe())
+                                        logged_process.append(pec.name())
+                        else:
+                            for sd in suspicious_directories:
+                                if (sd in proc_element.exe()) and (proc_element.name() not in logged_process):
+                                    table_object.add_row(str(proc_element.pid), proc_element.name(), proc_element.exe())
+                                    logged_process.append(proc_element.name())
+                except:
+                    continue
             await asyncio.sleep(1)
 
     async def attach_process_to_frida(self):
@@ -317,6 +267,17 @@ class WindowsDynamicAnalyzer:
                             continue
             await asyncio.sleep(1)
 
+    def _is_valid_url(self, buf):
+        return (len(buf) >= 13) and (buf not in {b"http://", b"https://"}) and not any(wl in buf.decode() for wl in self.whitelist_domains)
+
+    def _update_table(self, table, *args):
+        if len(table.columns[0]._cells) < 15:
+            table.add_row(*args)
+        else:
+            ans_ind = len(table.columns[0]._cells)
+            for i, arg in enumerate(args):
+                table.columns[i]._cells[ans_ind-1] = Text(str(arg), style="bold italic cyan")
+
     async def create_log_file(self):
         while True:
             with open(f"sc0pe_process-{self.target_pid}.json", "w") as rp_file:
@@ -345,6 +306,13 @@ def main_app(target_pid):
         Layout(name="top_right_up"),
         Layout(name="top_right_down")
     )
+
+    # Split bottom
+    program_layout["Bottom"].split_row(
+        Layout(name="bottom_left"),
+        Layout(name="bottom_right")
+    )
+
     # Create table for net connections
     conn_table = Table()
     conn_table.add_column("[bold green]PID", justify="center")
@@ -372,6 +340,12 @@ def main_app(target_pid):
     mem_dumpy.add_column("[bold green]File Name", justify="center")
     mem_dumpy.add_column("[bold green]Size", justify="center")
 
+    # Create table for suspicious paths
+    sd_table = Table()
+    sd_table.add_column("[bold green]PID", justify="center")
+    sd_table.add_column("[bold green]Name", justify="center")
+    sd_table.add_column("[bold green]Path", justify="center")
+
     # Upper grid for left
     upper_grid_left = Table.grid()
     upper_grid_left.add_row(
@@ -390,7 +364,6 @@ def main_app(target_pid):
     # Upper down grid zone
     upper_right_down = Table.grid()
     upper_right_down.add_row(
-        Panel(Text(f"For detailed information please check: sc0pe_process-{target_pid}.json"), border_style="bold yellow", title="Detailed Information"),
         Panel(mem_dumpy, border_style="bold magenta", title="Dumped Files From Memory")
     )
     
@@ -401,19 +374,12 @@ def main_app(target_pid):
         if message["type"] == "send":
             api_name = message["payload"]["target_api"]
             arguments = message["payload"]["args"]
-            if len(win_api_ct.columns[0]._cells) < 15:
-                win_api_ct.add_row(str(api_name), str(arguments))
-            else:
-                ans_ind = len(win_api_ct.columns[0]._cells)
-                win_api_ct.columns[0]._cells[ans_ind-1] = Text(str(api_name), style="bold italic cyan")
-                win_api_ct.columns[1]._cells[ans_ind-1] = Text(str(arguments), style="bold italic cyan")
-
-            # Report
+            wda._update_table(win_api_ct, api_name, arguments)
             report_obj["api_calls"].append((api_name, arguments))
 
     # Bottom zone
-    bottom_zone = Table.grid()
-    bottom_zone.add_row(
+    bottom_zone_left = Table.grid()
+    bottom_zone_left.add_row(
         Panel(
             win_api_ct,
             border_style="bold red",
@@ -425,22 +391,27 @@ def main_app(target_pid):
             title="Extracted URL Values"
         )
     )
-    program_layout["Bottom"].update(bottom_zone)
+    program_layout["bottom_left"].update(bottom_zone_left)
+    bottom_zone_right = Table.grid()
+    bottom_zone_right.add_row(
+        Panel(sd_table, border_style="bold cyan", title="Suspicious Execution Paths")
+    )
+    program_layout["bottom_right"].update(bottom_zone_right)
 
     # Create tasks
     event_loop = asyncio.get_event_loop()
     event_loop.create_task(wda.gather_processes(proc_info_table))
-    event_loop.create_task(wda.check_all_process())
+    event_loop.create_task(wda.check_alive_process())
+    event_loop.create_task(wda.enumerate_network_connections(conn_table))
     event_loop.create_task(wda.memory_dumper(mem_dumpy))
     event_loop.create_task(wda.parse_cmdline_arguments())
-    event_loop.create_task(wda.enumerate_network_connections(conn_table))
-    event_loop.create_task(wda.check_alive_process())
     event_loop.create_task(wda.create_log_file())
     event_loop.create_task(wda.get_loaded_modules())
     event_loop.create_task(wda.extract_url_from_memory(ex_url_mem))
+    event_loop.create_task(wda.scan_for_suspicious_directories(sd_table))
     event_loop.create_task(wda.attach_process_to_frida())
     event_loop.create_task(wda.get_open_files())
-    with Live(program_layout, refresh_per_second=1.1):
+    with Live(program_layout, refresh_per_second=1.8):
         event_loop.run_forever()
 
 if __name__ == "__main__":
@@ -464,9 +435,12 @@ if __name__ == "__main__":
                         break
                 if target_pid:
                     break
+            if psutil.Process(target_pid).parent() and "explorer.exe" not in psutil.Process(target_pid).parent().name(): # We need parent only
+                target_pid = psutil.Process(target_pid).ppid()
 
         # Execution
         print(f"\n{infoS} Monitoring PID: [bold green]{target_pid}[white]. ([bold blink yellow]Ctrl+C to stop![white])")
+        print(f"{infoS} For detailed information please check: [bold green]sc0pe_process-{target_pid}.json[white]")
         main_app(target_pid)
     except:
         err_exit(f"{errorS} Program terminated!")
