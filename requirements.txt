@@ -26,3 +26,4 @@ bs4
 wh1tem0cha
 psutil
 pymem
+pyja3

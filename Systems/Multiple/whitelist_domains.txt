@@ -6,6 +6,7 @@ iec.ch
 microsoft.com
 aka.ms
 mozilla.org
+mozilla.com
 digicert.com
 ocsp.accv.es
 crbug.com
@@ -75,3 +76,7 @@ text-decoration:
 html4/loose.dtd
 xmlsoap.org
 docs.oasis-open.org
+lencr.org
+cacerts.digicert
+bbc.com
+reddit.com

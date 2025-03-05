@@ -3,6 +3,7 @@
 import re
 import os
 import sys
+import socket
 import json
 import binascii
 import shutil
@@ -50,35 +51,57 @@ class PcapAnalyzer:
         self.all_content = open(self.pcap_file, "rb").read()
         self.file_buffer = open(self.pcap_file, "rb")
         self.pcap_content = dpkt.pcap.Reader(self.file_buffer)
+        self.wlist = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}whitelist_domains.txt", "r").read().split("\n")
         print(f"{infoS} Loading PCAP content. It will take a while please wait...")
         self.packet_content_array = []
         for _, buf in self.pcap_content:
             self.packet_content_array.append(buf)
 
+    def chk_wlist(self, target_string):
+        for pat in self.wlist:
+            matched = re.findall(pat, target_string)
+            if matched:
+                return False # Whitelist found
+        return True
+
     def search_urls(self):
         url_table = Table()
-        url_table.add_column("[bold green]Extracted URL\'s", justify="center")
+        url_table.add_column("[bold green]Extracted URL\'s (Without whitelist domains)", justify="center")
         extracted_data = []
         print(f"{infoS} Performing URL extraction. It will take a while please wait...")
         for packet in track(range(len(self.packet_content_array)), description="Processing packets..."):
-            eth = dpkt.ethernet.Ethernet(self.packet_content_array[packet])
-            if isinstance(eth.data, dpkt.ip.IP) and isinstance(eth.data.data, dpkt.tcp.TCP):
-                http = eth.data.data.data
-                try:
-                    if http.startswith(b'GET') or http.startswith(b'POST'):
-                        match = re.search(rb'(?i)\bHost: (.*?)\r\n', http)
-                        if match:
-                            host = match.group(1).decode('utf-8')
-                            url_match = re.search(rb'(?i)\b(GET|POST) (.*?) HTTP', http)
-                            if url_match:
-                                path = url_match.group(2).decode('utf-8')
-                                url = f"http://{host}{path}"
-                                if url not in extracted_data:
-                                    extracted_data.append(url)
-                                    url_table.add_row(url)
-                except:
-                    continue
-        self.make_choice_and_print(url_table, "URL address", extracted_data)
+            try:
+                match = re.findall(rb"http[s]?://[a-zA-Z0-9./?=_%:-]*", self.packet_content_array[packet])
+                if match:
+                    for url in match:
+                        if url not in extracted_data:
+                            extracted_data.append(url)
+            except:
+                continue
+        if extracted_data:
+            final_urls = []
+            for i in extracted_data:
+                if (i.decode() != "http://" and i.decode() != "https://") and ("." in i.decode()):
+                    if self.chk_wlist(i.decode()):
+                        url_table.add_row(i.decode())
+                        final_urls.append(i.decode())
+        self.make_choice_and_print(url_table, "URL address", final_urls)
+
+    def search_ip_addresses(self):
+        print(f"\n{infoS} Performing IP Address extraction. It will take a while please wait...")
+        ip_table = Table()
+        ip_table.add_column("[bold green]Extracted IP Addresses", justify="center")
+        uniq_ips = set()
+        for buf in self.packet_content_array:
+            eth = dpkt.ethernet.Ethernet(buf)
+            if isinstance(eth.data, dpkt.ip.IP):
+                ip = eth.data
+                src_ip = socket.inet_ntoa(ip.src)
+                dst_ip = socket.inet_ntoa(ip.dst)
+                uniq_ips.update([src_ip, dst_ip])
+        for ips in uniq_ips:
+            ip_table.add_row(ips)
+        print(ip_table)
 
     def search_dns_queries(self):
         dns_table = Table()
@@ -136,7 +159,7 @@ class PcapAnalyzer:
             if matches != []:
                 for mm in matches:
                     try:
-                        if mm not in extracted_data:
+                        if mm.decode() not in extracted_data:
                             if mm.decode()[0] != "." and "." in mm.decode():
                                 extracted_data.append(mm.decode())
                                 stuff_table.add_row(mm.decode())
@@ -165,46 +188,50 @@ class PcapAnalyzer:
 
     def lookup_ja3_digest(self):
         print(f"\n{infoS} Performing malicious [bold green]JA3 Digest[white] lookup. Please wait...")
-        os.system(f"ja3 {self.pcap_file} > out.json")
+        os.system(f"ja3 \"{self.pcap_file}\" > out.json")
         ja3_data = json.load(open("out.json"))
-        ja3_array = []
+        if ja3_data != []:
+            ja3_array = []
 
-        # Table for extracted data
-        jtable = Table()
-        jtable.add_column("[bold green]Extracted Digest Values", justify="center")
+            # Table for extracted data
+            jtable = Table()
+            jtable.add_column("[bold green]Extracted Digest Values", justify="center")
 
-        # Try to get ja3 digests
-        for ja in ja3_data:
-            if ja["ja3_digest"] not in ja3_array:
-                ja3_array.append(ja["ja3_digest"])
-                jtable.add_row(ja["ja3_digest"])
+            # Try to get ja3 digests
+            for ja in ja3_data:
+                if ja["ja3_digest"] not in ja3_array:
+                    ja3_array.append(ja["ja3_digest"])
+                    jtable.add_row(ja["ja3_digest"])
 
-        if ja3_array:
-            print(jtable)
+            if ja3_array:
+                print(jtable)
 
-            # Parsing database
-            l_data = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}ja3_fingerprints.lst").read().split("\n")
-            digest_arr = []
-            for d in l_data:
-                if d.split(",")[0] not in digest_arr:
-                    digest_arr.append(d.split(",")[0])
+                # Parsing database
+                l_data = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}ja3_fingerprints.lst").read().split("\n")
+                digest_arr = []
+                for d in l_data:
+                    if d.split(",")[0] not in digest_arr:
+                        digest_arr.append(d.split(",")[0])
 
-            # Perform lookup
-            j_count = 0
-            for jd in ja3_array:
-                if jd in digest_arr:
-                    j_count += 1
-                    j_type_index = digest_arr.index(jd)
-                    print(f"[bold magenta]>>>[white] JA3: [bold green]{jd}[white] ---> [bold red]{l_data[j_type_index].split(',')[1]}")
+                # Perform lookup
+                j_count = 0
+                for jd in ja3_array:
+                    if jd in digest_arr:
+                        j_count += 1
+                        j_type_index = digest_arr.index(jd)
+                        print(f"[bold magenta]>>>[white] JA3: [bold green]{jd}[white] ---> [bold red]{l_data[j_type_index].split(',')[1]}")
 
-            if j_count == 0:
-                print(f"\n{errorS} There is no malicious digest value found!")
+                if j_count == 0:
+                    print(f"\n{errorS} There is no malicious digest value found!")
+        else:
+            print(f"{errorS} There is no malicious digest value found!")
         os.system("rm -rf out.json")
 
 # Execution
 target_pcap = sys.argv[1]
 pcap_analyzer = PcapAnalyzer(target_pcap)
 pcap_analyzer.search_urls()
+pcap_analyzer.search_ip_addresses()
 pcap_analyzer.search_dns_queries()
 pcap_analyzer.find_interesting_stuff()
 pcap_analyzer.detect_executables()
