@@ -8,7 +8,7 @@ import json
 import binascii
 import shutil
 
-from utils import err_exit, user_confirm
+from utils import err_exit, user_confirm, chk_wlist
 
 try:
     from rich import print
@@ -51,18 +51,10 @@ class PcapAnalyzer:
         self.all_content = open(self.pcap_file, "rb").read()
         self.file_buffer = open(self.pcap_file, "rb")
         self.pcap_content = dpkt.pcap.Reader(self.file_buffer)
-        self.wlist = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}whitelist_domains.txt", "r").read().split("\n")
         print(f"{infoS} Loading PCAP content. It will take a while please wait...")
         self.packet_content_array = []
         for _, buf in self.pcap_content:
             self.packet_content_array.append(buf)
-
-    def chk_wlist(self, target_string):
-        for pat in self.wlist:
-            matched = re.findall(pat, target_string)
-            if matched:
-                return False # Whitelist found
-        return True
 
     def search_urls(self):
         url_table = Table()
@@ -82,7 +74,7 @@ class PcapAnalyzer:
             final_urls = []
             for i in extracted_data:
                 if (i.decode() != "http://" and i.decode() != "https://") and ("." in i.decode()):
-                    if self.chk_wlist(i.decode()):
+                    if chk_wlist(i.decode()):
                         url_table.add_row(i.decode())
                         final_urls.append(i.decode())
         self.make_choice_and_print(url_table, "URL address", final_urls)

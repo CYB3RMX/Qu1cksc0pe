@@ -1,3 +1,4 @@
+import re
 import sys
 
 from rich import print
@@ -9,6 +10,17 @@ TABLE_TITLE_DEFAULTS = dict(
     title_style="bold italic cyan",
 )
 
+# Compatibility
+path_seperator = "/"
+strings_param = "-a"
+if sys.platform == "win32":
+    path_seperator = "\\"
+
+# Gathering Qu1cksc0pe path variable
+sc0pe_path = open(".path_handler", "r").read()
+
+# Get whitelist domains for "chk_wlist" method
+whitelist_domains = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}whitelist_domains.txt", "r").read().split("\n")
 
 def get_argv(idx, default=None):
     """Return the `sys.argv` value for the given index, defaulting on `None` or a supplied custom value."""
@@ -67,3 +79,10 @@ def user_confirm(question_text):
 def stylize_bool(b, invert_style=False):
     prefix = "[bold green]" if b ^ invert_style else "[bold red]"
     return prefix + repr(b)
+
+def chk_wlist(target_string):
+    for pat in whitelist_domains:
+        matched = re.findall(pat, target_string)
+        if matched:
+            return False # Whitelist found
+    return True

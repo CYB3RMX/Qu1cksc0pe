@@ -41,6 +41,9 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
+<b>06/03/2025</b>
+- [X] Improvements on ```Document Analyzer``` module.
+
 <b>05/03/2025</b>
 - [X] Improvements on ```PCAP Analyzer``` module.
 

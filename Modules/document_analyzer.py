@@ -12,7 +12,7 @@ import subprocess
 import configparser
 import urllib.parse
 from bs4 import BeautifulSoup
-from utils import err_exit, user_confirm
+from utils import err_exit, user_confirm, chk_wlist
 
 # Checking for rich
 try:
@@ -63,14 +63,9 @@ targetFile = sys.argv[1]
 
 # Compatibility
 path_seperator = "/"
-strings_param = "--all"
+strings_param = "-a"
 if sys.platform == "win32":
     path_seperator = "\\"
-    strings_param = "-a"
-elif sys.platform == "darwin":
-    strings_param = "-a"
-else:
-    pass
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
@@ -90,7 +85,6 @@ class DocumentAnalyzer:
         self.base64_pattern = r'(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})'
         self.mal_code = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}malicious_html_codes.json"))
         self.mal_rtf_code = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}malicious_rtf_codes.json"))
-        self.whitelist_domains = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}whitelist_domains.txt", "r").read()
         self.pat_ct = 0
         self.is_ole_file = None
         self.rtf_exploit_pattern_dict = {
@@ -262,7 +256,7 @@ class DocumentAnalyzer:
             docTable = Table(title="* Document Structure *", title_style="bold italic cyan", title_justify="center")
             docTable.add_column("[bold green]File Name", justify="center")
             for df in document.namelist():
-                if ".bin" in df or "embeddings" in df:
+                if ".bin" in df or "embeddings" in df or ".rtf" in df:
                     docTable.add_row(f"[bold red]{df}")
                     bins.append(df)
                 else:
@@ -284,7 +278,7 @@ class DocumentAnalyzer:
                     ddd = document.read(fff).decode()
                     linkz = re.findall(r"http[s]?://[a-zA-Z0-9./?=_%:-]*", ddd)
                     for lnk in linkz:
-                        if lnk.split("/")[2] not in self.whitelist_domains:
+                        if chk_wlist(lnk):
                             exlinks.add_row(lnk)
                 except:
                     continue
@@ -450,10 +444,10 @@ class DocumentAnalyzer:
         # Looking for embedded urls
         urlswitch = 0
         print(f"\n{infoS} Searching for interesting links...")
-        url_match = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", allstr)
+        url_match = re.findall(r"http[s]?://[a-zA-Z0-9./?=_%:-]*", allstr)
         if url_match != []:
             for lnk in url_match:
-                if lnk.split("/")[2] not in self.whitelist_domains:
+                if chk_wlist(lnk):
                     print(f"[bold magenta]>>>[white] {lnk}")
                     urlswitch += 1
         
@@ -573,11 +567,11 @@ class DocumentAnalyzer:
         urlTable = Table(title="* Embedded URL\'s *", title_style="bold italic cyan", title_justify="center")
         urlTable.add_column("[bold green]URL", justify="center")
         uustr = 0
-        linkz = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", allstr)
+        linkz = re.findall(r"http[s]?://[a-zA-Z0-9./?=_%:-]*", allstr)
         if len(linkz) != 0:
             lcontrol = []
             for l in linkz:
-                if l.split("/")[2] not in self.whitelist_domains:
+                if chk_wlist(l):
                     if l not in lcontrol:
                         if ")" in l:
                             if l.split(')')[0] not in lcontrol:
@@ -644,7 +638,7 @@ class DocumentAnalyzer:
                                 pass
 
                             # Method 2
-                            get_url = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", str(doc.getobj(obj)))
+                            get_url = re.findall(r"http[s]?://[a-zA-Z0-9./?=_%:-]*", str(doc.getobj(obj)))
                             if get_url != []:
                                 for ur in get_url:
                                     if "\'" in ur:
@@ -737,13 +731,13 @@ class DocumentAnalyzer:
     def html_fetch_urls(self, given_buffer):
         print(f"\n{infoS} Checking URL values...")
         url_vals = []
-        regx = re.findall(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", given_buffer)
+        regx = re.findall(r"http[s]?://[a-zA-Z0-9./?=_%:-]*", given_buffer)
         if regx != []:
             url_table = Table()
             url_table.add_column("[bold green]URL Values", justify="center")
             for url in regx:
                 if url not in url_vals:
-                    if url.split("/")[2].split("\'")[0] not in self.whitelist_domains:
+                    if chk_wlist(url):
                         if "\'" in url: # Remove the single quote
                             url_table.add_row(url.split("\'")[0])
                         else:
