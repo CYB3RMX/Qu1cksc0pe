@@ -41,6 +41,11 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
+<b>19/03/2025</b>
+- [X] Improvements on ```Android Dynamic Analyzer``` module.
+
+https://github.com/user-attachments/assets/7b27abb9-f18e-4611-8bdd-cd65106b5cf0
+
 <b>06/03/2025</b>
 - [X] Improvements on ```Document Analyzer``` module.
 
@@ -195,7 +200,7 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 
 <br><b>Usage</b>: ```python qu1cksc0pe.py --watch```<br>
 
-https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/3251dc28-7c97-4a82-aa6b-a981fb6da13e
+https://github.com/user-attachments/assets/7b27abb9-f18e-4611-8bdd-cd65106b5cf0
 
 ## Windows Process Analysis
 <br><b>Usage</b>: ```python qu1cksc0pe.py --watch```<br>
