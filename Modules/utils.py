@@ -1,8 +1,10 @@
 import re
+import os
 import sys
 
 from rich import print
 from rich.table import Table
+from rich.text import Text
 
 
 TABLE_TITLE_DEFAULTS = dict(
@@ -86,3 +88,18 @@ def chk_wlist(target_string):
         if matched:
             return False # Whitelist found
     return True
+
+def recursive_dir_scan(target_directory):
+    fnames = []
+    for root, d_names, f_names in os.walk(target_directory):
+        for ff in f_names:
+            fnames.append(os.path.join(root, ff))
+    return fnames
+
+def update_table(table, *args):
+    if len(table.columns[0]._cells) < 15:
+        table.add_row(*args)
+    else:
+        ans_ind = len(table.columns[0]._cells)
+        for i, arg in enumerate(args):
+            table.columns[i]._cells[ans_ind-1] = Text(str(arg), style="bold italic cyan")
