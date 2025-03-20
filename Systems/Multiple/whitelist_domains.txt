@@ -87,3 +87,4 @@ youtu.be
 flickr.com
 unisolated.invalid
 fontawesome.io
+pki.goog

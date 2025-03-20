@@ -33,6 +33,18 @@ try:
 except:
     err_exit("Error: >prompt_toolkit< module not found.")
 
+try:
+    from colorama import Fore, Style
+except ModuleNotFoundError as e:
+    print("Error: >colorama< module not found.")
+    raise e
+
+# Colors
+red = Fore.LIGHTRED_EX
+cyan = Fore.LIGHTCYAN_EX
+white = Style.RESET_ALL
+green = Fore.LIGHTGREEN_EX
+
 # Compatibility
 path_seperator = "/"
 adb_path = shutil.which("adb")
@@ -45,6 +57,7 @@ if sys.platform == "win32":
     adb_path = adb_conf["ADB_PATH"]["win_adb_path"]
 
 # Legends
+infoC = f"{cyan}[{red}*{cyan}]{white}"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 
@@ -99,8 +112,9 @@ report = {
 }
 
 class AndroidDynamicAnalyzer:
-    def __init__(self, target_file):
+    def __init__(self, target_file, is_installed):
         self.target_file = target_file
+        self.is_installed = is_installed
         self.device = None
         self.target_package = None
         self.target_appname = None
@@ -143,6 +157,8 @@ class AndroidDynamicAnalyzer:
     def install_setup_frida(self):
         print(f"{infoS} Frida server not found! Installing it for you...")
         self.device_arch = subprocess.run(f"{adb_path} -s {self.device} shell getprop ro.product.cpu.abi", shell=True, stdout=subprocess.PIPE).stdout.decode().strip("\n")
+        if "arm" in self.device_arch:
+            self.device_arch = "arm" # Handling arm based systems
 
         # Download and setup the server
         print(f"{infoS} Downloading: [bold green]frida-server-{self.frida_version}-android-{self.device_arch}.xz")
@@ -156,6 +172,9 @@ class AndroidDynamicAnalyzer:
             print(f"{infoS} Frida server is ready!")
     def bootup_frida_server(self):
         self.device_arch = subprocess.run(f"{adb_path} -s {self.device} shell getprop ro.product.cpu.abi", shell=True, stdout=subprocess.PIPE).stdout.decode().strip("\n")
+        if "arm" in self.device_arch:
+            self.device_arch = "arm" # Handling arm based systems
+
         _ = subprocess.run(f"{adb_path} -s {self.device} shell /data/local/tmp/frida-server-{self.frida_version}-android-{self.device_arch} &", shell=True)
         cf = subprocess.run("adb shell netstat -antp", shell=True, stdout=subprocess.PIPE).stdout
         if b"frida-server" in cf:
@@ -214,7 +233,8 @@ class AndroidDynamicAnalyzer:
             self.bootup_frida_server()
 
         # Install target package and select it
-        self.install_target_application()
+        if not self.is_installed:
+            self.install_target_application()
         self.enumerate_packages_and_select()
 
         # Remove old memory dump file
@@ -343,7 +363,7 @@ class AndroidDynamicAnalyzer:
                         for ff in dircontent:
                             file_type = subprocess.check_output(f"file \"{ff}\"", shell=True).decode().split(":")[1].strip()
                             if ff not in logged_files:
-                                if "Dalvik dex" in file_type:
+                                if "Dalvik dex" in file_type or "Android package" in file_type:
                                     update_table(table_object, ff, f"[bold red]{file_type}[white]")
                                 else:
                                     update_table(table_object, ff, f"[white]{file_type}")
@@ -433,8 +453,14 @@ class AndroidDynamicAnalyzer:
 
 # This function is a skeleton for our program
 def skeleton_program():
-    target_file = prompt("[>>>] Enter Full Path of The Target File [Press TAB to auto-complete]: ", completer=path_completer)
-    ada = AndroidDynamicAnalyzer(target_file)
+    print("\n[bold cyan][[bold red]1[bold cyan]][white] Install APK and analyze")
+    print("[bold cyan][[bold red]2[bold cyan]][white] Analyze pre-installed package")
+    choice = int(input(f"\n{infoC} Select: "))
+    if choice == 1:
+        target_file = prompt("[>>>] Enter Full Path of The Target File [Press TAB to auto-complete]: ", completer=path_completer)
+        ada = AndroidDynamicAnalyzer(target_file, False)
+    else:
+        ada = AndroidDynamicAnalyzer(None, True)
     ada.preparation_phase_main()
 
     # ----- TUI Zone -----
