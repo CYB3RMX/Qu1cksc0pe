@@ -49,6 +49,7 @@ green = Fore.LIGHTGREEN_EX
 path_seperator = "/"
 adb_path = shutil.which("adb")
 downloader = "wget"
+remover = "rm -rf" # Instant, brutal lol :)
 if sys.platform == "win32":
     path_seperator = "\\"
     # Get adb path for windows
@@ -125,6 +126,7 @@ class AndroidDynamicAnalyzer:
         self.MAX_SIZE = 20971520
         self.target_acquired = False
         self.device_frida = None
+        self.logged_urls = []
 
     # ----- These functions are for preparing all stuff before the dynamic execution -----
     #   ----- ADB side -----
@@ -240,6 +242,9 @@ class AndroidDynamicAnalyzer:
         # Remove old memory dump file
         if self.target_package and os.path.exists(f"mem_dump-{self.target_package}.dmp"):
             os.remove(f"mem_dump-{self.target_package}.dmp")
+
+        # Remove junk files if user asks to it
+        self.cleanup_env()
 
         # Create frida session
         device_manager = frida.enumerate_devices()
@@ -366,7 +371,7 @@ class AndroidDynamicAnalyzer:
                                 if "Dalvik dex" in file_type or "Android package" in file_type:
                                     update_table(table_object, ff, f"[bold red]{file_type}[white]")
                                 else:
-                                    update_table(table_object, ff, f"[white]{file_type}")
+                                    update_table(table_object, ff, file_type)
                                 logged_files.append(ff)
                                 report["application_files"].append({ff: file_type})
             await asyncio.sleep(1)
@@ -392,37 +397,38 @@ class AndroidDynamicAnalyzer:
             pass
     def memory_analyzer(self, table_object):
         try:
-            if not os.path.exists(f"mem_dump-{self.target_package}.dmp"):
-                f_session = self.create_frida_session()
-                f_script = f_session.create_script(self.frida_script)
-                f_script.load()
-                agent = f_script.exports_sync
-                memory_ranges = agent.enumerate_ranges(self.PERMS)
+            f_session = self.create_frida_session()
+            f_script = f_session.create_script(self.frida_script)
+            f_script.load()
+            agent = f_script.exports_sync
+            memory_ranges = agent.enumerate_ranges(self.PERMS)
 
-                # Dumping application memory progress
-                for memr in range(len(memory_ranges)):
-                    try:
-                        if memory_ranges[memr]['size'] > self.MAX_SIZE:
-                            mem_acs_viol = self.split_data(agent, memory_ranges[memr]['base'], memory_ranges[memr]['size'], self.MAX_SIZE)
-                            continue
-                        else:
-                            mem_acs_viol = self.save_to_file(agent, memory_ranges[memr]['base'], memory_ranges[memr]['size'])
-                    except:
+            # Dumping application memory progress
+            for memr in range(len(memory_ranges)):
+                try:
+                    if memory_ranges[memr]['size'] > self.MAX_SIZE:
+                        mem_acs_viol = self.split_data(agent, memory_ranges[memr]['base'], memory_ranges[memr]['size'], self.MAX_SIZE)
                         continue
+                    else:
+                        mem_acs_viol = self.save_to_file(agent, memory_ranges[memr]['base'], memory_ranges[memr]['size'])
+                except:
+                    continue
 
-                # Analyze memory dump
-                if os.path.exists(f"mem_dump-{self.target_package}.dmp"):
-                    memory_dmp_buffer = open(f"mem_dump-{self.target_package}.dmp", "rb").read()
-                    
-                    # Extract urls
-                    urlz = re.findall(rb"http[s]?://[a-zA-Z0-9./?=_%:-]*", memory_dmp_buffer)
-                    if urlz != []:
-                        for u in urlz:
-                            if (b"." in u) and (chk_wlist(u.decode()) and u.decode() not in report["extracted_urls"]):
-                                report["extracted_urls"].append(u.decode())
-                        if report["extracted_urls"] != []:
-                            for u in report["extracted_urls"]:
+            # Analyze memory dump
+            if os.path.exists(f"mem_dump-{self.target_package}.dmp"):
+                memory_dmp_buffer = open(f"mem_dump-{self.target_package}.dmp", "rb").read()
+                
+                # Extract urls
+                urlz = re.findall(rb"http[s]?://[a-zA-Z0-9./?=_%:-]*", memory_dmp_buffer)
+                if urlz != []:
+                    for u in urlz:
+                        if (b"." in u) and (chk_wlist(u.decode()) and u.decode() not in report["extracted_urls"]):
+                            report["extracted_urls"].append(u.decode())
+                    if report["extracted_urls"] != []:
+                        for u in report["extracted_urls"]:
+                            if u not in self.logged_urls:
                                 update_table(table_object, u)
+                                self.logged_urls.append(u)
         except:
             pass
     async def check_alive_process(self):
@@ -450,6 +456,14 @@ class AndroidDynamicAnalyzer:
                 json.dump(report, rp_file, indent=4)
             rp_file.close()
             await asyncio.sleep(1)
+
+    def cleanup_env(self):
+        chc = input(f"\n{infoC} Do you want to clean junk files before analysis? [Y/n]: ")
+        if chc == "Y" or chc == "y":
+            print(f"{infoS} Cleaning up...")
+            for ff in previous_states.keys():
+                if os.path.exists(ff):
+                    _ = subprocess.run(f"{remover} {ff}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 # This function is a skeleton for our program
 def skeleton_program():

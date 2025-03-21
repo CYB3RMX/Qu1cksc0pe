@@ -88,3 +88,6 @@ flickr.com
 unisolated.invalid
 fontawesome.io
 pki.goog
+globalsign.com
+unity3d.com
+twimg.com
