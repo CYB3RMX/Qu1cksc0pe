@@ -77,11 +77,17 @@ https://github.com/user-attachments/assets/7b27abb9-f18e-4611-8bdd-cd65106b5cf0
 > If you encounter issues with the Python modules, creating a Python virtual environment (python_venv) should resolve them.
 
 ```bash
+# First you need to clone Qu1cksc0pe with this command
+git clone --depth 1 https://github.com/CYB3RMX/Qu1cksc0pe
+
+# After cloning the repository you must create a python virtual environment (for handling python modules)
+virtualenv -p python3 sc0pe_venv
+source sc0pe_venv/bin/activate
+
 # You can simply execute the following command it will do everything for you!
 bash setup.sh
 
 # If you want to install Qu1cksc0pe on your system just execute the following commands.
-bash setup.sh
 python qu1cksc0pe.py --install
 
 # To prevent interpreter errors after installation, use dos2unix.
