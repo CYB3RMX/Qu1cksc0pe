@@ -96,8 +96,8 @@ def recursive_dir_scan(target_directory):
             fnames.append(os.path.join(root, ff))
     return fnames
 
-def update_table(table, *args):
-    if len(table.columns[0]._cells) < 15:
+def update_table(table, row_size, *args):
+    if len(table.columns[0]._cells) < row_size:
         table.add_row(*args)
     else:
         ans_ind = len(table.columns[0]._cells)

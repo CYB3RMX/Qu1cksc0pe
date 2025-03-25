@@ -275,7 +275,7 @@ class AndroidDynamicAnalyzer:
                 if len(f_calls) != 0:
                     if last_file_user_log != f_calls[-1]:
                         if callstack >= 15:
-                            update_table(table_object, "[FILE CALL]", f_calls[-1])
+                            update_table(table_object, 15, "[FILE CALL]", f_calls[-1])
                         else:
                             table_object.add_row("[bold red][FILE CALL][white]", f_calls[-1])
                         callstack += 1
@@ -287,7 +287,7 @@ class AndroidDynamicAnalyzer:
                 if len(f_calls) != 0:
                     if last_file_data_log != f_calls[-1]:
                         if callstack >= 15:
-                            update_table(table_object, "[FILE CALL]", f_calls[-1])
+                            update_table(table_object, 15, "[FILE CALL]", f_calls[-1])
                         else:
                             table_object.add_row("[bold red][FILE CALL][white]", f_calls[-1])
                         callstack += 1
@@ -299,7 +299,7 @@ class AndroidDynamicAnalyzer:
                 if len(i_calls) != 0:
                     if last_intent_log != i_calls[-1]:
                         if callstack >= 15:
-                            update_table(table_object, "[INTENT CALL]", i_calls[-1])
+                            update_table(table_object, 15, "[INTENT CALL]", i_calls[-1])
                         else:
                             table_object.add_row("[bold yellow][INTENT CALL][white]", i_calls[-1])
                         callstack += 1
@@ -311,7 +311,7 @@ class AndroidDynamicAnalyzer:
                 if len(p_calls) != 0:
                     if last_provider_log != p_calls[-1]:
                         if callstack >= 15:
-                            update_table(table_object, "[PROVIDER CALL]", p_calls[-1])
+                            update_table(table_object, 15, "[PROVIDER CALL]", p_calls[-1])
                         else:
                             table_object.add_row("[bold magenta][PROVIDER CALL][white]", p_calls[-1])
                         callstack += 1
@@ -323,7 +323,7 @@ class AndroidDynamicAnalyzer:
                 if len(a_calls) != 0:
                     if last_approle_log != a_calls[-1]:
                         if callstack >= 15:
-                            update_table(table_object, "[APP ROLE CALL]", a_calls[-1])
+                            update_table(table_object, 15, "[APP ROLE CALL]", a_calls[-1])
                         else:
                             table_object.add_row("[bold pink][APP ROLE CALL][white]", a_calls[-1])
                         callstack += 1
@@ -335,7 +335,7 @@ class AndroidDynamicAnalyzer:
                 if len(m_calls) != 0:
                     if last_activity_log != m_calls[-1]:
                         if callstack >= 15:
-                            update_table(table_object, "[METHOD CALL]", m_calls[-1])
+                            update_table(table_object, 15, "[METHOD CALL]", m_calls[-1])
                         else:
                             table_object.add_row("[bold blue][METHOD CALL][white]", m_calls[-1])
                         callstack += 1
@@ -369,9 +369,9 @@ class AndroidDynamicAnalyzer:
                             file_type = subprocess.check_output(f"file \"{ff}\"", shell=True).decode().split(":")[1].strip()
                             if ff not in logged_files:
                                 if "Dalvik dex" in file_type or "Android package" in file_type:
-                                    update_table(table_object, ff, f"[bold red]{file_type}[white]")
+                                    update_table(table_object, 15, ff, f"[bold red]{file_type}[white]")
                                 else:
-                                    update_table(table_object, ff, file_type)
+                                    update_table(table_object, 15, ff, file_type)
                                 logged_files.append(ff)
                                 report["application_files"].append({ff: file_type})
             await asyncio.sleep(1)
@@ -427,7 +427,7 @@ class AndroidDynamicAnalyzer:
                     if report["extracted_urls"] != []:
                         for u in report["extracted_urls"]:
                             if u not in self.logged_urls:
-                                update_table(table_object, u)
+                                update_table(table_object, 15, u)
                                 self.logged_urls.append(u)
         except:
             pass
