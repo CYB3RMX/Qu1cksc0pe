@@ -41,6 +41,9 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
+<b>25/03/2025</b>
+- [X] Improvements on ```Windows Dynamic Analyzer``` module.
+
 <b>21/03/2025</b>
 - [X] Improvements on ```Android Dynamic Analyzer``` module.
 

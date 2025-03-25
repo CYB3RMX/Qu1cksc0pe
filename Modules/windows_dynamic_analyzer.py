@@ -5,7 +5,9 @@ import json
 import psutil
 import asyncio
 import warnings
+import subprocess
 from utils import err_exit
+from utils import update_table
 from windows_process_reader import WindowsProcessReader
 
 try:
@@ -13,7 +15,6 @@ try:
     from rich.table import Table
     from rich.live import Live
     from rich.layout import Layout
-    from rich.text import Text
     from rich.panel import Panel
 except:
     err_exit("Error: >rich< module not found.")
@@ -27,11 +28,6 @@ try:
     import frida
 except:
     err_exit("Error: >frida< module not found.")
-
-try:
-    import pefile as pf
-except:
-    err_exit("Error: >pefile< module not found.")
 
 try:
     from colorama import Fore, Style
@@ -100,9 +96,9 @@ class WindowsDynamicAnalyzer:
                         # Check if the child process are dangerous
                         if chld.pid not in self.target_processes:
                             if "cmd.exe" in chld.name() or "powershell.exe" in chld.name() or "rundll32.exe" in chld.name():
-                                self._update_table(table_object, f"[bold red]{chld.name()}[white]", f"[bold red]{str(chld.pid)}[white]")
+                                update_table(table_object, 4, f"[bold red]{chld.name()}[white]", f"[bold red]{str(chld.pid)}[white]")
                             else:
-                                self._update_table(table_object, chld.name(), str(chld.pid))
+                                update_table(table_object, 4, chld.name(), str(chld.pid))
                             self.target_processes.append(chld.pid)
 
                     # Finally add the tmp_rep to the report_object
@@ -110,7 +106,7 @@ class WindowsDynamicAnalyzer:
                         report_obj["process_ids"].update(tmp_rep)    
                 else:
                     if str(self.proc_handler.pid) not in table_object.columns[1]._cells:
-                        self._update_table(table_object, self.proc_handler.name(), str(self.proc_handler.pid))
+                        update_table(table_object, 4, self.proc_handler.name(), str(self.proc_handler.pid))
                     if self.target_pid not in report_obj["process_ids"].keys():
                         report_obj["process_ids"].update(tmp_rep)
                 await asyncio.sleep(0.5)
@@ -127,7 +123,7 @@ class WindowsDynamicAnalyzer:
                             if conn.raddr:
                                 conn_str = f"{proc_net.pid}|{proc_net.name()}|{conn.raddr.ip}:{conn.raddr.port}|{conn.status}"
                                 if conn_str not in report_obj["network_connections"]:
-                                    self._update_table(table_object, *conn_str.split("|"))
+                                    update_table(table_object, 15, *conn_str.split("|"))
                                     report_obj["network_connections"].append(conn_str)
                 await asyncio.sleep(0.5)
             except psutil.NoSuchProcess:
@@ -180,16 +176,15 @@ class WindowsDynamicAnalyzer:
             await asyncio.sleep(1)
 
     async def memory_dumper(self, table_obj):
-        self.dumped_files = []
         while True:
             for t_p in self.target_processes:
-                if f"qu1cksc0pe_memory_dump_{t_p}.bin" not in self.dumped_files:
-                    w_p_r = WindowsProcessReader(t_p)
-                    state = w_p_r.dump_memory()
-                    if state:
+                w_p_r = WindowsProcessReader(t_p)
+                state = w_p_r.dump_memory()
+                if state:
+                    if f"qu1cksc0pe_memory_dump_{t_p}.bin" not in self.dumped_files:
                         self.dumped_files.append(f"qu1cksc0pe_memory_dump_{t_p}.bin")
-                        table_obj.add_row(str(t_p), f"qu1cksc0pe_memory_dump_{t_p}.bin", str(os.path.getsize(f"qu1cksc0pe_memory_dump_{t_p}.bin")))
-            await asyncio.sleep(1)
+                        update_table(table_obj, 5, str(t_p), f"qu1cksc0pe_memory_dump_{t_p}.bin", str(os.path.getsize(f"qu1cksc0pe_memory_dump_{t_p}.bin")))
+            await asyncio.sleep(1.5)
 
     async def extract_url_from_memory(self, table_object):
         while True:
@@ -197,12 +192,12 @@ class WindowsDynamicAnalyzer:
                 for tpu in self.target_processes:
                     if tpu not in report_obj["extracted_urls"].keys():
                         if os.path.exists(f"qu1cksc0pe_memory_dump_{tpu}.bin"):
-                            dump_buffer = open(f"qu1cksc0pe_memory_dump_{tpu}.bin", "rb").read()
+                            dump_buffer = subprocess.run(f"strings qu1cksc0pe_memory_dump_{tpu}.bin", shell=True, stdout=subprocess.PIPE).stdout
                             urls = re.findall(rb"http[s]?://[a-zA-Z0-9./?=_%:-]*", dump_buffer)
                             tpu_url = {tpu: []}
                             for url in urls:
                                 if self._is_valid_url(url) and url.decode() not in tpu_url[tpu]:
-                                    self._update_table(table_object, url.decode())
+                                    update_table(table_object, 13, url.decode())
                                     tpu_url[tpu].append(url.decode())
                             report_obj["extracted_urls"].update(tpu_url)
                 await asyncio.sleep(1)
@@ -269,14 +264,6 @@ class WindowsDynamicAnalyzer:
 
     def _is_valid_url(self, buf):
         return (len(buf) >= 13) and (buf not in {b"http://", b"https://"}) and not any(wl in buf.decode() for wl in self.whitelist_domains)
-
-    def _update_table(self, table, *args):
-        if len(table.columns[0]._cells) < 15:
-            table.add_row(*args)
-        else:
-            ans_ind = len(table.columns[0]._cells)
-            for i, arg in enumerate(args):
-                table.columns[i]._cells[ans_ind-1] = Text(str(arg), style="bold italic cyan")
 
     async def create_log_file(self):
         while True:
@@ -374,7 +361,7 @@ def main_app(target_pid):
         if message["type"] == "send":
             api_name = message["payload"]["target_api"]
             arguments = message["payload"]["args"]
-            wda._update_table(win_api_ct, api_name, arguments)
+            update_table(win_api_ct, 13, api_name, arguments)
             report_obj["api_calls"].append((api_name, arguments))
 
     # Bottom zone
