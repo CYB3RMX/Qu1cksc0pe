@@ -65,7 +65,11 @@ report_obj = {
     "process_ids": {},
     "open_files": {},
     "loaded_modules": {},
-    "extracted_urls": {}
+    "extracted_urls": {},
+    "interesting_findings": {
+        "telegram_bot_token": [],
+        "telegram_chat_id": []
+    }
 }
 
 class WindowsDynamicAnalyzer:
@@ -73,6 +77,8 @@ class WindowsDynamicAnalyzer:
         self.target_pid = target_pid
         self.target_processes = []
         self.dumped_files = []
+        self.logged_things = []
+        self.bot_found_pid = None
         self.whitelist_domains = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}whitelist_domains.txt", "r").read().split("\n")
         self.frida_script = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}FridaScripts{path_seperator}sc0pe_windows_dynamic.js", "r").read()
         self.target_api_list = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows_api_trace_list.txt", "r").read().split("\n")
@@ -186,45 +192,69 @@ class WindowsDynamicAnalyzer:
                         update_table(table_obj, 5, str(t_p), f"qu1cksc0pe_memory_dump_{t_p}.bin", str(os.path.getsize(f"qu1cksc0pe_memory_dump_{t_p}.bin")))
             await asyncio.sleep(1.5)
 
-    async def extract_url_from_memory(self, table_object):
+    async def extract_url_and_interesting_from_memory(self, table_object):
         while True:
-            try:
-                for tpu in self.target_processes:
-                    if tpu not in report_obj["extracted_urls"].keys():
-                        if os.path.exists(f"qu1cksc0pe_memory_dump_{tpu}.bin"):
-                            dump_buffer = subprocess.run(f"strings qu1cksc0pe_memory_dump_{tpu}.bin", shell=True, stdout=subprocess.PIPE).stdout
-                            urls = re.findall(rb"http[s]?://[a-zA-Z0-9./?=_%:-]*", dump_buffer)
-                            tpu_url = {tpu: []}
-                            for url in urls:
-                                if self._is_valid_url(url) and url.decode() not in tpu_url[tpu]:
-                                    update_table(table_object, 13, url.decode())
-                                    tpu_url[tpu].append(url.decode())
-                            report_obj["extracted_urls"].update(tpu_url)
-                await asyncio.sleep(1)
-            except Exception as e:
-                print(e)
+            for tpu in self.target_processes:
+                if os.path.exists(f"qu1cksc0pe_memory_dump_{tpu}.bin"):
+                    dump_buffer = subprocess.run(f"strings qu1cksc0pe_memory_dump_{tpu}.bin", shell=True, stdout=subprocess.PIPE).stdout
+                    # ----- Telegram bot token -----
+                    checktg = re.findall(rb"([0-9]{10}\:[a-zA-Z0-9\-\_]{35}|bot[0-9]{10}\:[a-zA-Z0-9\-\_]+)", dump_buffer)
+                    if checktg != []:
+                        self.bot_found_pid = tpu
+                        vartemp = checktg[-1].decode()
+                        if vartemp not in report_obj["interesting_findings"]["telegram_bot_token"]:
+                            if "bot" in vartemp:
+                                vartemp = vartemp.replace("bot", "")
+                            report_obj["interesting_findings"]["telegram_bot_token"].append(vartemp)
 
-    async def scan_for_suspicious_directories(self, table_object):
-        suspicious_directories = ["\\AppData\\Local\\Temp", "\\AppData\\Roaming"] # Will be extended
-        logged_process = []
+                    # ----- Telegram chat id -----
+                    if report_obj["interesting_findings"]["telegram_bot_token"] != []:
+                        dump_buffer_id = subprocess.run(f"strings qu1cksc0pe_memory_dump_{self.bot_found_pid}.bin", shell=True, stdout=subprocess.PIPE).stdout
+                        patternz = report_obj["interesting_findings"]["telegram_bot_token"][0].split(":")[0]
+                        # Check case 1
+                        case1 = re.findall(rb"chat_id=[\-0-9]+", dump_buffer_id)
+                        if case1 != []:
+                            cids = [x.decode().replace("chat_id=", "") for x in re.findall(rb"chat_id=[\-0-9]+", dump_buffer_id)]
+                            if cids != []:
+                                for c in cids:
+                                    if c not in report_obj["interesting_findings"]["telegram_chat_id"]:
+                                        report_obj["interesting_findings"]["telegram_chat_id"].append(c)
+
+                        # If there is still empty array try case 2
+                        if len(report_obj["interesting_findings"]["telegram_chat_id"]) == 0:
+                            search = [x.group().decode() for x in re.finditer(rb"[\-0-9]{10}+", dump_buffer_id)]
+                            print()
+                            target_index = search.index(patternz)+1
+                            if search[search.index(patternz)+1] == patternz:
+                                target_index += 1
+                            if search[target_index] not in report_obj["interesting_findings"]["telegram_chat_id"]:
+                                report_obj["interesting_findings"]["telegram_chat_id"].append(search[target_index])
+
+                    # ----- Extract urls -----
+                    urls = re.findall(rb"http[s]?://[a-zA-Z0-9./?=_%:-]*", dump_buffer)
+                    tpu_url = {tpu: []}
+                    for url in urls:
+                        if self._is_valid_url(url) and url.decode() not in tpu_url[tpu]:
+                            update_table(table_object, 13, url.decode())
+                            tpu_url[tpu].append(url.decode())
+                    report_obj["extracted_urls"].update(tpu_url)
+            await asyncio.sleep(1)
+
+    async def interesting_findings_monitor(self, table_object):
         while True:
-            for proc_element in psutil.process_iter():
-                try:
-                    if proc_element.pid != 0:
-                        if proc_element.children() != []:
-                            for pec in proc_element.children():
-                                # Check suspicious directories
-                                for sd in suspicious_directories: # Not the best practice to implement but why not?
-                                    if (sd in pec.exe()) and (pec.name() not in logged_process):
-                                        table_object.add_row(str(pec.pid), pec.name(), pec.exe())
-                                        logged_process.append(pec.name())
-                        else:
-                            for sd in suspicious_directories:
-                                if (sd in proc_element.exe()) and (proc_element.name() not in logged_process):
-                                    table_object.add_row(str(proc_element.pid), proc_element.name(), proc_element.exe())
-                                    logged_process.append(proc_element.name())
-                except:
-                    continue
+            # Check if there is a telegram bot token
+            if report_obj["interesting_findings"]["telegram_bot_token"] != []:
+                for ttkn in report_obj["interesting_findings"]["telegram_bot_token"]:
+                    if ttkn not in self.logged_things:
+                        update_table(table_object, 6, "Telegram Bot Token", ttkn)
+                        self.logged_things.append(ttkn)
+
+            # Check if there is a telegram chat id
+            if report_obj["interesting_findings"]["telegram_chat_id"] != []:
+                for chtid in report_obj["interesting_findings"]["telegram_chat_id"]:
+                    if chtid not in self.logged_things:
+                        update_table(table_object, 6, "Telegram Chat ID", chtid)
+                        self.logged_things.append(chtid)
             await asyncio.sleep(1)
 
     async def attach_process_to_frida(self):
@@ -327,11 +357,10 @@ def main_app(target_pid):
     mem_dumpy.add_column("[bold green]File Name", justify="center")
     mem_dumpy.add_column("[bold green]Size", justify="center")
 
-    # Create table for suspicious paths
-    sd_table = Table()
-    sd_table.add_column("[bold green]PID", justify="center")
-    sd_table.add_column("[bold green]Name", justify="center")
-    sd_table.add_column("[bold green]Path", justify="center")
+    # Create table for interesting findings
+    ifds = Table()
+    ifds.add_column("[bold green]Type", justify="center")
+    ifds.add_column("[bold green]Value", justify="center")
 
     # Upper grid for left
     upper_grid_left = Table.grid()
@@ -351,7 +380,7 @@ def main_app(target_pid):
     # Upper down grid zone
     upper_right_down = Table.grid()
     upper_right_down.add_row(
-        Panel(mem_dumpy, border_style="bold magenta", title="Dumped Files From Memory")
+        Panel(mem_dumpy, border_style="bold magenta", title="Memory Dumps")
     )
     
     program_layout["top_right_down"].update(upper_right_down)
@@ -381,7 +410,7 @@ def main_app(target_pid):
     program_layout["bottom_left"].update(bottom_zone_left)
     bottom_zone_right = Table.grid()
     bottom_zone_right.add_row(
-        Panel(sd_table, border_style="bold cyan", title="Suspicious Execution Paths")
+        Panel(ifds, border_style="bold cyan", title="Interesting Findings")
     )
     program_layout["bottom_right"].update(bottom_zone_right)
 
@@ -394,8 +423,8 @@ def main_app(target_pid):
     event_loop.create_task(wda.parse_cmdline_arguments())
     event_loop.create_task(wda.create_log_file())
     event_loop.create_task(wda.get_loaded_modules())
-    event_loop.create_task(wda.extract_url_from_memory(ex_url_mem))
-    event_loop.create_task(wda.scan_for_suspicious_directories(sd_table))
+    event_loop.create_task(wda.extract_url_and_interesting_from_memory(ex_url_mem))
+    event_loop.create_task(wda.interesting_findings_monitor(ifds))
     event_loop.create_task(wda.attach_process_to_frida())
     event_loop.create_task(wda.get_open_files())
     with Live(program_layout, refresh_per_second=1.8):

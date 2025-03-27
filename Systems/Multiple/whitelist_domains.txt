@@ -110,3 +110,5 @@ comodo.net
 aspnetcdn.com
 asp.net
 azureedge.net
+monotype.com
+freedesktop.org
