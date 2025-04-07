@@ -5,7 +5,6 @@ import json
 import psutil
 import asyncio
 import warnings
-import subprocess
 from utils import err_exit
 from utils import update_table
 from windows_process_reader import WindowsProcessReader
@@ -78,7 +77,6 @@ class WindowsDynamicAnalyzer:
         self.target_processes = []
         self.dumped_files = []
         self.logged_things = []
-        self.bot_found_pid = None
         self.whitelist_domains = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}whitelist_domains.txt", "r").read().split("\n")
         self.frida_script = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}FridaScripts{path_seperator}sc0pe_windows_dynamic.js", "r").read()
         self.target_api_list = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows_api_trace_list.txt", "r").read().split("\n")
@@ -196,12 +194,15 @@ class WindowsDynamicAnalyzer:
         while True:
             for tpu in self.target_processes:
                 if os.path.exists(f"qu1cksc0pe_memory_dump_{tpu}.bin"):
-                    dump_buffer = subprocess.run(f"strings qu1cksc0pe_memory_dump_{tpu}.bin", shell=True, stdout=subprocess.PIPE).stdout
+                    dump_buffer = open(f"qu1cksc0pe_memory_dump_{tpu}.bin", "rb").read()
+                    dump_buffer = re.findall(rb'[^\x00-\x1F\x7F-\xFF]{4,}', dump_buffer) # String extraction instead of "strings"
                     # ----- Telegram bot token -----
-                    checktg = re.findall(rb"([0-9]{10}\:[a-zA-Z0-9\-\_]{35}|bot[0-9]{10}\:[a-zA-Z0-9\-\_]+)", dump_buffer)
+                    checktg = re.findall(r"([0-9]{10}\:[a-zA-Z0-9\-\_]{35}|bot[0-9]{10}\:[a-zA-Z0-9\-\_]+)", str(dump_buffer))
                     if checktg != []:
-                        self.bot_found_pid = tpu
-                        vartemp = checktg[-1].decode()
+                        multiple_occurence = False
+                        if len(checktg) > 1:
+                            multiple_occurence = True
+                        vartemp = checktg[-1]
                         if vartemp not in report_obj["interesting_findings"]["telegram_bot_token"]:
                             if "bot" in vartemp:
                                 vartemp = vartemp.replace("bot", "")
@@ -209,12 +210,11 @@ class WindowsDynamicAnalyzer:
 
                     # ----- Telegram chat id -----
                     if report_obj["interesting_findings"]["telegram_bot_token"] != []:
-                        dump_buffer_id = subprocess.run(f"strings qu1cksc0pe_memory_dump_{self.bot_found_pid}.bin", shell=True, stdout=subprocess.PIPE).stdout
                         patternz = report_obj["interesting_findings"]["telegram_bot_token"][0].split(":")[0]
                         # Check case 1
-                        case1 = re.findall(rb"chat_id=[\-0-9]+", dump_buffer_id)
+                        case1 = re.findall(r"chat_id=[\-0-9]+", str(dump_buffer))
                         if case1 != []:
-                            cids = [x.decode().replace("chat_id=", "") for x in re.findall(rb"chat_id=[\-0-9]+", dump_buffer_id)]
+                            cids = [x.replace("chat_id=", "") for x in re.findall(r"chat_id=[\-0-9]+", str(dump_buffer))]
                             if cids != []:
                                 for c in cids:
                                     if c not in report_obj["interesting_findings"]["telegram_chat_id"]:
@@ -222,8 +222,11 @@ class WindowsDynamicAnalyzer:
 
                         # If there is still empty array try case 2
                         if len(report_obj["interesting_findings"]["telegram_chat_id"]) == 0:
-                            search = [x.group().decode() for x in re.finditer(rb"[\-0-9]{10}+", dump_buffer_id)]
-                            print()
+                            search = [x.group() for x in re.finditer(r"[\-0-9]{10,11}", str(dump_buffer))]
+                            # The index of the chat_id is oftenly after the bot token index
+                            # We only need last token value index
+                            if multiple_occurence:
+                                search.pop(search.index(patternz))
                             target_index = search.index(patternz)+1
                             if search[search.index(patternz)+1] == patternz:
                                 target_index += 1
@@ -231,12 +234,12 @@ class WindowsDynamicAnalyzer:
                                 report_obj["interesting_findings"]["telegram_chat_id"].append(search[target_index])
 
                     # ----- Extract urls -----
-                    urls = re.findall(rb"http[s]?://[a-zA-Z0-9./?=_%:-]*", dump_buffer)
+                    urls = re.findall(r"http[s]?://[a-zA-Z0-9./?=_%:-]*", str(dump_buffer))
                     tpu_url = {tpu: []}
                     for url in urls:
-                        if self._is_valid_url(url) and url.decode() not in tpu_url[tpu]:
-                            update_table(table_object, 13, url.decode())
-                            tpu_url[tpu].append(url.decode())
+                        if self._is_valid_url(url) and url not in tpu_url[tpu]:
+                            update_table(table_object, 13, url)
+                            tpu_url[tpu].append(url)
                     report_obj["extracted_urls"].update(tpu_url)
             await asyncio.sleep(1)
 
@@ -293,7 +296,7 @@ class WindowsDynamicAnalyzer:
             await asyncio.sleep(1)
 
     def _is_valid_url(self, buf):
-        return (len(buf) >= 13) and (buf not in {b"http://", b"https://"}) and not any(wl in buf.decode() for wl in self.whitelist_domains)
+        return (len(buf) >= 13) and (buf not in {"http://", "https://"}) and not any(wl in buf for wl in self.whitelist_domains)
 
     async def create_log_file(self):
         while True:
