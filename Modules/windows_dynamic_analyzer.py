@@ -67,7 +67,9 @@ report_obj = {
     "extracted_urls": {},
     "interesting_findings": {
         "telegram_bot_token": [],
-        "telegram_chat_id": []
+        "telegram_chat_id": [],
+        "email": [],
+        "email_password": []
     }
 }
 
@@ -195,7 +197,15 @@ class WindowsDynamicAnalyzer:
             for tpu in self.target_processes:
                 if os.path.exists(f"qu1cksc0pe_memory_dump_{tpu}.bin"):
                     dump_buffer = open(f"qu1cksc0pe_memory_dump_{tpu}.bin", "rb").read()
-                    dump_buffer = re.findall(rb'[^\x00-\x1F\x7F-\xFF]{4,}', dump_buffer) # String extraction instead of "strings"
+
+                    # String extraction instead of "strings"
+                    c = re.findall(rb'(?:[\x20-\x7E]\x00){4,}', dump_buffer)
+                    cleaned = []
+                    for text in c:
+                        if b"\x00" in text:
+                            cleaned.append(text.replace(b"\x00", b"").decode())
+                    dump_buffer = re.findall(rb'[^\x00-\x1F\x7F-\xFF]{4,}', dump_buffer)
+
                     # ----- Telegram bot token -----
                     checktg = re.findall(r"([0-9]{10}\:[a-zA-Z0-9\-\_]{35}|bot[0-9]{10}\:[a-zA-Z0-9\-\_]+)", str(dump_buffer))
                     if checktg != []:
@@ -233,6 +243,17 @@ class WindowsDynamicAnalyzer:
                             if search[target_index] not in report_obj["interesting_findings"]["telegram_chat_id"]:
                                 report_obj["interesting_findings"]["telegram_chat_id"].append(search[target_index])
 
+                    # ----- Email address -----
+                    # NOTE: This technique works only => Vipkeylogger or similar samples
+                    mailz = re.findall(r'[a-zA-Z0-9.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}', str(cleaned))
+                    if mailz != []:
+                        for mail in mailz:
+                            if mail not in report_obj["interesting_findings"]["email"]:
+                                report_obj["interesting_findings"]["email"].append(mail)
+                                mail_index = cleaned.index(mail)
+                                if cleaned[mail_index+1] not in report_obj["interesting_findings"]["email_password"] and "Format_BadBase64Char" != cleaned[mail_index+1]:
+                                    report_obj["interesting_findings"]["email_password"].append(cleaned[mail_index+1])
+
                     # ----- Extract urls -----
                     urls = re.findall(r"http[s]?://[a-zA-Z0-9./?=_%:-]*", str(dump_buffer))
                     tpu_url = {tpu: []}
@@ -243,21 +264,26 @@ class WindowsDynamicAnalyzer:
                     report_obj["extracted_urls"].update(tpu_url)
             await asyncio.sleep(1)
 
+    def _monitor_handler(self, data_type, table_object, description):
+        if report_obj["interesting_findings"][data_type] != []:
+            for ttkn in report_obj["interesting_findings"][data_type]:
+                if ttkn not in self.logged_things:
+                    update_table(table_object, 6, description, str(ttkn))
+                    self.logged_things.append(ttkn)
+
     async def interesting_findings_monitor(self, table_object):
         while True:
             # Check if there is a telegram bot token
-            if report_obj["interesting_findings"]["telegram_bot_token"] != []:
-                for ttkn in report_obj["interesting_findings"]["telegram_bot_token"]:
-                    if ttkn not in self.logged_things:
-                        update_table(table_object, 6, "Telegram Bot Token", ttkn)
-                        self.logged_things.append(ttkn)
+            self._monitor_handler(data_type="telegram_bot_token", table_object=table_object, description="Telegram Bot Token")
 
             # Check if there is a telegram chat id
-            if report_obj["interesting_findings"]["telegram_chat_id"] != []:
-                for chtid in report_obj["interesting_findings"]["telegram_chat_id"]:
-                    if chtid not in self.logged_things:
-                        update_table(table_object, 6, "Telegram Chat ID", chtid)
-                        self.logged_things.append(chtid)
+            self._monitor_handler(data_type="telegram_chat_id", table_object=table_object, description="Telegram Chat ID")
+
+            # Check if there is a email value
+            self._monitor_handler(data_type="email", table_object=table_object, description="E-Mail Address")
+
+            # Check if there is a possible email password
+            self._monitor_handler(data_type="email_password", table_object=table_object, description="Possible E-Mail Password")
             await asyncio.sleep(1)
 
     async def attach_process_to_frida(self):
