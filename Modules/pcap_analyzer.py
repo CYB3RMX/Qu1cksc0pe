@@ -63,7 +63,7 @@ class PcapAnalyzer:
         print(f"{infoS} Performing URL extraction. It will take a while please wait...")
         for packet in track(range(len(self.packet_content_array)), description="Processing packets..."):
             try:
-                match = re.findall(rb"http[s]?://[a-zA-Z0-9./?=_%:-]*", self.packet_content_array[packet])
+                match = re.findall(rb"http[s]?://[a-zA-Z0-9./@?=_%:-]*", self.packet_content_array[packet])
                 if match:
                     for url in match:
                         if url not in extracted_data:

@@ -41,6 +41,9 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
+<b>25/06/2025</b>
+- [X] Improvements on ```Document Analyzer``` module. Qu1cksc0pe can now detect and extract possible Formbook samples from RTF files.
+
 <b>25/04/2025</b>
 - [X] Improvements on ```Windows Dynamic Analyzer``` module. Qu1cksc0pe can now extract ```E-Mail``` and possible ```Password``` values. (Effective against ```VIPKeylogger``` or similar families!)
 
