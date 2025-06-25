@@ -276,7 +276,7 @@ class DocumentAnalyzer:
             for fff in document.namelist():
                 try:
                     ddd = document.read(fff).decode()
-                    linkz = re.findall(r"http[s]?://[a-zA-Z0-9./?=_%:-]*", ddd)
+                    linkz = re.findall(r"http[s]?://[a-zA-Z0-9./@?=_%:-]*", ddd)
                     for lnk in linkz:
                         if chk_wlist(lnk):
                             exlinks.add_row(lnk)
@@ -444,7 +444,7 @@ class DocumentAnalyzer:
         # Looking for embedded urls
         urlswitch = 0
         print(f"\n{infoS} Searching for interesting links...")
-        url_match = re.findall(r"http[s]?://[a-zA-Z0-9./?=_%:-]*", allstr)
+        url_match = re.findall(r"http[s]?://[a-zA-Z0-9./@?=_%:-]*", allstr)
         if url_match != []:
             for lnk in url_match:
                 if chk_wlist(lnk):
@@ -567,7 +567,7 @@ class DocumentAnalyzer:
         urlTable = Table(title="* Embedded URL\'s *", title_style="bold italic cyan", title_justify="center")
         urlTable.add_column("[bold green]URL", justify="center")
         uustr = 0
-        linkz = re.findall(r"http[s]?://[a-zA-Z0-9./?=_%:-]*", allstr)
+        linkz = re.findall(r"http[s]?://[a-zA-Z0-9./@?=_%:-]*", allstr)
         if len(linkz) != 0:
             lcontrol = []
             for l in linkz:
@@ -638,7 +638,7 @@ class DocumentAnalyzer:
                                 pass
 
                             # Method 2
-                            get_url = re.findall(r"http[s]?://[a-zA-Z0-9./?=_%:-]*", str(doc.getobj(obj)))
+                            get_url = re.findall(r"http[s]?://[a-zA-Z0-9./@?=_%:-]*", str(doc.getobj(obj)))
                             if get_url != []:
                                 for ur in get_url:
                                     if "\'" in ur:
@@ -731,21 +731,23 @@ class DocumentAnalyzer:
     def html_fetch_urls(self, given_buffer):
         print(f"\n{infoS} Checking URL values...")
         url_vals = []
-        regx = re.findall(r"http[s]?://[a-zA-Z0-9./?=_%:-]*", given_buffer)
+        regx = re.findall(r"http[s]?://[a-zA-Z0-9./@?=_%:-]*", given_buffer)
         if regx != []:
-            url_table = Table()
-            url_table.add_column("[bold green]URL Values", justify="center")
             for url in regx:
                 if url not in url_vals:
                     if chk_wlist(url):
                         if "\'" in url: # Remove the single quote
-                            url_table.add_row(url.split("\'")[0])
+                            url_vals.append(url.split("\'")[0])
                         else:
-                            url_table.add_row(url)
-                        url_vals.append(url)
-            print(url_table)
-        else:
-            print(f"{errorS} There is no URL value found!")
+                            url_vals.append(url)
+            if url_vals != []:
+                url_table = Table()
+                url_table.add_column("[bold green]URL Values", justify="center")
+                for url in url_vals:
+                    url_table.add_row(url)
+                print(url_table)
+            else:
+                print(f"{errorS} There is no URL value found!")
 
     def chk_b64(self, given_buffer):
         keywords_to_check = [r"function", r"_0x", r"parseInt", r"script", r"var", r"document", r"src", r"atob", r"eval"]
@@ -978,11 +980,22 @@ class DocumentAnalyzer:
 
         # METHOD 2: Read between brackets
         get_brackets = re.findall(rb'}[a-f0-9]*}}}', buffer, re.IGNORECASE)
-        if get_brackets != []:
+        if get_brackets != [] and len(get_brackets[0]) > 15:
             print(f"{infoS} Looks like we found [bold green]possible exploit between brackets[white]. Attempting to identify and extraction...")
             self.pat_ct += 1
             finalbuffer = binascii.unhexlify(get_brackets[0].replace(b'}', b''))
             self.output_writer(out_file=f"qu1cksc0pe_extracted_exploit-{len(finalbuffer)}.bin", mode="wb", buffer=finalbuffer)
+
+        # METHOD 2.1: Read between brackets (Formbook)
+        get_brackets = re.findall(rb'}[0-9a-fA-F]+{', buffer, re.IGNORECASE)
+        if get_brackets != []:
+            for fff in get_brackets:
+                if len(fff) > 15 and b"4d5a000000" in fff:
+                    print(f"{infoS} Looks like we found [bold green]possible malicious code (Formbook) between brackets[white]. Attempting to identify and extraction...")
+                    self.pat_ct += 1
+                    finalbuffer = binascii.unhexlify(fff.replace(b"}", b"").replace(b"{", b""))
+                    self.output_writer(out_file=f"qu1cksc0pe_extracted_malcode-{len(finalbuffer)}.bin", mode="wb", buffer=finalbuffer)
+                    break
             
     def rtf_check_exploit_parse(self, exploit_buffer):
         if len(exploit_buffer) % 2 == 0:

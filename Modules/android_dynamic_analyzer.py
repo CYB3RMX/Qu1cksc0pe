@@ -419,7 +419,7 @@ class AndroidDynamicAnalyzer:
                 memory_dmp_buffer = open(f"mem_dump-{self.target_package}.dmp", "rb").read()
                 
                 # Extract urls
-                urlz = re.findall(rb"http[s]?://[a-zA-Z0-9./?=_%:-]*", memory_dmp_buffer)
+                urlz = re.findall(rb"http[s]?://[a-zA-Z0-9./@?=_%:-]*", memory_dmp_buffer)
                 if urlz != []:
                     for u in urlz:
                         if (b"." in u) and (chk_wlist(u.decode()) and u.decode() not in report["extracted_urls"]):

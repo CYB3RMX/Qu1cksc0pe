@@ -255,7 +255,7 @@ class WindowsDynamicAnalyzer:
                                     report_obj["interesting_findings"]["email_password"].append(cleaned[mail_index+1])
 
                     # ----- Extract urls -----
-                    urls = re.findall(r"http[s]?://[a-zA-Z0-9./?=_%:-]*", str(dump_buffer))
+                    urls = re.findall(r"http[s]?://[a-zA-Z0-9./@?=_%:-]*", str(dump_buffer))
                     tpu_url = {tpu: []}
                     for url in urls:
                         if self._is_valid_url(url) and url not in tpu_url[tpu]:
