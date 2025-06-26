@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import json
 import yara
@@ -228,7 +229,8 @@ class LinuxAnalyzer:
 
         for category in indicators_by_category:
             for func in indicators_by_category[category]["funcs"]:
-                if func in self.symbol_names:
+                chk = re.findall(func, str(self.strings_output), re.IGNORECASE)
+                if chk != []:
                     indicators_by_category[category]["occurence"] += 1
                     CATEGORIES[category].append(func)
                     self.categorized_func_count += 1
