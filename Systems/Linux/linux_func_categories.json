@@ -320,7 +320,8 @@
             "/proc/self/fd",
             "/var/run/nscd/socket",
             "/usr/share/zoneinfo",
-            "/etc/resolv.conf"
+            "/etc/resolv.conf",
+            "/dev/watchdog"
         ],
         "occurence": 0
     },
@@ -365,7 +366,10 @@
             "/bin/passwd",
             "/usr/local/etc/sshd_config",
             "crontab",
-            "/etc/resolv.conf"
+            "/etc/resolv.conf",
+            "/dev/watchdog",
+            "/boot/bootcmd",
+            "/etc/init.d/system"
         ],
         "occurence": 0
     },
