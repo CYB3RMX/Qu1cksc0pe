@@ -41,21 +41,14 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
+<b>18/08/2025</b>
+- [X] Improvements on ```Linux Analyzer``` module. Qu1cksc0pe can now emulate binaries safely and fetch their syscalls during the static analysis. (For Intel and ARM architectures!)
+
 <b>26/06/2025</b>
 - [X] Improvements on ```Linux Analyzer``` module.
 
 <b>25/06/2025</b>
 - [X] Improvements on ```Document Analyzer``` module. Qu1cksc0pe can now detect and extract possible Formbook samples from RTF files.
-
-<b>25/04/2025</b>
-- [X] Improvements on ```Windows Dynamic Analyzer``` module. Qu1cksc0pe can now extract ```E-Mail``` and possible ```Password``` values. (Effective against ```VIPKeylogger``` or similar families!)
-
-<b>07/04/2025</b>
-- [X] Improvements on ```Windows Dynamic Analyzer``` module.
-
-<b>27/03/2025</b>
-- [X] Improvements on ```Windows Dynamic Analyzer``` module. Qu1cksc0pe can now extract ```Telegram Bot Token``` and possible ```Telegram Chat ID``` values.
-- [X] With the ```Telegram Bot Token``` and ```Telegram Chat ID```, you can infiltrate Telegram bots using <a href="https://github.com/0x6rss/matkap">Matkap</a>
 
 # Available On
 <img width="400" src="https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png" alt="logo"><img width="400" src="https://user-images.githubusercontent.com/42123683/189416193-a709291f-be8f-469c-b649-c6201fa86677.jpeg" alt="logo">

@@ -36,3 +36,15 @@ GenerateKey
 LoadLibrary
 VirtualProtect
 GetProcAddress
+AES_Encryptor
+AES_Decryptor
+SetHook
+SetWindowsHookEx
+Antivirus
+ConnectServer
+BeginConnect
+CheckRemoteDebuggerPresent
+DetectSandboxie
+DetectDebugger
+DetectManufacturer
+RunAntiAnalysis
