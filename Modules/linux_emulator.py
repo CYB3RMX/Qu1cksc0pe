@@ -1,5 +1,4 @@
 from io import BytesIO
-import docker
 import os
 import re
 import subprocess
@@ -8,15 +7,18 @@ import subprocess
 try:
     from rich import print
     from rich.table import Table
-except ModuleNotFoundError as e:
+except:
     print("Error: >rich< module not found.")
-    raise e
 
 try:
     from colorama import Fore, Style
-except ModuleNotFoundError as e:
+except:
     print("Error: >colorama< module not found.")
-    raise e
+
+try:
+    import docker
+except:
+    print("Error: >docker< module not found.")
 
 # Colors
 red = Fore.LIGHTRED_EX
