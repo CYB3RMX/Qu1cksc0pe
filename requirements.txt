@@ -27,3 +27,4 @@ wh1tem0cha
 psutil
 pymem
 pyja3
+docker
