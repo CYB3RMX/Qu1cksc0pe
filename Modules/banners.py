@@ -3,7 +3,7 @@
 import sys
 import random
 
-from .utils import err_exit
+from .utils.helpers import err_exit
 
 # Module for colors
 try:

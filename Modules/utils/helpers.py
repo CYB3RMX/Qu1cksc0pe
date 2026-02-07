@@ -1,6 +1,6 @@
-import re
 import os
 import sys
+import json
 
 from rich import print
 from rich.table import Table
@@ -11,18 +11,6 @@ TABLE_TITLE_DEFAULTS = dict(
     title_justify="center",
     title_style="bold italic cyan",
 )
-
-# Compatibility
-path_seperator = "/"
-strings_param = "-a"
-if sys.platform == "win32":
-    path_seperator = "\\"
-
-# Gathering Qu1cksc0pe path variable
-sc0pe_path = open(".path_handler", "r").read()
-
-# Get whitelist domains for "chk_wlist" method
-whitelist_domains = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}whitelist_domains.txt", "r").read().split("\n")
 
 def get_argv(idx, default=None):
     """Return the `sys.argv` value for the given index, defaulting on `None` or a supplied custom value."""
@@ -82,13 +70,6 @@ def stylize_bool(b, invert_style=False):
     prefix = "[bold green]" if b ^ invert_style else "[bold red]"
     return prefix + repr(b)
 
-def chk_wlist(target_string):
-    for pat in whitelist_domains:
-        matched = re.findall(pat, target_string)
-        if matched:
-            return False # Whitelist found
-    return True
-
 def recursive_dir_scan(target_directory):
     fnames = []
     for root, d_names, f_names in os.walk(target_directory):
@@ -103,3 +84,8 @@ def update_table(table, row_size, *args):
         ans_ind = len(table.columns[0]._cells)
         for i, arg in enumerate(args):
             table.columns[i]._cells[ans_ind-1] = Text(str(arg), style="bold italic cyan")
+
+def save_report(target_os, report):
+    with open(f"sc0pe_{target_os}_report.json", "w") as report_file:
+        json.dump(report, report_file, indent=4)
+        print(f"\n[bold magenta]>>>[bold white] Report file saved into: [bold blink yellow]{report_file.name}\n")

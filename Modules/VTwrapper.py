@@ -4,8 +4,7 @@ import re
 import sys
 import hashlib
 import requests
-
-from utils import err_exit
+from utils.helpers import err_exit
 
 # Checking for rich existence
 try:

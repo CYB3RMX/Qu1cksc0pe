@@ -5,8 +5,8 @@ import json
 import psutil
 import asyncio
 import warnings
-from utils import err_exit
-from utils import update_table
+from utils.helpers import err_exit
+from utils.helpers import update_table
 from windows_process_reader import WindowsProcessReader
 
 try:

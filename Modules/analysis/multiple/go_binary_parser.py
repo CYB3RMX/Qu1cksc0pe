@@ -1,6 +1,6 @@
 import sys
 import json
-from .utils import err_exit
+from utils.helpers import err_exit
 
 try:
     from rich import print

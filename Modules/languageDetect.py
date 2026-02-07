@@ -2,9 +2,8 @@
 
 import re
 import sys
-import subprocess
-
-from utils import err_exit
+from utils.helpers import err_exit
+from analysis.multiple.multi import perform_strings
 
 try:
     import puremagic as pr
@@ -34,13 +33,8 @@ elif sys.platform == "darwin":
 else:
    pass
 
-# Perform strings
-_ = subprocess.run(f"strings {strings_param} \"{fileName}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-if sys.platform != "win32":
-    _ = subprocess.run(f"strings {strings_param} -e l {fileName} >> temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-
 # All strings
-allStrings = open("temp.txt", "r").read().split("\n")
+allStrings = perform_strings(fileName)
 
 # Strings for identifying programming language
 language_dict = {

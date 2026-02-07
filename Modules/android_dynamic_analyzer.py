@@ -7,10 +7,10 @@ import json
 import shutil
 import asyncio
 import subprocess
-from utils import err_exit
-from utils import chk_wlist
-from utils import recursive_dir_scan
-from utils import update_table
+from utils.helpers import err_exit
+from analysis.multiple.multi import chk_wlist
+from utils.helpers import recursive_dir_scan
+from utils.helpers import update_table
 
 try:
     from rich import print

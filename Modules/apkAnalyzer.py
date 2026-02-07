@@ -12,7 +12,8 @@ import subprocess
 import shutil
 from datetime import date
 
-from utils import err_exit
+from utils.helpers import err_exit
+from analysis.multiple.multi import perform_strings
 
 # Module handling
 try:
@@ -61,13 +62,10 @@ else:
 homeD = os.path.expanduser("~")
 path_seperator = "/"
 setup_scr = "setup.sh"
-strings_param = "--all"
+strings_param = "-a"
 if sys.platform == "win32":
     path_seperator = "\\"
     setup_scr = "setup.ps1"
-    strings_param = "-a"
-elif sys.platform == "darwin":
-    strings_param = "-a"
 else:
     pass
 
@@ -81,14 +79,8 @@ sc0pe_path = open(".path_handler", "r").read()
 danger = 0
 normal = 0
 
-# Perform strings
-_ = subprocess.run(f"strings {strings_param} \"{targetAPK}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-if sys.platform != "win32":
-    _ = subprocess.run(f"strings {strings_param} -e l {targetAPK} >> temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-
-
 # Gathering all strings from file
-allStrings = open("temp.txt", "r").read().split('\n')
+allStrings = perform_strings(targetAPK)
 
 # Parsing date
 today = date.today()
