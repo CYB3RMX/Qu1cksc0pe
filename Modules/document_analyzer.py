@@ -7,13 +7,14 @@ import json
 import zlib
 import base64
 import binascii
+import hashlib
 import zipfile
 import subprocess
 import configparser
 import urllib.parse
 from bs4 import BeautifulSoup
-from analysis.multiple.multi import chk_wlist, perform_strings, yara_rule_scanner
-from utils.helpers import err_exit, user_confirm
+from analysis.multiple.multi import chk_wlist, perform_strings, yara_rule_scanner, calc_hashes
+from utils.helpers import err_exit, user_confirm, get_argv, save_report
 
 # Checking for rich
 try:
@@ -26,6 +27,11 @@ try:
     import yara
 except:
     err_exit("Error: >yara< module not found.")
+
+try:
+    import msoffcrypto
+except:
+    msoffcrypto = None
 
 # Checking for oletools
 try:
@@ -58,6 +64,8 @@ except:
 # Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
+URL_REGEX = r"https?://[^\s'\"<>()]+"
+URL_PATTERN = re.compile(URL_REGEX)
 
 # Target file
 targetFile = sys.argv[1]
@@ -71,7 +79,7 @@ if sys.platform == "win32":
 sc0pe_path = open(".path_handler", "r").read()
 
 # All strings
-allstr = perform_strings(targetFile)
+allstr = "\n".join(perform_strings(targetFile))
 
 # Parsing config file to get rule path
 conf = configparser.ConfigParser()
@@ -79,17 +87,51 @@ conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_sep
 
 # Report
 report = {
-    "matched_rules": []
+    "filename": "",
+    "document_type": "",
+    "file_magic": "",
+    "hash_md5": "",
+    "hash_sha1": "",
+    "hash_sha256": "",
+    "all_strings": 0,
+    "categorized_findings": 0,
+    "is_ole_file": False,
+    "is_encrypted": False,
+    "matched_rules": [],
+    "extracted_urls": [],
+    "embedded_files": [],
+    "extracted_files": [],
+    "sections": {},
+    "decryption": {
+        "attempted": False,
+        "success": False,
+        "output_file": "",
+        "error": "",
+        "auto_analysis": {
+            "triggered": False,
+            "target_file": "",
+            "exit_code": None
+        }
+    }
 }
 
 class DocumentAnalyzer:
     def __init__(self, targetFile):
         self.targetFile = targetFile
         self.rule_path = conf["Rule_PATH"]["rulepath"]
-        self.file_sigs = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}file_sigs.json"))
+        self.decrypted_output_file = None
+        self.auto_chain_mode = os.environ.get("SC0PE_AUTO_DECRYPT_CHAIN", "0") == "1"
+        self._findings_seen = set()
+        report["filename"] = self.targetFile
+        calc_hashes(self.targetFile, report)
+        report["all_strings"] = len(allstr.split("\n"))
+        with open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}file_sigs.json", "r") as fp:
+            self.file_sigs = json.load(fp)
         self.base64_pattern = r'(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})'
-        self.mal_code = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}malicious_html_codes.json"))
-        self.mal_rtf_code = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}malicious_rtf_codes.json"))
+        with open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}malicious_html_codes.json", "r") as fp:
+            self.mal_code = json.load(fp)
+        with open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}malicious_rtf_codes.json", "r") as fp:
+            self.mal_rtf_code = json.load(fp)
         self.pat_ct = 0
         self.is_ole_file = None
         self.rtf_exploit_pattern_dict = {
@@ -135,21 +177,154 @@ class DocumentAnalyzer:
             }
         }
 
+    def _append_unique(self, key, value):
+        if value and value not in report[key]:
+            report[key].append(value)
+
+    def _add_finding(self, category, value):
+        finding_key = f"{category}:{value}"
+        if value and finding_key not in self._findings_seen:
+            self._findings_seen.add(finding_key)
+            report["categorized_findings"] += 1
+
+    def _register_embedded(self, name, detail):
+        entry = {"name": self._sanitize_text(name), "detail": self._sanitize_text(detail)}
+        if entry not in report["embedded_files"]:
+            report["embedded_files"].append(entry)
+
+    def _register_section(self, key, value):
+        report["sections"][key] = value
+
+    def _sanitize_text(self, value):
+        sanitized = ""
+        for ch in str(value):
+            sanitized += ch if ch.isprintable() else f"\\x{ord(ch):02x}"
+        return sanitized
+
+    def _sanitize_stream_name(self, stream_name):
+        return "/".join(self._sanitize_text(x) for x in str(stream_name).split("/"))
+
+    def _normalize_url(self, raw_url):
+        candidate = raw_url.strip().rstrip(".,;:)]}>\"'")
+        parsed = urllib.parse.urlparse(candidate)
+        if parsed.scheme not in ("http", "https"):
+            return None
+        if not parsed.netloc:
+            return None
+        host = parsed.netloc.split("@")[-1].split(":")[0].strip("[]")
+        if host == "":
+            return None
+        return candidate
+
+    def _extract_normalized_urls(self, text_buffer):
+        urls = []
+        for raw_url in URL_PATTERN.findall(text_buffer):
+            sanitized = self._normalize_url(raw_url)
+            if sanitized and chk_wlist(sanitized) and sanitized not in urls:
+                urls.append(sanitized)
+        return urls
+
+    @staticmethod
+    def _trim_to_known_magic(buffer):
+        magic_map = {
+            "ole": b"\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1",
+            "mz": b"MZ",
+            "zip": b"PK\x03\x04",
+            "pdf": b"%PDF",
+            "rtf": b"{\\rtf",
+        }
+        best_label = "raw"
+        best_offset = -1
+        for label, magic in magic_map.items():
+            pos = buffer.find(magic)
+            if pos != -1 and (best_offset == -1 or pos < best_offset):
+                best_offset = pos
+                best_label = label
+
+        if best_offset > 0:
+            return buffer[best_offset:], best_label, best_offset
+        if best_offset == 0:
+            return buffer, best_label, 0
+        return buffer, best_label, -1
+
+    @staticmethod
+    def _is_short_symbolic_string(text):
+        if len(text) > 6:
+            return False
+        symbol_chars = [")", "(", "[", "]", "+", "-", "<", ">", "*", "!"]
+        return any(symbol in text for symbol in symbol_chars)
+
+    def _attempt_default_decrypt(self):
+        default_password = "VelvetSweatshop"
+        if report["decryption"]["attempted"]:
+            return
+
+        report["decryption"]["attempted"] = True
+
+        print(f"\n{infoS} FILEPASS detected. Trying automatic decryption...")
+        if msoffcrypto is None:
+            report["decryption"]["error"] = "msoffcrypto module not found"
+            print(f"{errorS} Could not attempt decryption because [bold yellow]msoffcrypto-tool[white] is not installed.")
+            return
+
+        out_name = f"qu1cksc0pe_decrypted_{os.path.basename(self.targetFile)}"
+        try:
+            with open(self.targetFile, "rb") as infile:
+                office_file = msoffcrypto.OfficeFile(infile)
+                office_file.load_key(password=default_password)
+                with open(out_name, "wb") as outfile:
+                    office_file.decrypt(outfile)
+            report["decryption"]["success"] = True
+            report["decryption"]["output_file"] = out_name
+            self.decrypted_output_file = out_name
+            self._append_unique("extracted_files", out_name)
+            self._add_finding("Macro", "default_password_decryption_success")
+            print(f"{infoS} Decryption successful. Output file: [bold green]{out_name}[white]")
+        except Exception as exc:
+            report["decryption"]["error"] = str(exc)
+            print(f"{errorS} Automatic decryption failed.")
+
+    def analyze_decrypted_output(self):
+        if self.auto_chain_mode:
+            return
+        if not self.decrypted_output_file:
+            return
+        if not os.path.exists(self.decrypted_output_file):
+            report["decryption"]["auto_analysis"]["triggered"] = False
+            report["decryption"]["auto_analysis"]["target_file"] = self.decrypted_output_file
+            report["decryption"]["auto_analysis"]["exit_code"] = -1
+            return
+
+        print(f"\n{infoS} Automatically analyzing decrypted file...")
+        report["decryption"]["auto_analysis"]["triggered"] = True
+        report["decryption"]["auto_analysis"]["target_file"] = self.decrypted_output_file
+
+        env = os.environ.copy()
+        env["SC0PE_AUTO_DECRYPT_CHAIN"] = "1"
+        auto_proc = subprocess.run(
+            [sys.executable, __file__, self.decrypted_output_file, "False"],
+            env=env
+        )
+        report["decryption"]["auto_analysis"]["exit_code"] = auto_proc.returncode
+
     # Checking for file extension
     def CheckExt(self):
-        magic_buf = open(self.targetFile, "rb").read(8)
+        with open(self.targetFile, "rb") as file_ptr:
+            magic_buf = file_ptr.read(8)
         doc_type = subprocess.run(["file", self.targetFile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if "Microsoft Word" in doc_type.stdout.decode() or "Microsoft Excel" in doc_type.stdout.decode() or "Microsoft Office Word" in doc_type.stdout.decode():
+        decoded_doc_type = doc_type.stdout.decode()
+        report["file_magic"] = decoded_doc_type.strip()
+        if "Microsoft Word" in decoded_doc_type or "Microsoft Excel" in decoded_doc_type or "Microsoft Office Word" in decoded_doc_type:
             return "docscan"
-        elif "PDF document" in doc_type.stdout.decode():
+        elif "PDF document" in decoded_doc_type:
             return "pdfscan"
         elif self.targetFile.endswith(".one"): # TODO: Look for better solutions!
             return "onenote"
-        elif "HTML document" in doc_type.stdout.decode():
+        elif "HTML document" in decoded_doc_type:
             return "html"
-        elif ("Rich Text Format" in doc_type.stdout.decode() and binascii.unhexlify(b"7B5C72746631") in magic_buf) or (binascii.unhexlify(b"7B5C7274") in magic_buf):
+        elif ("Rich Text Format" in decoded_doc_type and binascii.unhexlify(b"7B5C72746631") in magic_buf) or (binascii.unhexlify(b"7B5C7274") in magic_buf):
             return "rtf"
-        elif "Zip archive" in doc_type.stdout.decode():
+        elif "Zip archive" in decoded_doc_type:
             return "archive_type_doc"
         else:
             return "unknown"
@@ -213,45 +388,58 @@ class DocumentAnalyzer:
     def Structure(self):
         # We need to unzip the file and check for interesting files
         print(f"\n{infoS} Analyzing file structure...")
+        if not zipfile.is_zipfile(self.targetFile):
+            print(f"{infoS} ZIP-based document structure was not detected. Skipping ZIP parser.")
+            self._add_finding("Structure", "zip_structure_unavailable")
+            return
+
         try:
-            document = zipfile.ZipFile(self.targetFile)
-            bins = []
+            with zipfile.ZipFile(self.targetFile) as document:
+                bins = []
+                archive_entries = []
+                discovered_urls = []
 
-            # Parsing the files
-            docTable = Table(title="* Document Structure *", title_style="bold italic cyan", title_justify="center")
-            docTable.add_column("[bold green]File Name", justify="center")
-            for df in document.namelist():
-                if ".bin" in df or "embeddings" in df or ".rtf" in df:
-                    docTable.add_row(f"[bold red]{df}")
-                    bins.append(df)
+                # Parsing the files
+                docTable = Table(title="* Document Structure *", title_style="bold italic cyan", title_justify="center")
+                docTable.add_column("[bold green]File Name", justify="center")
+                for df in document.namelist():
+                    archive_entries.append(df)
+                    if ".bin" in df or "embeddings" in df or ".rtf" in df:
+                        docTable.add_row(f"[bold red]{df}")
+                        bins.append(df)
+                        self._register_embedded(df, "archive_member")
+                    else:
+                        docTable.add_row(df)
+
+                    # Parse links while traversing entries to avoid a second pass.
+                    try:
+                        entry_data = document.read(df).decode(errors="ignore")
+                    except Exception:
+                        continue
+                    for sanitized_url in self._extract_normalized_urls(entry_data):
+                        if sanitized_url not in discovered_urls:
+                            discovered_urls.append(sanitized_url)
+                print(docTable)
+                self._register_section("archive_entries", archive_entries)
+                self._add_finding("Structure", f"archive_member_count={len(archive_entries)}")
+
+                # Perform analysis against binaries
+                if bins:
+                    for b in bins:
+                        bdata = document.read(b)
+                        self.BinaryAnalysis(b, bdata)
+
+                # Check for interesting external links (effective against follina related samples and IoC extraction)
+                print(f"\n{infoS} Searching for interesting links...")
+                if discovered_urls:
+                    exlinks = Table(title="* Interesting Links *", title_style="bold italic cyan", title_justify="center")
+                    exlinks.add_column("[bold green]Link", justify="center")
+                    for sanitized_url in discovered_urls:
+                        self._append_unique("extracted_urls", sanitized_url)
+                        exlinks.add_row(sanitized_url)
+                    print(exlinks)
                 else:
-                    docTable.add_row(df)
-            print(docTable)
-
-            # Perform analysis against binaries
-            if bins != []:
-                for b in bins:
-                    bdata = document.read(b)
-                    self.BinaryAnalysis(b, bdata)
-
-            # Check for insteresting external links (effective against follina related samples and IoC extraction)
-            print(f"\n{infoS} Searching for interesting links...")
-            exlinks = Table(title="* Interesting Links *", title_style="bold italic cyan", title_justify="center")
-            exlinks.add_column("[bold green]Link", justify="center")
-            for fff in document.namelist():
-                try:
-                    ddd = document.read(fff).decode()
-                    linkz = re.findall(r"http[s]?://[a-zA-Z0-9./@?=_%:-]*", ddd)
-                    for lnk in linkz:
-                        if chk_wlist(lnk):
-                            exlinks.add_row(lnk)
-                except:
-                    continue
-            
-            if exlinks.rows != []:
-                print(exlinks)
-            else:
-                print(f"[bold white on red]There is no interesting links found.")
+                    print(f"[bold white on red]There is no interesting links found.")
         except:
             print(f"{errorS} Error: Unable to unzip file.")
 
@@ -286,19 +474,28 @@ class DocumentAnalyzer:
     def MacroHunter(self):
         print(f"\n{infoS} Looking for Macros...")
         try:
-            fileData = open(self.targetFile, "rb").read()
+            with open(self.targetFile, "rb") as file_ptr:
+                fileData = file_ptr.read()
             vbaparser = VBA_Parser(self.targetFile, fileData)
+            xlm_macro_lines = []
+            macroList = []
             try:
                 macroList = list(vbaparser.analyze_macros())
             except:
                 pass
+            try:
+                xlm_macro_lines = list(vbaparser.xlm_macros)
+            except:
+                xlm_macro_lines = []
             macro_state_vba = 0
             macro_state_xlm = 0
             # Checking vba macros
             if vbaparser.contains_vba_macros == True:
                 print(f"[bold red]>>>[white] VBA MACRO: [bold green]Found.")
+                self._add_finding("Macro", "vba_macros")
                 if vbaparser.detect_vba_stomping() == True:
                     print(f"[bold red]>>>[white] VBA Stomping: [bold green]Found.")
+                    self._add_finding("Macro", "vba_stomping")
 
                 else:
                     print(f"[bold red]>>>[white] VBA Stomping: [bold red]Not found.")
@@ -310,10 +507,19 @@ class DocumentAnalyzer:
             # Checking for xlm macros
             if vbaparser.contains_xlm_macros == True:
                 print(f"\n[bold red]>>>[white] XLM MACRO: [bold green]Found.")
+                self._add_finding("Macro", "xlm_macros")
                 self.MacroParser(macroList)
                 macro_state_xlm += 1
             else:
                 print(f"\n[bold red]>>>[white] XLM MACRO: [bold red]Not found.")
+
+            filepass_detected = any("FILEPASS" in str(xlm_line).upper() for xlm_line in xlm_macro_lines)
+            if not filepass_detected and "FILEPASS" in allstr.upper():
+                filepass_detected = True
+
+            if filepass_detected:
+                self._add_finding("Macro", "filepass_record")
+                self._attempt_default_decrypt()
 
             # If there is macro we can extract it!
             if macro_state_vba != 0 or macro_state_xlm != 0:
@@ -324,7 +530,7 @@ class DocumentAnalyzer:
                             for xxx in mac:
                                 print(xxx.strip("\r\n"))
                     else:
-                        for mac in vbaparser.xlm_macros:
+                        for mac in xlm_macro_lines:
                             print(mac)
                     print(f"\n{infoS} Extraction completed.")
 
@@ -337,15 +543,19 @@ class DocumentAnalyzer:
         if isOleFile(self.targetFile) == True:
             print(f"{infoS} Ole File: [bold green]True[white]")
             self.is_ole_file = True
+            report["is_ole_file"] = True
         else:
             print(f"{infoS} Ole File: [bold red]False[white]")
             self.is_ole_file = False
+            report["is_ole_file"] = False
 
         # Check for encryption
         if is_encrypted(self.targetFile) == True:
             print(f"{infoS} Encrypted: [bold green]True[white]")
+            report["is_encrypted"] = True
         else:
             print(f"{infoS} Encrypted: [bold red]False[white]")
+            report["is_encrypted"] = False
 
         # Perform file structure analysis
         self.Structure()
@@ -387,12 +597,24 @@ class DocumentAnalyzer:
 
         # Enumerate directories
         olfl_table.add_row(olfl.root.name, str(olfl.root.size))
+        ole_streams = [{"name": self._sanitize_stream_name(olfl.root.name), "size": str(olfl.root.size)}]
         dir_stream_buffer = b""
+        embedded_ole_streams = 0
         for drc in olfl.listdir():
             dname = "/".join(drc)
             olfl_table.add_row(dname, str(olfl.get_size(dname)))
+            sanitized_name = self._sanitize_stream_name(dname)
+            ole_streams.append({"name": sanitized_name, "size": str(olfl.get_size(dname))})
+            # MBD*/Package, MBD*/Ole and ObjectPool streams are common embedded object carriers.
+            if (re.match(r"^MBD[0-9A-Fa-f]+/(Package|\x01?Ole)$", dname) is not None) or ("ObjectPool" in dname):
+                self._register_embedded(sanitized_name, "ole_embedded_stream")
+                embedded_ole_streams += 1
             dir_stream_buffer += olfl.openstream(dname).read()
         print(olfl_table)
+        self._register_section("ole_streams", ole_streams)
+        self._add_finding("OLE", f"stream_count={len(ole_streams)}")
+        if embedded_ole_streams > 0:
+            self._add_finding("OLE", f"embedded_stream_count={embedded_ole_streams}")
 
         # Extract strings from streams
         strings_base = re.findall(r"[^\x00-\x1F\x7F-\xFF]{4,}".encode(), dir_stream_buffer)
@@ -409,12 +631,12 @@ class DocumentAnalyzer:
         # Looking for embedded urls
         urlswitch = 0
         print(f"\n{infoS} Searching for interesting links...")
-        url_match = re.findall(r"http[s]?://[a-zA-Z0-9./@?=_%:-]*", allstr)
-        if url_match != []:
-            for lnk in url_match:
-                if chk_wlist(lnk):
-                    print(f"[bold magenta]>>>[white] {lnk}")
-                    urlswitch += 1
+        url_match = self._extract_normalized_urls(allstr)
+        if url_match:
+            for sanitized in url_match:
+                print(f"[bold magenta]>>>[white] {sanitized}")
+                self._append_unique("extracted_urls", sanitized)
+                urlswitch += 1
         
         if urlswitch == 0:
             print(f"[bold white on red]There is no interesting links found.")
@@ -437,9 +659,14 @@ class DocumentAnalyzer:
 
         # Add table
         efs = onenote_obj.get_files()
+        onenote_embeds = []
         for key in efs.keys():
             embedTable.add_row(efs[key]["identity"], efs[key]["extension"])
+            onenote_embeds.append({"identity": efs[key]["identity"], "extension": efs[key]["extension"]})
+            self._register_embedded(efs[key]["identity"], efs[key]["extension"])
         print(embedTable)
+        self._register_section("onenote_embedded", onenote_embeds)
+        self._add_finding("OneNote", f"embedded_count={len(onenote_embeds)}")
 
         # Extract embedded files
         print(f"\n{infoS} Performing embedded file extraction...")
@@ -448,6 +675,7 @@ class DocumentAnalyzer:
                 binfile.write(efs[key]["content"])
             binfile.close()
             print(f"[bold magenta]>>>[white] Embedded file saved as: [bold green]qu1cksc0pe_carved-{key}{efs[key]['extension']}[white]")
+            self._append_unique("extracted_files", f"qu1cksc0pe_carved-{key}{efs[key]['extension']}")
 
         # Perform Yara scan
         print(f"\n{infoS} Performing YARA rule matching...")
@@ -470,27 +698,35 @@ class DocumentAnalyzer:
         metaTable = Table(title="* Meta Information *", title_style="bold italic cyan", title_justify="center")
         metaTable.add_column("[bold green]Key", justify="center")
         metaTable.add_column("[bold green]Value", justify="center")
+        pdf_meta = {}
         if doc.info != [] and doc.info[0] != {}:
             for vals in doc.info[0]:
                 metaTable.add_row(f"[bold yellow]{vals}", f"{doc.info[0][vals]}")
+                pdf_meta[str(vals)] = str(doc.info[0][vals])
             print(metaTable)
         else:
             print(f"{errorS} No meta information found.")
+        self._register_section("pdf_meta", pdf_meta)
 
         # Gathering PDF catalog
         print(f"\n{infoS} Gathering PDF catalog...")
         suspicious_keys = []
+        catalog_keys = []
         catalogTable = Table(title="* PDF Catalog *", title_style="bold italic cyan", title_justify="center")
         catalogTable.add_column("[bold green]Key", justify="center")
         for vals in doc.catalog:
+            catalog_keys.append(str(vals))
             if "Type" in vals:
                 pass
             elif "AcroForm" in vals or "JavaScript" in vals or "OpenAction" in vals or "JS" in vals or "EmbeddedFile" in vals:
                 catalogTable.add_row(f"[bold red]{vals}") # Highlighting suspicious keys
                 suspicious_keys.append(vals)
+                self._add_finding("PDF", vals)
             else:
                 catalogTable.add_row(vals)
         print(catalogTable)
+        self._register_section("pdf_catalog_keys", catalog_keys)
+        self._register_section("pdf_suspicious_catalog_keys", suspicious_keys)
 
         # Suspicous PDF strings
         print(f"\n{infoS} Searching for suspicious strings...")
@@ -514,42 +750,34 @@ class DocumentAnalyzer:
         sTable = Table(title="* Suspicious Strings *", title_style="bold italic cyan", title_justify="center")
         sTable.add_column("[bold green]String", justify="center")
         sTable.add_column("[bold green]Count", justify="center")
+        suspicious_map = {}
         for s in suspicious:
             occur = re.findall(s, allstr)
             if len(occur) != 0:
                 if s == "/EmbeddedFile":
                     embedded_switch += 1
                 sTable.add_row(f"[bold red]{s}", f"{len(occur)}")
+                suspicious_map[s] = len(occur)
+                self._add_finding("PDF", f"{s}:{len(occur)}")
                 sstr += 1
 
         if sstr != 0:
             print(sTable)
         else:
             print(f"{errorS} There is no suspicious strings found!")
+        self._register_section("pdf_suspicious_strings", suspicious_map)
 
         # Looking for embedded links
         print(f"\n{infoS} Looking for embedded URL\'s via [bold green]Regex[white]...")
         urlTable = Table(title="* Embedded URL\'s *", title_style="bold italic cyan", title_justify="center")
         urlTable.add_column("[bold green]URL", justify="center")
         uustr = 0
-        linkz = re.findall(r"http[s]?://[a-zA-Z0-9./@?=_%:-]*", allstr)
-        if len(linkz) != 0:
-            lcontrol = []
-            for l in linkz:
-                if chk_wlist(l):
-                    if l not in lcontrol:
-                        if ")" in l:
-                            if l.split(')')[0] not in lcontrol:
-                                urlTable.add_row(f"[bold yellow]{l.split(')')[0]}")
-                                lcontrol.append(l.split(')')[0])
-                        elif "<" in l:
-                            if l.split('<')[0] not in lcontrol:
-                                urlTable.add_row(f"[bold yellow]{l.split('<')[0]}")
-                                lcontrol.append(l.split('<')[0])
-                        else:
-                            urlTable.add_row(f"[bold yellow]{l}")
-                            lcontrol.append(l)
-                        uustr += 1
+        linkz = self._extract_normalized_urls(allstr)
+        if linkz:
+            for sanitized in linkz:
+                urlTable.add_row(f"[bold yellow]{sanitized}")
+                self._append_unique("extracted_urls", sanitized)
+                uustr += 1
             if uustr != 0:
                 print(urlTable)
             else:
@@ -563,6 +791,7 @@ class DocumentAnalyzer:
         # Iterate over objects and analyze them!
         number_of_objects = 0
         ext_urls = []
+        pdf_objects = []
         for xref in doc.xrefs:
             if "ranges" in str(xref):
                 temp_of_objects = xref.ranges[0][1]
@@ -585,33 +814,40 @@ class DocumentAnalyzer:
 
                         # Check for magic headers
                         if object_data:
+                            hex_object_data = binascii.hexlify(object_data)
+                            matched_category = None
                             for categ in self.file_sigs:
                                 for pattern in self.file_sigs[categ]["patterns"]:
-                                    regex = re.findall(pattern.encode(), binascii.hexlify(object_data))
-                                    if regex != []:
-                                        print(f"{infoS} Possible [bold green]{categ}[white] detected at [bold green]ObjectID[white]: [bold yellow]{obj}[white]")
-                                        print(f"{infoS} Attempting to extraction...")
-                                        self.output_writer(out_file=f"qu1cksc0pe_carved-{categ}-{obj}.bin", mode="wb", buffer=object_data)
+                                    if re.findall(pattern.encode(), hex_object_data):
+                                        matched_category = categ
+                                        break
+                                if matched_category:
+                                    break
+                            if matched_category:
+                                print(f"{infoS} Possible [bold green]{matched_category}[white] detected at [bold green]ObjectID[white]: [bold yellow]{obj}[white]")
+                                print(f"{infoS} Attempting to extraction...")
+                                self.output_writer(out_file=f"qu1cksc0pe_carved-{matched_category}-{obj}.bin", mode="wb", buffer=object_data)
+                                self._register_embedded(f"ObjectID:{obj}", matched_category)
+                                self._add_finding("PDF", f"embedded_{matched_category}")
+                                pdf_objects.append({"object_id": obj, "category": matched_category})
 
                         # Check for /URI object
                         if "URI" in str(doc.getobj(obj)):
                             # Method 1
                             try:
-                                if doc.getobj(obj)["URI"].decode() not in ext_urls and doc.getobj(obj)["URI"].decode() != "":
-                                    ext_urls.append(doc.getobj(obj)["URI"].decode())
+                                raw_uri = doc.getobj(obj)["URI"].decode()
+                                sanitized_uri = self._normalize_url(raw_uri)
+                                if sanitized_uri and sanitized_uri not in ext_urls:
+                                    ext_urls.append(sanitized_uri)
+                                    self._append_unique("extracted_urls", sanitized_uri)
                             except:
                                 pass
 
                             # Method 2
-                            get_url = re.findall(r"http[s]?://[a-zA-Z0-9./@?=_%:-]*", str(doc.getobj(obj)))
-                            if get_url != []:
-                                for ur in get_url:
-                                    if "\'" in ur:
-                                        if ur.split("\'")[0] not in ext_urls:
-                                            ext_urls.append(ur.split("'")[0])
-                                    else:
-                                        if ur not in ext_urls:
-                                            ext_urls.append(ur)
+                            for sanitized in self._extract_normalized_urls(str(doc.getobj(obj))):
+                                if sanitized not in ext_urls:
+                                    ext_urls.append(sanitized)
+                                    self._append_unique("extracted_urls", sanitized)
 
                         # Check for /EmbeddedFile stream
                         if "EmbeddedFile" in str(doc.getobj(obj)) and "PDFStream" in str(doc.getobj(obj)):
@@ -634,6 +870,8 @@ class DocumentAnalyzer:
             for ext in ext_urls:
                 urlTable.add_row(ext)
             print(urlTable)
+        self._register_section("pdf_stream_objects", pdf_objects)
+        self._register_section("pdf_stream_url_count", len(ext_urls))
 
         # Perform Yara scan
         print(f"\n{infoS} Performing YARA rule matching...")
@@ -668,6 +906,7 @@ class DocumentAnalyzer:
         if decodd:
             for dd in decodd:
                 print(f"[bold magenta]>>>[white] {dd}")
+            self._add_finding("HTML", f"decoded_base64={len(decodd)}")
         else:
             print(f"{errorS} There is no potential encoded BASE64 value found!")
 
@@ -695,79 +934,50 @@ class DocumentAnalyzer:
 
     def html_fetch_urls(self, given_buffer):
         print(f"\n{infoS} Checking URL values...")
-        url_vals = []
-        regx = re.findall(r"http[s]?://[a-zA-Z0-9./@?=_%:-]*", given_buffer)
-        if regx != []:
-            for url in regx:
-                if url not in url_vals:
-                    if chk_wlist(url):
-                        if "\'" in url: # Remove the single quote
-                            url_vals.append(url.split("\'")[0])
-                        else:
-                            url_vals.append(url)
-            if url_vals != []:
-                url_table = Table()
-                url_table.add_column("[bold green]URL Values", justify="center")
-                for url in url_vals:
-                    url_table.add_row(url)
-                print(url_table)
-            else:
-                print(f"{errorS} There is no URL value found!")
+        url_vals = self._extract_normalized_urls(given_buffer)
+        if not url_vals:
+            print(f"{errorS} There is no URL value found!")
+            return
+
+        for sanitized in url_vals:
+            self._append_unique("extracted_urls", sanitized)
+        url_table = Table()
+        url_table.add_column("[bold green]URL Values", justify="center")
+        for url in url_vals:
+            url_table.add_row(url)
+        print(url_table)
+        self._add_finding("Other", f"url_count={len(url_vals)}")
 
     def chk_b64(self, given_buffer):
         keywords_to_check = [r"function", r"_0x", r"parseInt", r"script", r"var", r"document", r"src", r"atob", r"eval"]
-        b64codes = re.findall(self.base64_pattern, given_buffer)
-        if b64codes != []:
-            decc = []
-            for cod in b64codes:
-                try:
-                    key_count = 0
-                    decoded = base64.b64decode(cod)
-                    if "\\x" not in decoded.decode(): # Because we need strings not byte stuff
-                        if len(decoded.decode()) <= 6 and (")" in decoded.decode() or "(" in decoded.decode() or "[" in decoded.decode() or "]" in decoded.decode() or "+" in decoded.decode() or "-" in decoded.decode() or "<" in decoded.decode() or ">" in decoded.decode() or "*" in decoded.decode() or "!" in decoded.decode()):
-                            pass
-                        else:
-                            # -- Data sanitization and keyword check
-                            for key in keywords_to_check:
-                                km = re.findall(key, decoded.decode())
-                                if km != []:
-                                    key_count += 1
+        decc = []
+        for cod in re.findall(self.base64_pattern, given_buffer):
+            try:
+                decoded_text = base64.b64decode(cod).decode()
+            except:
+                continue
 
-                            # If we have target patterns then extract this sample
-                            if key_count != 0:
-                                if len(decoded.decode()) >= 150:
-                                    print(f"\n{infoS} Warning length of the decoded data is bigger than as we expected!")
-                                    self.output_writer(out_file=f"qu1cksc0pe_decoded_javascript-{len(decoded.decode())}.js", mode="w", buffer=decoded.decode())
-                                else:
-                                    decc.append(decoded.decode())
-                            else:
-                                decc.append(decoded.decode())
-                    else: # Otherwise if ve have byte stuff we also need to check everything in case of the suspicious stuff
-                        if len(decoded.decode()) <= 6 and (")" in decoded.decode() or "(" in decoded.decode() or "[" in decoded.decode() or "]" in decoded.decode() or "+" in decoded.decode() or "-" in decoded.decode() or "<" in decoded.decode() or ">" in decoded.decode() or "*" in decoded.decode() or "!" in decoded.decode()):
-                            pass
-                        else:
-                            # -- Data sanitization and keyword check
-                            for key in keywords_to_check:
-                                km = re.findall(key, decoded.decode())
-                                if km != []:
-                                    key_count += 1
+            if self._is_short_symbolic_string(decoded_text):
+                continue
 
-                            # If we have target patterns then extract this sample
-                            if key_count != 0:
-                                if len(decoded.decode()) >= 150:
-                                    print(f"\n{infoS} Warning length of the decoded data is bigger than as we expected!")
-                                    self.output_writer(out_file=f"qu1cksc0pe_decoded_javascript-{len(decoded.decode())}.js", mode="w", buffer=decoded.decode())
-                                else:
-                                    decc.append(decoded.decode())
-                            else:
-                                decc.append(decoded.decode())
-                except:
-                    continue
+            key_count = 0
+            for key in keywords_to_check:
+                km = re.findall(key, decoded_text)
+                if km != []:
+                    key_count += 1
 
-        if decc != []:
-            return decc
-        else:
-            return None
+            # If we have target patterns and the decoded payload is very large, save it as file.
+            if key_count != 0 and len(decoded_text) >= 150:
+                print(f"\n{infoS} Warning length of the decoded data is bigger than as we expected!")
+                self.output_writer(
+                    out_file=f"qu1cksc0pe_decoded_javascript-{len(decoded_text)}.js",
+                    mode="w",
+                    buffer=decoded_text
+                )
+                continue
+            decc.append(decoded_text)
+
+        return decc if decc != [] else None
 
     def html_dump_javascript(self, soup_obj):
         # Dump javascript
@@ -775,6 +985,7 @@ class DocumentAnalyzer:
         javscr = soup_obj.find_all("script")
         if javscr != []:
             print(f"{infoS} Found [bold red]{len(javscr)}[white]. If there is a potential malicious one we will extract it...")
+            self._add_finding("HTML", f"javascript_tag_count={len(javscr)}")
             for jv in javscr:
                 jav_buf = jv.getText().replace("<script>", "").replace("</script>", "")
                 # We need only malicious codes!
@@ -805,12 +1016,14 @@ class DocumentAnalyzer:
             for mc in self.mal_code:
                 if self.mal_code[mc]["count"] != 0:
                     mal_table.add_row(str(mc), self.mal_code[mc]["description"])
+                    self._add_finding("HTML", f"{mc}:{self.mal_code[mc]['count']}")
 
                     # Parsing attack keywords
                     if self.mal_code[mc]["type"] not in att_types:
                         att_types.append(self.mal_code[mc]["type"])
             print(mal_table)
             print(f"{infoS} Keywords for this sample: [bold red]{att_types}[white]")
+            self._register_section("html_attack_keywords", att_types)
         else:
             print(f"{errorS} There is no pattern found!")
     def html_check_input_points(self, soup_obj):
@@ -874,6 +1087,7 @@ class DocumentAnalyzer:
                 indicator += 1
                 for pat in smt:
                     print(f"[bold magenta]>>>[white] {pat}")
+                    self._add_finding("HTML", f"suspicious_file:{pat}")
 
         if indicator == 0:
             print(f"{errorS} There is no suspicious pattern found!")
@@ -888,6 +1102,7 @@ class DocumentAnalyzer:
             if mtch != []:
                 pind += 1
                 powe_table.add_row(co, str(len(mtch)))
+                self._add_finding("HTML", f"powershell_pattern:{co}")
         if pind != 0:
             print(f"\n{infoS} Looks like we found powershell code patterns!")
             print(powe_table)
@@ -896,6 +1111,7 @@ class DocumentAnalyzer:
         with open(out_file, mode) as ff:
             ff.write(buffer)
         print(f"{infoS} Data saved as: [bold yellow]{out_file}[white]")
+        self._append_unique("extracted_files", out_file)
 
     def check_exploit_patterns(self, buffer):
         for exp_pattern in self.rtf_exploit_extract_dict:
@@ -975,6 +1191,59 @@ class DocumentAnalyzer:
             else:
                 pass
 
+    def rtf_objdata_fallback_carve(self, buffer):
+        print(f"{infoS} Trying fallback extraction from [bold green]\\objdata[white] blocks...")
+        obj_positions = [match.start() for match in re.finditer(rb'\\objdata', buffer, re.IGNORECASE)]
+        if not obj_positions:
+            print(f"{errorS} There is no [bold green]\\objdata[white] block for fallback extraction.")
+            return 0
+
+        carved_count = 0
+        seen_digests = set()
+        for idx, start_pos in enumerate(obj_positions):
+            end_pos = obj_positions[idx+1] if idx+1 < len(obj_positions) else len(buffer)
+            window = buffer[start_pos:end_pos]
+            # Keep fallback bounded for performance and to avoid huge noisy scans.
+            window = window[:300000]
+
+            # Prefer the longest contiguous hex sequence within the objdata block.
+            hex_candidates = re.findall(rb'[0-9a-fA-F]{80,}', window)
+            if not hex_candidates:
+                continue
+            best_hex = max(hex_candidates, key=len)
+            if len(best_hex) % 2 != 0:
+                best_hex = best_hex[:-1]
+            if len(best_hex) < 80:
+                continue
+
+            try:
+                carved_data = binascii.unhexlify(best_hex)
+            except Exception:
+                continue
+            if len(carved_data) < 32:
+                continue
+
+            carved_data, payload_label, payload_offset = self._trim_to_known_magic(carved_data)
+            if payload_offset > 0:
+                self._add_finding("RTF", f"objdata_magic_offset={payload_offset}")
+
+            digest = hashlib.sha1(carved_data).hexdigest()
+            if digest in seen_digests:
+                continue
+            seen_digests.add(digest)
+
+            out_file = f"qu1cksc0pe_carved_objdata_fallback-{idx+1}-{payload_label}.bin"
+            self.output_writer(out_file=out_file, mode="wb", buffer=carved_data)
+            self._register_embedded(f"objdata_{idx+1}", "rtf_objdata_fallback")
+            carved_count += 1
+
+        if carved_count > 0:
+            self._add_finding("RTF", f"objdata_fallback_carved={carved_count}")
+            print(f"{infoS} Fallback extraction completed. Carved [bold green]{carved_count}[white] object(s).")
+        else:
+            print(f"{errorS} Fallback extraction could not recover valid embedded data.")
+        return carved_count
+
     def RTFAnalysis(self):
         # Scan file buffer for interesting patterns
         print(f"{infoS} Performing detection of the malicious code patterns...")
@@ -997,11 +1266,13 @@ class DocumentAnalyzer:
             for pat in self.mal_rtf_code:
                 if self.mal_rtf_code[pat]["count"] != 0:
                     rtf_table.add_row(str(pat), str(self.mal_rtf_code[pat]["description"]), str(self.mal_rtf_code[pat]["count"]))
+                    self._add_finding("RTF", f"{pat}:{self.mal_rtf_code[pat]['count']}")
 
                     if self.mal_rtf_code[pat]["type"] not in att_types:
                         att_types.append(self.mal_rtf_code[pat]["type"])
             print(rtf_table)
             print(f"{infoS} Keywords for this sample: [bold red]{att_types}[white]")
+            self._register_section("rtf_attack_keywords", att_types)
 
             # Check for suspicious unescape pattern
             if self.mal_rtf_code["unescape"]["count"] != 0:
@@ -1022,6 +1293,9 @@ class DocumentAnalyzer:
         self.rtf_check_exploit_main(buffer=buf_trim)
         if self.pat_ct == 0:
             print(f"{errorS} There is no suspicious embedded exploit/script pattern detected!")
+            self.rtf_objdata_fallback_carve(buffer=buf_trim)
+        else:
+            self._add_finding("RTF", f"embedded_exploit_count={self.pat_ct}")
 
         # Get url values
         self.html_fetch_urls(allstr)
@@ -1038,6 +1312,7 @@ class DocumentAnalyzer:
 try:
     docObj = DocumentAnalyzer(targetFile)
     ext = docObj.CheckExt()
+    report["document_type"] = ext
     if ext == "docscan" or ext == "archive_type_doc":
         docObj.BasicInfoGa()
     elif ext == "pdfscan":
@@ -1052,5 +1327,8 @@ try:
         print(f"{errorS} Analysis technique is not implemented for now. Please send the file to the developer for further analysis.")
     else:
         print(f"{errorS} File format is not supported.")
-except:
-    err_exit(f"{errorS} An error occured while analyzing that file.")
+    docObj.analyze_decrypted_output()
+    if get_argv(2) == "True":
+        save_report("document", report)
+except Exception as exc:
+    err_exit(f"{errorS} An error occured while analyzing that file. Details: {exc}")

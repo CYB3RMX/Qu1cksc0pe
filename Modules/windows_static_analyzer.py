@@ -206,12 +206,20 @@ class WindowsAnalyzer:
                 tables.add_column(f"Functions or Strings about [bold green]{key}", justify="center")
                 tables.add_column("Address", justify="center")
                 winrep["categories"].update({key: []})
+                detailed_categories = os.environ.get("SC0PE_WINDOWS_REPORT_DETAILED", "").strip() == "1"
+                seen_api = set()
                 for func in dictCateg[key]:
                     if func[0] == "":
                         pass
                     else:
                         tables.add_row(f"[bold red]{func[0]}", f"[bold red]{func[1]}")
-                        winrep["categories"][key].append(func)
+                        api = func[0]
+                        if detailed_categories:
+                            winrep["categories"][key].append(func)
+                        else:
+                            if api not in seen_api:
+                                winrep["categories"][key].append(api)
+                                seen_api.add(api)
                 print(tables)
 
     def dll_files(self):

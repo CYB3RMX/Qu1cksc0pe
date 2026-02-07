@@ -78,7 +78,7 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 # First you need to clone Qu1cksc0pe with this command
 git clone --depth 1 https://github.com/CYB3RMX/Qu1cksc0pe
 
-# After cloning the repository you must create a python virtual environment (for handling python modules)
+# After cloning the repository YOU MUST create a python virtual environment (for handling python modules)
 virtualenv -p python3 sc0pe_venv
 source sc0pe_venv/bin/activate
 
@@ -86,7 +86,7 @@ source sc0pe_venv/bin/activate
 bash setup.sh
 
 # If you want to install Qu1cksc0pe on your system just execute the following commands.
-python qu1cksc0pe.py --install
+python qu1cksc0pe.py --install # Optional
 
 # To prevent interpreter errors after installation, use dos2unix.
 dos2unix /usr/bin/qu1cksc0pe

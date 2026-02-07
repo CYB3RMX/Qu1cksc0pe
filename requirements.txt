@@ -5,6 +5,7 @@ rich
 tqdm
 colorama
 oletools
+msoffcrypto-tool
 pefile
 pyaxmlparser
 yara-python==4.5.0

@@ -166,20 +166,27 @@ def BasicAnalyzer(analyzeFile):
 
         # If given file is a JAR file then run JAR file analysis
         if file_name_trim[-1] == ".jar": # Extension based detection
-            execute_module(f"apkAnalyzer.py \"{analyzeFile}\" False JAR")
+            if args.report:
+                execute_module(f"apkAnalyzer.py \"{analyzeFile}\" True JAR")
+            else:
+                execute_module(f"apkAnalyzer.py \"{analyzeFile}\" False JAR")
         elif "Dalvik (Android) executable" in fileType:
-            execute_module(f"apkAnalyzer.py \"{analyzeFile}\" False DEX")
+            if args.report:
+                execute_module(f"apkAnalyzer.py \"{analyzeFile}\" True DEX")
+            else:
+                execute_module(f"apkAnalyzer.py \"{analyzeFile}\" False DEX")
         else:
             if args.report:
                 execute_module(f"apkAnalyzer.py \"{analyzeFile}\" True APK")
             else:
                 execute_module(f"apkAnalyzer.py \"{analyzeFile}\" False APK")
-            # APP Security
-            choice = str(input(f"\n{infoC} Do you want to check target app\'s security? This process will take a while.[Y/n]: "))
-            if choice == "Y" or choice == "y":
-                execute_module(f"apkSecCheck.py")
-            else:
-                pass
+            if not args.report:
+                # APP Security
+                choice = str(input(f"\n{infoC} Do you want to check target app\'s security? This process will take a while.[Y/n]: "))
+                if choice == "Y" or choice == "y":
+                    execute_module(f"apkSecCheck.py")
+                else:
+                    pass
 
     # Pcap analysis
     elif "pcap" in fileType or "capture file" in fileType:
@@ -254,7 +261,10 @@ def Qu1cksc0pe():
         # Handling --file argument
         if args.file is not None:
             print(f"{infoS} Analyzing: [bold green]{args.file}[white]")
-            execute_module(f"document_analyzer.py \"{args.file}\"")
+            if args.report:
+                execute_module(f"document_analyzer.py \"{args.file}\" True")
+            else:
+                execute_module(f"document_analyzer.py \"{args.file}\" False")
         # Handling --folder argument
         if args.folder is not None:
             err_exit("[bold white on red][blink]--docs[/blink] argument is not supported for folder analyzing!\n")

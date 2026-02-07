@@ -3,6 +3,8 @@ import sys
 import json
 import warnings
 import configparser
+import shutil
+import subprocess
 from .analysis.multiple.go_binary_parser import GolangParser
 from .analysis.linux.linux_emulator import Linxcution
 
@@ -60,10 +62,132 @@ class LinuxAnalyzer:
         self.strings_output = strings_lines
         self.report = self.__class__.init_blank_report(default="")
         _binary = lief.parse(target_file)
-        self.symbol_names = [sym.name for sym in _binary.symbols]
+        if not _binary:
+            err_exit(f"{errorS} Failed to parse target ELF with LIEF.")
+
+        self.symbol_names = self._collect_function_candidates(_binary, strings_lines)
         self.binary = _binary
         self.is_go_binary = None
         self.categorized_func_count = 0
+        # Best-effort hint for debugging/report consumers.
+        self.report["number_of_functions_source"] = self._function_count_source
+
+    def _collect_lief_symbol_names(self, binary):
+        names = []
+        try:
+            for sym in getattr(binary, "symbols", []) or []:
+                nm = getattr(sym, "name", "")
+                if nm:
+                    names.append(str(nm))
+        except Exception:
+            pass
+
+        # Some LIEF builds expose dynamic symbols separately.
+        try:
+            for sym in getattr(binary, "dynamic_symbols", []) or []:
+                nm = getattr(sym, "name", "")
+                if nm:
+                    names.append(str(nm))
+        except Exception:
+            pass
+
+        # Some LIEF versions expose imported/exported function names as lists.
+        for attr in ("imported_functions", "exported_functions"):
+            try:
+                vals = getattr(binary, attr, None)
+                if vals:
+                    for v in vals:
+                        if v:
+                            names.append(str(v))
+            except Exception:
+                pass
+
+        # De-dup while preserving order.
+        return list(dict.fromkeys([n for n in names if isinstance(n, str) and n.strip()]))
+
+    def _collect_readelf_functions(self):
+        readelf = shutil.which("readelf")
+        if not readelf:
+            return []
+        try:
+            proc = subprocess.run(
+                [readelf, "-Ws", self.target_file],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+        except Exception:
+            return []
+        if proc.returncode != 0 or not proc.stdout:
+            return []
+
+        out = []
+        for line in proc.stdout.splitlines():
+            # Example columns:
+            #  123: 00000000     0 FUNC    GLOBAL DEFAULT  UND socket@GLIBC_2.2.5
+            if " FUNC " not in line:
+                continue
+            parts = line.split()
+            if not parts:
+                continue
+            name = parts[-1].strip()
+            if name and name != "":
+                out.append(name)
+
+        return list(dict.fromkeys(out))
+
+    def _collect_strings_function_candidates(self, strings_lines):
+        # Heuristic: keep "identifier-like" tokens, avoid paths/URLs/whitespace.
+        out = []
+        for s in strings_lines or []:
+            if not s or not isinstance(s, str):
+                continue
+            s = s.strip()
+            if not s or len(s) < 3 or len(s) > 128:
+                continue
+            if any(x in s for x in (" ", "\t", "/", "\\", "://")):
+                continue
+            # Typical function/symbol formats: foo, foo_bar, foo@GLIBC_2.2.5
+            if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_@.]{2,127}", s):
+                continue
+            low = s.lower()
+            if low in ("elf", "gnu", "glibc", "linux"):
+                continue
+            # Drop obvious shared object names.
+            if low.endswith(".so") or ".so." in low:
+                continue
+            out.append(s)
+
+        return list(dict.fromkeys(out))
+
+    def _collect_function_candidates(self, binary, strings_lines):
+        """
+        Populate `self.symbol_names` used in stats.
+
+        Order:
+        1) LIEF symbols/dynamic symbols/imported/exported functions (if available)
+        2) readelf FUNC symbols (if available)
+        3) strings-based heuristic (best-effort for stripped/odd-arch binaries)
+        """
+        self._function_count_source = "unknown"
+
+        names = self._collect_lief_symbol_names(binary)
+        if names:
+            self._function_count_source = "lief"
+            return names
+
+        names = self._collect_readelf_functions()
+        if names:
+            self._function_count_source = "readelf"
+            return names
+
+        names = self._collect_strings_function_candidates(strings_lines)
+        if names:
+            self._function_count_source = "strings_heuristic"
+            return names
+
+        self._function_count_source = "none"
+        return []
 
     def parse_section_content(self, sec_name):
         return "".join([chr(unicode_point)
@@ -254,6 +378,7 @@ class LinuxAnalyzer:
             "hash_md5": default, "hash_sha1": default, "hash_sha256": default,
             "binary_entrypoint": default, "interpreter": default,
             "categorized_functions": 0, "number_of_functions": 0,
+            "number_of_functions_source": default,
             "number_of_sections": 0, "number_of_segments": 0,
             "libraries": [],
             "sections": [], "segments": [],

@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
 # Colors
 cyan='\e[96m'
@@ -12,93 +13,234 @@ info="${cyan}[${yellow}*${cyan}]${default}"
 success="${cyan}[${green}+${cyan}]${default}"
 error="${cyan}[${red}!${cyan}]${default}"
 
-# Detecting package manager
 command_exists() {
   command -v "$1" >/dev/null 2>&1
 }
-if command_exists apt; then
-  echo -en "${info} APT package manager detected.\n"
-  package_manager="apt install"
-fi
-if command_exists pacman; then
-  echo -en "${info} Pacman package manager detected.\n"
-  package_manager="pacman -S"
-fi
 
-# Gather necessary python modules
-if command -v pip3 &>/dev/null; then
-    echo -en "${info} Installing python modules...\n"
-    pip3 install -r requirements.txt
+run_with_privilege() {
+  if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
+    "$@"
+  elif command_exists sudo; then
+    sudo "$@"
+  else
+    log_error "This step requires root privileges, but sudo is not available."
+    exit 1
+  fi
+}
+
+log_info() {
+  echo -e "${info} $1"
+}
+
+log_success() {
+  echo -e "${success} $1"
+}
+
+log_error() {
+  echo -e "${error} $1"
+}
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+BASE_DIR="${HOME}/sc0pe_Base"
+VENV_PYTHON="${SCRIPT_DIR}/sc0pe/bin/python"
+PYTHON_BIN="python3"
+if [[ -x "${VENV_PYTHON}" ]]; then
+  PYTHON_BIN="${VENV_PYTHON}"
+fi
+JADX_VERSION="1.5.3"
+JADX_URL="https://github.com/skylot/jadx/releases/download/v${JADX_VERSION}/jadx-${JADX_VERSION}.zip"
+JADX_DIR="${BASE_DIR}/jadx"
+LIBSCANNER_CONF="${SCRIPT_DIR}/Systems/Android/libScanner.conf"
+JADX_LAUNCHER_PATH=""
+
+# Detect package manager
+PKG_MANAGER=""
+PKG_INSTALL_CMD=()
+PKG_PIP=""
+PKG_ADB=""
+PKG_MONO=""
+PKG_JAVA=""
+if command_exists apt-get; then
+  PKG_MANAGER="apt"
+  PKG_INSTALL_CMD=(apt-get install -y)
+  PKG_PIP="python3-pip"
+  PKG_ADB="adb"
+  PKG_MONO="mono-complete"
+  PKG_JAVA="default-jre-headless"
+  log_info "APT package manager detected."
+elif command_exists pacman; then
+  PKG_MANAGER="pacman"
+  PKG_INSTALL_CMD=(pacman -S --noconfirm --needed)
+  PKG_PIP="python-pip"
+  PKG_ADB="android-tools"
+  PKG_MONO="mono"
+  PKG_JAVA="jre-openjdk-headless"
+  log_info "Pacman package manager detected."
 else
-  echo -en "${error} pip3 is not installed on this system. Installing it for you..."
-  sudo ${package_manager} python3-pip
-  echo -en "${info} Installing python modules...\n"
-  pip3 install -r requirements.txt
+  log_error "Supported package manager not found (apt-get or pacman)."
+  exit 1
 fi
 
-# Setting up sc0pe_Base folder in /home/$user if its not exist
-echo -en "${info} Setting up ${green}sc0pe_Base${default} folder in ${green}/home/$USER${default}...\n"
-USER=$(whoami)
-if [ ! -d "/home/$USER/sc0pe_Base" ]; then
-    echo -en "${info} Creating ${green}sc0pe_Base${default} folder in ${green}/home/$USER${default}...\n"
-    mkdir /home/$USER/sc0pe_Base
+install_system_packages() {
+  run_with_privilege "${PKG_INSTALL_CMD[@]}" "$@"
+}
+
+ensure_cmd_or_install() {
+  local cmd_name="$1"
+  local pkg_name="$2"
+  local note="${3:-}"
+  if command_exists "$cmd_name"; then
+    log_info "${green}${cmd_name}${default} command is already installed."
+    return
+  fi
+  if [[ -n "$note" ]]; then
+    log_info "$note"
+  fi
+  log_info "Installing ${green}${pkg_name}${default}..."
+  install_system_packages "$pkg_name"
+  log_success "Installed ${pkg_name}."
+}
+
+find_jadx_launcher() {
+  local candidate=""
+  local subdir=""
+  local base_dir=""
+  local candidates=(
+    "${JADX_DIR}/bin/jadx"
+    "${JADX_DIR}/jadx"
+  )
+
+  for subdir in "${JADX_DIR}"/*; do
+    if [[ -d "${subdir}" ]]; then
+      candidates+=("${subdir}/bin/jadx" "${subdir}/jadx")
+    fi
+  done
+
+  for candidate in "${candidates[@]}"; do
+    if [[ -f "${candidate}" ]]; then
+      base_dir="$(dirname "${candidate}")"
+      if [[ -f "${base_dir}/../lib/jadx-cli-${JADX_VERSION}.jar" ]]; then
+        :
+      elif [[ -f "${base_dir}/lib/jadx-cli-${JADX_VERSION}.jar" ]]; then
+        :
+      else
+        continue
+      fi
+      chmod +x "${candidate}" 2>/dev/null || true
+      dos2unix -q "${candidate}" 2>/dev/null || true
+      echo "${candidate}"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+# Ensure pip3
+if ! "${PYTHON_BIN}" -m pip --version >/dev/null 2>&1; then
+  if [[ "${PYTHON_BIN}" == "python3" ]]; then
+    log_info "pip3 is not installed. Installing ${green}${PKG_PIP}${default}..."
+    install_system_packages "$PKG_PIP"
+  else
+    log_error "pip is not available in virtual environment interpreter: ${PYTHON_BIN}"
+    exit 1
+  fi
+fi
+
+# Install python modules
+if [[ ! -f requirements.txt ]]; then
+  log_error "requirements.txt not found in ${SCRIPT_DIR}."
+  exit 1
+fi
+log_info "Installing python modules from requirements.txt..."
+"${PYTHON_BIN}" -m pip install -r requirements.txt
+log_success "Python modules installed."
+
+# Setup sc0pe_Base
+log_info "Setting up ${green}sc0pe_Base${default} folder in ${green}${BASE_DIR}${default}..."
+mkdir -p "$BASE_DIR"
+log_success "sc0pe_Base is ready."
+
+# Required system tools
+ensure_cmd_or_install adb "$PKG_ADB"
+ensure_cmd_or_install strings binutils
+ensure_cmd_or_install dos2unix dos2unix
+ensure_cmd_or_install unzip unzip
+
+# Ensure downloader is available
+if command_exists curl; then
+  DOWNLOADER="curl"
+elif command_exists wget; then
+  DOWNLOADER="wget"
 else
-    echo -en "${info} ${green}sc0pe_Base${default} folder is already exist in ${green}/home/$USER${default}...\n"
+  ensure_cmd_or_install wget wget
+  DOWNLOADER="wget"
 fi
 
-# Check for ADB command
-if command -v adb &>/dev/null; then
-    echo -en "${success} ${green}ADB${default} command is already exist!"
+# Setup JADX
+if JADX_LAUNCHER_PATH="$(find_jadx_launcher)"; then
+  log_info "JADX already exists in ${green}${JADX_DIR}${default}."
+  log_info "Detected JADX launcher: ${green}${JADX_LAUNCHER_PATH}${default}"
 else
-    echo -en "${error} ADB command is not installed on this system. Installing it for you..."
-    sudo ${package_manager} adb
-    echo -en "${success} Done!\n"
+  if [[ -d "$JADX_DIR" ]]; then
+    log_info "JADX directory exists but launcher was not found. Re-installing..."
+    rm -rf "$JADX_DIR"
+  fi
+
+  mkdir -p "$JADX_DIR"
+  log_info "Downloading JADX v${JADX_VERSION}..."
+  tmp_zip="$(mktemp -t jadx-XXXXXX.zip)"
+  tmp_extract="$(mktemp -d -t jadx-XXXXXX)"
+  trap 'rm -f "$tmp_zip"; rm -rf "$tmp_extract"' EXIT
+
+  if [[ "$DOWNLOADER" == "curl" ]]; then
+    curl -fL "$JADX_URL" -o "$tmp_zip"
+  else
+    wget "$JADX_URL" -O "$tmp_zip"
+  fi
+
+  log_info "Unzipping JADX..."
+  unzip -q "$tmp_zip" -d "$tmp_extract"
+
+  cp -a "${tmp_extract}/." "$JADX_DIR/"
+  if JADX_LAUNCHER_PATH="$(find_jadx_launcher)"; then
+    log_success "JADX installed at ${JADX_DIR}."
+    log_info "Detected JADX launcher: ${green}${JADX_LAUNCHER_PATH}${default}"
+  else
+    log_error "Could not locate JADX launcher after installation."
+    exit 1
+  fi
 fi
 
-# Downloading and setup Jadx from Github if its not exist in sc0pe_Base folder
-if [ ! -d "/home/$USER/sc0pe_Base/jadx" ]; then
-    echo -en "${info} Downloading Jadx...\n"
-    wget "https://github.com/skylot/jadx/releases/download/v1.4.7/jadx-1.4.7.zip" -O jadx.zip
-    echo -en "${info} Unzipping Jadx...\n"
-    unzip -q jadx.zip -d jadx
-    echo -en "${info} Removing junks...\n"
-    rm -rf jadx.zip
-    echo -en "${info} Setting up Jadx...\n"
-    mv jadx/ /home/$USER/sc0pe_Base/
-    echo -en "${info} Modifying Systems/Android/libScanner.conf...\n"
-    sed -i "s|/usr/bin/jadx|/home/$USER/sc0pe_Base/jadx/bin/jadx|g" Systems/Android/libScanner.conf
-    echo -en "${success} Done!\n"
+# Update libScanner.conf
+if [[ -f "$LIBSCANNER_CONF" ]]; then
+  log_info "Updating Systems/Android/libScanner.conf..."
+  sed -i "s|^decompiler = .*|decompiler = ${JADX_LAUNCHER_PATH}|g" "$LIBSCANNER_CONF"
+  log_success "libScanner.conf updated."
 else
-    echo -en "${info} Jadx is already exist in ${green}/home/$USER/sc0pe_Base${default}...\n"
+  log_error "Could not find ${LIBSCANNER_CONF}."
 fi
 
-# Check for strings command
-if [ ! -f "/usr/bin/strings" ]; then
-    echo -e "${error} Whoa there! ${green}strings${default} command is not exist in your system!"
-    echo -en "${yellow}>>> ${default}I will install it for you, but you need to enter your password to continue...\n"
-    sudo ${package_manager} binutils
-    echo -en "${success} Done!\n"
-else
-    echo -en "${info} ${green}strings${default} command is already exist...\n"
-fi
-
-# Check for dos2unix
-if [ ! -f "/usr/bin/dos2unix" ]; then
-    echo -en "${info} Installing ${green}dos2unix${default} command...\n"
-    sudo ${package_manager} dos2unix
-    echo -en "${success} Done!\n"
-fi
+# JADX requires Java runtime
+ensure_cmd_or_install java "$PKG_JAVA"
 
 # Check for pyOneNote
-if [ ! -f "/home/$USER/.local/bin/pyonenote" ]; then
-    echo -en "${info} Cloning ${green}pyOneNote${default}...\n"
-    pip install -U https://github.com/DissectMalware/pyOneNote/archive/master.zip --force
+if "${PYTHON_BIN}" -c "from pyOneNote.Main import OneDocment" >/dev/null 2>&1; then
+  log_info "${green}pyOneNote${default} is already available."
 else
-    echo -en "${info} ${green}pyOneNote${default} is already exist...\n"
+  log_info "Installing ${green}pyOneNote${default}..."
+  "${PYTHON_BIN}" -m pip install -U --force-reinstall https://github.com/DissectMalware/pyOneNote/archive/master.zip
+  log_success "pyOneNote installed."
 fi
 
-# Setting up "mono-complete"
-echo -en "${info} Setting up mono-complete\n"
-sudo ${package_manager} mono-complete
+# Setup mono
+if command_exists mono; then
+  log_info "${green}mono${default} is already installed."
+else
+  log_info "Setting up ${green}${PKG_MONO}${default}..."
+  install_system_packages "$PKG_MONO"
+  log_success "${PKG_MONO} installed."
+fi
 
-echo -en "\n${info} All done.\n"
+log_success "All done."

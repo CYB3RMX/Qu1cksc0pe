@@ -29,6 +29,16 @@ if sys.platform == "win32":
 # Path variable
 sc0pe_path = open(".path_handler", "r").read()
 
+# Ensure `analysis.*` imports resolve when running as a script.
+modules_dir = os.path.join(sc0pe_path.strip(), "Modules")
+if modules_dir not in sys.path:
+    sys.path.insert(0, modules_dir)
+
+try:
+    from analysis.multiple.multi import yara_rule_scanner
+except:
+    err_exit("Error: >analysis.multiple.multi< module not found.")
+
 # Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 
@@ -42,40 +52,9 @@ file_sigs = {'UPX': 'UPX0', 'AsPack': '.aspack', 'ConfuserEx v0.6.0': 'ConfuserE
 
 # YARA rule based scanner
 def YaraBased(target_file):
-    # Indicator
-    yara_match_indicator = 0
-
-    # Gathering all rules
-    allRules = os.listdir(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}Packer_Rules{path_seperator}")
-
-    # Parsing rule matches
-    yara_matches = []
-    for rul in allRules:
-        try:
-            rules = yara.compile(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}Packer_Rules{path_seperator}{rul}")
-            tempmatch = rules.match(target_file)
-            if tempmatch != []:
-                for matched in tempmatch:
-                    if matched.strings != []:
-                        yara_matches.append(matched)
-        except:
-            continue
-
-    # Printing area
-    if yara_matches != []:
-        yara_match_indicator += 1
-        for rul in yara_matches:
-            yaraTable = Table()
-            print(f">>> Rule name: [i][bold magenta]{rul}[/i]")
-            yaraTable.add_column("[bold green]Offset", justify="center")
-            yaraTable.add_column("[bold green]Matched String/Byte", justify="center")
-            for matched_pattern in rul.strings:
-                yaraTable.add_row(f"{hex(matched_pattern.instances[0].offset)}", f"{str(matched_pattern.instances[0].matched_data)}")
-            print(yaraTable)
-            print(" ")
-
-    # If there is no match
-    if yara_match_indicator == 0:
+    rep = {"matched_rules": []}
+    hit = yara_rule_scanner("/Systems/Multiple/Packer_Rules/", target_file, rep, quiet_nomatch=True, header_label="")
+    if not hit:
         print(f"[bold white on red]There is no rules matched for {target_file}")
 
 # Simple analyzer function
