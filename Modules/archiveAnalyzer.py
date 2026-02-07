@@ -49,6 +49,16 @@ else:
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
+# Ensure `analysis.*` imports resolve when running as a script.
+modules_dir = os.path.join(sc0pe_path.strip(), "Modules")
+if modules_dir not in sys.path:
+    sys.path.insert(0, modules_dir)
+
+try:
+    from analysis.multiple.multi import yara_rule_scanner
+except:
+    err_exit("Error: >analysis.multiple.multi< module not found.")
+
 # Target file
 targetFile = sys.argv[1]
 
@@ -179,40 +189,30 @@ class ArchiveAnalyzer:
     def perform_yara_scan(self, yara_target, config_file):
         self.yara_target = yara_target
         self.config_file = config_file
-        yara_match_indicator = 0
 
         # Parsing config file to get rule path
         conf = configparser.ConfigParser()
         conf.read(self.config_file)
         rule_path = conf["Rule_PATH"]["rulepath"]
-        finalpath = f"{sc0pe_path}{path_seperator}{rule_path}"
-        allRules = os.listdir(finalpath)
-
-        # This array for holding and parsing easily matched rules
-        yara_matches = []
-        for rul in allRules:
-            try:
-                rules = yara.compile(f"{finalpath}{rul}")
-                tempmatch = rules.match(self.yara_target)
-                if tempmatch != []:
-                    for matched in tempmatch:
-                        if matched.strings != []:
-                            if matched not in yara_matches:
-                                yara_matches.append(matched)
-            except:
-                continue
-
-        # Printing area
-        if yara_matches != []:
-            yara_match_indicator += 1
-            yaraTable = Table()
-            yaraTable.add_column(f"[bold green]Matched YARA Rules for: [bold red]{self.yara_target}[white]", justify="center")
-            for rul in yara_matches:
-                yaraTable.add_row(str(rul))
-            print(yaraTable)
-
-        if yara_match_indicator == 0:
+        rep = {"matched_rules": []}
+        hit = yara_rule_scanner(rule_path, self.yara_target, rep, quiet_nomatch=True, quiet_errors=False, print_matches=False)
+        if not hit:
             print(f"[bold white on red]There is no rules matched for {self.yara_target}")
+            return
+
+        # Preserve the original, compact output for archives: list matched rule names only.
+        rule_names = []
+        for entry in rep.get("matched_rules", []):
+            if isinstance(entry, dict):
+                for k in entry.keys():
+                    if k not in rule_names:
+                        rule_names.append(k)
+
+        yaraTable = Table()
+        yaraTable.add_column(f"[bold green]Matched YARA Rules for: [bold red]{self.yara_target}[white]", justify="center")
+        for rn in rule_names:
+            yaraTable.add_row(str(rn))
+        print(yaraTable)
 
 # Execution
 arch_analyzer = ArchiveAnalyzer(targetFile)

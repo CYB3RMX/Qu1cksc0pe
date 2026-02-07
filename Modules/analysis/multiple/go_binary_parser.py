@@ -1,6 +1,15 @@
 import sys
 import json
-from utils.helpers import err_exit
+try:
+    # When imported as `Modules.*`
+    from ...utils.helpers import err_exit
+except Exception:
+    # When executed as a standalone module (sys.path[0] == ".../Modules")
+    try:
+        from utils.helpers import err_exit
+    except Exception:
+        # Last resort for some invocation contexts.
+        from Modules.utils.helpers import err_exit
 
 try:
     from rich import print
