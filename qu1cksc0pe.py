@@ -91,7 +91,7 @@ else:
     libscan = configparser.ConfigParser()
 
 # Utility functions
-from Modules.utils import err_exit
+from Modules.utils.helpers import err_exit
 
 MODULE_PREFIX = f"{sc0pe_path}{path_seperator}Modules{path_seperator}"
 def execute_module(target, path=MODULE_PREFIX, invoker=py_binary):

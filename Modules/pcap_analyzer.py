@@ -8,7 +8,8 @@ import json
 import binascii
 import shutil
 
-from utils import err_exit, user_confirm, chk_wlist
+from analysis.multiple.multi import chk_wlist
+from utils.helpers import err_exit, user_confirm
 
 try:
     from rich import print

@@ -5,7 +5,7 @@ import sys
 import shutil
 import subprocess
 
-from utils import err_exit
+from utils.helpers import err_exit
 
 # Testing prompt_toolkit existence
 try:

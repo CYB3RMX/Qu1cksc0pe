@@ -1,26 +1,24 @@
-import os
 import re
 import sys
 import json
-import yara
-import hashlib
 import warnings
-import subprocess
 import configparser
-from .go_binary_parser import GolangParser
-from .linux_emulator import Linxcution
+from .analysis.multiple.go_binary_parser import GolangParser
+from .analysis.linux.linux_emulator import Linxcution
 
 try:
     # by default, assume we're running as a module, inside a package
-    from .utils import (
+    from .utils.helpers import (
         err_exit, get_argv, emit_table, init_table,
-        no_blanks, user_confirm, stylize_bool,
+        no_blanks, user_confirm, stylize_bool, save_report
     )
+    from .analysis.multiple.multi import calc_hashes, perform_strings, yara_rule_scanner
 except ImportError: # fallback for running as "raw" Python file
-    from utils import (
+    from utils.helpers import (
         err_exit, get_argv, emit_table, init_table,
-        no_blanks, user_confirm, stylize_bool,
+        no_blanks, user_confirm, stylize_bool, save_report
     )
+    from analysis.multiple.multi import calc_hashes, perform_strings, yara_rule_scanner
 
 try:
     from rich import print
@@ -39,7 +37,6 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 # Compatibility
 path_seperator = "/"
-strings_param = "-a"
 if sys.platform == "win32":
     path_seperator = "\\"
 
@@ -82,62 +79,6 @@ class LinuxAnalyzer:
         print(binsec_t)
         self.report["security"] = binsec
 
-    def calc_hashes(self, filename):
-        hashmd5 = hashlib.md5()
-        hashsha1 = hashlib.sha1()
-        hashsha256 = hashlib.sha256()
-        try:
-            with open(filename, "rb") as ff:
-                for chunk in iter(lambda: ff.read(4096), b""):
-                    hashmd5.update(chunk)
-            ff.close()
-            with open(filename, "rb") as ff:
-                for chunk in iter(lambda: ff.read(4096), b""):
-                    hashsha1.update(chunk)
-            ff.close()
-            with open(filename, "rb") as ff:
-                for chunk in iter(lambda: ff.read(4096), b""):
-                    hashsha256.update(chunk)
-            ff.close()
-        except: # TODO: more specific; also: handle/raise!
-            pass
-        print(f"[bold red]>>>>[white] MD5: [bold green]{hashmd5.hexdigest()}")
-        print(f"[bold red]>>>>[white] SHA1: [bold green]{hashsha1.hexdigest()}")
-        print(f"[bold red]>>>>[white] SHA256: [bold green]{hashsha256.hexdigest()}")
-        self.report["hash_md5"] = hashmd5.hexdigest()
-        self.report["hash_sha1"] = hashsha1.hexdigest()
-        self.report["hash_sha256"] = hashsha256.hexdigest()
-
-    def save_report(self, target_os):
-        with open(f"sc0pe_{target_os}_report.json", "w") as report_file:
-            json.dump(self.report, report_file, indent=4)
-            print(f"\n[bold magenta]>>>[bold white] Report file saved into: [bold blink yellow]{report_file.name}\n")
-
-    def yara_scan(self, filename):
-        combined_path = f"{self.base_path}{path_seperator}{self.rule_path}"
-        recorded_matches = []
-        for rule_fname in os.listdir(combined_path):
-            try:
-                for matched in yara.compile(f"{combined_path}{rule_fname}").match(filename):
-                    if len(matched.strings) > 0 and not matched in recorded_matches:
-                        recorded_matches.append(matched)
-            except:
-                continue
-
-        if len(recorded_matches) == 0:
-            print(f"[bold white on red]There is no rule matched for {filename}");return
-
-        for match in recorded_matches:
-            print(f">>> Rule name: [i][bold magenta]{match}[/i]")
-            yara_t = init_table("Offset", "Matched String/Byte", style="bold green")
-            self.report["matched_rules"].append({str(match): []})
-            for pi in self.__class__.yara_matches_to_patterninfo(match.strings):
-                self.report["matched_rules"][-1][str(match)].append(pi)
-                yara_t.add_row(str(pi["offset"]), str(pi["matched_pattern"]))
-
-            print(yara_t)
-            print(" ")
-
     def emit_general_information(self):
         print(f"{infoS} General Informations about [bold green]{self.target_file}")
         print(f"[bold red]>>>>[white] Machine Type: [bold green]{str(self.binary.header.machine_type).split('.')[-1]}")
@@ -152,7 +93,7 @@ class LinuxAnalyzer:
         self.report["binary_entrypoint"] = str(hex(self.binary.entrypoint))
         self.report["number_of_sections"] = len(self.binary.sections)
         self.report["number_of_segments"] = len(self.binary.segments)
-        self.calc_hashes(self.target_file)
+        calc_hashes(self.target_file, self.report)
         self.check_bin_security()
 
     def parse_sections(self):
@@ -249,7 +190,7 @@ class LinuxAnalyzer:
         self.report["categories"] = CATEGORIES
 
         print(f"\n{infoS} Performing YARA rule matching...")
-        self.yara_scan(self.target_file)
+        yara_rule_scanner(self.rule_path, self.target_file, self.report)
 
         self.parse_sections()
         self.parse_segments()
@@ -295,21 +236,7 @@ class LinuxAnalyzer:
             print("[bold]You can also use [green][i]--hashscan[/i] [white]to scan this file.")
 
         if emit_report:
-            self.save_report("linux")
-
-    @staticmethod
-    def yara_matches_to_patterninfo(patterns):
-        out = []
-        for pattern in patterns:
-            instance = pattern.instances[0]
-            pattern_info = {"offset": hex(instance.offset)}
-            try:
-                pattern_info["matched_pattern"] = instance.matched_data.decode("ascii")
-            except:
-                pattern_info["matched_pattern"] = str(instance.matched_data)
-            finally:
-                out.append(pattern_info)
-        return out
+            save_report("linux", self.report)
 
     @staticmethod
     def init_blank_report(default="NO_RESULT_PRESENT"):
@@ -337,10 +264,7 @@ class LinuxAnalyzer:
 
 
 def run(sc0pe_path, target_file, emit_report=False):
-    subprocess.run(f"strings {strings_param} \"{target_file}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-    if sys.platform != "win32":
-        subprocess.run(f"strings {strings_param} -e l {target_file} >> temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-
+    allstrs = perform_strings(target_file)
     conf = configparser.ConfigParser()
     conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}linux.conf")
 
@@ -360,7 +284,7 @@ def run(sc0pe_path, target_file, emit_report=False):
     lina = LinuxAnalyzer(
         base_path=sc0pe_path, target_file=target_file,
         rule_path=conf["Rule_PATH"]["rulepath"],
-        strings_lines=open("temp.txt", "r").read().split("\n"),
+        strings_lines=allstrs,
     )
     lina.emit_general_information()
     lina.analyze(indicators_by_category, emit_report=emit_report)

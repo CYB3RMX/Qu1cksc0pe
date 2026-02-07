@@ -12,7 +12,8 @@ import subprocess
 import configparser
 import urllib.parse
 from bs4 import BeautifulSoup
-from utils import err_exit, user_confirm, chk_wlist
+from analysis.multiple.multi import chk_wlist, perform_strings, yara_rule_scanner
+from utils.helpers import err_exit, user_confirm
 
 # Checking for rich
 try:
@@ -63,24 +64,28 @@ targetFile = sys.argv[1]
 
 # Compatibility
 path_seperator = "/"
-strings_param = "-a"
 if sys.platform == "win32":
     path_seperator = "\\"
 
 # Gathering Qu1cksc0pe path variable
 sc0pe_path = open(".path_handler", "r").read()
 
-# Perform strings
-_ = subprocess.run(f"strings {strings_param} \"{targetFile}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-if sys.platform != "win32":
-    _ = subprocess.run(f"strings {strings_param} -e l {targetFile} >> temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-
 # All strings
-allstr = open("temp.txt", "r").read()
+allstr = perform_strings(targetFile)
+
+# Parsing config file to get rule path
+conf = configparser.ConfigParser()
+conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}multiple.conf")
+
+# Report
+report = {
+    "matched_rules": []
+}
 
 class DocumentAnalyzer:
     def __init__(self, targetFile):
         self.targetFile = targetFile
+        self.rule_path = conf["Rule_PATH"]["rulepath"]
         self.file_sigs = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}file_sigs.json"))
         self.base64_pattern = r'(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})'
         self.mal_code = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}malicious_html_codes.json"))
@@ -148,46 +153,6 @@ class DocumentAnalyzer:
             return "archive_type_doc"
         else:
             return "unknown"
-
-    # Yara Scanner
-    def DocumentYara(self):
-        yara_match_indicator = 0
-        # Parsing config file to get rule path
-        conf = configparser.ConfigParser()
-        conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}multiple.conf")
-        rule_path = conf["Rule_PATH"]["rulepath"]
-        finalpath = f"{sc0pe_path}{path_seperator}{rule_path}"
-        allRules = os.listdir(finalpath)
-
-        # This array for holding and parsing easily matched rules
-        yara_matches = []
-        for rul in allRules:
-            try:
-                rules = yara.compile(f"{finalpath}{rul}")
-                tempmatch = rules.match(self.targetFile)
-                if tempmatch != []:
-                    for matched in tempmatch:
-                        if matched.strings != []:
-                            if matched not in yara_matches:
-                                yara_matches.append(matched)
-            except:
-                continue
-
-        # Printing area
-        if yara_matches != []:
-            yara_match_indicator += 1
-            for rul in yara_matches:
-                yaraTable = Table()
-                print(f">>> Rule name: [i][bold magenta]{rul}[/i]")
-                yaraTable.add_column("Offset", style="bold green", justify="center")
-                yaraTable.add_column("Matched String/Byte", style="bold green", justify="center")
-                for matched_pattern in rul.strings:
-                    yaraTable.add_row(f"{hex(matched_pattern.instances[0].offset)}", f"{str(matched_pattern.instances[0].matched_data)}")
-                print(yaraTable)
-                print(" ")
-
-        if yara_match_indicator == 0:
-            print(f"[bold white on red]There is no rules matched for {self.targetFile}")
 
     # Perform analysis against embedded binaries
     def JARCheck(self):
@@ -387,7 +352,7 @@ class DocumentAnalyzer:
 
         # Perform Yara scan
         print(f"\n{infoS} Performing YARA rule matching...")
-        self.DocumentYara()
+        yara_rule_scanner(self.rule_path, self.targetFile, report)
 
         # Perform Ole file analysis
         if self.is_ole_file:
@@ -486,7 +451,7 @@ class DocumentAnalyzer:
 
         # Perform Yara scan
         print(f"\n{infoS} Performing YARA rule matching...")
-        self.DocumentYara()
+        yara_rule_scanner(self.rule_path, self.targetFile, report)
 
     # PDF analysis
     def PDFAnalysis(self):
@@ -672,7 +637,7 @@ class DocumentAnalyzer:
 
         # Perform Yara scan
         print(f"\n{infoS} Performing YARA rule matching...")
-        self.DocumentYara()
+        yara_rule_scanner(self.rule_path, self.targetFile, report)
 
     # HTML analysis
     def HTMLanalysis(self):
@@ -1063,7 +1028,7 @@ class DocumentAnalyzer:
 
         # Perform Yara scan
         print(f"\n{infoS} Performing YARA rule matching...")
-        self.DocumentYara()
+        yara_rule_scanner(self.rule_path, self.targetFile, report)
 
     def archive_type_analyzer(self):
         print(f"{infoS} Parsing contents of the target document...")

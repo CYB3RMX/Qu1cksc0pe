@@ -6,8 +6,7 @@ import sys
 import email
 import subprocess
 import shutil
-
-from utils import err_exit
+from utils.helpers import err_exit
 
 try:
     from rich import print

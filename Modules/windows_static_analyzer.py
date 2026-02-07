@@ -3,16 +3,14 @@
 import os
 import re
 import sys
-import yara
 import json
 import sqlite3
-import hashlib
 import warnings
 import binascii
 import subprocess
 import configparser
-
-from utils import err_exit, get_argv
+from utils.helpers import err_exit, get_argv, save_report
+from analysis.multiple.multi import perform_strings, calc_hashes, yara_rule_scanner
 
 try:
     from rich import print
@@ -68,13 +66,9 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 homeD = os.path.expanduser("~")
 path_seperator = "/"
 setup_scr = "setup.sh"
-strings_param = "--all"
 if sys.platform == "win32":
     path_seperator = "\\"
     setup_scr = "setup.ps1"
-    strings_param = "-a"
-elif sys.platform == "darwin":
-    strings_param = "-a"
 else:
     pass
 
@@ -130,18 +124,13 @@ winrep = {
 conf = configparser.ConfigParser()
 conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf")
 
-# Perform strings
-_ = subprocess.run(f"strings {strings_param} \"{fileName}\" > temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-if sys.platform != "win32":
-    _ = subprocess.run(f"strings {strings_param} -e l {fileName} >> temp.txt", stderr=subprocess.PIPE, stdout=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-
 class WindowsAnalyzer:
     def __init__(self, target_file):
         self.target_file = target_file
         self.allFuncs = 0
         self.windows_imports_and_exports = []
         self.executable_buffer = open(self.target_file, "rb").read()
-        self.all_strings = open("temp.txt", "r").read().split("\n")
+        self.all_strings = perform_strings(fileName)
         self.blacklisted_patterns = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}dotnet_blacklisted_methods.txt", "r").read().split("\n")
         self.sus_reg_keys = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}suspicious_registry_keys.txt", "r").read().split("\n")
         self.rule_path = conf["Rule_PATH"]["rulepath"]
@@ -454,135 +443,13 @@ class WindowsAnalyzer:
         print(f"\n{infoS} Performing string decode via function emulation. Please wait...")
         self.decode_strings_floss(viv, decode_features)
 
-        # Get functions
-        print(f"\n{infoS} Extracting and parsing function informations. Please wait...")
-        funcz = viv.getFunctions()
-
-        # Perform basic analysis against functions
-        # -- Create table
-        fun_table = Table()
-        fun_table.add_column("[bold green]Function Name", justify="center")
-        fun_table.add_column("[bold green]Size", justify="center")
-        fun_table.add_column("[bold green]Offset", justify="center")
-        fun_table.add_column("[bold green]Xrefs From This Address", justify="center")
-        fun_table.add_column("[bold green]Xrefs To This Address", justify="center")
-
-        # -- Parse functions
-        print(f"[bold magenta]>>>[white] Number of functions: [bold green]{len(funcz)}[white]")
-        for fun in track(range(len(funcz)), description="Processing..."):
-            try:
-                fn_name = viv.getName(funcz[fun])
-                fn_size = viv.getCodeBlock(funcz[fun])[1]
-                xrf_fr = len(viv.getXrefsFrom(funcz[fun]))
-                xrf_to = len(viv.getXrefsTo(funcz[fun]))
-
-                # -- If we have function size larger than 200 there is must be something!
-                if fn_size >= 200:
-                    table_str = f"[bold red]{fn_size} Attention!![white]"
-                else:
-                    table_str = str(fn_size)
-
-                # -- Check for xrefs_fr
-                if xrf_fr != 0:
-                    xrf_fr_str = f"[bold red]{xrf_fr}[white]"
-                else:
-                    xrf_fr_str = str(xrf_fr)
-
-                # -- Check for xrefs_to
-                if xrf_to != 0:
-                    xrf_to_str = f"[bold red]{xrf_to}[white]"
-                else:
-                    xrf_to_str = str(xrf_to)
-
-                fun_table.add_row(
-                    fn_name,
-                    table_str,
-                    str(hex(fun)),
-                    xrf_fr_str,
-                    xrf_to_str
-                )
-            except:
-                continue
-        print(fun_table)
-
-    def hash_calculator(self, filename, report_object):
-        hashmd5 = hashlib.md5()
-        hashsha1 = hashlib.sha1()
-        hashsha256 = hashlib.sha256()
-        try:
-            with open(filename, "rb") as ff:
-                for chunk in iter(lambda: ff.read(4096), b""):
-                    hashmd5.update(chunk)
-            ff.close()
-            with open(filename, "rb") as ff:
-                for chunk in iter(lambda: ff.read(4096), b""):
-                    hashsha1.update(chunk)
-            ff.close()
-            with open(filename, "rb") as ff:
-                for chunk in iter(lambda: ff.read(4096), b""):
-                    hashsha256.update(chunk)
-            ff.close()
-        except:
-            pass
-        print(f"[bold red]>>>>[white] MD5: [bold green]{hashmd5.hexdigest()}")
-        print(f"[bold red]>>>>[white] SHA1: [bold green]{hashsha1.hexdigest()}")
-        print(f"[bold red]>>>>[white] SHA256: [bold green]{hashsha256.hexdigest()}")
-        report_object["hash_md5"] = hashmd5.hexdigest()
-        report_object["hash_sha1"] = hashsha1.hexdigest()
-        report_object["hash_sha256"] = hashsha256.hexdigest()
-
-    def yara_rule_scanner(self, filename, report_object):
-        yara_match_indicator = 0
-        finalpath = f"{sc0pe_path}{path_seperator}{self.rule_path}"
-        allRules = os.listdir(finalpath)
-
-        # This array for holding and parsing easily matched rules
-        yara_matches = []
-        for rul in allRules:
-            try:
-                rules = yara.compile(f"{finalpath}{rul}")
-                tempmatch = rules.match(filename)
-                if tempmatch != []:
-                    for matched in tempmatch:
-                        if matched.strings != []:
-                            if matched not in yara_matches:
-                                yara_matches.append(matched)
-            except:
-                continue
-
-        # Printing area
-        if yara_matches != []:
-            yara_match_indicator += 1
-            for rul in yara_matches:
-                yaraTable = Table()
-                print(f">>> Rule name: [i][bold magenta]{rul}[/i]")
-                yaraTable.add_column("Offset", style="bold green", justify="center")
-                yaraTable.add_column("Matched String/Byte", style="bold green", justify="center")
-                report_object["matched_rules"].append({str(rul): []})
-                for matched_pattern in rul.strings:
-                    yaraTable.add_row(f"{hex(matched_pattern.instances[0].offset)}", f"{str(matched_pattern.instances[0].matched_data)}")
-                    try:
-                        report_object["matched_rules"][-1][str(rul)].append({"offset": hex(matched_pattern.instances[0].offset), "matched_pattern": matched_pattern.instances[0].matched_data.decode("ascii")})
-                    except:
-                        report_object["matched_rules"][-1][str(rul)].append({"offset": hex(matched_pattern.instances[0].offset), "matched_pattern": str(matched_pattern.instances[0].matched_data)})
-                print(yaraTable)
-                print(" ")
-
-        if yara_match_indicator == 0:
-            print(f"[bold white on red]There is no rules matched for {filename}")
-
-    def report_writer(self, target_os, report_object):
-        with open(f"sc0pe_{target_os}_{winrep['hash_sha256']}_report.json", "w") as rp_file:
-            json.dump(report_object, rp_file, indent=4)
-        print(f"\n[bold magenta]>>>[bold white] Report file saved into: [bold blink yellow]sc0pe_{target_os}_{winrep['hash_sha256']}_report.json\n")
-
     def statistics_method(self):
         datestamp = self.gather_timestamp()
         print(f"\n[bold green]-> [white]Statistics for: [bold green][i]{self.target_file}[/i]")
         print(f"[bold magenta]>>[white] Time Date Stamp: [bold green][i]{datestamp}[/i]")
         winrep["filename"] = self.target_file
         winrep["timedatestamp"] = datestamp
-        self.hash_calculator(self.target_file, winrep)
+        calc_hashes(self.target_file, winrep)
         print(f"[bold magenta]>>[white] IMPHASH: [bold green]{self.binaryfile.get_imphash()}")
         winrep["imphash"] = self.binaryfile.get_imphash()
 
@@ -723,11 +590,11 @@ class WindowsAnalyzer:
 
         # Yara rule match
         print(f"\n{infoS} Performing YARA rule matching...")
-        self.yara_rule_scanner(fileName, report_object=winrep)
+        yara_rule_scanner(self.rule_path, fileName, winrep)
         self.statistics_method()
         # Print reports
         if get_argv(2) == "True":
-            self.report_writer("windows", winrep)
+            save_report("windows", winrep)
 
     def msi_file_analyzer(self):
         print(f"{infoS} Performing Microsoft Software Installer analysis...\n")
@@ -737,7 +604,7 @@ class WindowsAnalyzer:
         self.detect_embedded_PE()
         # Yara rule match
         print(f"\n{infoS} Performing YARA rule matching...")
-        self.yara_rule_scanner(fileName, report_object=winrep)
+        yara_rule_scanner(self.rule_path, fileName, winrep)
 
 # Execute
 windows_analyzer = WindowsAnalyzer(target_file=str(fileName))
@@ -750,17 +617,15 @@ windows_analyzer.detect_embedded_PE()
 
 # Yara rule match
 print(f"\n{infoS} Performing YARA rule matching...")
-windows_analyzer.yara_rule_scanner(fileName, report_object=winrep)
-
+yara_rule_scanner(windows_analyzer.rule_path, fileName, winrep)
 windows_analyzer.section_parser()
 
 try:
     windows_analyzer.analyze_via_viv()
 except:
     print(f"{errorS} An error occured while analyzing functions! This file might have some [bold red]anti-analysis[white] technique!")
-
 windows_analyzer.statistics_method()
 
 # Print reports
 if get_argv(2) == "True":
-    windows_analyzer.report_writer("windows", winrep)
+    save_report("windows", winrep)

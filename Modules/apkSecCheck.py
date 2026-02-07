@@ -3,7 +3,7 @@
 import sys
 import xml.etree.ElementTree as etr
 
-from utils import err_exit
+from utils.helpers import err_exit
 
 try:
     from rich import print
