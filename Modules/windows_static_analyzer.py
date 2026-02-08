@@ -34,8 +34,6 @@ except:
 
 try:
     import floss
-    from floss import main
-    from floss import strings
 except:
     err_exit("Error: >flare-floss< module not found.")
 
