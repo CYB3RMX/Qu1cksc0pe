@@ -123,6 +123,7 @@ ARG_NAMES_TO_KWARG_OPTS = {
     "packer": {"help": "Check if your file is packed with common packers.", "action": "store_true"},
     "resource": {"help": "Analyze resources in target file", "action": "store_true"},
     "report": {"help": "Export analysis reports into a file (JSON Format for now).", "action": "store_true"},
+    "ai": {"help": "Analyze generated report using smart analyzer (requires --report; enabled automatically).", "action": "store_true"},
     "watch": {"help": "Perform dynamic analysis against Windows/Android files. (Linux will coming soon!!)", "action": "store_true"},
     "sigcheck": {"help": "Scan file signatures in target file.", "action": "store_true"},
     "vtFile": {"help": "Scan your file with VirusTotal API.", "action": "store_true"}
@@ -133,6 +134,31 @@ for arg_name, cfg in ARG_NAMES_TO_KWARG_OPTS.items():
     cfg["required"] = cfg.get("required", False)
     parser.add_argument("--" + arg_name, **cfg)
 args = parser.parse_args()
+
+# If user requests AI analysis, we must have a report to analyze.
+if getattr(args, "ai", False) and not getattr(args, "report", False):
+    args.report = True
+
+def _latest_report_path():
+    try:
+        candidates = [f for f in os.listdir(".") if f.startswith("sc0pe_") and f.endswith("_report.json")]
+    except Exception:
+        return None
+    if not candidates:
+        return None
+    candidates = [os.path.abspath(c) for c in candidates if os.path.exists(c)]
+    if not candidates:
+        return None
+    return max(candidates, key=lambda p: os.path.getmtime(p))
+
+def _maybe_run_ai():
+    if not getattr(args, "ai", False):
+        return
+    report_path = _latest_report_path()
+    if not report_path:
+        print(f"{errorS} AI analysis requested but no report file found (expected sc0pe_*_report.json).")
+        return
+    execute_module(f"analysis/multiple/smart_analyzer.py \"{report_path}\"")
 
 # Basic analyzer function that handles single and multiple scans
 def BasicAnalyzer(analyzeFile):
@@ -145,17 +171,20 @@ def BasicAnalyzer(analyzeFile):
             execute_module(f"windows_static_analyzer.py \"{analyzeFile}\" True")
         else:
             execute_module(f"windows_static_analyzer.py \"{analyzeFile}\" False")
+        _maybe_run_ai()
 
     # Linux Analysis
     elif "ELF" in fileType:
         print(f"{infoS} Target OS: [bold green]Linux[white]\n")
         import Modules.linux_static_analyzer as lina
         lina.run(sc0pe_path, analyzeFile, emit_report=args.report)
+        _maybe_run_ai()
 
     # MacOSX Analysis
     elif "Mach-O" in fileType or '\\xca\\xfe\\xba\\xbe' in fileType:
         print(f"{infoS} Target OS: [bold green]OSX[white]\n")
         execute_module(f"apple_analyzer.py \"{analyzeFile}\"")
+        _maybe_run_ai()
 
     # Android Analysis
     elif ("PK" in fileType and "Java archive" in fileType) or "Dalvik (Android) executable" in fileType:
@@ -170,16 +199,19 @@ def BasicAnalyzer(analyzeFile):
                 execute_module(f"apkAnalyzer.py \"{analyzeFile}\" True JAR")
             else:
                 execute_module(f"apkAnalyzer.py \"{analyzeFile}\" False JAR")
+            _maybe_run_ai()
         elif "Dalvik (Android) executable" in fileType:
             if args.report:
                 execute_module(f"apkAnalyzer.py \"{analyzeFile}\" True DEX")
             else:
                 execute_module(f"apkAnalyzer.py \"{analyzeFile}\" False DEX")
+            _maybe_run_ai()
         else:
             if args.report:
                 execute_module(f"apkAnalyzer.py \"{analyzeFile}\" True APK")
             else:
                 execute_module(f"apkAnalyzer.py \"{analyzeFile}\" False APK")
+            _maybe_run_ai()
             if not args.report:
                 # APP Security
                 choice = str(input(f"\n{infoC} Do you want to check target app\'s security? This process will take a while.[Y/n]: "))
@@ -192,16 +224,19 @@ def BasicAnalyzer(analyzeFile):
     elif "pcap" in fileType or "capture file" in fileType:
         print(f"{infoS} Performing [bold green]PCAP[while] analysis...\n")
         execute_module(f"pcap_analyzer.py \"{analyzeFile}\"")
+        _maybe_run_ai()
 
     # Powershell analysis
     elif ".ps1" in analyzeFile:
         print(f"{infoS} Performing [bold green]Powershell Script[white] analysis...\n")
         execute_module(f"powershell_analyzer.py \"{analyzeFile}\"")
+        _maybe_run_ai()
 
     # Email file analysis
     elif "email message" in fileType or "message/rfc822" in fileType:
         print(f"{infoS} Performing [bold green]Email File[white] analysis...\n")
         execute_module(f"email_analyzer.py \"{analyzeFile}\"")
+        _maybe_run_ai()
     else:
         err_exit("\n[bold white on red]File type not supported. Make sure you are analyze executable files or document files.\n[bold]>>> If you want to scan document files try [bold green][i]--docs[/i] [white]argument.")
 
@@ -265,6 +300,7 @@ def Qu1cksc0pe():
                 execute_module(f"document_analyzer.py \"{args.file}\" True")
             else:
                 execute_module(f"document_analyzer.py \"{args.file}\" False")
+            _maybe_run_ai()
         # Handling --folder argument
         if args.folder is not None:
             err_exit("[bold white on red][blink]--docs[/blink] argument is not supported for folder analyzing!\n")

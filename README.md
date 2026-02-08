@@ -41,14 +41,12 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
-<b>18/08/2025</b>
-- [X] Improvements on ```Linux Analyzer``` module. Qu1cksc0pe can now emulate binaries safely and fetch their syscalls during the static analysis. (For Intel and ARM architectures!)
-
-<b>26/06/2025</b>
-- [X] Improvements on ```Linux Analyzer``` module.
-
-<b>25/06/2025</b>
-- [X] Improvements on ```Document Analyzer``` module. Qu1cksc0pe can now detect and extract possible Formbook samples from RTF files.
+<b>08/02/2026</b>
+- [X] **NEW FEATURE**: AI report analysis via `--ai` (auto-enables `--report`)
+- [X] Android analyzer improvements: faster source pattern scanning and cleaner report outputs.
+- [X] Setup improvements: JADX updated to `v1.5.3` and setup scripts made more robust (`setup.sh`, `setup.ps1`).
+- [X] Better handling for problematic APKs: detect encrypted ZIP entries and report the reason when decompilation is skipped/failed.
+- [X] Document analyzer improvements: automatic decryption attempt for `FILEPASS`-protected Office documents.
 
 # Available On
 <img width="400" src="https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png" alt="logo"><img width="400" src="https://user-images.githubusercontent.com/42123683/189416193-a709291f-be8f-469c-b649-c6201fa86677.jpeg" alt="logo">
@@ -63,14 +61,6 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 <br><b><i>And also another Linux distributions like as Kali/Parrot</i></b>
 
 # Setup and Installation
-<br><b>Necessary Dependencies</b>:
-- <i>Python ```3.10``` or higher versions.</i>
-- ```VirusTotal API Key``` => <i>Performing VirusTotal based analysis.</i>
-- ```Strings``` => <i>Necessary for static analysis.</i>
-- ```Jadx``` => <i>Performing source code and resource analysis.</i>
-- ```PyOneNote``` => <i>OneNote document analysis.</i>
-- ```Mono``` => <i>Performing .Net binary analysis.</i>
-
 > [!NOTE]
 > If you encounter issues with the Python modules, creating a Python virtual environment (python_venv) should resolve them.
 

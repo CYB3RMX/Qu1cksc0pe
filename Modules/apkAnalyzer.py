@@ -464,7 +464,7 @@ class APKAnalyzer:
         for lib_dir in possible_libs:
             if os.path.isdir(lib_dir):
                 for fname in os.listdir(lib_dir):
-                    if fname.startswith("jadx-cli-") and fname.endswith(".jar"):
+                    if (fname.startswith("jadx-cli-") and fname.endswith(".jar")) or (fname.startswith("jadx-") and fname.endswith("-all.jar")):
                         return True
         return False
 
@@ -567,8 +567,9 @@ class APKAnalyzer:
             except Exception:
                 return False
 
+        # jadx 1.5.x removed/changed some flags; avoid using -q for compatibility.
         proc = subprocess.run(
-            [self.decompiler_path, "-q", "-d", output_dir, self.full_path_file],
+            [self.decompiler_path, "-d", output_dir, self.full_path_file],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,

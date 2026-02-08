@@ -120,9 +120,12 @@ find_jadx_launcher() {
   for candidate in "${candidates[@]}"; do
     if [[ -f "${candidate}" ]]; then
       base_dir="$(dirname "${candidate}")"
-      if [[ -f "${base_dir}/../lib/jadx-cli-${JADX_VERSION}.jar" ]]; then
+      # jadx release packaging differs between versions:
+      # - older: lib/jadx-cli-<ver>.jar
+      # - newer: lib/jadx-<ver>-all.jar
+      if [[ -f "${base_dir}/../lib/jadx-cli-${JADX_VERSION}.jar" || -f "${base_dir}/../lib/jadx-${JADX_VERSION}-all.jar" ]]; then
         :
-      elif [[ -f "${base_dir}/lib/jadx-cli-${JADX_VERSION}.jar" ]]; then
+      elif [[ -f "${base_dir}/lib/jadx-cli-${JADX_VERSION}.jar" || -f "${base_dir}/lib/jadx-${JADX_VERSION}-all.jar" ]]; then
         :
       else
         continue
