@@ -46,8 +46,9 @@ function Invoke-Download([string]$Uri, [string]$OutFile) {
 
 function Test-JadxInstall([string]$JadxDir, [string]$JadxVersion) {
     $launcher = Join-Path $JadxDir "bin\\jadx.bat"
-    $jar = Join-Path $JadxDir ("lib\\jadx-cli-{0}.jar" -f $JadxVersion)
-    return ((Test-Path -LiteralPath $launcher) -and (Test-Path -LiteralPath $jar))
+    $jarCli = Join-Path $JadxDir ("lib\\jadx-cli-{0}.jar" -f $JadxVersion)
+    $jarAll = Join-Path $JadxDir ("lib\\jadx-{0}-all.jar" -f $JadxVersion)
+    return ((Test-Path -LiteralPath $launcher) -and ((Test-Path -LiteralPath $jarCli) -or (Test-Path -LiteralPath $jarAll)))
 }
 
 function Update-IniLine([string]$Path, [string]$Key, [string]$Value) {
@@ -313,4 +314,3 @@ try {
     Write-Err $_.Exception.Message
     exit 1
 }
-
