@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-import sys
 import random
 
 from .utils.helpers import err_exit

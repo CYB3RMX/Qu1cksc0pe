@@ -4,7 +4,6 @@ import json
 import sys
 import re
 import os
-import yara
 import getpass
 import configparser
 import requests

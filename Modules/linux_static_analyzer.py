@@ -11,14 +11,14 @@ from .analysis.linux.linux_emulator import Linxcution
 try:
     # by default, assume we're running as a module, inside a package
     from .utils.helpers import (
-        err_exit, get_argv, emit_table, init_table,
-        no_blanks, user_confirm, stylize_bool, save_report
+        err_exit, get_argv, init_table,
+        user_confirm, stylize_bool, save_report
     )
     from .analysis.multiple.multi import calc_hashes, perform_strings, yara_rule_scanner
 except ImportError: # fallback for running as "raw" Python file
     from utils.helpers import (
-        err_exit, get_argv, emit_table, init_table,
-        no_blanks, user_confirm, stylize_bool, save_report
+        err_exit, get_argv, init_table,
+        user_confirm, stylize_bool, save_report
     )
     from analysis.multiple.multi import calc_hashes, perform_strings, yara_rule_scanner
 
