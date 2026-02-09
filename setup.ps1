@@ -286,6 +286,64 @@ function Ensure-StringsCommand([string]$ToolsBin) {
     Write-Ok "strings command installed into $ToolsBin"
 }
 
+function Ensure-7Zip() {
+    $cmd = Get-Command 7z -ErrorAction SilentlyContinue
+    if ($null -ne $cmd) {
+        Write-Info "7z is already available: $($cmd.Source)"
+        return
+    }
+
+    $candidatePaths = @(
+        (Join-Path $env:ProgramFiles "7-Zip\\7z.exe"),
+        (Join-Path ${env:ProgramFiles(x86)} "7-Zip\\7z.exe")
+    ) | Where-Object { $_ -and (Test-Path -LiteralPath $_) }
+
+    if ($candidatePaths.Count -gt 0) {
+        $sevenZipDir = Split-Path -Parent $candidatePaths[0]
+        if (-not ($env:PATH -split ";" | Where-Object { $_ -eq $sevenZipDir })) {
+            $env:PATH = "$sevenZipDir;$env:PATH"
+        }
+        Write-Ok "7z found at $($candidatePaths[0]) (added to PATH for this session)."
+        return
+    }
+
+    # Try installing via common Windows package managers.
+    $winget = Get-Command winget -ErrorAction SilentlyContinue
+    if ($null -ne $winget) {
+        Write-Info "Installing 7-Zip via winget (user scope)..."
+        & winget install -e --id 7zip.7zip --scope user --accept-package-agreements --accept-source-agreements | Out-Null
+        $cmd = Get-Command 7z -ErrorAction SilentlyContinue
+        if ($null -ne $cmd) {
+            Write-Ok "7z installed: $($cmd.Source)"
+            return
+        }
+    }
+
+    $choco = Get-Command choco -ErrorAction SilentlyContinue
+    if ($null -ne $choco) {
+        Write-Info "Installing 7-Zip via Chocolatey..."
+        & choco install 7zip -y | Out-Null
+        $cmd = Get-Command 7z -ErrorAction SilentlyContinue
+        if ($null -ne $cmd) {
+            Write-Ok "7z installed: $($cmd.Source)"
+            return
+        }
+    }
+
+    $scoop = Get-Command scoop -ErrorAction SilentlyContinue
+    if ($null -ne $scoop) {
+        Write-Info "Installing 7-Zip via Scoop..."
+        & scoop install 7zip | Out-Null
+        $cmd = Get-Command 7z -ErrorAction SilentlyContinue
+        if ($null -ne $cmd) {
+            Write-Ok "7z installed: $($cmd.Source)"
+            return
+        }
+    }
+
+    throw "7z (7-Zip) is required for ACE archive extraction. Install 7-Zip (7z) and re-run setup."
+}
+
 try {
     $RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
     Set-Location -LiteralPath $RepoRoot
@@ -301,6 +359,7 @@ try {
     $ToolsBin = Ensure-ToolsBin -BaseDir $BaseDir
     Ensure-FileCommand -ToolsBin $ToolsBin
     Ensure-StringsCommand -ToolsBin $ToolsBin
+    Ensure-7Zip
 
     $JadxVersion = "1.5.3"
     $null = Ensure-Jadx -BaseDir $BaseDir -RepoRoot $RepoRoot -JadxVersion $JadxVersion

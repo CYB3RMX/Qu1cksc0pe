@@ -46,6 +46,8 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 - [X] .NET analysis no longer requires `pythonnet`/Mono (pure-Python metadata parsing via `dnfile`).
 - [X] Vivisect/FLOSS stability: run analysis in a separate process with configurable timeouts; decode/emulation uses its own (longer) timeout and is non-interactive by default.
 - [X] Setup/Docker cleanup: removed `mono-complete` / `pythonnet` dependency.
+- [X] Archive analyzer: removed `acefile` dependency. ACE archives are extracted via `7z`/`7zz` when available.
+- [X] Android analyzer: APK resource/content scan is now part of `--analyze` and is saved into the JSON report under `resource_scan`.
 
 <b>08/02/2026</b>
 - [X] **NEW FEATURE**: AI report analysis via `--ai` (auto-enables `--report`)
@@ -81,6 +83,8 @@ source sc0pe_venv/bin/activate
 
 # You can simply execute the following command it will do everything for you!
 bash setup.sh
+#
+# setup.sh also installs required system tools (e.g. adb, strings, unzip, 7z) and sets up JADX.
 
 # If you want to install Qu1cksc0pe on your system just execute the following commands.
 python qu1cksc0pe.py --install # Optional
@@ -96,6 +100,36 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 # PS C:\Users\user\Desktop\Qu1cksc0pe> .\setup.ps1
 ```
 
+# Environment Variables
+You can change some analyzer behaviors via environment variables (useful for CI, reproducibility, or controlling report size/timeouts).
+
+**Linux/macOS (bash/zsh) example**
+```bash
+SC0PE_ANDROID_REPORT_DETAILED=1 python qu1cksc0pe.py --file app.apk --analyze --report
+```
+
+**Windows (PowerShell) example**
+```powershell
+$env:SC0PE_ANDROID_REPORT_DETAILED="1"
+python .\\qu1cksc0pe.py --file app.apk --analyze --report
+```
+
+| Variable | Default | What It Does |
+| :--- | :--- | :--- |
+| `SC0PE_ANDROID_REPORT_DETAILED` | `0` | Android analyzer JSON becomes more verbose (keeps larger fields and higher limits). Includes more details under `resource_scan`, and keeps large duplicate fields like `code_patterns` more often. |
+| `SC0PE_WINDOWS_REPORT_DETAILED` | `0` | Windows analyzer stores per-category API lists in more detail (instead of unique API names only). |
+| `SC0PE_AUTO_DECRYPT_CHAIN` | `0` | Document analyzer: when an Office document decryption succeeds, automatically re-runs analysis on the decrypted output (best-effort). |
+| `SC0PE_VIV_TIMEOUT_SEC` | `60` | Windows analyzer: Vivisect analysis wall-clock timeout. Set `0` to skip Vivisect. |
+| `SC0PE_VIV_MAX_FILE_MB` | `25` | Windows analyzer: skip Vivisect if file is larger than this limit (MB). |
+| `SC0PE_VIV_MAX_STRINGS` | `250` | Windows analyzer: limit output strings collected from Vivisect/FLOSS worker. |
+| `SC0PE_VIV_DECODE` | enabled (not `0`) | Windows analyzer: enable/disable FLOSS decode/emulation phase. Set `0` to skip decode while keeping basic Vivisect results. |
+| `SC0PE_FLOSS_FORCE_DECODE` | `0` | Windows analyzer: force decode/emulation even when function count is above `SC0PE_FLOSS_DECODE_MAX_FUNCS`. |
+| `SC0PE_FLOSS_DECODE_MAX_FUNCS` | `150` | Windows analyzer: if decoding would emulate more than this many functions, it is skipped unless forced. |
+| `SC0PE_FLOSS_DECODE_TOP_N` | `20` | Windows analyzer: how many “top” candidate functions to prioritize for decoding. |
+| `SC0PE_FLOSS_DECODE_TIMEOUT_SEC` | `300` | Windows analyzer: timeout for the decode/emulation phase (separate from `SC0PE_VIV_TIMEOUT_SEC`). |
+| `OLLAMA_HOST` | `http://127.0.0.1:11434` | AI report analysis backend (Ollama). Set this if Ollama is remote or on a different host/port. |
+| `JAVA_HOME` | unset | Android analyzer: helps locate Java runtime for JADX. Set this if Java is installed but not detected. |
+
 # Static Analysis
 ## Normal analysis
 <i><b>Description</b>: You can perform basic analysis and triage against your samples.</i>
@@ -108,9 +142,13 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 
 <b>Effective Against</b>:
 - .NET Executables
-- Android Files (.apk)
 
 <b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_file --resource```<br>
+
+> [!NOTE]
+> Android APK resource scanning was moved into the Android analyzer. Use:
+> `python qu1cksc0pe.py --file app.apk --analyze --report`
+> The JSON report includes `resource_scan`. Set `SC0PE_ANDROID_REPORT_DETAILED=1` to keep more details in the report.
 ![resource](https://user-images.githubusercontent.com/42123683/189416431-de08337f-8d46-4c9c-a635-59a5faca28ff.gif)
 
 ## Hash scan
@@ -162,6 +200,9 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 - ACE
  
 <b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_archive_file --archive```
+
+> [!NOTE]
+> ACE archive support requires `7z`/`7zz` to be installed (setup scripts install it on supported systems).
 ![archiveanalysis](https://user-images.githubusercontent.com/42123683/230241452-0d93d2ca-69a2-42d9-aa99-c9c7cfe637bf.gif)
 
 ## File signature analyzer

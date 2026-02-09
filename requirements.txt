@@ -15,7 +15,6 @@ lief
 pdfminer.six
 requests
 rarfile
-acefile
 Pillow
 dpkt
 dnfile==0.15.0
