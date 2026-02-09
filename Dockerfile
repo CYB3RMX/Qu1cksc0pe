@@ -4,8 +4,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Istanbul
 
 # Gather dependencies
-RUN apt update && apt install -y curl wget git binutils sudo unzip python3 python3-pip mono-complete default-jre
-RUN pip3 install setuptools wheel pythonnet pycryptodome python-magic
+RUN apt update && apt install -y curl wget git binutils sudo unzip python3 python3-pip default-jre
+RUN pip3 install setuptools wheel
 
 # Install application
 WORKDIR /app

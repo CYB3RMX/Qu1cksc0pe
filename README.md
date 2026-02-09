@@ -41,6 +41,12 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
+<b>09/02/2026</b>
+- [X] Windows static analyzer improvements: faster import/export extraction (`pefile` fast load + parsing only required directories).
+- [X] .NET analysis no longer requires `pythonnet`/Mono (pure-Python metadata parsing via `dnfile`).
+- [X] Vivisect/FLOSS stability: run analysis in a separate process with configurable timeouts; decode/emulation uses its own (longer) timeout and is non-interactive by default.
+- [X] Setup/Docker cleanup: removed `mono-complete` / `pythonnet` dependency.
+
 <b>08/02/2026</b>
 - [X] **NEW FEATURE**: AI report analysis via `--ai` (auto-enables `--report`)
 - [X] Android analyzer improvements: faster source pattern scanning and cleaner report outputs.
@@ -63,6 +69,7 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 # Setup and Installation
 > [!NOTE]
 > If you encounter issues with the Python modules, creating a Python virtual environment (python_venv) should resolve them.
+> For detailed setup and troubleshooting (dependencies, Docker usage, Windows notes), see the <a href="https://zread.ai/CYB3RMX/Qu1cksc0pe/1-overview">project overview documentation</a>.
 
 ```bash
 # First you need to clone Qu1cksc0pe with this command

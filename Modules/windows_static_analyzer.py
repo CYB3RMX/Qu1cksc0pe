@@ -5,10 +5,10 @@ import re
 import sys
 import json
 import sqlite3
-import warnings
 import binascii
 import subprocess
 import configparser
+import multiprocessing as mp
 from utils.helpers import err_exit, get_argv, save_report
 from analysis.multiple.multi import perform_strings, calc_hashes, yara_rule_scanner
 
@@ -25,17 +25,18 @@ except:
     err_exit("Error: >pefile< module not found.")
 
 try:
-    warnings.filterwarnings("ignore")
-    import clr
+    import dnfile
 except:
-    print("Error: >pythonnet< module not found.")
-    print(f"[bold red]>>>[white] You can execute: [bold green]sudo apt install mono-complete && pip3 install pythonnet[white]")
-    sys.exit(1)
+    dnfile = None
 
 try:
-    import floss
+    # flare-floss package layout can differ; some builds don't expose `floss.main` as an attribute.
+    from floss import main as floss_main
 except:
-    err_exit("Error: >flare-floss< module not found.")
+    try:
+        import floss.main as floss_main
+    except:
+        err_exit("Error: >flare-floss< module not found.")
 
 try:
     import vivisect
@@ -71,17 +72,26 @@ else:
     pass
 
 #--------------------------------------------- Gathering Qu1cksc0pe path variable
-sc0pe_path = open(".path_handler", "r").read()
-fileName = sys.argv[1]
-
-# Loading dnlib.dll
-clr.AddReference(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}dnlib.dll")
-from dnlib.DotNet import *
-from System.IO import *
+try:
+    sc0pe_path = open(".path_handler", "r").read().strip()
+except Exception:
+    # Backwards-compat: allow running without setup, using repo root as base.
+    sc0pe_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 #--------------------------------------------------------------------- Keywords for categorized scanning
 windows_api_list = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows_api_categories.json"))
 dotnet_malware_pattern = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}dotnet_malware_patterns.json"))
+
+# Reverse index for fast categorization (api -> category). Built once at import time.
+_API_TO_CATEGORY = {}
+_API_LOWER_TO_API_AND_CATEGORY = {}
+for _cat in windows_api_list:
+    for _api in windows_api_list[_cat].get("apis", []):
+        if _api not in _API_TO_CATEGORY:
+            _API_TO_CATEGORY[_api] = _cat
+        _k = str(_api).lower()
+        if _k not in _API_LOWER_TO_API_AND_CATEGORY:
+            _API_LOWER_TO_API_AND_CATEGORY[_k] = (_api, _cat)
 
 #--------------------------------------------- Dictionary of Categories
 dictCateg = {
@@ -122,13 +132,78 @@ winrep = {
 conf = configparser.ConfigParser()
 conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf")
 
+def _viv_floss_worker(
+    target_file,
+    q,
+    max_out=250,
+    do_decode=True,
+    force_decode=False,
+    decode_max_funcs=150,
+    decode_top_n=20,
+):
+    """
+    Run vivisect+FLOSS in a separate process so we can time out/terminate safely.
+    Sends:
+      1) phase=basic (after viv.analyze + stack/tight + decode plan)
+      2) phase=decode (after emulation decode), if enabled
+    """
+    try:
+        import vivisect
+        try:
+            from floss import main as floss_main
+        except Exception:
+            import floss.main as floss_main
+        vivisect.logging.disable()
+
+        viv = vivisect.VivWorkspace()
+        viv.loadFromFile(target_file)
+        viv.analyze()
+
+        out_basic = {"phase": "basic", "stack_strings": [], "tight_strings": [], "truncated": {}}
+
+        selected_functions = floss_main.select_functions(viv, None)
+        stack_strings = floss_main.extract_stackstrings(viv, selected_functions, 4) or []
+        out_basic["stack_strings"] = [s.string for s in stack_strings[:max_out]]
+        if len(stack_strings) > max_out:
+            out_basic["truncated"]["stack_strings"] = len(stack_strings)
+
+        decode_features, _ = floss_main.find_decoding_function_features(viv, viv.getFunctions())
+        tight_loops = floss_main.get_functions_with_tightloops(decode_features)
+        tight_strings = floss_main.extract_tightstrings(viv, tight_loops, 4) or []
+        out_basic["tight_strings"] = [s.string for s in tight_strings[:max_out]]
+        if len(tight_strings) > max_out:
+            out_basic["truncated"]["tight_strings"] = len(tight_strings)
+
+        # Decide decode plan early, so the parent can print partial output even if decode hangs.
+        fvas_to_emulate = []
+        if do_decode:
+            top_functions = floss_main.get_top_functions(decode_features, int(decode_top_n))
+            fvas_to_emulate = floss_main.get_function_fvas(top_functions)
+            fvas_tight_funcs = floss_main.get_tight_function_fvas(decode_features)
+            fvas_to_emulate = floss_main.append_unique(fvas_to_emulate, fvas_tight_funcs)
+            out_basic["decode_fvas"] = fvas_to_emulate[: max(0, int(decode_max_funcs) + 1)]
+            out_basic["decode_fvas_total"] = len(fvas_to_emulate)
+            if len(fvas_to_emulate) > decode_max_funcs and not force_decode:
+                out_basic["decoded_skipped"] = len(fvas_to_emulate)
+        q.put(out_basic)
+
+        if do_decode and fvas_to_emulate and (len(fvas_to_emulate) <= decode_max_funcs or force_decode):
+            out_decode = {"phase": "decode", "decoded_strings": [], "truncated": {}}
+            decoded = floss_main.decode_strings(viv, fvas_to_emulate, 4) or []
+            out_decode["decoded_strings"] = [s.string for s in decoded[:max_out]]
+            if len(decoded) > max_out:
+                out_decode["truncated"]["decoded_strings"] = len(decoded)
+            q.put(out_decode)
+    except Exception as e:
+        q.put({"phase": "error", "error": str(e)})
+
 class WindowsAnalyzer:
     def __init__(self, target_file):
         self.target_file = target_file
         self.allFuncs = 0
         self.windows_imports_and_exports = []
         self.executable_buffer = open(self.target_file, "rb").read()
-        self.all_strings = perform_strings(fileName)
+        self.all_strings = perform_strings(self.target_file)
         self.blacklisted_patterns = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}dotnet_blacklisted_methods.txt", "r").read().split("\n")
         self.sus_reg_keys = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}suspicious_registry_keys.txt", "r").read().split("\n")
         self.rule_path = conf["Rule_PATH"]["rulepath"]
@@ -150,7 +225,15 @@ class WindowsAnalyzer:
     def gather_windows_imports_and_exports(self):
         print(f"{infoS} Performing extraction of imports and exports. Please wait...")
         try:
-            self.binaryfile = pf.PE(fileName)
+            # Fast path: avoid parsing every directory; we only need import/export/debug here.
+            self.binaryfile = pf.PE(self.target_file, fast_load=True)
+            self.binaryfile.parse_data_directories(
+                directories=[
+                    pf.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_IMPORT"],
+                    pf.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_EXPORT"],
+                    pf.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_DEBUG"],
+                ]
+            )
             # -- Extract imports
             for imps in self.binaryfile.DIRECTORY_ENTRY_IMPORT:
                 try:
@@ -164,18 +247,38 @@ class WindowsAnalyzer:
                     self.windows_imports_and_exports.append([exp.name.decode('utf-8'), hex(self.binaryfile.OPTIONAL_HEADER.ImageBase + exp.address)]) # For full address and not only offset
                 except:
                     continue
-        except:
-            binary_data = open(fileName, "rb").read()
-            for index in track(range(len(windows_api_list)), description="Analyzing.."):
-                current_categ = list(windows_api_list.keys())[index]
-                for api in windows_api_list[current_categ]["apis"]:
+        except Exception:
+            # Fallback path: pefile couldn't parse. Old implementation did O(#APIs * file_size) regex scanning.
+            # Instead, use already-extracted strings as a prefilter; then find offsets only for matched APIs.
+            bin_lower = self.executable_buffer.lower()
+            seen = set()
+            for s in self.all_strings:
+                ss = str(s).strip()
+                if not ss:
+                    continue
+                key = ss.lower()
+                if key in seen:
+                    continue
+                hit = _API_LOWER_TO_API_AND_CATEGORY.get(key)
+                if not hit:
+                    continue
+                api, _ = hit
+                seen.add(key)
+
+                off = -1
+                try:
+                    pat = key.encode("ascii", errors="ignore")
+                    if pat:
+                        off = bin_lower.find(pat)
+                except Exception:
+                    off = -1
+                if off == -1:
                     try:
-                        matcher = re.finditer(api.encode(), binary_data, re.IGNORECASE)
-                        for pos in matcher:
-                            if [api, hex(pos.start())] not in self.windows_imports_and_exports:
-                                self.windows_imports_and_exports.append([api, hex(pos.start())])
-                    except:
-                        continue
+                        off = bin_lower.find(key.encode("utf-16le"))
+                    except Exception:
+                        off = -1
+
+                self.windows_imports_and_exports.append([api, hex(off) if off != -1 else "N/A"])
         if self.windows_imports_and_exports != []:
             self.api_categorizer()
             self.dictcateg_parser()
@@ -184,12 +287,15 @@ class WindowsAnalyzer:
 
     def api_categorizer(self):
         for win_api in self.windows_imports_and_exports:
-            for key in windows_api_list:
-                if win_api[0] in windows_api_list[key]["apis"]:
-                    if win_api[0] != "":
-                        windows_api_list[key]["occurence"] += 1
-                        dictCateg[key].append(win_api)
-                        self.allFuncs += 1
+            api = win_api[0]
+            if not api:
+                continue
+            cat = _API_TO_CATEGORY.get(api)
+            if not cat:
+                continue
+            windows_api_list[cat]["occurence"] += 1
+            dictCateg[cat].append(win_api)
+            self.allFuncs += 1
 
     def dictcateg_parser(self):
         for key in dictCateg:
@@ -337,7 +443,7 @@ class WindowsAnalyzer:
                 valid_offsets.append(pos.start())
         if valid_offsets != []:
             print(f"{infoS} There is possible [bold red]{len(valid_offsets)}[white] embedded PE file found!")
-            print(f"{infoS} Execute: [bold green]python qu1cksc0pe.py --file {fileName} --sigcheck[white] to extract them!\n")
+            print(f"{infoS} Execute: [bold green]python qu1cksc0pe.py --file {self.target_file} --sigcheck[white] to extract them!\n")
         else:
             print(f"{errorS} There is no embedded PE file!\n")
 
@@ -388,7 +494,7 @@ class WindowsAnalyzer:
         print(peStatistics)
 
     def decode_section(self, viv_obj, fvas_to_emulate):
-        decoded_strings = floss.main.decode_strings(viv_obj, fvas_to_emulate, 4)
+        decoded_strings = floss_main.decode_strings(viv_obj, fvas_to_emulate, 4)
         if decoded_strings != []:
             ss_table = Table()
             ss_table.add_column("[bold green]Decoded Strings", justify="center")
@@ -399,55 +505,194 @@ class WindowsAnalyzer:
             print(f"\n{errorS} There is no decoded string value found!")
 
     def decode_strings_floss(self, viv_obj, decode_features):
-        top_functions = floss.main.get_top_functions(decode_features, 20)
-        fvas_to_emulate = floss.main.get_function_fvas(top_functions)
-        fvas_tight_funcs = floss.main.get_tight_function_fvas(decode_features)
-        fvas_to_emulate = floss.main.append_unique(fvas_to_emulate, fvas_tight_funcs)
-        if len(fvas_to_emulate) >= 150:
-            print(f"\n{infoS} Looks like we have [bold red]{len(fvas_to_emulate)}[white] functions to emulate!!")
-            choice = str(input(f"\n{infoC} Do you want to emulate functions and decode strings anyway? [Y/n]: "))
-            if choice == "Y" or choice == "y":
-                self.decode_section(viv_obj, fvas_to_emulate)
-        else:
-            self.decode_section(viv_obj, fvas_to_emulate)
+        top_functions = floss_main.get_top_functions(decode_features, 20)
+        fvas_to_emulate = floss_main.get_function_fvas(top_functions)
+        fvas_tight_funcs = floss_main.get_tight_function_fvas(decode_features)
+        fvas_to_emulate = floss_main.append_unique(fvas_to_emulate, fvas_tight_funcs)
+        # Non-interactive default: skip extremely large emulation sets unless forced.
+        force_decode = os.environ.get("SC0PE_FLOSS_FORCE_DECODE", "").strip() == "1"
+        decode_max_funcs = int(os.environ.get("SC0PE_FLOSS_DECODE_MAX_FUNCS", "150"))
+        if len(fvas_to_emulate) > decode_max_funcs and not force_decode:
+            print(f"\n{infoS} Skipping string emulation: [bold red]{len(fvas_to_emulate)}[white] functions (set SC0PE_FLOSS_FORCE_DECODE=1 to force).")
+            return
+        self.decode_section(viv_obj, fvas_to_emulate)
 
     def analyze_via_viv(self):
         print(f"\n{infoS} Performing analysis via Vivisect and Floss...")
-        viv = vivisect.VivWorkspace() # Creating workspace
-        print(f"{infoS} Initializing [bold green]viv.analyze[white]. Please wait...")
-        viv.loadFromFile(self.target_file)
-        viv.analyze()
+        # Vivisect analysis can be very slow or hang on some samples.
+        # Run it in a separate process so we can enforce a wall-clock timeout.
+        timeout_sec = int(os.environ.get("SC0PE_VIV_TIMEOUT_SEC", "60"))
+        # Function emulation can legitimately take a long time; keep a separate, longer timeout.
+        decode_timeout_sec = int(os.environ.get("SC0PE_FLOSS_DECODE_TIMEOUT_SEC", "300"))
+        max_file_mb = int(os.environ.get("SC0PE_VIV_MAX_FILE_MB", "25"))
+        max_out = int(os.environ.get("SC0PE_VIV_MAX_STRINGS", "250"))
+        do_decode = os.environ.get("SC0PE_VIV_DECODE", "").strip() != "0"
+        force_decode = os.environ.get("SC0PE_FLOSS_FORCE_DECODE", "").strip() == "1"
+        decode_max_funcs = int(os.environ.get("SC0PE_FLOSS_DECODE_MAX_FUNCS", "150"))
+        decode_top_n = int(os.environ.get("SC0PE_FLOSS_DECODE_TOP_N", "20"))
+
+        try:
+            fsz = os.path.getsize(self.target_file) / (1024 * 1024)
+            if fsz > max_file_mb:
+                print(f"{infoS} Skipping vivisect: file size is [bold red]{fsz:.1f}MB[white] (limit {max_file_mb}MB).")
+                return
+        except Exception:
+            pass
+
+        if timeout_sec <= 0:
+            print(f"{infoS} Skipping vivisect: SC0PE_VIV_TIMEOUT_SEC={timeout_sec}.")
+            return
+
+        print(f"{infoS} Initializing [bold green]viv.analyze[white]. Please wait... (timeout={timeout_sec}s)")
+        q = mp.Queue()
+        p = mp.Process(
+            target=_viv_floss_worker,
+            args=(self.target_file, q, max_out, do_decode, force_decode, decode_max_funcs, decode_top_n),
+        )
+        p.daemon = True
+        p.start()
+        try:
+            res_basic = q.get(timeout=timeout_sec)
+        except Exception:
+            try:
+                p.terminate()
+            except Exception:
+                pass
+            p.join(5)
+            try:
+                q.close()
+                q.join_thread()
+            except Exception:
+                pass
+            print(f"{errorS} Vivisect analysis timed out after {timeout_sec}s. Skipping...\n")
+            return
+
+        if isinstance(res_basic, dict) and res_basic.get("phase") == "error":
+            try:
+                p.terminate()
+            except Exception:
+                pass
+            p.join(5)
+            try:
+                q.close()
+                q.join_thread()
+            except Exception:
+                pass
+            print(f"{errorS} Vivisect analysis error: [bold red]{res_basic['error']}[white]\n")
+            return
 
         # Extract strings via flare-floss
         print(f"{infoS} Performing [bold green]stack string[white] extraction. Please wait...")
-        selected_functions = floss.main.select_functions(viv, None)
-        stack_strings = floss.main.extract_stackstrings(viv, selected_functions, 4)
-        if stack_strings != []:
+        stack_strings = res_basic.get("stack_strings") or []
+        if stack_strings:
             ss_table = Table()
             ss_table.add_column("[bold green]Extracted Stack Strings", justify="center")
             for ss in stack_strings:
-                ss_table.add_row(ss.string)
+                ss_table.add_row(ss)
+            if "stack_strings" in (res_basic.get("truncated") or {}):
+                ss_table.caption = f"truncated: total={res_basic['truncated']['stack_strings']}"
             print(ss_table)
         else:
             print(f"\n{errorS} There is no stack string value found!\n")
 
         # Extract tight strings
         print(f"\n{infoS} Performing [bold green]tight string[white] extraction. Please wait...")
-        decode_features, _ = floss.main.find_decoding_function_features(viv, viv.getFunctions())
-        tight_loops = floss.main.get_functions_with_tightloops(decode_features)
-        tight_strings = floss.main.extract_tightstrings(viv, tight_loops, 4)
-        if tight_strings != []:
+        tight_strings = res_basic.get("tight_strings") or []
+        if tight_strings:
             ss_table = Table()
             ss_table.add_column("[bold green]Extracted Tight Strings", justify="center")
             for ss in tight_strings:
-                ss_table.add_row(ss.string)
+                ss_table.add_row(ss)
+            if "tight_strings" in (res_basic.get("truncated") or {}):
+                ss_table.caption = f"truncated: total={res_basic['truncated']['tight_strings']}"
             print(ss_table)
         else:
             print(f"\n{errorS} There is no tight string value found!\n")
 
         # String decoding via function emulation
         print(f"\n{infoS} Performing string decode via function emulation. Please wait...")
-        self.decode_strings_floss(viv, decode_features)
+        if res_basic.get("decoded_skipped"):
+            print(f"{infoS} Skipped decoding: [bold red]{res_basic['decoded_skipped']}[white] functions to emulate (set SC0PE_FLOSS_FORCE_DECODE=1 to force).")
+            try:
+                p.terminate()
+            except Exception:
+                pass
+            p.join(5)
+            try:
+                q.close()
+                q.join_thread()
+            except Exception:
+                pass
+            return
+
+        if not do_decode:
+            try:
+                p.terminate()
+            except Exception:
+                pass
+            p.join(5)
+            try:
+                q.close()
+                q.join_thread()
+            except Exception:
+                pass
+            return
+
+        # Wait for decode phase separately; if it times out, keep basic results.
+        try:
+            res_decode = q.get(timeout=max(1, decode_timeout_sec))
+        except Exception:
+            try:
+                p.terminate()
+            except Exception:
+                pass
+            p.join(5)
+            try:
+                q.close()
+                q.join_thread()
+            except Exception:
+                pass
+            print(f"{errorS} FLOSS decode timed out after {decode_timeout_sec}s. Skipping decode...\n")
+            return
+
+        if isinstance(res_decode, dict) and res_decode.get("phase") == "error":
+            try:
+                p.terminate()
+            except Exception:
+                pass
+            p.join(5)
+            try:
+                q.close()
+                q.join_thread()
+            except Exception:
+                pass
+            print(f"{errorS} FLOSS decode error: [bold red]{res_decode['error']}[white]\n")
+            return
+
+        decoded_strings = (res_decode or {}).get("decoded_strings") or []
+        if decoded_strings:
+            ss_table = Table()
+            ss_table.add_column("[bold green]Decoded Strings", justify="center")
+            for ss in decoded_strings:
+                ss_table.add_row(ss)
+            if "decoded_strings" in ((res_decode or {}).get("truncated") or {}):
+                ss_table.caption = f"truncated: total={res_decode['truncated']['decoded_strings']}"
+            print(ss_table)
+        else:
+            print(f"\n{errorS} There is no decoded string value found!")
+
+        # Make sure the worker is gone.
+        if p.is_alive():
+            try:
+                p.terminate()
+            except Exception:
+                pass
+        p.join(5)
+        try:
+            q.close()
+            q.join_thread()
+        except Exception:
+            pass
 
     def statistics_method(self):
         datestamp = self.gather_timestamp()
@@ -530,47 +775,77 @@ class WindowsAnalyzer:
 
         self.gather_windows_imports_and_exports()
 
-        # Load the assembly using dnlib
-        try:
-            assembly = AssemblyDef.Load(self.target_file)
+        class_names = []
+        # Parse .NET metadata without pythonnet (dnfile is pure-Python).
+        # If dnfile isn't available, we will still continue with other heuristics.
+        if dnfile is None:
+            print(f"\n{errorS} Optional dependency missing: [bold red]dnfile[white]")
+            print(f"{infoS} Install with: [bold green]pip3 install dnfile[white]\n")
+        else:
+            try:
+                pe = dnfile.dnPE(self.target_file)
+                if not getattr(pe, "net", None):
+                    raise ValueError("Not a valid .NET assembly (NET directory missing).")
 
-            class_names = []
-            print(f"\n{infoS} Extracting and analyzing classes...")
-            for module in assembly.Modules:
-                for typ in module.Types:
-                    if "<" not in typ.FullName:
-                        class_names.append(typ.FullName)
+                md = pe.net.metadata
+                # Optimized metadata uses #~, unoptimized uses #-.
+                mdtables = md.streams.get(b"#~") or md.streams.get(b"#-")
+                if mdtables is None:
+                    raise ValueError("No metadata tables stream found (#~/#-).")
+
+                # ECMA-335 table id 2 == TypeDef
+                typedef_table = mdtables.tables.get(2)
+                if typedef_table is None:
+                    raise ValueError("TypeDef table not found in metadata tables.")
+
+                print(f"\n{infoS} Extracting and analyzing classes...")
+                for typ in typedef_table.rows:
+                    try:
+                        tname = str(getattr(typ, "TypeName", "")).strip()
+                        tns = str(getattr(typ, "TypeNamespace", "")).strip()
+                        if not tname:
+                            continue
+                        full_name = f"{tns}.{tname}" if tns else tname
+                        if "<" in full_name:
+                            continue
+                        class_names.append(full_name)
+
                         dotnet_table = Table()
-                        dotnet_table.add_column(f"Methods in Class: [bold green]{typ.FullName}[white]", justify="center")
-                        methodz = []
-                        for met in typ.Methods:
-                            if str(met.Name) not in methodz:
-                                methodz.append(str(met.Name))
-                                if str(met.Name) in self.blacklisted_patterns:
-                                    dotnet_table.add_row(f"[bold red]{str(met.Name)}[white]")
-                                else:
-                                    dotnet_table.add_row(str(met.Name))
+                        dotnet_table.add_column(f"Methods in Class: [bold green]{full_name}[white]", justify="center")
+                        methodz = set()
+                        for met_idx in getattr(typ, "MethodList", []) or []:
+                            met_row = getattr(met_idx, "row", None)
+                            met_name = str(getattr(met_row, "Name", "")).strip()
+                            if not met_name or met_name in methodz:
+                                continue
+                            methodz.add(met_name)
+                            if met_name in self.blacklisted_patterns:
+                                dotnet_table.add_row(f"[bold red]{met_name}[white]")
+                            else:
+                                dotnet_table.add_row(met_name)
                         print(dotnet_table)
+                    except Exception:
+                        continue
 
-            print(f"\n{infoS} Performing pattern analysis...")
-            fswc = 0
-            dot_fam = Table()
-            dot_fam.add_column(f"[bold green]Malware Family/Artifact", justify="center")
-            dot_fam.add_column(f"[bold green]Pattern Occurence", justify="center")
-            for family in dotnet_malware_pattern:
-                for dotp in dotnet_malware_pattern[family]["patterns"]:
-                    matcher = re.findall(dotp, str(class_names), re.IGNORECASE)
-                    if matcher != []:
-                        dotnet_malware_pattern[family]["occurence"] += len(matcher)
-                if dotnet_malware_pattern[family]["occurence"] != 0:
-                    dot_fam.add_row(family, str(dotnet_malware_pattern[family]["occurence"]))
-                    fswc += 1
-            if fswc != 0:
-                print(dot_fam)
-            else:
-                print(f"{errorS} Couldn\'t detect any pattern. This file might be obfuscated!\n")
-        except:
-            print(f"\n{errorS} An error occured while parsing the .NET file. Continuing...\n")
+                print(f"\n{infoS} Performing pattern analysis...")
+                fswc = 0
+                dot_fam = Table()
+                dot_fam.add_column(f"[bold green]Malware Family/Artifact", justify="center")
+                dot_fam.add_column(f"[bold green]Pattern Occurence", justify="center")
+                for family in dotnet_malware_pattern:
+                    for dotp in dotnet_malware_pattern[family]["patterns"]:
+                        matcher = re.findall(dotp, str(class_names), re.IGNORECASE)
+                        if matcher != []:
+                            dotnet_malware_pattern[family]["occurence"] += len(matcher)
+                    if dotnet_malware_pattern[family]["occurence"] != 0:
+                        dot_fam.add_row(family, str(dotnet_malware_pattern[family]["occurence"]))
+                        fswc += 1
+                if fswc != 0:
+                    print(dot_fam)
+                else:
+                    print(f"{errorS} Couldn\'t detect any pattern. This file might be obfuscated!\n")
+            except Exception as e:
+                print(f"\n{errorS} An error occured while parsing the .NET file: [bold red]{e}[white]. Continuing...\n")
 
         self.check_for_valid_registry_keys()
         self.check_for_interesting_stuff()
@@ -596,7 +871,7 @@ class WindowsAnalyzer:
 
         # Yara rule match
         print(f"\n{infoS} Performing YARA rule matching...")
-        yara_rule_scanner(self.rule_path, fileName, winrep)
+        yara_rule_scanner(self.rule_path, self.target_file, winrep)
         self.statistics_method()
         # Print reports
         if get_argv(2) == "True":
@@ -610,28 +885,36 @@ class WindowsAnalyzer:
         self.detect_embedded_PE()
         # Yara rule match
         print(f"\n{infoS} Performing YARA rule matching...")
-        yara_rule_scanner(self.rule_path, fileName, winrep)
+        yara_rule_scanner(self.rule_path, self.target_file, winrep)
 
-# Execute
-windows_analyzer = WindowsAnalyzer(target_file=str(fileName))
-windows_analyzer.dll_files()
-windows_analyzer.get_debug_information()
-windows_analyzer.scan_for_special_artifacts()
-windows_analyzer.check_for_valid_registry_keys()
-windows_analyzer.check_for_interesting_stuff()
-windows_analyzer.detect_embedded_PE()
+def main():
+    if len(sys.argv) < 2:
+        err_exit("Usage: windows_static_analyzer.py <file> [save_report=True|False]")
+    fileName = sys.argv[1]
 
-# Yara rule match
-print(f"\n{infoS} Performing YARA rule matching...")
-yara_rule_scanner(windows_analyzer.rule_path, fileName, winrep)
-windows_analyzer.section_parser()
+    # Execute
+    windows_analyzer = WindowsAnalyzer(target_file=str(fileName))
+    windows_analyzer.dll_files()
+    windows_analyzer.get_debug_information()
+    windows_analyzer.scan_for_special_artifacts()
+    windows_analyzer.check_for_valid_registry_keys()
+    windows_analyzer.check_for_interesting_stuff()
+    windows_analyzer.detect_embedded_PE()
 
-try:
-    windows_analyzer.analyze_via_viv()
-except:
-    print(f"{errorS} An error occured while analyzing functions! This file might have some [bold red]anti-analysis[white] technique!")
-windows_analyzer.statistics_method()
+    # Yara rule match
+    print(f"\n{infoS} Performing YARA rule matching...")
+    yara_rule_scanner(windows_analyzer.rule_path, fileName, winrep)
+    windows_analyzer.section_parser()
 
-# Print reports
-if get_argv(2) == "True":
-    save_report("windows", winrep)
+    try:
+        windows_analyzer.analyze_via_viv()
+    except Exception:
+        print(f"{errorS} An error occured while analyzing functions! This file might have some [bold red]anti-analysis[white] technique!")
+    windows_analyzer.statistics_method()
+
+    # Print reports
+    if get_argv(2) == "True":
+        save_report("windows", winrep)
+
+if __name__ == "__main__":
+    main()
