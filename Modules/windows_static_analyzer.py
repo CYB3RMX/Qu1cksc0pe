@@ -82,6 +82,46 @@ except Exception:
 windows_api_list = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows_api_categories.json"))
 dotnet_malware_pattern = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}dotnet_malware_patterns.json"))
 
+# --- .NET helpers (dnfile)
+def _dn_fullname(row):
+    if row is None:
+        return ""
+    ns = getattr(row, "TypeNamespace", "") or ""
+    name = getattr(row, "TypeName", "") or ""
+    ns = str(ns).strip()
+    name = str(name).strip()
+    if ns and name:
+        return f"{ns}.{name}"
+    return name
+
+def _dn_extends_fullname(typ):
+    ext = getattr(typ, "Extends", None)
+    row = getattr(ext, "row", None)
+    return _dn_fullname(row)
+
+def _dn_is_interface(typ):
+    # ECMA-335 TypeAttributes.ClassSemanticsMask: 0x20 == Interface
+    try:
+        return (int(getattr(typ, "Flags", 0)) & 0x20) != 0
+    except Exception:
+        return False
+
+def _dn_kind(typ):
+    """
+    Best-effort type classification based on flags + base type.
+    We primarily use this to exclude interop structs/enums which create noisy/empty tables.
+    """
+    if _dn_is_interface(typ):
+        return "interface"
+    base = _dn_extends_fullname(typ)
+    if base == "System.Enum":
+        return "enum"
+    if base == "System.ValueType":
+        return "struct"
+    if base == "System.MulticastDelegate":
+        return "delegate"
+    return "class"
+
 # Reverse index for fast categorization (api -> category). Built once at import time.
 _API_TO_CATEGORY = {}
 _API_LOWER_TO_API_AND_CATEGORY = {}
@@ -808,18 +848,36 @@ class WindowsAnalyzer:
                         full_name = f"{tns}.{tname}" if tns else tname
                         if "<" in full_name:
                             continue
+
+                        # Only show real reference types (classes/delegates). Skip structs/enums/interfaces which
+                        # frequently come from P/Invoke interop and cause lots of empty method tables.
+                        kind = _dn_kind(typ)
+                        if kind not in ("class", "delegate"):
+                            continue
+
                         class_names.append(full_name)
 
-                        dotnet_table = Table()
-                        dotnet_table.add_column(f"Methods in Class: [bold green]{full_name}[white]", justify="center")
-                        methodz = set()
+                        # Collect methods first; skip printing empty tables.
+                        method_rows = []
+                        seen = set()
                         for met_idx in getattr(typ, "MethodList", []) or []:
                             met_row = getattr(met_idx, "row", None)
                             met_name = str(getattr(met_row, "Name", "")).strip()
-                            if not met_name or met_name in methodz:
+                            if not met_name or met_name in seen:
                                 continue
-                            methodz.add(met_name)
-                            if met_name in self.blacklisted_patterns:
+                            seen.add(met_name)
+                            method_rows.append((met_name, met_name in self.blacklisted_patterns))
+
+                        if not method_rows:
+                            continue
+                        dotnet_table = Table()
+                        if kind == "delegate":
+                            hdr = f"Methods in Delegate: [bold green]{full_name}[white]"
+                        else:
+                            hdr = f"Methods in Class: [bold green]{full_name}[white]"
+                        dotnet_table.add_column(hdr, justify="center")
+                        for met_name, is_black in method_rows:
+                            if is_black:
                                 dotnet_table.add_row(f"[bold red]{met_name}[white]")
                             else:
                                 dotnet_table.add_row(met_name)
