@@ -6,6 +6,8 @@ import sys
 import zipfile
 import subprocess
 import configparser
+import shutil
+import tempfile
 
 from utils.helpers import err_exit
 
@@ -25,11 +27,6 @@ try:
     import rarfile
 except:
     err_exit("Error: >rarfile< module not found.")
-
-try:
-    import acefile
-except:
-    err_exit("Error: >acefile< module not found.")
 
 # Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
@@ -90,22 +87,36 @@ class ArchiveAnalyzer:
         self.perform_basic_scans(arch_object=rar_data, arch_type="rar")
 
     def ace_file_analysis(self):
-        # Parsing ace file
-        ace_data = acefile.AceArchive(self.targetFile)
+        # `acefile` dependency removed: try extracting with 7-Zip if present.
+        seven_zip = shutil.which("7z") or shutil.which("7zz")
+        if not seven_zip:
+            err_exit(f"{errorS} ACE archive detected but no extractor found. Install 7-Zip (`7z`) or convert the archive.")
 
-        # Perform basic scans
-        self.perform_basic_scans(arch_object=ace_data, arch_type="ace")
+        tmpdir = tempfile.mkdtemp(prefix="qu1cksc0pe_ace_")
+        try:
+            proc = subprocess.run(
+                [seven_zip, "x", "-y", f"-o{tmpdir}", self.targetFile],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            if proc.returncode != 0:
+                err_exit(f"{errorS} Failed to extract ACE archive with 7-Zip.\n{proc.stderr.strip() or proc.stdout.strip()}")
+
+            ace_data = ExtractedArchive(tmpdir)
+            self.perform_basic_scans(arch_object=ace_data, arch_type="ace")
+        finally:
+            try:
+                shutil.rmtree(tmpdir)
+            except Exception:
+                pass
 
     def perform_basic_scans(self, arch_object, arch_type):
         self.arch_object = arch_object
         self.arch_type = arch_type
 
-        if self.arch_type == "ace":
-            enumerate_arr = self.arch_object.getmembers()
-            namelist_arr = self.arch_object.getnames()
-        else:
-            enumerate_arr = self.arch_object.infolist()
-            namelist_arr = []
+        enumerate_arr = self.arch_object.infolist()
+        namelist_arr = []
 
         # Enumerating zip file contents
         print(f"\n{infoS} Analyzing archive file contents...")
@@ -113,10 +124,7 @@ class ArchiveAnalyzer:
         contentTable.add_column("[bold green]File Name", justify="center")
         contentTable.add_column("[bold green]File Size (bytes)", justify="center")
         for zf in enumerate_arr:
-            if self.arch_type == "ace":
-                contentTable.add_row(zf.filename, str(zf.size))
-            else:
-                contentTable.add_row(zf.filename, str(zf.file_size))
+            contentTable.add_row(zf.filename, str(zf.file_size))
 
             # Check if target content is a directory
             if zf.is_dir():
@@ -213,6 +221,65 @@ class ArchiveAnalyzer:
         for rn in rule_names:
             yaraTable.add_row(str(rn))
         print(yaraTable)
+
+
+class ExtractedArchiveEntry:
+    def __init__(self, filename, file_size, is_dir):
+        self.filename = filename
+        self.file_size = file_size
+        self._is_dir = bool(is_dir)
+
+    def is_dir(self):
+        return self._is_dir
+
+
+class ExtractedArchive:
+    """
+    Minimal read-only archive-like wrapper used for formats we extract via external tools (e.g., ACE via 7z).
+    Exposes `infolist()` and `read(name)` similar to zipfile/rarfile objects used by this module.
+    """
+
+    def __init__(self, root_dir):
+        self.root_dir = os.path.abspath(root_dir)
+        self._entries = None
+
+    def infolist(self):
+        if self._entries is not None:
+            return self._entries
+
+        entries = []
+        for base, dnames, fnames in os.walk(self.root_dir):
+            rel_base = os.path.relpath(base, self.root_dir)
+            rel_base = "" if rel_base == "." else rel_base
+
+            for d in dnames:
+                rel = os.path.join(rel_base, d) if rel_base else d
+                rel = rel.replace(os.sep, "/")
+                entries.append(ExtractedArchiveEntry(rel + "/", 0, True))
+
+            for f in fnames:
+                full = os.path.join(base, f)
+                rel = os.path.join(rel_base, f) if rel_base else f
+                rel = rel.replace(os.sep, "/")
+                try:
+                    sz = os.path.getsize(full)
+                except OSError:
+                    sz = 0
+                entries.append(ExtractedArchiveEntry(rel, sz, False))
+
+        # Stable ordering for deterministic output
+        entries.sort(key=lambda e: e.filename)
+        self._entries = entries
+        return entries
+
+    def read(self, name):
+        # Normalize and prevent path traversal outside root_dir.
+        norm = name.replace("\\", "/").lstrip("/")
+        full = os.path.abspath(os.path.join(self.root_dir, *norm.split("/")))
+        if not (full == self.root_dir or full.startswith(self.root_dir + os.sep)):
+            raise ValueError("invalid archive member path")
+        with open(full, "rb") as f:
+            return f.read()
 
 # Execution
 arch_analyzer = ArchiveAnalyzer(targetFile)

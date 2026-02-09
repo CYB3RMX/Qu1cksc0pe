@@ -60,12 +60,14 @@ PKG_INSTALL_CMD=()
 PKG_PIP=""
 PKG_ADB=""
 PKG_JAVA=""
+PKG_7Z=""
 if command_exists apt-get; then
   PKG_MANAGER="apt"
   PKG_INSTALL_CMD=(apt-get install -y)
   PKG_PIP="python3-pip"
   PKG_ADB="adb"
   PKG_JAVA="default-jre-headless"
+  PKG_7Z="p7zip-full"
   log_info "APT package manager detected."
 elif command_exists pacman; then
   PKG_MANAGER="pacman"
@@ -73,6 +75,7 @@ elif command_exists pacman; then
   PKG_PIP="python-pip"
   PKG_ADB="android-tools"
   PKG_JAVA="jre-openjdk-headless"
+  PKG_7Z="p7zip"
   log_info "Pacman package manager detected."
 else
   log_error "Supported package manager not found (apt-get or pacman)."
@@ -167,6 +170,7 @@ ensure_cmd_or_install adb "$PKG_ADB"
 ensure_cmd_or_install strings binutils
 ensure_cmd_or_install dos2unix dos2unix
 ensure_cmd_or_install unzip unzip
+ensure_cmd_or_install 7z "$PKG_7Z" "Installing 7-Zip CLI (required for ACE archive extraction in archiveAnalyzer)."
 
 # Ensure downloader is available
 if command_exists curl; then

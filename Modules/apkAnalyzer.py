@@ -172,6 +172,18 @@ class APKAnalyzer:
             "source_findings_total": 0,
             "source_findings_truncated": False,
             "source_findings": [],
+            "resource_scan": {
+                "attempted": False,
+                "error": "",
+                "file_type_counts": {},
+                "notable_file_types": [],  # [{type, count, samples:[...]}]
+                "interesting_files": {},   # {ext: [paths]}
+                "skipped_large_files": 0,
+                "ioc_summary": {},         # {category: count}
+                "ioc_matches_total": 0,
+                "ioc_matches_truncated": False,
+                "ioc_matches": [],         # [{category, pattern, file}]
+            },
             "user": username,
             "date": dformat,
         }
@@ -664,6 +676,7 @@ class APKAnalyzer:
             clean_report.pop("native_libraries", None)
             clean_report.pop("native_library_triage", None)
             clean_report.pop("yara_detailed_matches", None)
+            clean_report.pop("resource_scan", None)
 
         # For APK analysis we already store the findings list; `code_patterns` is a large
         # duplicate mapping (file -> patterns/categories). Keep it only in detailed mode.
@@ -682,6 +695,271 @@ class APKAnalyzer:
             for ff in f_names:
                 fnames.append(os.path.join(root, ff))
         return fnames
+
+    def ResourceScan(self, axml_obj):
+        """
+        APK resource/content scan (ported from Modules/resourceChecker.py for APKs).
+        Collects:
+        - file type counts (pyaxmlparser get_files_types)
+        - interesting file extensions (.json/.dex/.bin/.sh)
+        - basic IOC patterns across all APK members (Tor strings, URLs, IP:PORT/localhost)
+        Stored into report under `resource_scan` to avoid requiring `--resource` for APK triage.
+        """
+        rs = self.reportz.get("resource_scan") or {}
+        rs["attempted"] = True
+        rs["error"] = ""
+        rs["file_type_counts"] = {}
+        rs["notable_file_types"] = []
+        rs["interesting_files"] = {}
+        rs["skipped_large_files"] = 0
+        rs["ioc_summary"] = {}
+        rs["ioc_matches_total"] = 0
+        rs["ioc_matches_truncated"] = False
+        rs["ioc_matches"] = []
+        self.reportz["resource_scan"] = rs
+
+        if not axml_obj:
+            rs["error"] = "manifest_parse_failed"
+            return
+
+        # Limits to keep default JSON small.
+        detailed = self.detailed_report
+        max_samples_per_type = 12 if detailed else 6
+        max_interesting_per_ext = 80 if detailed else 25
+        max_iocs_total = 400 if detailed else 80
+        max_iocs_per_file = 6 if detailed else 3
+        max_file_bytes = 6 * 1024 * 1024  # skip very large assets to avoid CPU/ram spikes
+
+        # Wordlists/regexes (same intent as resourceChecker.py).
+        tor_needles = [
+            "obfs4",
+            "iat-mode=",
+            "meek_lite",
+            "found_existing_tor_process",
+            "newnym",
+        ]
+        url_re = re.compile(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
+        ip_port_re = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}:\d{1,5}\b")
+
+        # File types inventory (counts + samples for notable types).
+        types = {}
+        try:
+            types = axml_obj.get_files_types() or {}
+        except Exception:
+            types = {}
+
+        # Build counts and notable samples.
+        counts = {}
+        notable = {}
+        notable_keywords = (
+            "dalvik",
+            "elf",
+            "executable",
+            "bourne-again shell",
+            "jar",
+            "c++ source",
+            "c source",
+        )
+        for path, ftype in (types or {}).items():
+            t = str(ftype or "unknown")
+            counts[t] = counts.get(t, 0) + 1
+            low_t = t.lower()
+            if "image" in low_t:
+                continue
+            if any(k in low_t for k in notable_keywords):
+                ent = notable.get(t)
+                if not ent:
+                    ent = {"type": t, "count": 0, "samples": []}
+                    notable[t] = ent
+                ent["count"] += 1
+                if len(ent["samples"]) < max_samples_per_type:
+                    ent["samples"].append(path)
+
+        rs["file_type_counts"] = dict(sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])))
+        rs["notable_file_types"] = sorted(notable.values(), key=lambda x: (-int(x.get("count", 0)), str(x.get("type", ""))))
+
+        # Interesting extensions inventory.
+        interesting_exts = [".json", ".dex", ".bin", ".sh"]
+        interesting = {e: [] for e in interesting_exts}
+        try:
+            for member in axml_obj.get_files() or []:
+                m = str(member or "")
+                low = m.lower()
+                for ext in interesting_exts:
+                    if low.endswith(ext):
+                        if len(interesting[ext]) < max_interesting_per_ext:
+                            interesting[ext].append(m)
+                        break
+        except Exception:
+            pass
+        rs["interesting_files"] = {k: v for k, v in interesting.items() if v}
+
+        # IOC scanning across APK members.
+        seen = set()
+        ioc_counts = {"Presence of Tor": 0, "URLs": 0, "IP Addresses": 0}
+        total = 0
+        try:
+            members = list(axml_obj.get_files() or [])
+        except Exception:
+            members = []
+
+        for member in members:
+            if total >= max_iocs_total:
+                break
+            m = str(member or "")
+            if not m or m.endswith("/"):
+                continue
+
+            # Skip images early (common, low-signal).
+            ftype = str(types.get(m, "") or "")
+            if ftype and ("image" in ftype.lower()):
+                continue
+
+            try:
+                buf = axml_obj.get_file(m)
+            except Exception:
+                continue
+            if not isinstance(buf, (bytes, bytearray)):
+                continue
+            if len(buf) > max_file_bytes:
+                rs["skipped_large_files"] += 1
+                continue
+
+            text = ""
+            try:
+                text = buf.decode("utf-8", errors="ignore")
+            except Exception:
+                text = ""
+            low = text.lower()
+
+            per_file_hits = 0
+
+            # Tor indicators (substring search).
+            for needle in tor_needles:
+                if per_file_hits >= max_iocs_per_file or total >= max_iocs_total:
+                    break
+                if needle.lower() in low:
+                    key = ("Presence of Tor", needle, m)
+                    if key not in seen:
+                        seen.add(key)
+                        rs["ioc_matches"].append({"category": "Presence of Tor", "pattern": needle, "file": m})
+                        ioc_counts["Presence of Tor"] += 1
+                        total += 1
+                        per_file_hits += 1
+
+            if per_file_hits < max_iocs_per_file and total < max_iocs_total:
+                # URL extraction (optionally hide whitelisted domains like in Get_IP_URL()).
+                try:
+                    urls = url_re.findall(text) or []
+                except Exception:
+                    urls = []
+                if urls:
+                    uniq_urls = []
+                    for u in urls:
+                        if not u or u in uniq_urls:
+                            continue
+                        # Hide templated format-string URLs (low-signal).
+                        if ("%s" in u) or ("%1$" in u) or ("%2$" in u):
+                            continue
+                        # Best-effort whitelist filtering (keep only non-whitelisted).
+                        try:
+                            ul = u.lower()
+                            if not chk_wlist(ul):
+                                continue
+                            host = urlparse(ul).hostname or ""
+                            if host and (not chk_wlist(host)):
+                                continue
+                        except Exception:
+                            pass
+                        uniq_urls.append(u)
+                        if len(uniq_urls) >= max_iocs_per_file:
+                            break
+
+                    for u in uniq_urls[:max_iocs_per_file]:
+                        if per_file_hits >= max_iocs_per_file or total >= max_iocs_total:
+                            break
+                        key = ("URLs", u, m)
+                        if key in seen:
+                            continue
+                        seen.add(key)
+                        rs["ioc_matches"].append({"category": "URLs", "pattern": u, "file": m})
+                        ioc_counts["URLs"] += 1
+                        total += 1
+                        per_file_hits += 1
+
+            if per_file_hits < max_iocs_per_file and total < max_iocs_total:
+                # IP:PORT + localhost
+                ips = []
+                try:
+                    ips = ip_port_re.findall(text) or []
+                except Exception:
+                    ips = []
+                if "localhost" in low:
+                    ips.append("localhost")
+                if ips:
+                    uniq_ips = []
+                    for ip in ips:
+                        if not ip or ip in uniq_ips:
+                            continue
+                        uniq_ips.append(ip)
+                        if len(uniq_ips) >= max_iocs_per_file:
+                            break
+
+                    for ip in uniq_ips[:max_iocs_per_file]:
+                        if per_file_hits >= max_iocs_per_file or total >= max_iocs_total:
+                            break
+                        key = ("IP Addresses", ip, m)
+                        if key in seen:
+                            continue
+                        seen.add(key)
+                        rs["ioc_matches"].append({"category": "IP Addresses", "pattern": ip, "file": m})
+                        ioc_counts["IP Addresses"] += 1
+                        total += 1
+                        per_file_hits += 1
+
+        rs["ioc_summary"] = {k: int(v) for k, v in ioc_counts.items() if v}
+        rs["ioc_matches_total"] = int(total)
+        if (not detailed) and total >= max_iocs_total:
+            rs["ioc_matches_truncated"] = True
+
+        # Console output: keep it compact.
+        try:
+            if rs.get("notable_file_types"):
+                t = Table(title="* APK Resource Scan (File Types) *", title_style="bold italic cyan", title_justify="center")
+                t.add_column("Type", justify="left", style="bold green")
+                t.add_column("Count", justify="center", style="bold yellow")
+                t.add_column("Samples", justify="left", style="bold cyan")
+                for ent in rs["notable_file_types"][:12]:
+                    samples = "\n".join((ent.get("samples") or [])[:max_samples_per_type])
+                    t.add_row(str(ent.get("type", "")), str(ent.get("count", 0)), samples)
+                print(t)
+
+            if rs.get("interesting_files"):
+                t = Table(title="* Interesting APK Members *", title_style="bold italic cyan", title_justify="center")
+                t.add_column("Kind", justify="left", style="bold green")
+                t.add_column("Samples", justify="left", style="bold yellow")
+                for ext, items in sorted(rs["interesting_files"].items(), key=lambda kv: kv[0]):
+                    show = (items or [])[:10]
+                    extra = max(0, len(items or []) - len(show))
+                    s = "\n".join(show)
+                    if extra:
+                        s = f"{s}\n(+{extra})"
+                    t.add_row(ext, s)
+                print(t)
+
+            if rs.get("ioc_matches"):
+                t = Table(title="* APK Resource Scan (IOCs) *", title_style="bold italic cyan", title_justify="center")
+                t.add_column("Category", justify="left", style="bold green")
+                t.add_column("Pattern", justify="left", style="bold yellow")
+                t.add_column("File", justify="left", style="bold cyan")
+                show = rs["ioc_matches"][:25]
+                for ent in show:
+                    t.add_row(str(ent.get("category", "")), str(ent.get("pattern", "")), str(ent.get("file", "")))
+                print(t)
+                if rs.get("ioc_matches_truncated"):
+                    print(f"{infoS} Resource scan IOC list truncated in report/output. Set `SC0PE_ANDROID_REPORT_DETAILED=1` for more.")
+        except Exception:
+            pass
 
     def yara_rule_scanner(self, filename, report_object, quiet_nomatch=False, header_label=""):
         # Use shared scanner from Modules/analysis/multiple/multi.py
@@ -1593,6 +1871,18 @@ if __name__ == '__main__':
         # Source code analysis zone
         print(f"\n{infoS} Performing source code analysis...")
         apka.ScanSource()
+
+        # APK resource scan (ported from resourceChecker.py for APKs)
+        print(f"\n{infoS} Performing resource scan (APK contents)...")
+        try:
+            apka.ResourceScan(axml_obj)
+        except Exception:
+            # Best-effort: do not break main analysis flow.
+            try:
+                apka.reportz["resource_scan"]["attempted"] = True
+                apka.reportz["resource_scan"]["error"] = "exception"
+            except Exception:
+                pass
 
         # IP and URL value scan
         apka.Get_IP_URL()
