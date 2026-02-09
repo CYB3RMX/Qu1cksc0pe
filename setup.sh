@@ -59,14 +59,12 @@ PKG_MANAGER=""
 PKG_INSTALL_CMD=()
 PKG_PIP=""
 PKG_ADB=""
-PKG_MONO=""
 PKG_JAVA=""
 if command_exists apt-get; then
   PKG_MANAGER="apt"
   PKG_INSTALL_CMD=(apt-get install -y)
   PKG_PIP="python3-pip"
   PKG_ADB="adb"
-  PKG_MONO="mono-complete"
   PKG_JAVA="default-jre-headless"
   log_info "APT package manager detected."
 elif command_exists pacman; then
@@ -74,7 +72,6 @@ elif command_exists pacman; then
   PKG_INSTALL_CMD=(pacman -S --noconfirm --needed)
   PKG_PIP="python-pip"
   PKG_ADB="android-tools"
-  PKG_MONO="mono"
   PKG_JAVA="jre-openjdk-headless"
   log_info "Pacman package manager detected."
 else
@@ -235,15 +232,6 @@ else
   log_info "Installing ${green}pyOneNote${default}..."
   "${PYTHON_BIN}" -m pip install -U --force-reinstall https://github.com/DissectMalware/pyOneNote/archive/master.zip
   log_success "pyOneNote installed."
-fi
-
-# Setup mono
-if command_exists mono; then
-  log_info "${green}mono${default} is already installed."
-else
-  log_info "Setting up ${green}${PKG_MONO}${default}..."
-  install_system_packages "$PKG_MONO"
-  log_success "${PKG_MONO} installed."
 fi
 
 log_success "All done."
