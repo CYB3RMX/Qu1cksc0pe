@@ -41,10 +41,15 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
+<b>10/02/2026</b>
+- [X] Removed FLOSS/Vivisect from the project (no string decode/emulation stage in Windows analysis).
+- [X] Linux static analyzer: Golang special analysis findings are now saved into the Linux JSON report under `golang`.
+- [X] AI analyzer (`--ai`): full report JSON is included in the LLM prompt (`report_full`); model thinking blocks are stripped from console output and the saved AI report; extracted IoCs are displayed in a separate table.
+
 <b>09/02/2026</b>
 - [X] Windows static analyzer improvements: faster import/export extraction (`pefile` fast load + parsing only required directories).
 - [X] .NET analysis no longer requires `pythonnet`/Mono (pure-Python metadata parsing via `dnfile`).
-- [X] Vivisect/FLOSS stability: run analysis in a separate process with configurable timeouts; decode/emulation uses its own (longer) timeout and is non-interactive by default.
+- [X] Windows static analyzer cleanup: removed FLOSS integration (string decode/emulation) due to stability/performance issues.
 - [X] Setup/Docker cleanup: removed `mono-complete` / `pythonnet` dependency.
 - [X] Archive analyzer: removed `acefile` dependency. ACE archives are extracted via `7z`/`7zz` when available.
 - [X] Android analyzer: APK resource/content scan is now part of `--analyze` and is saved into the JSON report under `resource_scan`.
@@ -119,14 +124,12 @@ python .\\qu1cksc0pe.py --file app.apk --analyze --report
 | `SC0PE_ANDROID_REPORT_DETAILED` | `0` | Android analyzer JSON becomes more verbose (keeps larger fields and higher limits). Includes more details under `resource_scan`, and keeps large duplicate fields like `code_patterns` more often. |
 | `SC0PE_WINDOWS_REPORT_DETAILED` | `0` | Windows analyzer stores per-category API lists in more detail (instead of unique API names only). |
 | `SC0PE_AUTO_DECRYPT_CHAIN` | `0` | Document analyzer: when an Office document decryption succeeds, automatically re-runs analysis on the decrypted output (best-effort). |
-| `SC0PE_VIV_TIMEOUT_SEC` | `60` | Windows analyzer: Vivisect analysis wall-clock timeout. Set `0` to skip Vivisect. |
-| `SC0PE_VIV_MAX_FILE_MB` | `25` | Windows analyzer: skip Vivisect if file is larger than this limit (MB). |
-| `SC0PE_VIV_MAX_STRINGS` | `250` | Windows analyzer: limit output strings collected from Vivisect/FLOSS worker. |
-| `SC0PE_VIV_DECODE` | enabled (not `0`) | Windows analyzer: enable/disable FLOSS decode/emulation phase. Set `0` to skip decode while keeping basic Vivisect results. |
-| `SC0PE_FLOSS_FORCE_DECODE` | `0` | Windows analyzer: force decode/emulation even when function count is above `SC0PE_FLOSS_DECODE_MAX_FUNCS`. |
-| `SC0PE_FLOSS_DECODE_MAX_FUNCS` | `150` | Windows analyzer: if decoding would emulate more than this many functions, it is skipped unless forced. |
-| `SC0PE_FLOSS_DECODE_TOP_N` | `20` | Windows analyzer: how many “top” candidate functions to prioritize for decoding. |
-| `SC0PE_FLOSS_DECODE_TIMEOUT_SEC` | `300` | Windows analyzer: timeout for the decode/emulation phase (separate from `SC0PE_VIV_TIMEOUT_SEC`). |
+| `SC0PE_AI_INTERESTING_PATTERNS_MAX_KEYS` | `25` | AI analyzer: limit how many keys from `interesting_string_patterns` are included in the LLM prompt. |
+| `SC0PE_AI_INTERESTING_PATTERNS_MAX_VALUES` | `30` | AI analyzer: limit list size per `interesting_string_patterns` key in the LLM prompt. |
+| `SC0PE_AI_TEMP_TXT_EXCERPT_CHARS` | `2500` | AI analyzer: limit how many characters of `temp_txt` are included in the LLM prompt. Set `0` to omit the excerpt. |
+| `SC0PE_AI_TEMP_TXT_MAX_STRINGS` | `300` | AI analyzer: limit number of meaningful strings selected from `temp.txt` for the LLM prompt. |
+| `SC0PE_AI_TEMP_TXT_MIN_LEN` | `6` | AI analyzer: minimum length for a meaningful string extracted from `temp.txt`. |
+| `SC0PE_AI_TEMP_TXT_MAX_LEN` | `180` | AI analyzer: maximum length for a meaningful string extracted from `temp.txt`. |
 | `OLLAMA_HOST` | `http://127.0.0.1:11434` | AI report analysis backend (Ollama). Set this if Ollama is remote or on a different host/port. |
 | `JAVA_HOME` | unset | Android analyzer: helps locate Java runtime for JADX. Set this if Java is installed but not detected. |
 

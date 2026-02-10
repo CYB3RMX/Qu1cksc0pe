@@ -99,6 +99,15 @@ report = {
     "is_encrypted": False,
     "matched_rules": [],
     "extracted_urls": [],
+    "macros": {
+        "extracted": False,
+        "vba": [],
+        "xlm": [],
+        "truncated": {
+            "vba": 0,
+            "xlm": 0
+        }
+    },
     "embedded_files": [],
     "extracted_files": [],
     "sections": {},
@@ -200,6 +209,18 @@ class DocumentAnalyzer:
         for ch in str(value):
             sanitized += ch if ch.isprintable() else f"\\x{ord(ch):02x}"
         return sanitized
+
+    def _sanitize_and_truncate(self, value, max_chars):
+        sanitized = self._sanitize_text(value)
+        if max_chars is None:
+            return sanitized, False
+        try:
+            max_chars = int(max_chars)
+        except Exception:
+            max_chars = 0
+        if max_chars > 0 and len(sanitized) > max_chars:
+            return sanitized[:max_chars] + "\\n...<truncated>...", True
+        return sanitized, False
 
     def _sanitize_stream_name(self, stream_name):
         return "/".join(self._sanitize_text(x) for x in str(stream_name).split("/"))
@@ -525,12 +546,48 @@ class DocumentAnalyzer:
             if macro_state_vba != 0 or macro_state_xlm != 0:
                 if user_confirm("\n>>> Do you want to extract macros [Y/n]?: "):
                     print(f"{infoS} Attempting to extraction...\n")
+                    report["macros"]["extracted"] = True
+                    max_macro_chars = int(os.environ.get("SC0PE_REPORT_MAX_MACRO_CHARS", "50000"))
+
                     if macro_state_vba != 0:
                         for mac in vbaparser.extract_all_macros():
-                            for xxx in mac:
-                                print(xxx.strip("\r\n"))
-                    else:
+                            # oletools typically returns: (container, stream_path, vba_filename, vba_code)
+                            try:
+                                container = mac[0] if len(mac) > 0 else ""
+                                stream_path = mac[1] if len(mac) > 1 else ""
+                                vba_filename = mac[2] if len(mac) > 2 else ""
+                                vba_code = mac[3] if len(mac) > 3 else ""
+                                code, truncated = self._sanitize_and_truncate(vba_code, max_macro_chars)
+                                report["macros"]["vba"].append(
+                                    {
+                                        "container": self._sanitize_text(container),
+                                        "stream": self._sanitize_text(stream_path),
+                                        "module": self._sanitize_text(vba_filename),
+                                        "code": code,
+                                        "truncated": truncated,
+                                    }
+                                )
+                                if truncated:
+                                    report["macros"]["truncated"]["vba"] += 1
+                            except Exception:
+                                code, truncated = self._sanitize_and_truncate(mac, max_macro_chars)
+                                report["macros"]["vba"].append({"code": code, "truncated": truncated})
+                                if truncated:
+                                    report["macros"]["truncated"]["vba"] += 1
+
+                            # Preserve existing console output behaviour.
+                            try:
+                                for xxx in mac:
+                                    print(str(xxx).strip("\r\n"))
+                            except Exception:
+                                print(str(mac))
+
+                    if macro_state_xlm != 0:
                         for mac in xlm_macro_lines:
+                            line, truncated = self._sanitize_and_truncate(mac, max_macro_chars)
+                            report["macros"]["xlm"].append({"line": line, "truncated": truncated})
+                            if truncated:
+                                report["macros"]["truncated"]["xlm"] += 1
                             print(mac)
                     print(f"\n{infoS} Extraction completed.")
 

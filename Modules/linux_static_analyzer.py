@@ -71,6 +71,18 @@ class LinuxAnalyzer:
         self.categorized_func_count = 0
         # Best-effort hint for debugging/report consumers.
         self.report["number_of_functions_source"] = self._function_count_source
+        self.report.setdefault(
+            "golang",
+            {
+                "detected": False,
+                "analysis_performed": False,
+                "go_sections": [],
+                "findings_by_category": {},
+                "finding_counts": {},
+                "total_findings": 0,
+                "error": "",
+            },
+        )
 
     def _collect_lief_symbol_names(self, binary):
         names = []
@@ -240,8 +252,22 @@ class LinuxAnalyzer:
             check_go = metadata["name"]
             metadata["name"] = "[bold red]"+metadata["name"]
             # Check for go presence
-            if ".go" in check_go[:3] and check_go[:4] != ".got":
-                self.is_go_binary = True
+            # Go sections often include: .gopclntab, .gosymtab, .go.buildinfo, .note.go.buildid
+            try:
+                nm = str(check_go or "")
+            except Exception:
+                nm = ""
+            if nm:
+                low = nm.lower()
+                if (
+                    (low.startswith(".go") and not low.startswith(".got"))
+                    or (".note.go" in low)
+                    or (low in (".gopclntab", ".gosymtab", ".go.buildinfo", ".note.go.buildid"))
+                ):
+                    self.is_go_binary = True
+                    self.report["golang"]["detected"] = True
+                    if nm not in self.report["golang"]["go_sections"]:
+                        self.report["golang"]["go_sections"].append(nm)
             # since 3.7, dict objects guarantee insertion order preservation
             section_t.add_row(*metadata.values()) # so this is ok for filling a row
 
@@ -331,14 +357,36 @@ class LinuxAnalyzer:
         if self.is_go_binary:
             print(f"\n{infoS} Qu1cksc0pe was identified this binary as [bold green]Golang[white] binary.")
             if user_confirm(">>> Do you want to perform special analysis[Y/n]?: "):
-                golang_parser = GolangParser(self.target_file)
-                golang_parser.golang_analysis_main()
-                go_report = golang_parser.record_analysis_summary()
-                for key in go_report:
-                    if go_report[key] != []:
-                        CATEGORIES[key] += go_report[key]
-                        self.categorized_func_count += len(go_report[key])
-                        self.symbol_names += go_report[key]
+                try:
+                    golang_parser = GolangParser(self.target_file)
+                    golang_parser.golang_analysis_main()
+                    go_report = golang_parser.record_analysis_summary()
+                    self.report["golang"]["analysis_performed"] = True
+                    self.report["golang"]["findings_by_category"] = go_report if isinstance(go_report, dict) else {}
+
+                    counts = {}
+                    total = 0
+                    if isinstance(go_report, dict):
+                        for key, vals in go_report.items():
+                            if not isinstance(vals, list):
+                                continue
+                            if not vals:
+                                continue
+                            # Merge findings into categories (also reflected in report["categories"]).
+                            if key not in CATEGORIES:
+                                CATEGORIES[key] = []
+                            CATEGORIES[key] += vals
+                            self.categorized_func_count += len(vals)
+                            self.symbol_names += vals
+                            counts[key] = len(vals)
+                            total += len(vals)
+
+                    self.report["golang"]["finding_counts"] = counts
+                    self.report["golang"]["total_findings"] = total
+                except Exception as e:
+                    self.report["golang"]["analysis_performed"] = False
+                    self.report["golang"]["error"] = str(e)
+                    print(f"{errorS} Golang analysis failed: {e}")
 
         if self.categorized_func_count != 0:
             print(f"\n[bold green]->[white] Statistics for: [bold green][i]{self.target_file}[/i]")
@@ -384,7 +432,16 @@ class LinuxAnalyzer:
             "sections": [], "segments": [],
             "categories": {},
             "matched_rules": [],
-            "security": {"NX": False, "PIE": False}
+            "security": {"NX": False, "PIE": False},
+            "golang": {
+                "detected": False,
+                "analysis_performed": False,
+                "go_sections": [],
+                "findings_by_category": {},
+                "finding_counts": {},
+                "total_findings": 0,
+                "error": "",
+            },
         }
 
 

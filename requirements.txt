@@ -19,8 +19,6 @@ Pillow
 dpkt
 dnfile==0.15.0
 pydnsbl
-flare-floss
-vivisect
 pycryptodome
 bs4
 wh1tem0cha
