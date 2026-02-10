@@ -8,7 +8,6 @@ import sqlite3
 import binascii
 import subprocess
 import configparser
-import multiprocessing as mp
 from utils.helpers import err_exit, get_argv, save_report
 from analysis.multiple.multi import perform_strings, calc_hashes, yara_rule_scanner
 
@@ -28,21 +27,6 @@ try:
     import dnfile
 except:
     dnfile = None
-
-try:
-    # flare-floss package layout can differ; some builds don't expose `floss.main` as an attribute.
-    from floss import main as floss_main
-except:
-    try:
-        import floss.main as floss_main
-    except:
-        err_exit("Error: >flare-floss< module not found.")
-
-try:
-    import vivisect
-    vivisect.logging.disable() # Suppressing error messages
-except:
-    err_exit("Error: >vivisect< module not found.")
 
 try:
     from colorama import Fore, Style
@@ -81,6 +65,7 @@ except Exception:
 #--------------------------------------------------------------------- Keywords for categorized scanning
 windows_api_list = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows_api_categories.json"))
 dotnet_malware_pattern = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}dotnet_malware_patterns.json"))
+
 
 # --- .NET helpers (dnfile)
 def _dn_fullname(row):
@@ -161,6 +146,7 @@ winrep = {
     "all_imports_exports": 0,
     "categorized_imports": 0,
     "categories": {},
+    "interesting_string_patterns": [],
     "matched_rules": [],
     "linked_dll": [],
     "pdb_file_name": "",
@@ -171,71 +157,6 @@ winrep = {
 #------------------------------------ Read and parse config file
 conf = configparser.ConfigParser()
 conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf")
-
-def _viv_floss_worker(
-    target_file,
-    q,
-    max_out=250,
-    do_decode=True,
-    force_decode=False,
-    decode_max_funcs=150,
-    decode_top_n=20,
-):
-    """
-    Run vivisect+FLOSS in a separate process so we can time out/terminate safely.
-    Sends:
-      1) phase=basic (after viv.analyze + stack/tight + decode plan)
-      2) phase=decode (after emulation decode), if enabled
-    """
-    try:
-        import vivisect
-        try:
-            from floss import main as floss_main
-        except Exception:
-            import floss.main as floss_main
-        vivisect.logging.disable()
-
-        viv = vivisect.VivWorkspace()
-        viv.loadFromFile(target_file)
-        viv.analyze()
-
-        out_basic = {"phase": "basic", "stack_strings": [], "tight_strings": [], "truncated": {}}
-
-        selected_functions = floss_main.select_functions(viv, None)
-        stack_strings = floss_main.extract_stackstrings(viv, selected_functions, 4) or []
-        out_basic["stack_strings"] = [s.string for s in stack_strings[:max_out]]
-        if len(stack_strings) > max_out:
-            out_basic["truncated"]["stack_strings"] = len(stack_strings)
-
-        decode_features, _ = floss_main.find_decoding_function_features(viv, viv.getFunctions())
-        tight_loops = floss_main.get_functions_with_tightloops(decode_features)
-        tight_strings = floss_main.extract_tightstrings(viv, tight_loops, 4) or []
-        out_basic["tight_strings"] = [s.string for s in tight_strings[:max_out]]
-        if len(tight_strings) > max_out:
-            out_basic["truncated"]["tight_strings"] = len(tight_strings)
-
-        # Decide decode plan early, so the parent can print partial output even if decode hangs.
-        fvas_to_emulate = []
-        if do_decode:
-            top_functions = floss_main.get_top_functions(decode_features, int(decode_top_n))
-            fvas_to_emulate = floss_main.get_function_fvas(top_functions)
-            fvas_tight_funcs = floss_main.get_tight_function_fvas(decode_features)
-            fvas_to_emulate = floss_main.append_unique(fvas_to_emulate, fvas_tight_funcs)
-            out_basic["decode_fvas"] = fvas_to_emulate[: max(0, int(decode_max_funcs) + 1)]
-            out_basic["decode_fvas_total"] = len(fvas_to_emulate)
-            if len(fvas_to_emulate) > decode_max_funcs and not force_decode:
-                out_basic["decoded_skipped"] = len(fvas_to_emulate)
-        q.put(out_basic)
-
-        if do_decode and fvas_to_emulate and (len(fvas_to_emulate) <= decode_max_funcs or force_decode):
-            out_decode = {"phase": "decode", "decoded_strings": [], "truncated": {}}
-            decoded = floss_main.decode_strings(viv, fvas_to_emulate, 4) or []
-            out_decode["decoded_strings"] = [s.string for s in decoded[:max_out]]
-            if len(decoded) > max_out:
-                out_decode["truncated"]["decoded_strings"] = len(decoded)
-            q.put(out_decode)
-    except Exception as e:
-        q.put({"phase": "error", "error": str(e)})
 
 class WindowsAnalyzer:
     def __init__(self, target_file):
@@ -250,7 +171,9 @@ class WindowsAnalyzer:
 
         # Check for windows file type
         self.exec_type = subprocess.run(["file", self.target_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if ".Net" in self.exec_type.stdout.decode():
+        self.exec_type_str = self.exec_type.stdout.decode(errors="ignore")
+        self.is_dotnet = (".net" in self.exec_type_str.lower()) or ("mono/.net" in self.exec_type_str.lower())
+        if self.is_dotnet:
             print(f"{infoS} File Type: [bold green].NET Executable[white]\n")
             self.dotnet_file_analyzer()
             sys.exit(0)
@@ -464,11 +387,19 @@ class WindowsAnalyzer:
 
         # Print output
         if intstf != []:
+            seen = set()
             for stf in intstf:
+                # Persist findings into JSON report as well.
+                key = str(stf)
+                if key not in seen:
+                    seen.add(key)
+                    suspicious = (stf in interesting_stuff) or (".cmd" in stf or ".bat" in stf or ".exe" in stf or "syscall" in stf) or ("Select" in stf)
+                    winrep["interesting_string_patterns"].append({"value": key, "suspicious": bool(suspicious)})
+
                 if (stf in interesting_stuff) or (".cmd" in stf or ".bat" in stf or ".exe" in stf or "syscall" in stf) or ("Select" in stf):
-                    stuff_table.add_row(f"[bold red]{stf}[white]")
+                    stuff_table.add_row(f"[bold red]{key}[white]")
                 else:
-                    stuff_table.add_row(stf)
+                    stuff_table.add_row(key)
             print(stuff_table)
         else:
             print(f"{errorS} There is no pattern about interesting string values!\n")
@@ -532,207 +463,6 @@ class WindowsAnalyzer:
             except:
                 continue
         print(peStatistics)
-
-    def decode_section(self, viv_obj, fvas_to_emulate):
-        decoded_strings = floss_main.decode_strings(viv_obj, fvas_to_emulate, 4)
-        if decoded_strings != []:
-            ss_table = Table()
-            ss_table.add_column("[bold green]Decoded Strings", justify="center")
-            for ss in decoded_strings:
-                ss_table.add_row(ss.string)
-            print(ss_table)
-        else:
-            print(f"\n{errorS} There is no decoded string value found!")
-
-    def decode_strings_floss(self, viv_obj, decode_features):
-        top_functions = floss_main.get_top_functions(decode_features, 20)
-        fvas_to_emulate = floss_main.get_function_fvas(top_functions)
-        fvas_tight_funcs = floss_main.get_tight_function_fvas(decode_features)
-        fvas_to_emulate = floss_main.append_unique(fvas_to_emulate, fvas_tight_funcs)
-        # Non-interactive default: skip extremely large emulation sets unless forced.
-        force_decode = os.environ.get("SC0PE_FLOSS_FORCE_DECODE", "").strip() == "1"
-        decode_max_funcs = int(os.environ.get("SC0PE_FLOSS_DECODE_MAX_FUNCS", "150"))
-        if len(fvas_to_emulate) > decode_max_funcs and not force_decode:
-            print(f"\n{infoS} Skipping string emulation: [bold red]{len(fvas_to_emulate)}[white] functions (set SC0PE_FLOSS_FORCE_DECODE=1 to force).")
-            return
-        self.decode_section(viv_obj, fvas_to_emulate)
-
-    def analyze_via_viv(self):
-        print(f"\n{infoS} Performing analysis via Vivisect and Floss...")
-        # Vivisect analysis can be very slow or hang on some samples.
-        # Run it in a separate process so we can enforce a wall-clock timeout.
-        timeout_sec = int(os.environ.get("SC0PE_VIV_TIMEOUT_SEC", "60"))
-        # Function emulation can legitimately take a long time; keep a separate, longer timeout.
-        decode_timeout_sec = int(os.environ.get("SC0PE_FLOSS_DECODE_TIMEOUT_SEC", "300"))
-        max_file_mb = int(os.environ.get("SC0PE_VIV_MAX_FILE_MB", "25"))
-        max_out = int(os.environ.get("SC0PE_VIV_MAX_STRINGS", "250"))
-        do_decode = os.environ.get("SC0PE_VIV_DECODE", "").strip() != "0"
-        force_decode = os.environ.get("SC0PE_FLOSS_FORCE_DECODE", "").strip() == "1"
-        decode_max_funcs = int(os.environ.get("SC0PE_FLOSS_DECODE_MAX_FUNCS", "150"))
-        decode_top_n = int(os.environ.get("SC0PE_FLOSS_DECODE_TOP_N", "20"))
-
-        try:
-            fsz = os.path.getsize(self.target_file) / (1024 * 1024)
-            if fsz > max_file_mb:
-                print(f"{infoS} Skipping vivisect: file size is [bold red]{fsz:.1f}MB[white] (limit {max_file_mb}MB).")
-                return
-        except Exception:
-            pass
-
-        if timeout_sec <= 0:
-            print(f"{infoS} Skipping vivisect: SC0PE_VIV_TIMEOUT_SEC={timeout_sec}.")
-            return
-
-        print(f"{infoS} Initializing [bold green]viv.analyze[white]. Please wait... (timeout={timeout_sec}s)")
-        q = mp.Queue()
-        p = mp.Process(
-            target=_viv_floss_worker,
-            args=(self.target_file, q, max_out, do_decode, force_decode, decode_max_funcs, decode_top_n),
-        )
-        p.daemon = True
-        p.start()
-        try:
-            res_basic = q.get(timeout=timeout_sec)
-        except Exception:
-            try:
-                p.terminate()
-            except Exception:
-                pass
-            p.join(5)
-            try:
-                q.close()
-                q.join_thread()
-            except Exception:
-                pass
-            print(f"{errorS} Vivisect analysis timed out after {timeout_sec}s. Skipping...\n")
-            return
-
-        if isinstance(res_basic, dict) and res_basic.get("phase") == "error":
-            try:
-                p.terminate()
-            except Exception:
-                pass
-            p.join(5)
-            try:
-                q.close()
-                q.join_thread()
-            except Exception:
-                pass
-            print(f"{errorS} Vivisect analysis error: [bold red]{res_basic['error']}[white]\n")
-            return
-
-        # Extract strings via flare-floss
-        print(f"{infoS} Performing [bold green]stack string[white] extraction. Please wait...")
-        stack_strings = res_basic.get("stack_strings") or []
-        if stack_strings:
-            ss_table = Table()
-            ss_table.add_column("[bold green]Extracted Stack Strings", justify="center")
-            for ss in stack_strings:
-                ss_table.add_row(ss)
-            if "stack_strings" in (res_basic.get("truncated") or {}):
-                ss_table.caption = f"truncated: total={res_basic['truncated']['stack_strings']}"
-            print(ss_table)
-        else:
-            print(f"\n{errorS} There is no stack string value found!\n")
-
-        # Extract tight strings
-        print(f"\n{infoS} Performing [bold green]tight string[white] extraction. Please wait...")
-        tight_strings = res_basic.get("tight_strings") or []
-        if tight_strings:
-            ss_table = Table()
-            ss_table.add_column("[bold green]Extracted Tight Strings", justify="center")
-            for ss in tight_strings:
-                ss_table.add_row(ss)
-            if "tight_strings" in (res_basic.get("truncated") or {}):
-                ss_table.caption = f"truncated: total={res_basic['truncated']['tight_strings']}"
-            print(ss_table)
-        else:
-            print(f"\n{errorS} There is no tight string value found!\n")
-
-        # String decoding via function emulation
-        print(f"\n{infoS} Performing string decode via function emulation. Please wait...")
-        if res_basic.get("decoded_skipped"):
-            print(f"{infoS} Skipped decoding: [bold red]{res_basic['decoded_skipped']}[white] functions to emulate (set SC0PE_FLOSS_FORCE_DECODE=1 to force).")
-            try:
-                p.terminate()
-            except Exception:
-                pass
-            p.join(5)
-            try:
-                q.close()
-                q.join_thread()
-            except Exception:
-                pass
-            return
-
-        if not do_decode:
-            try:
-                p.terminate()
-            except Exception:
-                pass
-            p.join(5)
-            try:
-                q.close()
-                q.join_thread()
-            except Exception:
-                pass
-            return
-
-        # Wait for decode phase separately; if it times out, keep basic results.
-        try:
-            res_decode = q.get(timeout=max(1, decode_timeout_sec))
-        except Exception:
-            try:
-                p.terminate()
-            except Exception:
-                pass
-            p.join(5)
-            try:
-                q.close()
-                q.join_thread()
-            except Exception:
-                pass
-            print(f"{errorS} FLOSS decode timed out after {decode_timeout_sec}s. Skipping decode...\n")
-            return
-
-        if isinstance(res_decode, dict) and res_decode.get("phase") == "error":
-            try:
-                p.terminate()
-            except Exception:
-                pass
-            p.join(5)
-            try:
-                q.close()
-                q.join_thread()
-            except Exception:
-                pass
-            print(f"{errorS} FLOSS decode error: [bold red]{res_decode['error']}[white]\n")
-            return
-
-        decoded_strings = (res_decode or {}).get("decoded_strings") or []
-        if decoded_strings:
-            ss_table = Table()
-            ss_table.add_column("[bold green]Decoded Strings", justify="center")
-            for ss in decoded_strings:
-                ss_table.add_row(ss)
-            if "decoded_strings" in ((res_decode or {}).get("truncated") or {}):
-                ss_table.caption = f"truncated: total={res_decode['truncated']['decoded_strings']}"
-            print(ss_table)
-        else:
-            print(f"\n{errorS} There is no decoded string value found!")
-
-        # Make sure the worker is gone.
-        if p.is_alive():
-            try:
-                p.terminate()
-            except Exception:
-                pass
-        p.join(5)
-        try:
-            q.close()
-            q.join_thread()
-        except Exception:
-            pass
 
     def statistics_method(self):
         datestamp = self.gather_timestamp()
@@ -912,11 +642,6 @@ class WindowsAnalyzer:
         # Get debug information
         self.get_debug_information()
 
-        try:
-            self.analyze_via_viv()
-        except:
-            print(f"{errorS} An error occured while analyzing functions! This file might have some [bold red]anti-analysis[white] technique!")
-
         # Try to parse target via pefile for get more information
         try:
             print(f"\n{infoS} Parsing section information...")
@@ -964,10 +689,6 @@ def main():
     yara_rule_scanner(windows_analyzer.rule_path, fileName, winrep)
     windows_analyzer.section_parser()
 
-    try:
-        windows_analyzer.analyze_via_viv()
-    except Exception:
-        print(f"{errorS} An error occured while analyzing functions! This file might have some [bold red]anti-analysis[white] technique!")
     windows_analyzer.statistics_method()
 
     # Print reports

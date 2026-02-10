@@ -1,5 +1,6 @@
 import sys
 import json
+import os
 try:
     # When imported as `Modules.*`
     from ...utils.helpers import err_exit
@@ -22,8 +23,15 @@ infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
 #--------------------------------------------- Gathering Qu1cksc0pe path variable
-sc0pe_path = open(".path_handler", "r").read()
-fileName = sys.argv[1]
+try:
+    sc0pe_path = open(".path_handler", "r").read().strip()
+except Exception:
+    # Allow running without `qu1cksc0pe.py` creating `.path_handler`.
+    sc0pe_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+try:
+    fileName = sys.argv[1]
+except Exception:
+    fileName = ""
 
 # Compatibility
 path_seperator = "/"
@@ -46,9 +54,19 @@ class GolangParser:
     def __init__(self, target_file_name):
         self._target_file_name = target_file_name
         self._golang_sections = []
-        self._all_patterns = open("temp.txt", "r").read().split("\n")
+        # Reset global category buckets to avoid cross-run accumulation.
+        for k in CATEGORIES:
+            CATEGORIES[k] = []
+        try:
+            self._all_patterns = open("temp.txt", "r", encoding="utf-8", errors="ignore").read().split("\n")
+        except Exception:
+            self._all_patterns = []
         self._section_buffer = None
-        self._pattern_categories = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}golang_categories.json"))
+        try:
+            self._pattern_categories = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}golang_categories.json"))
+        except Exception as e:
+            self._pattern_categories = {}
+            print(f"{errorS} Failed to load golang_categories.json: {e}")
 
     def categorize_patterns(self):
         print(f"\n{infoS} Categorizing extracted patterns...")

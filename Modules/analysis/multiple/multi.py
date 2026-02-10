@@ -14,7 +14,11 @@ if sys.platform == "win32":
     path_seperator = "\\"
 
 # Gathering Qu1cksc0pe path variable
-sc0pe_path = open(".path_handler", "r").read()
+try:
+    sc0pe_path = open(".path_handler", "r").read().strip()
+except Exception:
+    # Allow running modules directly without `qu1cksc0pe.py` creating `.path_handler`.
+    sc0pe_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 
 # Get whitelist domains for "chk_wlist" method
 whitelist_domains = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}whitelist_domains.txt", "r").read().split("\n")
