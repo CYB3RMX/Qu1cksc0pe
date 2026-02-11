@@ -666,9 +666,53 @@ class WindowsAnalyzer:
         self.check_for_valid_registry_keys()
         self.check_for_interesting_stuff()
         self.detect_embedded_PE()
+
+        # Some MSI samples may fail PE parsing in gather_windows_imports_and_exports fallback path.
+        # Try a best-effort parse here; if still unavailable, continue without PE-dependent stages.
+        if not hasattr(self, "binaryfile"):
+            try:
+                self.binaryfile = pf.PE(self.target_file, fast_load=True)
+                self.binaryfile.parse_data_directories(
+                    directories=[
+                        pf.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_IMPORT"],
+                        pf.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_EXPORT"],
+                        pf.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_DEBUG"],
+                    ]
+                )
+            except Exception:
+                self.binaryfile = None
+
+        if self.binaryfile is not None:
+            self.get_debug_information()
+            try:
+                print(f"\n{infoS} Parsing section information...")
+                self.section_parser()
+            except Exception:
+                pass
+            try:
+                print(f"\n{infoS} Checking linked DLL files...")
+                self.dll_files()
+            except Exception:
+                pass
         # Yara rule match
         print(f"\n{infoS} Performing YARA rule matching...")
         yara_rule_scanner(self.rule_path, self.target_file, winrep)
+
+        # Always fill basic fields, even when binaryfile metadata is unavailable.
+        winrep["filename"] = self.target_file
+        calc_hashes(self.target_file, winrep)
+
+        if self.binaryfile is not None:
+            try:
+                self.statistics_method()
+            except SystemExit:
+                # statistics_method may exit early for low-function samples; still allow report save.
+                pass
+            except Exception as e:
+                print(f"{errorS} MSI statistics stage failed: [bold red]{e}[white]")
+
+        if get_argv(2) == "True":
+            save_report("windows", winrep)
 
 def main():
     if len(sys.argv) < 2:

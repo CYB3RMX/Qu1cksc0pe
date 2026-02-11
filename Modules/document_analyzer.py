@@ -108,6 +108,14 @@ report = {
             "xlm": 0
         }
     },
+    "script_analysis": {
+        "language": "",
+        "vbe_encoded": False,
+        "categories": {},
+        "createobject_values": [],
+        "shell_commands": [],
+        "decoded_payload_hints": []
+    },
     "embedded_files": [],
     "extracted_files": [],
     "sections": {},
@@ -334,7 +342,13 @@ class DocumentAnalyzer:
             magic_buf = file_ptr.read(8)
         doc_type = subprocess.run(["file", self.targetFile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         decoded_doc_type = doc_type.stdout.decode()
+        lower_file = self.targetFile.lower()
+        lower_magic = decoded_doc_type.lower()
         report["file_magic"] = decoded_doc_type.strip()
+        if lower_file.endswith((".vbs", ".vbe", ".vba", ".vb", ".bas", ".cls", ".frm")):
+            return "vbscript"
+        elif "vbscript" in lower_magic or "visual basic" in lower_magic:
+            return "vbscript"
         if "Microsoft Word" in decoded_doc_type or "Microsoft Excel" in decoded_doc_type or "Microsoft Office Word" in decoded_doc_type:
             return "docscan"
         elif "PDF document" in decoded_doc_type:
@@ -1365,6 +1379,191 @@ class DocumentAnalyzer:
         print(f"{infoS} Parsing contents of the target document...")
         self.Structure()
 
+    def VBScriptAnalysis(self):
+        print(f"{infoS} Performing VBScript/VBA static analysis...")
+        try:
+            with open(self.targetFile, "rb") as fptr:
+                script_bytes = fptr.read()
+        except Exception as exc:
+            err_exit(f"{errorS} Could not read target script. Details: {exc}")
+
+        script_text = script_bytes.decode("utf-8", errors="ignore")
+        if script_text.strip() == "":
+            script_text = allstr
+
+        lower_file = self.targetFile.lower()
+        if lower_file.endswith(".vbs") or lower_file.endswith(".vbe"):
+            report["script_analysis"]["language"] = "VBScript"
+        elif lower_file.endswith(".vba") or lower_file.endswith(".vb") or lower_file.endswith(".bas") or lower_file.endswith(".cls") or lower_file.endswith(".frm"):
+            report["script_analysis"]["language"] = "VBA Script"
+        else:
+            report["script_analysis"]["language"] = "VB Family Script"
+
+        # VBE encoded scripts usually contain this marker.
+        if "#@~^" in script_text:
+            report["script_analysis"]["vbe_encoded"] = True
+            self._add_finding("VBScript", "vbe_encoded_marker")
+            print(f"{infoS} Encoded VBE marker detected ([bold yellow]#@~^[white]).")
+
+        vb_patterns = {
+            "AutoExec": [
+                r"\bAuto(?:Open|Close|Exec|Exit)\b",
+                r"\bDocument_(?:Open|Close)\b",
+                r"\bWorkbook_(?:Open|Close)\b"
+            ],
+            "Execution": [
+                r"\bCreateObject\s*\(",
+                r"\bGetObject\s*\(",
+                r"\bWScript\.Shell\b",
+                r"\bShell\s*\(",
+                r"\bExec\s*\(",
+                r"\bRun\s*\(",
+                r"\bExecute(?:Global)?\b",
+                r"\bEval\b"
+            ],
+            "Network": [
+                r"\bMSXML2\.(?:XMLHTTP|ServerXMLHTTP)\b",
+                r"\bWinHttp\.WinHttpRequest\b",
+                r"\bURLDownloadToFile(?:A|W)?\b",
+                r"\bADODB\.Stream\b",
+                r"\bbitsadmin\b",
+                r"\bcertutil\b"
+            ],
+            "Persistence": [
+                r"\bRegWrite\b",
+                r"\bCurrentVersion\\Run(?:Once)?\b",
+                r"\b(?:HKCU|HKLM)\\",
+                r"\bschtasks\b",
+                r"\bwinmgmts\b",
+                r"\bWin32_Process\b",
+                r"\bStartup\b"
+            ],
+            "Obfuscation": [
+                r"\bChrW?\s*\(",
+                r"\bStrReverse\s*\(",
+                r"\bSplit\s*\(",
+                r"\bJoin\s*\(",
+                r"\bReplace\s*\(",
+                r"\bMid(?:B)?\s*\(",
+                r"\bAscW?\s*\(",
+                r"\bXor\b",
+                r"\bFromBase64String\b",
+                r"[A-Za-z0-9+/]{100,}={0,2}"
+            ],
+            "FileSystem": [
+                r"\bScripting\.FileSystemObject\b",
+                r"\bCreateTextFile\b",
+                r"\bOpenTextFile\b",
+                r"\bSaveToFile\b",
+                r"\bWriteFile\b",
+                r"\bCopyFile\b"
+            ]
+        }
+
+        summary_table = Table(title="* VBScript/VBA Pattern Summary *", title_style="bold italic cyan", title_justify="center")
+        summary_table.add_column("[bold green]Category", justify="center")
+        summary_table.add_column("[bold green]Count", justify="center")
+
+        for category, p_list in vb_patterns.items():
+            hits = []
+            seen = set()
+            for pattern in p_list:
+                for mt in re.finditer(pattern, script_text, re.IGNORECASE):
+                    matched = mt.group(0).strip()
+                    if matched and matched not in seen:
+                        seen.add(matched)
+                        hits.append(self._sanitize_text(matched))
+            if hits:
+                summary_table.add_row(f"[bold red]{category}", str(len(hits)))
+                self._add_finding("VBScript", f"{category.lower()}={len(hits)}")
+            else:
+                summary_table.add_row(category, "0")
+            report["script_analysis"]["categories"][category] = hits
+            self._register_section(f"vbscript_{category.lower()}_hits", hits)
+
+        print(summary_table)
+
+        # Common COM object and command extraction.
+        create_obj = []
+        for mt in re.finditer(r'CreateObject\s*\(\s*"([^"]+)"\s*\)', script_text, re.IGNORECASE):
+            val = self._sanitize_text(mt.group(1))
+            if val not in create_obj:
+                create_obj.append(val)
+        report["script_analysis"]["createobject_values"] = create_obj
+        if create_obj:
+            obj_table = Table(title="* CreateObject Values *", title_style="bold italic cyan", title_justify="center")
+            obj_table.add_column("[bold green]ProgID", justify="center")
+            for obj in create_obj:
+                obj_table.add_row(obj)
+            print(obj_table)
+
+        shell_cmds = []
+        cmd_patterns = [
+            r'(?:WScript\.Shell\s*\.\s*Run|WScript\.Shell\s*\.\s*Exec)\s*\(\s*"([^"]+)"',
+            r'\bShell\s*\(\s*"([^"]+)"'
+        ]
+        for cp in cmd_patterns:
+            for mt in re.finditer(cp, script_text, re.IGNORECASE):
+                cmd = self._sanitize_text(mt.group(1).strip())
+                if cmd and cmd not in shell_cmds:
+                    shell_cmds.append(cmd)
+        report["script_analysis"]["shell_commands"] = shell_cmds
+        if shell_cmds:
+            cmd_table = Table(title="* Potential Shell Commands *", title_style="bold italic cyan", title_justify="center")
+            cmd_table.add_column("[bold green]Command", justify="center")
+            for cmd in shell_cmds:
+                cmd_table.add_row(cmd)
+                self._add_finding("VBScript", "shell_command")
+            print(cmd_table)
+
+        # Decode likely long Base64 payloads for quick triage hints.
+        decoded_hints = []
+        b64_candidates = re.findall(r"(?:[A-Za-z0-9+/]{4}){30,}(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?", script_text)
+        for candidate in b64_candidates[:30]:
+            try:
+                decoded = base64.b64decode(candidate).decode("utf-8", errors="ignore")
+            except Exception:
+                continue
+            decoded = decoded.strip()
+            if len(decoded) < 20:
+                continue
+            printable_ratio = sum(ch.isprintable() for ch in decoded) / max(len(decoded), 1)
+            if printable_ratio < 0.80:
+                continue
+            hint, truncated = self._sanitize_and_truncate(decoded, 200)
+            if hint and hint not in decoded_hints:
+                decoded_hints.append(hint)
+            if truncated:
+                self._add_finding("VBScript", "decoded_payload_truncated")
+            if len(decoded_hints) >= 15:
+                break
+        report["script_analysis"]["decoded_payload_hints"] = decoded_hints
+        self._register_section("vbscript_decoded_payload_hint_count", len(decoded_hints))
+        if decoded_hints:
+            dec_table = Table(title="* Decoded Payload Hints *", title_style="bold italic cyan", title_justify="center")
+            dec_table.add_column("[bold green]Snippet", justify="center")
+            for hint in decoded_hints:
+                dec_table.add_row(hint)
+            print(dec_table)
+
+        # URL extraction
+        print(f"\n{infoS} Looking for embedded URL values...")
+        url_hits = self._extract_normalized_urls(script_text)
+        if url_hits:
+            url_table = Table(title="* Extracted URLs *", title_style="bold italic cyan", title_justify="center")
+            url_table.add_column("[bold green]URL", justify="center")
+            for url in url_hits:
+                url_table.add_row(url)
+                self._append_unique("extracted_urls", url)
+            print(url_table)
+            self._add_finding("VBScript", f"url_count={len(url_hits)}")
+        else:
+            print(f"{errorS} There is no URL value found!")
+
+        # Perform Yara scan
+        print(f"\n{infoS} Performing YARA rule matching...")
+        yara_rule_scanner(self.rule_path, self.targetFile, report)
+
 # Execution area
 try:
     docObj = DocumentAnalyzer(targetFile)
@@ -1380,6 +1579,8 @@ try:
         docObj.HTMLanalysis()
     elif ext == "rtf":
         docObj.RTFAnalysis()
+    elif ext == "vbscript":
+        docObj.VBScriptAnalysis()
     elif ext == "unknown":
         print(f"{errorS} Analysis technique is not implemented for now. Please send the file to the developer for further analysis.")
     else:

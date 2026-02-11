@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-
+	
 import re
 import io
 import sys
@@ -10,9 +10,11 @@ import base64
 import binascii
 import subprocess
 import warnings
-
-from utils.helpers import err_exit
-
+import os
+import hashlib
+	
+from utils.helpers import err_exit, get_argv, save_report
+	
 try:
     from rich import print
     from rich.table import Table
@@ -22,9 +24,13 @@ except:
 # Legends
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
-
+	
 # Gathering Qu1cksc0pe path variable
-sc0pe_path = open(".path_handler", "r").read()
+try:
+    sc0pe_path = open(".path_handler", "r").read().strip()
+except Exception:
+    # Allow running module directly without `.path_handler`.
+    sc0pe_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 # Configurating strings parameter and make compatability
 path_seperator = "/"
@@ -51,30 +57,107 @@ class PowerShellAnalyzer:
             self.all_strings = self.target_buffer_16bit.stdout.decode().split("\n")+self.target_buffer_normal.stdout.decode().split("\n")
         else:
             self.all_strings = self.target_buffer_normal.stdout.decode().split("\n")
-        self.pattern_b64 = [r"\[(?i)sYsteM\.coNvert\]::FROmbaSe64StRiNG\(\s*[\'\"]([^']*)[\'\"]\s*\)|\[System\.Convert\]::FromBase64String\(\s*'([A-Za-z0-9+/=]+)'\s*\)",
-                            r"[A-Za-z0-9+/=]+"
+        # NOTE: Avoid inline flag blocks like `(?i)` mid-pattern; use re.IGNORECASE in calls instead.
+        self.pattern_b64 = [
+                            r"\[sYsteM\.coNvert\]::FROmbaSe64StRiNG\(\s*[\'\"]([^'\"]*)[\'\"]\s*\)|\[System\.Convert\]::FromBase64String\(\s*'([A-Za-z0-9+/=]+)'\s*\)",
+                            r"[A-Za-z0-9+/=]{40,}"
                         ]
         self.pattern_ascii = r'\[Byte\[\]\]\((\d+(?:,\d+)*)\)'
         self.pattern_hex = r'\[System\.Convert\]::fromHEXString\(\'([0-9a-fA-F]+)\'\)'
+
+        # JSON report object (used when qu1cksc0pe runs with --report/--ai).
+        self.report = {
+            "filename": self.target_file,
+            "file_type": "POWERSHELL",
+            "hash_md5": "",
+            "hash_sha1": "",
+            "hash_sha256": "",
+            "matched_patterns": {},
+            "extracted_paths": [],
+            "possible_executions": [],
+            "payloads": {
+                "xor_key": "",
+                "xor_detected": False,
+                "decoded_files": [],
+                "non_xored_detected": False,
+                "non_xored_files": [],
+                "normal_base64_decoded_files": [],
+            },
+            "errors": [],
+        }
+        self._calc_hashes_into_report()
+        self._write_temp_txt()
+
+    def _calc_hashes_into_report(self):
+        try:
+            md5 = hashlib.md5()
+            sha1 = hashlib.sha1()
+            sha256 = hashlib.sha256()
+            with open(self.target_file, "rb") as f:
+                for chunk in iter(lambda: f.read(8192), b""):
+                    md5.update(chunk)
+                    sha1.update(chunk)
+                    sha256.update(chunk)
+            self.report["hash_md5"] = md5.hexdigest()
+            self.report["hash_sha1"] = sha1.hexdigest()
+            self.report["hash_sha256"] = sha256.hexdigest()
+        except Exception:
+            pass
+
+    def _write_temp_txt(self):
+        """
+        smart_analyzer.py enriches LLM context by reading ./temp.txt.
+        PowerShell analysis previously didn't create it, so --ai had less evidence.
+        """
+        try:
+            if str(os.environ.get("SC0PE_POWERSHELL_WRITE_TEMP_TXT", "1")).strip() == "0":
+                return
+        except Exception:
+            pass
+
+        try:
+            # Prefer the strings output (already collected). Keep it simple and ASCII-safe.
+            data = "\n".join([s for s in (self.all_strings or []) if isinstance(s, str)])
+            with open("temp.txt", "w", encoding="utf-8", errors="ignore") as f:
+                f.write(data)
+        except Exception:
+            # Best-effort only.
+            pass
+
+    def _extract_b64_from_match(self, m):
+        # re.findall with alternation returns tuples; pick the first non-empty group.
+        if isinstance(m, tuple):
+            for it in m:
+                if it:
+                    return str(it)
+            return ""
+        return str(m or "")
 
     def save_data_into_file(self, output_file, data):
         with open(output_file, "wb") as ff:
             ff.write(data)
         print(f"{infoS} Decoded payload saved into: [bold green]{output_file}[white]")
-
+        try:
+            self.report["payloads"]["decoded_files"].append(output_file)
+        except Exception:
+            pass
+	
     def scan_code_patterns(self):
         print(f"{infoS} Performing pattern scan...")
+        self.report["matched_patterns"] = {}
         for pat in powershell_code_patterns:
             pat_table = Table()
             pat_table.add_column(f"Extracted patterns about [bold green]{pat}[white]", justify="center")
+            found = []
             for code in powershell_code_patterns[pat]["patterns"]:
                 matchh = re.findall(code, str(self.all_strings), re.IGNORECASE)
                 if matchh != []:
                     pat_table.add_row(code)
-                    powershell_code_patterns[pat]["occurence"] += 1
-            if powershell_code_patterns[pat]["occurence"] != 0:
+                    found.append(code)
+            if found:
                 print(pat_table)
-
+                self.report["matched_patterns"][pat] = found
+	
     def check_executions(self):
         print(f"\n{infoS} Performing detection of possible executions...")
         exec_patterns = [
@@ -93,6 +176,10 @@ class PowerShellAnalyzer:
             if matchs != []:
                 for mm in matchs:
                     exec_table.add_row(mm)
+                    try:
+                        self.report["possible_executions"].append(mm)
+                    except Exception:
+                        pass
                     swc += 1
         if swc != 0:
             print(exec_table)
@@ -108,6 +195,11 @@ class PowerShellAnalyzer:
         if mathces != []:
             for path in mathces:
                 path_table.add_row(path)
+                try:
+                    if path not in self.report["extracted_paths"]:
+                        self.report["extracted_paths"].append(path)
+                except Exception:
+                    pass
             print(path_table)
         else:
             print(f"{errorS} There is no pattern about path values...\n")
@@ -126,6 +218,11 @@ class PowerShellAnalyzer:
         # First we need to check Bytearrays (Metasploit, CobaltStrike)
         if self.check_for_xor_key() is not None:
             print(f"{infoS} Looks like we have a possible [bold green]XOR\'ed[white] payload. Attempting to detect its type...")
+            try:
+                self.report["payloads"]["xor_detected"] = True
+                self.report["payloads"]["xor_key"] = str(self.check_for_xor_key() or "")
+            except Exception:
+                pass
             self.detect_and_carve_base64_payloads_xored()
             self.detect_and_carve_ascii_number_payloads_xored()
             self.detect_and_carve_hex_values_payloads_xored()
@@ -163,7 +260,9 @@ class PowerShellAnalyzer:
             xor_key = self.check_for_xor_key()
             if xor_key is not None:
                 print(f"{infoS} XOR Key: [bold green]{xor_key}[white]")
-                self.xor_decrypt_and_save(payload_type="base64", payload=b64matches[0][0], xor_key=xor_key)
+                payload = self._extract_b64_from_match(b64matches[0])
+                if payload:
+                    self.xor_decrypt_and_save(payload_type="base64", payload=payload, xor_key=xor_key)
             else:
                 print(f"{errorS} Couldn\'t find XOR key!\n")
         else:
@@ -202,13 +301,21 @@ class PowerShellAnalyzer:
     # ------------------------------------ non-XORED payload detection and extraction
     def check_for_non_xored_payloads_presence(self):
         print(f"{infoS} Performing [bold green]non-XOR\'ed[white] payload detection...")
-        b64_payload = re.findall(self.pattern_b64[0], str(self.all_strings), re.IGNORECASE)
+        try:
+            b64_payload = re.findall(self.pattern_b64[0], str(self.all_strings), re.IGNORECASE)
+        except re.error as e:
+            self.report["errors"].append(f"regex_error_base64_pattern: {e}")
+            b64_payload = []
         ascii_payload = re.findall(self.pattern_ascii, str(self.all_strings), re.IGNORECASE)
         hex_payload = re.findall(self.pattern_hex, str(self.all_strings), re.IGNORECASE)
         pe_payload = re.findall(r"4d5a90", str(self.all_strings), re.IGNORECASE)
         if b64_payload != [] or ascii_payload != [] or hex_payload != [] or pe_payload != []:
             if self.check_for_xor_key() is None:
                 print(f"{infoS} Looks like we have a possible [bold green]non-XOR\'ed[white] payload. Attempting to detect its type...")
+                try:
+                    self.report["payloads"]["non_xored_detected"] = True
+                except Exception:
+                    pass
                 self.detect_and_carve_b64_non_xored()
                 self.detect_and_carve_pe_executable_non_xored()
             else:
@@ -221,7 +328,10 @@ class PowerShellAnalyzer:
         print(f"\n{infoS} Searching for: [bold green]BASE64 Encoded[white] payloads...")
         b64matches = re.findall(self.pattern_b64[0], str(self.all_strings), re.IGNORECASE)
         if b64matches != []:
-            b64_data = base64.b64decode(b64matches[0][0])
+            payload = self._extract_b64_from_match(b64matches[0])
+            if not payload:
+                return
+            b64_data = base64.b64decode(payload)
             print(f"{infoS} We have a [bold green]BASE64[white] encoded payload. Performing decode and extract...")
             print(f"{infoS} Checking for compressed data presence...")
             deflatestream = re.findall(r'Io\.CoMpRESSiOn\.defLaTEstReam', str(self.all_strings), re.IGNORECASE)
@@ -231,14 +341,20 @@ class PowerShellAnalyzer:
                 decompress_obj = zlib.decompressobj(-zlib.MAX_WBITS)
                 decompressed_data = decompress_obj.decompress(b64_data)
                 output = io.BytesIO(decompressed_data).read().decode('ascii')
-                self.save_data_into_file(output_file="qu1cksc0pe_decoded_b64_payload.bin", data=output.encode())
+                out_name = "qu1cksc0pe_decoded_b64_payload.bin"
+                self.save_data_into_file(output_file=out_name, data=output.encode())
+                self.report["payloads"]["non_xored_files"].append(out_name)
             elif gzipstream != []:
                 print(f"{infoS} Gzip data found! Attempting to decompress...")
                 decompressed_data = gzip.decompress(b64_data)
-                self.save_data_into_file(output_file="qu1cksc0pe_decoded_b64_payload.bin", data=decompressed_data)
+                out_name = "qu1cksc0pe_decoded_b64_payload.bin"
+                self.save_data_into_file(output_file=out_name, data=decompressed_data)
+                self.report["payloads"]["non_xored_files"].append(out_name)
             else:
                 print(f"{infoS} There is no compression. Extracting payload anyway...")
-                self.save_data_into_file(output_file="qu1cksc0pe_decoded_b64_payload.bin", data=b64_data)
+                out_name = "qu1cksc0pe_decoded_b64_payload.bin"
+                self.save_data_into_file(output_file=out_name, data=b64_data)
+                self.report["payloads"]["non_xored_files"].append(out_name)
         else:
             print(f"{errorS} There is no pattern about BASE64 encoded payloads!\n")
 
@@ -251,9 +367,14 @@ class PowerShellAnalyzer:
                 try:
                     decbf = base64.b64decode(enc)
                     if len(decbf.decode()) > 10:
-                        with open(f"qu1cksc0pe_decoded_b64_{len(decbf.decode())}.bin", "w") as ff:
+                        out_name = f"qu1cksc0pe_decoded_b64_{len(decbf.decode())}.bin"
+                        with open(out_name, "w") as ff:
                             ff.write(decbf.decode())
-                        print(f"{infoS} Decoded payload saved into: [bold green]qu1cksc0pe_decoded_b64_{len(decbf.decode())}.bin[white]")
+                        print(f"{infoS} Decoded payload saved into: [bold green]{out_name}[white]")
+                        try:
+                            self.report["payloads"]["normal_base64_decoded_files"].append(out_name)
+                        except Exception:
+                            pass
                 except:
                     continue
         else:
@@ -268,7 +389,12 @@ class PowerShellAnalyzer:
             for pat in self.all_strings:
                 if "4D5A90" in pat and "=" in pat:
                     sanitized = self.buffer_sanitizer(executable_buffer=pat.split("=")[1])
-                    self.save_data_into_file(output_file=f"qu1cksc0pe_extracted_pe_{counter}.exe", data=binascii.unhexlify(sanitized))
+                    out_name = f"qu1cksc0pe_extracted_pe_{counter}.exe"
+                    self.save_data_into_file(output_file=out_name, data=binascii.unhexlify(sanitized))
+                    try:
+                        self.report["payloads"]["non_xored_files"].append(out_name)
+                    except Exception:
+                        pass
                     counter += 1
         else:
             print(f"{errorS} There is no possible PE executable pattern found!\n")
@@ -282,12 +408,30 @@ class PowerShellAnalyzer:
 
         return executable_buffer
 
-# Execution
-target_pwsh = sys.argv[1]
-pwsh_analyzer = PowerShellAnalyzer(target_pwsh)
-pwsh_analyzer.scan_code_patterns()
-pwsh_analyzer.extract_path_values()
-pwsh_analyzer.check_executions()
-pwsh_analyzer.find_payloads_xored()
-pwsh_analyzer.check_for_non_xored_payloads_presence()
-pwsh_analyzer.check_only_legit_base64()
+def main():
+    if len(sys.argv) < 2:
+        err_exit("Usage: powershell_analyzer.py <file> [save_report=True|False]")
+
+    target_pwsh = sys.argv[1]
+    pwsh_analyzer = PowerShellAnalyzer(target_pwsh)
+    try:
+        pwsh_analyzer.scan_code_patterns()
+        pwsh_analyzer.extract_path_values()
+        pwsh_analyzer.check_executions()
+        pwsh_analyzer.find_payloads_xored()
+        pwsh_analyzer.check_for_non_xored_payloads_presence()
+        pwsh_analyzer.check_only_legit_base64()
+    except Exception as e:
+        # Keep module alive; allow --ai flow to proceed with a partial report.
+        try:
+            pwsh_analyzer.report["errors"].append(f"analysis_error: {e}")
+        except Exception:
+            pass
+        print(f"{errorS} PowerShell analysis error: {e}")
+
+    if get_argv(2) == "True":
+        save_report("powershell", pwsh_analyzer.report)
+
+
+if __name__ == "__main__":
+    main()
