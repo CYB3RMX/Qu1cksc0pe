@@ -27,6 +27,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps us
 | Android Files (.apk, .jar, .dex) | Static, Dynamic(for now .apk only) |
 | Golang Binaries (Linux) | Static |
 | Document Files | Static |
+| VBScript/VBA Family (.vbs, .vbe, .vba, .vb, .bas, .cls, .frm) | Static (`--docs`) |
 | Archive Files (.zip, .rar, .ace) | Static |
 | PCAP Files (.pcap) | Static |
 | Powershell Scripts | Static |
@@ -41,6 +42,14 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
+<b>11/02/2026</b>
+- [X] Document analyzer: added VBScript/VBA family static analysis for `.vbs`, `.vbe`, `.vba`, `.vb`, `.bas`, `.cls`, `.frm` (pattern summary, `CreateObject` values, shell command hits, decoded payload hints).
+- [X] AI analyzer model selection is now explicit: only the model in `Systems/Multiple/multiple.conf` (`[Ollama] model`) is used.
+- [X] AI analyzer performance/stability: `temp.txt` is parsed/sampled before prompt building; large reports are compacted with size guards; incomplete/truncated LLM output is retried.
+- [X] AI output cleanup: hidden/internal thinking blocks are stripped; partial `<<SC0PE_IOCS_JSON_*>>` blocks are removed from UI/report when response is cut.
+- [X] LLM IoC quality improvements: local analysis paths are filtered from `file_paths`; stricter domain/IP validation added; file-like pseudo-domains (e.g. `sheet1.xml`) are dropped.
+- [X] Email analyzer hardening: Python 3.14 event loop compatibility for DNSBL checks, noisy DNSBL false-positive filtering, and reliable extracted-attachment cleanup.
+
 <b>10/02/2026</b>
 - [X] Removed FLOSS/Vivisect from the project (no string decode/emulation stage in Windows analysis).
 - [X] Linux static analyzer: Golang special analysis findings are now saved into the Linux JSON report under `golang`.
@@ -77,6 +86,7 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 > [!NOTE]
 > If you encounter issues with the Python modules, creating a Python virtual environment (python_venv) should resolve them.
 > For detailed setup and troubleshooting (dependencies, Docker usage, Windows notes), see the <a href="https://zread.ai/CYB3RMX/Qu1cksc0pe/1-overview">project overview documentation</a>.
+> AI model selection is manual: set `[Ollama] model` in `Systems/Multiple/multiple.conf` to the exact model you want to use.
 
 ```bash
 # First you need to clone Qu1cksc0pe with this command
@@ -126,10 +136,36 @@ python .\\qu1cksc0pe.py --file app.apk --analyze --report
 | `SC0PE_AUTO_DECRYPT_CHAIN` | `0` | Document analyzer: when an Office document decryption succeeds, automatically re-runs analysis on the decrypted output (best-effort). |
 | `SC0PE_AI_INTERESTING_PATTERNS_MAX_KEYS` | `25` | AI analyzer: limit how many keys from `interesting_string_patterns` are included in the LLM prompt. |
 | `SC0PE_AI_INTERESTING_PATTERNS_MAX_VALUES` | `30` | AI analyzer: limit list size per `interesting_string_patterns` key in the LLM prompt. |
-| `SC0PE_AI_TEMP_TXT_EXCERPT_CHARS` | `2500` | AI analyzer: limit how many characters of `temp_txt` are included in the LLM prompt. Set `0` to omit the excerpt. |
-| `SC0PE_AI_TEMP_TXT_MAX_STRINGS` | `300` | AI analyzer: limit number of meaningful strings selected from `temp.txt` for the LLM prompt. |
+| `SC0PE_AI_INCLUDE_TEMP_EXCERPT` | `0` | AI analyzer: include raw `temp.txt` excerpt in prompt when set to `1` (default is parsed/summarized mode without raw excerpt). |
+| `SC0PE_AI_TEMP_TXT_EXCERPT_CHARS` | `800` | AI analyzer: character limit for raw `temp.txt` excerpt (used when `SC0PE_AI_INCLUDE_TEMP_EXCERPT=1`). |
+| `SC0PE_AI_TEMP_TXT_MAX_STRINGS` | `50` | AI analyzer: limit number of meaningful strings selected from parsed `temp.txt`. |
 | `SC0PE_AI_TEMP_TXT_MIN_LEN` | `6` | AI analyzer: minimum length for a meaningful string extracted from `temp.txt`. |
 | `SC0PE_AI_TEMP_TXT_MAX_LEN` | `180` | AI analyzer: maximum length for a meaningful string extracted from `temp.txt`. |
+| `SC0PE_AI_TEMP_PARSE_MAX_BYTES` | `2097152` | AI analyzer: max bytes to parse from `temp.txt` while building compact evidence. |
+| `SC0PE_AI_TEMP_PARSE_MAX_LINES` | `12000` | AI analyzer: max lines to parse from `temp.txt`. |
+| `SC0PE_AI_TEMP_SAMPLE_LINES` | `2500` | AI analyzer: sample size used for meaningful-string scoring. |
+| `SC0PE_AI_TEMP_IOC_CAP` | `40` | AI analyzer: cap for IoC candidates parsed from `temp.txt`. |
+| `SC0PE_AI_TEMP_IOC_PROMPT_MAX` | `20` | AI analyzer: max parsed IoC values per kind sent to LLM prompt. |
+| `SC0PE_AI_MAX_REPORT_CHARS` | `180000` | AI analyzer: threshold for full-report prompt mode; larger reports are compacted automatically. |
+| `SC0PE_AI_COMPACT_MAX_LIST_ITEMS` | `40` | AI analyzer: list sampling limit in compact report mode. |
+| `SC0PE_AI_COMPACT_MAX_STR` | `220` | AI analyzer: max string length per field in compact report mode. |
+| `SC0PE_AI_COMPACT_MAX_DEPTH` | `4` | AI analyzer: nested depth limit in compact report mode. |
+| `SC0PE_AI_OLLAMA_HTTP_TIMEOUT` | `60` | AI analyzer: Ollama HTTP call timeout (seconds). |
+| `SC0PE_AI_HTTP_PROBE_TIMEOUT` | `20` | AI analyzer: short probe timeout before full HTTP generation call (seconds). |
+| `SC0PE_AI_OLLAMA_CLI_TIMEOUT` | `90` | AI analyzer: Ollama CLI call timeout (seconds). |
+| `SC0PE_AI_TOTAL_BUDGET` | `120` | AI analyzer: total generation budget across retries/fallback attempts (seconds). |
+| `SC0PE_AI_OLLAMA_NUM_PREDICT` | `700` | AI analyzer: default generation token budget per Ollama call. |
+| `SC0PE_AI_OLLAMA_RETRY_NUM_PREDICT` | `1400` | AI analyzer: generation token budget for retry when output looks truncated. |
+| `SC0PE_AI_OLLAMA_NUM_CTX` | `8192` | AI analyzer: Ollama context window setting. |
+| `SC0PE_AI_DISABLE_THINK` | `1` | AI analyzer: sends `think=false` (if supported) and removes thinking artifacts from displayed/saved output. |
+| `SC0PE_AI_ALLOW_SHORT_DOMAINS` | `0` | IoC sanitizer: allow very short SLD domains (disabled by default to reduce false positives). |
+| `SC0PE_AI_MIN_SLD_LEN` | `4` | IoC sanitizer: minimum registrable-label length for domain validation. |
+| `SC0PE_AI_ALLOW_FILELIKE_TLDS` | `0` | IoC sanitizer: when `0`, filters file-like pseudo-domains such as `sheet1.xml`. |
+| `SC0PE_AI_KEEP_LOCAL_PATHS` | `0` | IoC sanitizer: when `0`, removes local analysis machine paths from `file_paths`. |
+| `SC0PE_EMAIL_DNSBL_FILTER_NOISY` | `1` | Email analyzer: filter noisy DNSBL providers to reduce false positives. |
+| `SC0PE_EMAIL_DNSBL_ALLOW_UNKNOWN` | `0` | Email analyzer: include/exclude DNSBL hits with unknown category. |
+| `SC0PE_EMAIL_DNSBL_NOISY_PROVIDERS` | unset | Email analyzer: comma-separated extra DNSBL providers to treat as noisy. |
+| `SC0PE_AUTO_CLEANUP_ATTACHMENTS` | unset | Email analyzer: set `1` for auto-delete, `0` for never-delete, unset for interactive prompt. |
 | `OLLAMA_HOST` | `http://127.0.0.1:11434` | AI report analysis backend (Ollama). Set this if Ollama is remote or on a different host/port. |
 | `JAVA_HOME` | unset | Android analyzer: helps locate Java runtime for JADX. Set this if Java is installed but not detected. |
 
@@ -187,6 +223,7 @@ python .\\qu1cksc0pe.py --file app.apk --analyze --report
 - OneNote Documents (.one)
 - HTML Documents (.htm, .html)
 - Rich Text Format Documents (.rtf)
+- VBScript/VBA Family (.vbs, .vbe, .vba, .vb, .bas, .cls, .frm)
 
 <b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_document --docs```<br>
 ![docs](https://user-images.githubusercontent.com/42123683/189416778-f7f93d49-7ff0-4eb5-9898-53e63e5833a1.gif)

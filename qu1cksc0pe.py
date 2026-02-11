@@ -164,6 +164,7 @@ def _maybe_run_ai():
 def BasicAnalyzer(analyzeFile):
     print(f"{infoS} Analyzing: [bold green]{analyzeFile}[white]")
     fileType = str(pr.magic_file(analyzeFile))
+    lower_ext = os.path.splitext(analyzeFile)[1].lower()
     # Windows Analysis
     if "Windows Executable" in fileType or ".msi" in fileType or ".dll" in fileType or ".exe" in fileType:
         print(f"{infoS} Target OS: [bold green]Windows[white]\n")
@@ -229,13 +230,28 @@ def BasicAnalyzer(analyzeFile):
     # Powershell analysis
     elif ".ps1" in analyzeFile:
         print(f"{infoS} Performing [bold green]Powershell Script[white] analysis...\n")
-        execute_module(f"powershell_analyzer.py \"{analyzeFile}\"")
+        if args.report:
+            execute_module(f"powershell_analyzer.py \"{analyzeFile}\" True")
+        else:
+            execute_module(f"powershell_analyzer.py \"{analyzeFile}\" False")
+        _maybe_run_ai()
+
+    # VBScript/VBA family analysis
+    elif lower_ext in (".vbs", ".vbe", ".vba", ".vb", ".bas", ".cls", ".frm"):
+        print(f"{infoS} Performing [bold green]VBScript/VBA[white] analysis...\n")
+        if args.report:
+            execute_module(f"document_analyzer.py \"{analyzeFile}\" True")
+        else:
+            execute_module(f"document_analyzer.py \"{analyzeFile}\" False")
         _maybe_run_ai()
 
     # Email file analysis
     elif "email message" in fileType or "message/rfc822" in fileType:
         print(f"{infoS} Performing [bold green]Email File[white] analysis...\n")
-        execute_module(f"email_analyzer.py \"{analyzeFile}\"")
+        if args.report:
+            execute_module(f"email_analyzer.py \"{analyzeFile}\" True")
+        else:
+            execute_module(f"email_analyzer.py \"{analyzeFile}\" False")
         _maybe_run_ai()
     else:
         err_exit("\n[bold white on red]File type not supported. Make sure you are analyze executable files or document files.\n[bold]>>> If you want to scan document files try [bold green][i]--docs[/i] [white]argument.")
