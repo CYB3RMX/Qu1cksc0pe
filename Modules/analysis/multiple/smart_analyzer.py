@@ -915,6 +915,23 @@ _NON_DOMAIN_FILELIKE_TLDS = {
     "png", "jpg", "jpeg", "gif", "bmp", "tiff", "svg", "ico", "webp",
     "mp3", "wav", "flac", "mp4", "mkv", "avi", "mov",
 }
+_COMMON_GTLDS_STRICT = {
+    # High-frequency gTLDs seen in malware IoCs / threat feeds
+    "com", "net", "org", "info", "biz", "name", "pro", "xyz", "top", "site", "online", "store", "shop",
+    "app", "dev", "io", "me", "cc", "live", "link", "click", "work", "club", "pw", "win", "host", "space",
+    "tech", "cloud", "services", "support", "today", "news", "blog", "agency", "digital", "media", "email",
+    "world", "website", "monster", "finance", "trade", "download",
+    # Infrastructure / platform
+    "gov", "edu", "mil", "int", "arpa",
+}
+_NAMESPACE_DOMAIN_TOKENS = {
+    "system", "microsoft", "mscorlib", "netstandard", "runtime", "visualbasic", "codedom",
+    "compiler", "collections", "componentmodel", "configuration", "drawing", "resources",
+    "windows", "forms", "interops", "interopservices", "threading", "linq", "sqlclient",
+    "diagnostics", "reflections", "serialization", "cryptography", "web", "xml", "data",
+    "generic", "point", "bitmap", "icon", "resourcereader",
+}
+_HEX_PREFIXED_NAMESPACE_RE = re.compile(r"^[0-9a-f]{6,}(system|microsoft|mscorlib|runtime|visualbasic)$", re.IGNORECASE)
 
 
 def _clean_ioc_value(v):
@@ -934,6 +951,25 @@ def _is_valid_domain(d):
     tld = parts[-1]
     sld = parts[-2] if len(parts) >= 2 else ""
     registrable_label = sld
+
+    # Reject .NET / namespace-like artifacts frequently hallucinated/extracted as domains.
+    # Examples: system.core, microsoft.visualbasic, b03f...system.drawing.point
+    if not _env_bool("SC0PE_AI_ALLOW_NAMESPACE_DOMAINS", False):
+        ns_score = 0
+        for p in parts:
+            pl = p.lower()
+            if pl in _NAMESPACE_DOMAIN_TOKENS or _HEX_PREFIXED_NAMESPACE_RE.fullmatch(pl):
+                ns_score += 1
+        # Require at least 2 matching labels or nearly all labels to be namespace-like.
+        if ns_score >= 2 and ns_score >= max(2, len(parts) - 1):
+            return False
+
+    # Optional strict TLD gate to suppress random tokenized false-positives.
+    # Allows all ccTLDs (2-letter) and a curated gTLD set by default.
+    if _env_bool("SC0PE_AI_STRICT_TLD", True):
+        if len(tld) != 2 and tld not in _COMMON_GTLDS_STRICT:
+            return False
+
     # Handle common second-level public suffix patterns like *.com.tr
     if len(parts) >= 3 and sld in {"com", "net", "org", "gov", "edu", "mil", "ac", "co", "or", "ne", "go", "gen", "gob"}:
         registrable_label = parts[-3]
