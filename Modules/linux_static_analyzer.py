@@ -6,7 +6,6 @@ import configparser
 import shutil
 import subprocess
 from .analysis.multiple.go_binary_parser import GolangParser
-from .analysis.linux.linux_emulator import Linxcution
 
 try:
     # by default, assume we're running as a module, inside a package
@@ -346,12 +345,6 @@ class LinuxAnalyzer:
         self.parse_segments()
         self.list_libraries()
         self.handle_debug_sections()
-
-        # Emulate target binary in the isolated environment (Docker+Qemu)
-        print(f"\n{infoS} Do you want to perform binary emulation on the isolated environment?")
-        if user_confirm(">>> Choice[Y/n]: "):
-            linxc = Linxcution(self.target_file, str(self.binary.header.machine_type).split('.')[-1])
-            linxc.perform_analysis()
 
         # run golang specific analysis if applicable
         if self.is_go_binary:

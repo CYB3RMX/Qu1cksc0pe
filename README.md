@@ -42,6 +42,13 @@ python qu1cksc0pe.py --file suspicious_file --analyze
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
+<b>12/02/2026</b>
+- [X] Linux dynamic analyzer: added a dedicated Linux menu with separate actions for Binary Emulation and PID Monitoring.
+- [X] PID monitoring improvements: target can now be selected by PID or process name, with better Frida attach retries and child-process attach handling.
+- [X] Linux emulation fallback chain improved: Docker SDK -> Docker CLI -> host `qemu` fallback (when available).
+- [X] Linux dynamic prompts now support TAB autocomplete (menu selection, binary path, PID/process name).
+- [X] Linux PID monitoring exits gracefully on `Ctrl+C` without traceback.
+
 <b>11/02/2026</b>
 - [X] Document analyzer: added VBScript/VBA family static analysis for `.vbs`, `.vbe`, `.vba`, `.vb`, `.bas`, `.cls`, `.frm` (pattern summary, `CreateObject` values, shell command hits, decoded payload hints).
 - [X] AI analyzer model selection is now explicit: only the model in `Systems/Multiple/multiple.conf` (`[Ollama] model`) is used.
@@ -283,6 +290,20 @@ python .\\qu1cksc0pe.py --file app.apk --analyze --report
 <br><b>Usage</b>: ```python qu1cksc0pe.py --watch```<br>
 
 https://github.com/user-attachments/assets/7b27abb9-f18e-4611-8bdd-cd65106b5cf0
+
+## Linux Dynamic Analysis
+<i><b>Description</b>: Linux dynamic flow is menu-driven and lets you choose emulation or live process monitoring.</i>
+
+<br><b>Usage</b>: ```python qu1cksc0pe.py --watch```<br>
+
+After selecting Linux:
+- Option `1`: Binary Emulation (isolated environment).
+- Option `2`: PID Monitoring (`Frida` + `psutil`).
+
+Notes:
+- PID monitoring accepts both numeric PID and process name.
+- Interactive Linux prompts support TAB autocomplete (selection, path, PID/name).
+- Emulation fallback order: Docker SDK -> Docker CLI -> host `qemu` (if Docker is unavailable).
 
 ## Windows Process Analysis
 <br><b>Usage</b>: ```python qu1cksc0pe.py --watch```<br>

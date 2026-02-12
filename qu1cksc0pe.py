@@ -184,7 +184,10 @@ def BasicAnalyzer(analyzeFile):
     # MacOSX Analysis
     elif "Mach-O" in fileType or '\\xca\\xfe\\xba\\xbe' in fileType:
         print(f"{infoS} Target OS: [bold green]OSX[white]\n")
-        execute_module(f"apple_analyzer.py \"{analyzeFile}\"")
+        if args.report:
+            execute_module(f"apple_analyzer.py \"{analyzeFile}\" True")
+        else:
+            execute_module(f"apple_analyzer.py \"{analyzeFile}\" False")
         _maybe_run_ai()
 
     # Android Analysis
