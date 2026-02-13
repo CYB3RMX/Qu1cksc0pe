@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="stack">
+  <article class="glass result-head">
+    <div class="result-top">
+      <h1>Queue Monitor</h1>
+      <span class="status queue">Live</span>
+    </div>
+    <p class="meta" id="queue-stats-line">Queued: {{ queue_stats.queued }} | Running: {{ queue_stats.running }} | Total: {{ queue_stats.total }}</p>
+    <div class="actions">
+      <a href="{{ url_for('index') }}" class="btn-secondary">Back to Dashboard</a>
+    </div>
+  </article>
+
+  <article class="glass">
+    <h2>All Jobs</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Sample</th>
+          <th>Mode</th>
+          <th>Status</th>
+          <th>Queued At</th>
+          <th>Duration</th>
+          <th>Open</th>
+        </tr>
+      </thead>
+      <tbody id="jobs-table-body">
+        {% if jobs %}
+          {% for row in jobs %}
+          <tr>
+            <td>{{ row.sample_name }}</td>
+            <td>{{ row.preset_label }}</td>
+            <td>
+              <span class="job-pill {{ row.status }}">
+                {{ row.status }}{% if row.status == 'queued' and row.queue_position %} (#{{ row.queue_position }}){% endif %}
+              </span>
+            </td>
+            <td>{{ row.created_at_text }}</td>
+            <td>{% if row.duration is not none %}{{ row.duration }}s{% else %}-{% endif %}</td>
+            <td><a class="open-link {{ row.status }}" href="{{ url_for('job_result', job_id=row.id) }}">Open</a></td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="6">No jobs yet.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </article>
+</section>
+
+<script>
+  function bootQueueMonitor() {
+    const statsLine = document.getElementById("queue-stats-line");
+    const body = document.getElementById("jobs-table-body");
+    const apiUrl = "{{ url_for('jobs_api') }}";
+    const initialRows = {{ jobs|tojson }};
+    const knownStatus = new Map();
+    const notifiedJobs = new Set();
+
+    if (Array.isArray(initialRows)) {
+      initialRows.forEach((row) => {
+        if (!row || !row.id) {
+          return;
+        }
+        knownStatus.set(String(row.id), String(row.status || "").toLowerCase());
+      });
+    }
+
+    function esc(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('\"', "&quot;");
+    }
+
+    function buildRow(row) {
+      const duration = row.duration !== null && row.duration !== undefined ? `${row.duration}s` : "-";
+      const queueTag = row.status === "queued" && row.queue_position ? ` (#${row.queue_position})` : "";
+      const jobUrl = `/jobs/${encodeURIComponent(row.id)}`;
+      return `<tr>
+        <td>${esc(row.sample_name)}</td>
+        <td>${esc(row.preset_label)}</td>
+        <td><span class="job-pill ${esc(row.status)}">${esc(row.status)}${queueTag}</span></td>
+        <td>${esc(row.created_at_text)}</td>
+        <td>${esc(duration)}</td>
+        <td><a class="open-link ${esc(row.status)}" href="${jobUrl}">Open</a></td>
+      </tr>`;
+    }
+
+    function maybeNotify(row) {
+      if (!row || !row.id) {
+        return;
+      }
+      const jobId = String(row.id);
+      const status = String(row.status || "").toLowerCase();
+      const previous = String(knownStatus.get(jobId) || "").toLowerCase();
+      const becameTerminal =
+        (previous === "queued" || previous === "running") &&
+        (status === "completed" || status === "failed");
+
+      if (becameTerminal && !notifiedJobs.has(jobId) && window.QSNotify && typeof window.QSNotify.analysisFinished === "function") {
+        window.QSNotify.analysisFinished({
+          jobId,
+          status,
+          sampleName: row.sample_name,
+          jobUrl: `/jobs/${encodeURIComponent(jobId)}`,
+        });
+        notifiedJobs.add(jobId);
+      }
+      knownStatus.set(jobId, status);
+    }
+
+    function render(data) {
+      if (!data || !data.queue || !Array.isArray(data.jobs)) {
+        return;
+      }
+      data.jobs.forEach(maybeNotify);
+      statsLine.textContent = `Queued: ${data.queue.queued} | Running: ${data.queue.running} | Total: ${data.queue.total}`;
+      if (data.jobs.length === 0) {
+        body.innerHTML = '<tr><td colspan="6">No jobs yet.</td></tr>';
+        return;
+      }
+      body.innerHTML = data.jobs.map(buildRow).join("");
+    }
+
+    async function poll() {
+      try {
+        const res = await fetch(apiUrl, { cache: "no-store" });
+        if (!res.ok) {
+          return;
+        }
+        const payload = await res.json();
+        render(payload);
+      } catch (_err) {
+        // Best-effort live update; keep current view on fetch failure.
+      }
+    }
+
+    poll();
+    setInterval(poll, 2000);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootQueueMonitor);
+  } else {
+    bootQueueMonitor();
+  }
+</script>
+{% endblock %}

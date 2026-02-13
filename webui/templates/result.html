@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="stack report-page">
+  <article class="glass report-hero">
+    <div class="report-hero-main">
+      <p class="report-tag">Analysis Workspace</p>
+      <h1>{{ job.sample_name }}</h1>
+      <p class="meta">
+        Mode: {{ job.preset_label }} | Created: {{ job.created_at_text }}
+        {% if job.started_at_text != '-' %}| Started: {{ job.started_at_text }}{% endif %}
+        {% if job.finished_at_text != '-' %}| Finished: {{ job.finished_at_text }}{% endif %}
+        {% if job.duration is not none %}| Duration: {{ job.duration }}s{% endif %}
+      </p>
+      <div class="report-chips">
+        <span class="status {% if job.status == 'completed' %}ok{% elif job.status == 'failed' %}bad{% elif job.status == 'running' %}run{% else %}queue{% endif %}">{{ job.status }}</span>
+        <span>Report: {{ job.report_file_label if job.report_file_label else 'N/A' }}</span>
+        {% if job.ai_file_label %}<span>AI Report: {{ job.ai_file_label }}</span>{% endif %}
+        {% if job.status == 'queued' and job.queue_position %}<span>Queue Position: #{{ job.queue_position }}</span>{% endif %}
+      </div>
+    </div>
+    <div class="report-hero-actions">
+      <a href="{{ url_for('index') }}" class="btn-secondary">New Analysis</a>
+      <a href="{{ url_for('jobs_dashboard') }}" class="btn-secondary">Queue Monitor</a>
+    </div>
+  </article>
+
+  {% if job.status in ['queued', 'running'] %}
+  <article class="glass report-stage report-stage-live">
+    <div class="progress-note">
+      <div class="spinner"></div>
+      {% if job.status == 'queued' %}
+      <span>Your analysis is queued. Waiting jobs: {{ job.queued_total }}</span>
+      {% else %}
+      <span>Analysis is running. This page refreshes automatically.</span>
+      {% endif %}
+    </div>
+  </article>
+  {% endif %}
+
+  {% if job.status == 'failed' %}
+  <article class="glass">
+    <h2>Execution Error</h2>
+    <pre class="console">{{ job.error_message if job.error_message else 'Analyzer returned an error.' }}</pre>
+  </article>
+  {% endif %}
+
+  {% if job.report_load_error and job.status in ['completed', 'failed'] %}
+  <article class="glass">
+    <h2>Report Read Error</h2>
+    <pre class="console">{{ job.report_load_error }}</pre>
+  </article>
+  {% endif %}
+
+  {% if job.status == 'completed' and job.report_loaded %}
+  {% set ai_text = job.ai_ui.ai_output if job.ai_ui.ai_output else job.report_ui.ai_output %}
+  {% set ai_iocs = job.ai_ui.ai_iocs if job.ai_ui.ai_iocs else job.report_ui.ai_iocs %}
+
+  {% if ai_text %}
+  <article class="glass report-section">
+    <h2>AI Analysis Narrative</h2>
+    <pre class="console ai-output">{{ ai_text }}</pre>
+  </article>
+  {% endif %}
+
+  {% if ai_iocs %}
+  <article class="glass report-section">
+    <h2>AI Extracted IOCs</h2>
+    <div class="signal-grid">
+      {% for ioc in ai_iocs %}
+      {% if ioc.count and ioc.count > 0 %}
+      <section class="signal-card">
+        <header>
+          <h3>{{ ioc.kind }}</h3>
+          <span>{{ ioc.count }}</span>
+        </header>
+        <ul>
+          {% for value in ioc["values"] %}
+          <li>{{ value }}</li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </article>
+  {% endif %}
+
+  <section class="report-main stack">
+      {% if job.report_ui.metadata %}
+      <article class="glass report-section">
+        <h2>Metadata</h2>
+        <dl class="rail-list">
+          {% for item in job.report_ui.metadata %}
+          <div>
+            <dt>{{ item.label }}</dt>
+            <dd>{{ item.value }}</dd>
+          </div>
+          {% endfor %}
+        </dl>
+      </article>
+      {% endif %}
+
+      {% set vt = job.report_ui.vt_section %}
+      {% if vt and (vt.available or vt.error) %}
+      <article class="glass report-section">
+        <h2>VirusTotal File Scan</h2>
+        {% if vt.error %}
+        <p class="meta">{{ vt.error }}</p>
+        {% else %}
+          {% if vt.summary %}
+          <div class="summary-grid">
+            {% for item in vt.summary %}
+            <article class="metric">
+              <span>{{ item.label }}</span>
+              <strong>{{ item.value }}</strong>
+            </article>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          {% if vt.threat_categories or vt.threat_names %}
+          <div class="signal-grid">
+            {% if vt.threat_categories %}
+            <section class="signal-card">
+              <header>
+                <h3>Threat Categories</h3>
+                <span>{{ vt.threat_categories|length }}</span>
+              </header>
+              <ul>
+                {% for item in vt.threat_categories %}
+                <li>{{ item.value }} ({{ item.count }})</li>
+                {% endfor %}
+              </ul>
+            </section>
+            {% endif %}
+
+            {% if vt.threat_names %}
+            <section class="signal-card">
+              <header>
+                <h3>Threat Names</h3>
+                <span>{{ vt.threat_names|length }}</span>
+              </header>
+              <ul>
+                {% for item in vt.threat_names %}
+                <li>{{ item.value }} ({{ item.count }})</li>
+                {% endfor %}
+              </ul>
+            </section>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          {% if vt.detections %}
+          <div class="table-wrap">
+            <table class="data-table compact">
+              <thead>
+                <tr>
+                  <th>Engine</th>
+                  <th>Result</th>
+                  <th>Category</th>
+                  <th>Method</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in vt.detections %}
+                <tr>
+                  <td>{{ row.engine }}</td>
+                  <td>{{ row.result }}</td>
+                  <td>{{ row.category }}</td>
+                  <td>{{ row.method }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% endif %}
+        {% endif %}
+      </article>
+      {% endif %}
+
+      {% if job.report_ui.categories %}
+      <article class="glass report-section">
+        <h2>Category Heatmap</h2>
+        <div class="heatmap">
+          {% for row in job.report_ui.categories %}
+          <div class="heat-row" style="--score: {{ row.count }};">
+            <span class="name">{{ row.name }}</span>
+            <span class="value">{{ row.count }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </article>
+      {% endif %}
+
+      {% if job.report_ui.interesting_patterns %}
+      <article class="glass report-section">
+        <h2>Interesting String Patterns</h2>
+        <ul class="pattern-list">
+          {% for value in job.report_ui.interesting_patterns %}
+          <li>{{ value }}</li>
+          {% endfor %}
+        </ul>
+      </article>
+      {% endif %}
+
+      {% if job.report_ui.matched_rules_rows %}
+      <article class="glass report-section">
+        <h2>Matched YARA Rules</h2>
+        <div class="rules-grid">
+          {% for row in job.report_ui.matched_rules_rows %}
+          <section class="rule-card">
+            <header>
+              <h3>{{ row.name }}</h3>
+              <span>{{ row.count }} hits</span>
+            </header>
+            <div class="table-wrap">
+              <table class="data-table compact">
+                <thead>
+                  <tr>
+                    <th>Offset</th>
+                    <th>Pattern</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for sample in row.samples %}
+                  <tr>
+                    <td>{{ sample.offset if sample.offset else '-' }}</td>
+                    <td>{{ sample.pattern }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+          {% endfor %}
+        </div>
+      </article>
+      {% endif %}
+
+      {% if job.report_ui.sections or job.report_ui.extra_panels %}
+      <article class="glass report-section">
+        <h2>Core Findings</h2>
+        <div class="signal-grid">
+          {% for section in job.report_ui.sections %}
+          <section class="signal-card">
+            <header>
+              <h3>{{ section.title }}</h3>
+              <span>{{ section.count }}</span>
+            </header>
+            <ul>
+              {% for item in section["items"] %}
+              <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+          </section>
+          {% endfor %}
+
+          {% for section in job.report_ui.extra_panels %}
+          <section class="signal-card muted">
+            <header>
+              <h3>{{ section.title }}</h3>
+              <span>{{ section.count }}</span>
+            </header>
+            <ul>
+              {% for item in section["items"] %}
+              <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+          </section>
+          {% endfor %}
+        </div>
+      </article>
+      {% endif %}
+
+      {% if job.report_ui.windows_api_categories %}
+      <article class="glass report-section">
+        <h2>Windows API Categories</h2>
+        <div class="signal-grid">
+          {% for section in job.report_ui.windows_api_categories %}
+          <section class="signal-card">
+            <header>
+              <h3>{{ section.name }}</h3>
+              <span>{{ section.count }}</span>
+            </header>
+            <ul>
+              {% for api in section.apis %}
+              <li>{{ api }}</li>
+              {% endfor %}
+            </ul>
+          </section>
+          {% endfor %}
+        </div>
+      </article>
+      {% endif %}
+  </section>
+  {% endif %}
+
+  {% if job.status == 'completed' and not job.report_loaded and not job.report_load_error %}
+  <article class="glass">
+    <h2>No Report Data</h2>
+    {% if job.report_expected %}
+    <p class="meta">A report was expected, but no readable JSON file was found.</p>
+    {% else %}
+    <p class="meta">This mode can complete without generating a JSON report.</p>
+    {% endif %}
+  </article>
+  {% endif %}
+</section>
+
+<script>
+  function bootResultNotify() {
+    const jobId = {{ job.id|tojson }};
+    const status = String({{ job.status|tojson }} || "").toLowerCase();
+    const sampleName = {{ job.sample_name|tojson }};
+    const statusKey = `qs-job-status:${jobId}`;
+    let previous = "";
+    try {
+      previous = String(window.localStorage.getItem(statusKey) || "").toLowerCase();
+    } catch (_err) {
+      previous = "";
+    }
+
+    if (
+      (previous === "queued" || previous === "running") &&
+      (status === "completed" || status === "failed") &&
+      window.QSNotify &&
+      typeof window.QSNotify.analysisFinished === "function"
+    ) {
+      window.QSNotify.analysisFinished({
+        jobId,
+        status,
+        sampleName,
+        jobUrl: `/jobs/${encodeURIComponent(jobId)}`,
+      });
+    }
+
+    try {
+      window.localStorage.setItem(statusKey, status);
+    } catch (_err) {
+      // Ignore storage restrictions.
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootResultNotify);
+  } else {
+    bootResultNotify();
+  }
+</script>
+
+{% if auto_refresh %}
+<script>
+  setTimeout(function () {
+    window.location.reload();
+  }, {{ refresh_seconds * 1000 }});
+</script>
+{% endif %}
+{% endblock %}

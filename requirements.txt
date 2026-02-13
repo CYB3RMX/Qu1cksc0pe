@@ -26,3 +26,4 @@ psutil
 pymem
 pyja3
 docker
+flask
