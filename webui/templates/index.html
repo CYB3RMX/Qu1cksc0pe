@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="home-v2">
+  <section class="home-workbench">
+    <article class="glass launch-card-v2">
+      <header class="launch-head">
+        <div>
+          <h2>Launch New Analysis</h2>
+          <p class="meta">Select file, pick mode, queue task.</p>
+        </div>
+        <div class="launch-actions">
+          <a href="{{ url_for('jobs_dashboard') }}" class="btn-secondary">Open Queue Monitor</a>
+        </div>
+      </header>
+
+      <form id="analysis-form" method="post" action="{{ url_for('run_analysis_route') }}" enctype="multipart/form-data">
+        <label class="upload-zone upload-zone-v2" id="upload-zone">
+          <input id="sample" type="file" name="sample" required>
+          <span class="upload-title">Drop sample or click to browse</span>
+          <span class="upload-sub">Max file size: {{ max_upload_mb }} MB</span>
+          <span class="file-picked" id="picked-file">No file selected</span>
+        </label>
+
+        <div class="section-head">
+          <h2>Analysis Profile</h2>
+        </div>
+
+        <div class="preset-grid">
+          {% for key, preset in presets.items() %}
+          {% if key != "vtFile" %}
+          <label class="preset-card">
+            <input type="radio" name="preset" value="{{ key }}" {% if key == "analyze" %}checked{% endif %}>
+            <span class="preset-label">{{ preset.label }}</span>
+            <span class="preset-desc">{{ preset.description }}</span>
+          </label>
+          {% endif %}
+          {% endfor %}
+        </div>
+
+        <label class="toggle">
+          <input type="checkbox" name="enable_ai" value="1">
+          <span>Also run AI report generation (`--ai`)</span>
+        </label>
+
+        <button type="submit" class="btn-primary">Queue Analysis</button>
+      </form>
+    </article>
+  </section>
+
+  {% if recent_jobs %}
+  <article class="glass recent-jobs-v2">
+    <div class="recent-head">
+      <h2>Recent Jobs</h2>
+      <a href="{{ url_for('jobs_dashboard') }}" class="btn-secondary">See All</a>
+    </div>
+    <div class="recent-grid">
+      {% for row in recent_jobs %}
+      <article class="recent-job-card" data-job-id="{{ row.id }}">
+        <p class="recent-sample">{{ row.sample_name }}</p>
+        <p class="meta">{{ row.preset_label }}</p>
+        <div class="recent-row">
+          <span class="job-pill {{ row.status }} js-recent-status">{{ row.status }}</span>
+          <a class="open-report-link {{ row.status }} js-recent-open" href="{{ url_for('job_result', job_id=row.id) }}">Open Report</a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </article>
+  {% endif %}
+</section>
+{% endblock %}

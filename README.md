@@ -38,10 +38,18 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps us
 python qu1cksc0pe.py --file suspicious_file --analyze
 ```
 
+```bash
+# Launch Web UI
+python3 qu1cksc0pe.py --ui
+```
+
 # Screenshot
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
+<b>13/02/2026</b>
+- [X] NEW FEATURE: Added Web UI.
+
 <b>12/02/2026</b>
 - [X] Linux dynamic analyzer: added a dedicated Linux menu with separate actions for Binary Emulation and PID Monitoring.
 - [X] PID monitoring improvements: target can now be selected by PID or process name, with better Frida attach retries and child-process attach handling.
@@ -218,6 +226,9 @@ python .\\qu1cksc0pe.py --file app.apk --analyze --report
 - ```CrowdSourced IDS Reports```
 
 <b>Usage for --vtFile</b>: ```python qu1cksc0pe.py --file suspicious_file --vtFile```<br>
+> [!NOTE]
+> In Web UI flow, `Standart Analysis` and `Document` presets also execute VirusTotal file lookup in background and show the result in the report page.
+
 ![total](https://user-images.githubusercontent.com/42123683/189416676-06216d52-4882-492d-9ee4-4ff7c04b6358.gif)
 
 ## Document scan

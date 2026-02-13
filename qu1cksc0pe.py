@@ -4,6 +4,7 @@
 try:
     import os
     import sys
+    import subprocess
     import argparse
     import getpass
     import configparser
@@ -126,7 +127,8 @@ ARG_NAMES_TO_KWARG_OPTS = {
     "ai": {"help": "Analyze generated report using smart analyzer (requires --report; enabled automatically).", "action": "store_true"},
     "watch": {"help": "Perform dynamic analysis against Windows/Android files. (Linux will coming soon!!)", "action": "store_true"},
     "sigcheck": {"help": "Scan file signatures in target file.", "action": "store_true"},
-    "vtFile": {"help": "Scan your file with VirusTotal API.", "action": "store_true"}
+    "vtFile": {"help": "Scan your file with VirusTotal API.", "action": "store_true"},
+    "ui": {"help": "Launch Flask-based web interface.", "action": "store_true"}
 }
 
 parser = argparse.ArgumentParser()
@@ -159,6 +161,23 @@ def _maybe_run_ai():
         print(f"{errorS} AI analysis requested but no report file found (expected sc0pe_*_report.json).")
         return
     execute_module(f"analysis/multiple/smart_analyzer.py \"{report_path}\"")
+
+def launch_web_ui():
+    web_app_path = os.path.join(sc0pe_path, "Modules", "web_app.py")
+    if not os.path.exists(web_app_path):
+        err_exit(f"{errorS} UI entrypoint not found: {web_app_path}")
+    print(f"{infoS} Launching [bold green]Qu1cksc0pe Web UI[white]...")
+    try:
+        ui_proc = subprocess.run([py_binary, web_app_path], check=False)
+    except KeyboardInterrupt:
+        print("\n[bold white on red]Web UI terminated by user.\n")
+        return
+    if ui_proc.returncode != 0:
+        err_exit(
+            f"{errorS} Failed to launch Web UI. Make sure dependencies are installed "
+            f"(e.g. [bold green]pip install -r requirements.txt[white]).",
+            arg_override=ui_proc.returncode,
+        )
 
 # Basic analyzer function that handles single and multiple scans
 def BasicAnalyzer(analyzeFile):
@@ -261,6 +280,11 @@ def BasicAnalyzer(analyzeFile):
 
 # Main function
 def Qu1cksc0pe():
+    # Launch Flask web UI and exit.
+    if args.ui:
+        launch_web_ui()
+        return
+
     # Getting all strings from the file if the target file exists.
     if args.file:
         if os.path.exists(args.file):
@@ -452,6 +476,8 @@ def cleanup_junks():
 def main():
     try:
         Qu1cksc0pe()
+    except KeyboardInterrupt:
+        print("\n[bold white on red]Program terminated by user.\n")
     finally: # ensure cleanup irrespective of errors
         cleanup_junks()
 
