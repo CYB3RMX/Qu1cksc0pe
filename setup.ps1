@@ -26,6 +26,46 @@ function Ensure-Directory([string]$Path) {
     }
 }
 
+function Get-NormalizedPath([string]$Path) {
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return ""
+    }
+    $full = $Path
+    try {
+        $full = [System.IO.Path]::GetFullPath($Path)
+    } catch {
+        $full = $Path
+    }
+    return $full.TrimEnd("\")
+}
+
+function Ensure-PathEntry([string]$PathToAdd, [ValidateSet("Process", "User")] [string]$Scope) {
+    $normalizedToAdd = Get-NormalizedPath -Path $PathToAdd
+    if ([string]::IsNullOrWhiteSpace($normalizedToAdd)) {
+        return $false
+    }
+
+    $currentPath = if ($Scope -eq "Process") { $env:PATH } else { [Environment]::GetEnvironmentVariable("Path", "User") }
+    $entries = @()
+    if (-not [string]::IsNullOrWhiteSpace($currentPath)) {
+        $entries = @($currentPath -split ";" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    }
+
+    foreach ($entry in $entries) {
+        if ((Get-NormalizedPath -Path $entry) -ieq $normalizedToAdd) {
+            return $false
+        }
+    }
+
+    $newPath = if ($entries.Length -gt 0) { "$PathToAdd;$($entries -join ';')" } else { $PathToAdd }
+    if ($Scope -eq "Process") {
+        $env:PATH = $newPath
+    } else {
+        [Environment]::SetEnvironmentVariable("Path", $newPath, "User")
+    }
+    return $true
+}
+
 function Invoke-Download([string]$Uri, [string]$OutFile) {
     # Prefer Invoke-WebRequest (available on both Windows PowerShell and PowerShell 7+).
     $iwr = Get-Command Invoke-WebRequest -ErrorAction SilentlyContinue
@@ -151,13 +191,26 @@ function Ensure-Jadx([string]$BaseDir, [string]$RepoRoot, [string]$JadxVersion) 
         Write-Info "Extracting JADX..."
         Expand-Archive -LiteralPath $tmpZip -DestinationPath $tmpExtract -Force
 
-        # zip content usually contains 'jadx-*' folder.
-        $inner = Get-ChildItem -LiteralPath $tmpExtract | Where-Object { $_.PSIsContainer } | Select-Object -First 1
-        if ($null -eq $inner) {
-            throw "Unexpected JADX archive layout (no inner folder)."
+        # JADX packaging can be either:
+        # - direct content in archive root (bin/, lib/, ...)
+        # - nested under a single jadx-* folder
+        $sourceRoot = $tmpExtract
+        $rootBin = Join-Path $sourceRoot "bin"
+        $rootLib = Join-Path $sourceRoot "lib"
+        if (-not ((Test-Path -LiteralPath $rootBin) -and (Test-Path -LiteralPath $rootLib))) {
+            $inner = Get-ChildItem -LiteralPath $tmpExtract -Directory | Select-Object -First 1
+            if ($null -ne $inner) {
+                $sourceRoot = $inner.FullName
+            }
         }
 
-        Copy-Item -LiteralPath (Join-Path $inner.FullName "*") -Destination $jadxDir -Recurse -Force
+        $sourceBin = Join-Path $sourceRoot "bin"
+        $sourceLib = Join-Path $sourceRoot "lib"
+        if (-not ((Test-Path -LiteralPath $sourceBin) -and (Test-Path -LiteralPath $sourceLib))) {
+            throw "Unexpected JADX archive layout (bin/lib folders were not found)."
+        }
+
+        Get-ChildItem -LiteralPath $sourceRoot -Force | Copy-Item -Destination $jadxDir -Recurse -Force
     } finally {
         if (Test-Path -LiteralPath $tmpZip) { Remove-Item -LiteralPath $tmpZip -Force }
         if (Test-Path -LiteralPath $tmpExtract) { Remove-Item -LiteralPath $tmpExtract -Force -Recurse }
@@ -216,9 +269,12 @@ function Ensure-PlatformTools([string]$BaseDir, [string]$RepoRoot) {
 function Ensure-ToolsBin([string]$BaseDir) {
     $toolsBin = Join-Path $BaseDir "bin"
     Ensure-Directory $toolsBin
-    # Make available for current session; persistent PATH is intentionally not modified.
-    if (-not ($env:PATH -split ";" | Where-Object { $_ -eq $toolsBin })) {
-        $env:PATH = "$toolsBin;$env:PATH"
+    $null = Ensure-PathEntry -PathToAdd $toolsBin -Scope "Process"
+    $addedToUserPath = Ensure-PathEntry -PathToAdd $toolsBin -Scope "User"
+    if ($addedToUserPath) {
+        Write-Ok "Added $toolsBin to user PATH (persistent)."
+    } else {
+        Write-Info "$toolsBin already exists in user PATH."
     }
     return $toolsBin
 }
@@ -298,7 +354,8 @@ function Ensure-7Zip() {
         (Join-Path ${env:ProgramFiles(x86)} "7-Zip\\7z.exe")
     ) | Where-Object { $_ -and (Test-Path -LiteralPath $_) }
 
-    if ($candidatePaths.Count -gt 0) {
+    $candidatePaths = @($candidatePaths)
+    if ($candidatePaths.Length -gt 0) {
         $sevenZipDir = Split-Path -Parent $candidatePaths[0]
         if (-not ($env:PATH -split ";" | Where-Object { $_ -eq $sevenZipDir })) {
             $env:PATH = "$sevenZipDir;$env:PATH"
@@ -344,6 +401,137 @@ function Ensure-7Zip() {
     throw "7z (7-Zip) is required for ACE archive extraction. Install 7-Zip (7z) and re-run setup."
 }
 
+function Ensure-Winget() {
+    $winget = Get-Command winget -ErrorAction SilentlyContinue
+    if ($null -ne $winget) {
+        return $winget.Source
+    }
+
+    Write-Info "winget not found. Installing App Installer (winget)..."
+    $tmpDir = Join-Path ([System.IO.Path]::GetTempPath()) ("winget-{0}" -f ([guid]::NewGuid().ToString("N")))
+    Ensure-Directory $tmpDir
+    $bundlePath = Join-Path $tmpDir "Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
+    $vclibsPath = Join-Path $tmpDir "Microsoft.VCLibs.x64.14.00.Desktop.appx"
+
+    try {
+        Invoke-Download -Uri "https://aka.ms/getwinget" -OutFile $bundlePath
+        Invoke-Download -Uri "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx" -OutFile $vclibsPath
+
+        # VCLibs may already be installed. Ignore errors and continue.
+        try { Add-AppxPackage -Path $vclibsPath -ErrorAction Stop | Out-Null } catch {}
+        Add-AppxPackage -Path $bundlePath -ErrorAction Stop | Out-Null
+    } finally {
+        if (Test-Path -LiteralPath $tmpDir) { Remove-Item -LiteralPath $tmpDir -Force -Recurse }
+    }
+
+    # App Installer usually exposes winget via WindowsApps.
+    $windowsApps = Join-Path $env:LOCALAPPDATA "Microsoft\\WindowsApps"
+    if (Test-Path -LiteralPath $windowsApps) {
+        $null = Ensure-PathEntry -PathToAdd $windowsApps -Scope "Process"
+        $null = Ensure-PathEntry -PathToAdd $windowsApps -Scope "User"
+    }
+
+    $winget = Get-Command winget -ErrorAction SilentlyContinue
+    if ($null -ne $winget) {
+        Write-Ok "winget installed: $($winget.Source)"
+        return $winget.Source
+    }
+
+    $wingetExe = Join-Path $windowsApps "winget.exe"
+    if (Test-Path -LiteralPath $wingetExe) {
+        Write-Ok "winget installed: $wingetExe"
+        return $wingetExe
+    }
+
+    throw "winget installation attempted but winget.exe is still not available. Restart Windows and re-run setup."
+}
+
+function Resolve-OllamaPath() {
+    $cmd = Get-Command ollama -ErrorAction SilentlyContinue
+    if ($null -ne $cmd) {
+        return $cmd.Source
+    }
+
+    $candidates = @(
+        (Join-Path $env:LOCALAPPDATA "Programs\\Ollama\\ollama.exe"),
+        (Join-Path $env:ProgramFiles "Ollama\\ollama.exe")
+    ) | Where-Object { $_ -and (Test-Path -LiteralPath $_) }
+    $candidates = @($candidates)
+    if ($candidates.Length -gt 0) {
+        return $candidates[0]
+    }
+    return ""
+}
+
+function Ensure-Ollama() {
+    $ollamaExe = Resolve-OllamaPath
+    if (-not [string]::IsNullOrWhiteSpace($ollamaExe)) {
+        $ollamaDir = Split-Path -Parent $ollamaExe
+        $null = Ensure-PathEntry -PathToAdd $ollamaDir -Scope "Process"
+        $null = Ensure-PathEntry -PathToAdd $ollamaDir -Scope "User"
+        Write-Info "Ollama is already available: $ollamaExe"
+        return $ollamaExe
+    }
+
+    $wingetExe = Ensure-Winget
+
+    Write-Info "Installing Ollama via winget (user scope)..."
+    & $wingetExe install -e --id Ollama.Ollama --scope user --accept-package-agreements --accept-source-agreements | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "winget failed to install Ollama. Try manually: winget install -e --id Ollama.Ollama --scope user"
+    }
+
+    $ollamaExe = Resolve-OllamaPath
+    if ([string]::IsNullOrWhiteSpace($ollamaExe)) {
+        throw "Ollama installation completed but ollama.exe was not found. Restart terminal and re-run setup."
+    }
+
+    $ollamaDir = Split-Path -Parent $ollamaExe
+    $null = Ensure-PathEntry -PathToAdd $ollamaDir -Scope "Process"
+    $null = Ensure-PathEntry -PathToAdd $ollamaDir -Scope "User"
+    Write-Ok "Ollama installed: $ollamaExe"
+    return $ollamaExe
+}
+
+function Ensure-OllamaModel([string]$OllamaExe, [string]$ModelName) {
+    if ([string]::IsNullOrWhiteSpace($ModelName)) {
+        throw "Model name is empty."
+    }
+    $isCloudModel = $ModelName.Trim().ToLowerInvariant().EndsWith(":cloud")
+
+    $existing = & $OllamaExe list 2>$null
+    if (($LASTEXITCODE -eq 0) -and ($existing | Where-Object { $_ -match ("^\s*{0}(?:\s|$)" -f [regex]::Escape($ModelName)) })) {
+        Write-Info "Ollama model already exists: $ModelName"
+        return $true
+    }
+
+    Write-Info "Pulling Ollama model: $ModelName"
+    $pullOutput = & $OllamaExe pull $ModelName 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Info "Model pull failed on first attempt. Trying to start Ollama service and retry..."
+        try {
+            Start-Process -FilePath $OllamaExe -ArgumentList "serve" -WindowStyle Hidden | Out-Null
+            Start-Sleep -Seconds 3
+        } catch {
+            # best-effort; retry pull anyway
+        }
+        $retryOutput = & $OllamaExe pull $ModelName 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            $allOutput = (($pullOutput | ForEach-Object { $_.ToString() }) + ($retryOutput | ForEach-Object { $_.ToString() })) -join "`n"
+            if ($isCloudModel -and ($allOutput -match "(?i)\b401\b|unauthorized|authentication|auth")) {
+                Write-Err "Cloud model pull requires Ollama authentication. Run: ollama signin"
+                Write-Info "Then retry manually: ollama pull $ModelName"
+                Write-Info "Setup will continue without pulling this model."
+                return $false
+            }
+            throw "Failed to pull Ollama model '$ModelName'. Try manually: ollama pull $ModelName"
+        }
+    }
+
+    Write-Ok "Ollama model is ready: $ModelName"
+    return $true
+}
+
 try {
     $RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
     Set-Location -LiteralPath $RepoRoot
@@ -360,6 +548,11 @@ try {
     Ensure-FileCommand -ToolsBin $ToolsBin
     Ensure-StringsCommand -ToolsBin $ToolsBin
     Ensure-7Zip
+    $OllamaExe = Ensure-Ollama
+    $ollamaModelReady = Ensure-OllamaModel -OllamaExe $OllamaExe -ModelName "kimi-k2.5:cloud"
+    if (-not $ollamaModelReady) {
+        Write-Info "Continuing setup without a pulled Ollama cloud model."
+    }
 
     $JadxVersion = "1.5.3"
     $null = Ensure-Jadx -BaseDir $BaseDir -RepoRoot $RepoRoot -JadxVersion $JadxVersion
@@ -368,7 +561,7 @@ try {
     Ensure-PyOneNote
 
     Write-Ok "All done."
-    Write-Info "Note: Tools were installed into $ToolsBin and added to PATH for this session."
+    Write-Info "Note: Tools were installed into $ToolsBin and added to PATH (current session + persistent user PATH)."
 } catch {
     Write-Err $_.Exception.Message
     exit 1
