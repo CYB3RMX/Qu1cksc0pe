@@ -47,6 +47,9 @@ python3 qu1cksc0pe.py --ui
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
+<b>15/02/2026</b>
+- [X] Linux setup script (`setup.sh`) was improved with automatic Ollama installation and model pull support from `Systems/Multiple/multiple.conf`.
+
 <b>14/02/2026</b>
 - [X] Windows setup script (`setup.ps1`) was improved with persistent user PATH updates, automatic `winget`/Ollama setup, and graceful `kimi-k2.5:cloud` auth-error handling.
 

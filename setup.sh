@@ -102,6 +102,114 @@ ensure_cmd_or_install() {
   log_success "Installed ${pkg_name}."
 }
 
+get_ollama_model_from_conf() {
+  local conf_file="${SCRIPT_DIR}/Systems/Multiple/multiple.conf"
+  if [[ ! -f "${conf_file}" ]]; then
+    return 1
+  fi
+
+  awk -F'=' '
+    BEGIN { in_ollama=0 }
+    /^[[:space:]]*\[Ollama\][[:space:]]*$/ { in_ollama=1; next }
+    in_ollama && /^[[:space:]]*\[/ { in_ollama=0 }
+    in_ollama && $1 ~ /^[[:space:]]*model[[:space:]]*$/ {
+      v=$2
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", v)
+      print v
+      exit
+    }
+  ' "${conf_file}"
+}
+
+ensure_ollama() {
+  if command_exists ollama; then
+    log_info "${green}ollama${default} is already installed."
+    return 0
+  fi
+
+  log_info "Installing ${green}Ollama${default}..."
+  if [[ "${DOWNLOADER}" == "curl" ]]; then
+    if ! run_with_privilege bash -lc "curl -fsSL https://ollama.com/install.sh | sh"; then
+      log_error "Failed to install Ollama via official install script."
+      return 1
+    fi
+  else
+    local tmp_installer
+    tmp_installer="$(mktemp -t ollama-install-XXXXXX.sh)"
+    if ! wget -qO "${tmp_installer}" "https://ollama.com/install.sh"; then
+      rm -f "${tmp_installer}"
+      log_error "Failed to download Ollama install script."
+      return 1
+    fi
+    if ! run_with_privilege bash "${tmp_installer}"; then
+      rm -f "${tmp_installer}"
+      log_error "Failed to install Ollama via downloaded install script."
+      return 1
+    fi
+    rm -f "${tmp_installer}"
+  fi
+
+  if command_exists ollama; then
+    log_success "Ollama installed."
+    return 0
+  fi
+
+  log_error "Ollama installation completed but 'ollama' command is still not available."
+  return 1
+}
+
+ensure_ollama_model() {
+  local model_name="$1"
+  if [[ -z "${model_name}" ]]; then
+    return 0
+  fi
+  if ! command_exists ollama; then
+    return 1
+  fi
+
+  if ollama list 2>/dev/null | awk '{print $1}' | grep -Fxq "${model_name}"; then
+    log_info "Ollama model already exists: ${model_name}"
+    return 0
+  fi
+
+  log_info "Pulling Ollama model: ${model_name}"
+  local pull_output=""
+  local retry_output=""
+  set +e
+  pull_output="$(ollama pull "${model_name}" 2>&1)"
+  local pull_ec=$?
+  set -e
+  if [[ ${pull_ec} -ne 0 ]]; then
+    log_info "Model pull failed on first attempt. Trying to start Ollama service and retry..."
+    run_with_privilege systemctl start ollama >/dev/null 2>&1 || true
+    if ! pgrep -f "ollama serve" >/dev/null 2>&1; then
+      nohup ollama serve >/dev/null 2>&1 &
+      sleep 2
+    fi
+
+    set +e
+    retry_output="$(ollama pull "${model_name}" 2>&1)"
+    local retry_ec=$?
+    set -e
+    if [[ ${retry_ec} -ne 0 ]]; then
+      local all_output
+      all_output="${pull_output}
+${retry_output}"
+      if [[ "${model_name}" == *":cloud" ]] && echo "${all_output}" | grep -Eiq '(^|[^0-9])401([^0-9]|$)|unauthorized|authentication|auth'; then
+        log_error "Cloud model pull requires Ollama authentication. Run: ollama signin"
+        log_info "Then retry manually: ollama pull ${model_name}"
+        log_info "Setup will continue without pulling this model."
+        return 0
+      fi
+      log_error "Failed to pull Ollama model '${model_name}'. Try manually: ollama pull ${model_name}"
+      return 0
+    fi
+  fi
+
+  log_success "Ollama model is ready: ${model_name}"
+  return 0
+}
+
 find_jadx_launcher() {
   local candidate=""
   local subdir=""
@@ -180,6 +288,16 @@ elif command_exists wget; then
 else
   ensure_cmd_or_install wget wget
   DOWNLOADER="wget"
+fi
+
+# Ensure Ollama
+if ensure_ollama; then
+  OLLAMA_MODEL="$(get_ollama_model_from_conf || true)"
+  if [[ -n "${OLLAMA_MODEL}" ]]; then
+    ensure_ollama_model "${OLLAMA_MODEL}" || true
+  fi
+else
+  log_info "Continuing setup without Ollama."
 fi
 
 # Setup JADX
