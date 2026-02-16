@@ -281,9 +281,6 @@ class LinuxAnalyzer:
             print("[bold white on red]There is no debug sections in this binary!!")
             return
 
-        if not user_confirm(f"\n>> Do you want to analyze debug strings?[Y/n]: "):
-            return
-
         print()
         for name in [n for n in section_names if n == ".debug_str"]:
             print(f"[bold magenta]>>[white] Section: [bold yellow]{self.binary.get_section(name).name}[white] | Content: [bold cyan]{self.parse_section_content(name)}")

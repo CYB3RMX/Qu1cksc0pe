@@ -136,6 +136,14 @@ def _trim_text(text: str, max_len: int = 1600) -> str:
     return text[: max_len - 3] + "..."
 
 
+def _to_text(value: object) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    return str(value)
+
+
 def _normalize_inline_text(text: str) -> str:
     # Compact UI text for cards/tables: remove tabs/newlines and collapse whitespace.
     out = str(text or "")
@@ -1267,8 +1275,8 @@ def execute_preset(sample_path: Path, preset: AnalysisPreset, enable_ai: bool) -
         completed = subprocess.CompletedProcess(
             args=command,
             returncode=124,
-            stdout=exc.stdout or "",
-            stderr=(exc.stderr or "") + "\nAnalysis timed out.",
+            stdout=_to_text(exc.stdout),
+            stderr=_to_text(exc.stderr) + "\nAnalysis timed out.",
         )
 
     duration = round(time.perf_counter() - started, 2)
@@ -1278,7 +1286,7 @@ def execute_preset(sample_path: Path, preset: AnalysisPreset, enable_ai: bool) -
     stored_ai_report_path = _store_generated_report(ai_report_path, bucket="ai")
 
     log_output = "\n".join(
-        part for part in ((completed.stdout or "").strip(), (completed.stderr or "").strip()) if part
+        part for part in (_to_text(completed.stdout).strip(), _to_text(completed.stderr).strip()) if part
     ).strip()
 
     error_message = ""
@@ -1314,7 +1322,7 @@ def execute_preset(sample_path: Path, preset: AnalysisPreset, enable_ai: bool) -
         "exit_code": int(completed.returncode),
         "timed_out": timed_out,
         "duration": duration,
-        "command_display": " ".join(command),
+        "command_display": " ".join(_to_text(item) for item in command),
         "report_expected": report_expected,
         "report_path": stored_report_path,
         "ai_report_path": stored_ai_report_path,
