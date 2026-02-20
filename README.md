@@ -28,6 +28,7 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps us
 | Golang Binaries (Linux) | Static |
 | Document Files | Static |
 | VBScript/VBA Family (.vbs, .vbe, .vba, .vb, .bas, .cls, .frm) | Static (`--docs`) |
+| Windows Batch Scripts (.bat, .cmd) | Static (`--analyze`) |
 | Archive Files (.zip, .rar, .ace) | Static |
 | PCAP Files (.pcap) | Static |
 | Powershell Scripts | Static |
@@ -47,6 +48,14 @@ python3 qu1cksc0pe.py --ui
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
+<b>20/02/2026</b>
+- [X] Windows setup script (`setup.ps1`) was hardened: automatic `winget` fallback installation, Python/7-Zip bootstrap, Sysinternals `strings` EULA auto-accept, and resilient Ollama install flow.
+- [X] Ollama cloud-model handling in setup was improved: clear `ollama signin` guidance is shown once, and setup continues gracefully if cloud model pull fails.
+- [X] Config parsing was hardened for Windows/analysis modules with `utf-8-sig` support to avoid BOM-related `configparser` errors.
+- [X] Windows static analyzer report flow was fixed to avoid early exit on low-import samples, so `--report/--ai` can still produce JSON output.
+- [X] Web UI worker subprocess decoding was made robust on Windows (`utf-8` with replacement) to prevent `UnicodeDecodeError` crashes.
+- [X] Added/updated Windows Batch Script (`.bat`, `.cmd`) analysis support in `--analyze` flow with JSON report output.
+
 <b>15/02/2026</b>
 - [X] Linux setup script (`setup.sh`) was improved with automatic Ollama installation and model pull support from `Systems/Multiple/multiple.conf`.
 
@@ -134,6 +143,12 @@ docker run -it --rm -v $(pwd):/data qu1cksc0pe:latest --file /data/suspicious_fi
 
 # For Windows systems you need to execute the following command (Powershell)
 # PS C:\Users\user\Desktop\Qu1cksc0pe> .\setup.ps1
+#
+# setup.ps1 handles winget dependency fallback, Python + 7-Zip setup,
+# Sysinternals strings EULA acceptance, and resilient Ollama installation.
+# If cloud model auth is needed, run:
+# ollama signin
+# ollama pull kimi-k2.5:cloud
 ```
 
 # Environment Variables
@@ -251,6 +266,11 @@ python .\\qu1cksc0pe.py --file app.apk --analyze --report
 
 <b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_document --docs```<br>
 ![docs](https://user-images.githubusercontent.com/42123683/189416778-f7f93d49-7ff0-4eb5-9898-53e63e5833a1.gif)
+
+## Batch Script scan (.bat/.cmd)
+<i><b>Description</b>: Analyze Windows Batch scripts for suspicious commands, encoded payload patterns, URLs/domains/IPs, and rule matches.</i>
+
+<b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_script.bat --analyze --report```<br>
 
 ### Embedded File/Exploit Extraction
 ![exploit](https://user-images.githubusercontent.com/42123683/189676461-86565ff2-3a0c-426a-a66b-80a9462489b7.gif)

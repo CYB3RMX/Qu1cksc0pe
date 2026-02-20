@@ -54,7 +54,7 @@ if sys.platform == "win32":
     path_seperator = "\\"
     # Get adb path for windows
     adb_conf = configparser.ConfigParser()
-    adb_conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf")
+    adb_conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf", encoding="utf-8-sig")
     adb_path = adb_conf["ADB_PATH"]["win_adb_path"]
 
 # Legends

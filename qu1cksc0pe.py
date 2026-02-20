@@ -71,7 +71,7 @@ if os.name != "nt":
     if os.path.exists("/usr/bin/qu1cksc0pe") == True and os.path.exists(f"/etc/qu1cksc0pe.conf") == True:
         # Parsing new path and write into handler
         sc0peConf = configparser.ConfigParser()
-        sc0peConf.read(f"/etc/qu1cksc0pe.conf")
+        sc0peConf.read(f"/etc/qu1cksc0pe.conf", encoding="utf-8-sig")
         sc0pe_path = str(sc0peConf["Qu1cksc0pe_PATH"]["sc0pe"])
         sys.path.append(sc0pe_path)
         path_handler = open(".path_handler", "w")
@@ -153,14 +153,32 @@ def _latest_report_path():
         return None
     return max(candidates, key=lambda p: os.path.getmtime(p))
 
-def _maybe_run_ai():
+def _maybe_run_ai(fast_mode=False):
     if not getattr(args, "ai", False):
         return
     report_path = _latest_report_path()
     if not report_path:
         print(f"{errorS} AI analysis requested but no report file found (expected sc0pe_*_report.json).")
         return
-    execute_module(f"analysis/multiple/smart_analyzer.py \"{report_path}\"")
+    if not fast_mode:
+        execute_module(f"analysis/multiple/smart_analyzer.py \"{report_path}\"")
+        return
+
+    smart_analyzer_path = os.path.join(sc0pe_path, "Modules", "analysis", "multiple", "smart_analyzer.py")
+    env = os.environ.copy()
+    env.setdefault("SC0PE_AI_TOTAL_BUDGET", "45")
+    env.setdefault("SC0PE_AI_OLLAMA_HTTP_TIMEOUT", "25")
+    env.setdefault("SC0PE_AI_OLLAMA_CLI_TIMEOUT", "35")
+    env.setdefault("SC0PE_AI_OLLAMA_NUM_PREDICT", "280")
+    env.setdefault("SC0PE_AI_OLLAMA_RETRY_NUM_PREDICT", "560")
+    env.setdefault("SC0PE_AI_MAX_REPORT_CHARS", "65000")
+    env.setdefault("SC0PE_AI_COMPACT_MAX_LIST_ITEMS", "24")
+    env.setdefault("SC0PE_AI_TEMP_PARSE_MAX_LINES", "2500")
+    env.setdefault("SC0PE_AI_TEMP_SAMPLE_LINES", "600")
+    try:
+        subprocess.run([py_binary, smart_analyzer_path, report_path], env=env, check=False)
+    except Exception:
+        execute_module(f"analysis/multiple/smart_analyzer.py \"{report_path}\"")
 
 def launch_web_ui():
     web_app_path = os.path.join(sc0pe_path, "Modules", "web_app.py")
@@ -265,6 +283,15 @@ def BasicAnalyzer(analyzeFile):
             execute_module(f"document_analyzer.py \"{analyzeFile}\" True")
         else:
             execute_module(f"document_analyzer.py \"{analyzeFile}\" False")
+        _maybe_run_ai()
+
+    # Windows Batch Script analysis
+    elif lower_ext in (".bat", ".cmd"):
+        print(f"{infoS} Performing [bold green]Batch Script[white] analysis...\n")
+        if args.report:
+            execute_module(f"batch_analyzer.py \"{analyzeFile}\" True")
+        else:
+            execute_module(f"batch_analyzer.py \"{analyzeFile}\" False")
         _maybe_run_ai()
 
     # Email file analysis
@@ -388,7 +415,10 @@ def Qu1cksc0pe():
     if args.lang:
         # Handling --file argument
         if args.file is not None:
-            execute_module(f"languageDetect.py \"{args.file}\"")
+            if args.report:
+                execute_module(f"languageDetect.py \"{args.file}\" True {str(bool(args.ai))}")
+            else:
+                execute_module(f"languageDetect.py \"{args.file}\" False {str(bool(args.ai))}")
         # Handling --folder argument
         if args.folder is not None:
             err_exit("[bold white on red][blink]--lang[/blink] argument is not supported for folder analyzing!\n")
@@ -416,16 +446,25 @@ def Qu1cksc0pe():
     if args.packer:
         # Handling --file argument
         if args.file is not None:
-            execute_module(f"packerAnalyzer.py --single \"{args.file}\"")
+            if args.report:
+                execute_module(f"packerAnalyzer.py --single \"{args.file}\" True {str(bool(args.ai))}")
+            else:
+                execute_module(f"packerAnalyzer.py --single \"{args.file}\" False {str(bool(args.ai))}")
         # Handling --folder argument
         if args.folder is not None:
-            execute_module(f"packerAnalyzer.py --multiscan {args.folder}")
+            if args.report:
+                execute_module(f"packerAnalyzer.py --multiscan {args.folder} True {str(bool(args.ai))}")
+            else:
+                execute_module(f"packerAnalyzer.py --multiscan {args.folder} False {str(bool(args.ai))}")
 
     # domain extraction
     if args.domain:
         # Handling --file argument
         if args.file is not None:
-            execute_module(f"domainCatcher.py \"{args.file}\"")
+            if args.report:
+                execute_module(f"domainCatcher.py \"{args.file}\" True")
+            else:
+                execute_module(f"domainCatcher.py \"{args.file}\" False")
         # Handling --folder argument
         if args.folder is not None:
             err_exit("[bold white on red][blink]--domain[/blink] argument is not supported for folder analyzing!\n")

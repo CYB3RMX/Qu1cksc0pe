@@ -73,8 +73,9 @@ PRESETS: "OrderedDict[str, AnalysisPreset]" = OrderedDict(
         ),
         "packer": AnalysisPreset(
             label="Packer Detect",
-            description="Packer signature detection for packed binaries.",
+            description="Packer signature detection for packed binaries with JSON report output.",
             args=("--packer",),
+            report_default=True,
         ),
         "resource": AnalysisPreset(
             label="Resource",
@@ -88,13 +89,15 @@ PRESETS: "OrderedDict[str, AnalysisPreset]" = OrderedDict(
         ),
         "domain": AnalysisPreset(
             label="Domain/IOC",
-            description="URL and IP extraction from sample content.",
+            description="URL/IP/email extraction with JSON report support.",
             args=("--domain",),
+            report_default=True,
         ),
         "lang": AnalysisPreset(
             label="Language",
-            description="Programming language fingerprint analysis.",
+            description="Programming language fingerprint analysis with JSON report output.",
             args=("--lang",),
+            report_default=True,
         ),
         "vtFile": AnalysisPreset(
             label="VirusTotal File",
@@ -416,6 +419,7 @@ def build_summary(report_data: Optional[dict]) -> List[dict]:
         ("categories", "Categorized Hits"),
         ("matched_rules", "Matched YARA"),
         ("interesting_string_patterns", "Interesting Patterns"),
+        ("detected_languages", "Detected Languages"),
         ("linked_dll", "Linked DLLs"),
         ("libraries", "Libraries"),
         ("attachments", "Attachments"),
@@ -1258,6 +1262,7 @@ def execute_preset(sample_path: Path, preset: AnalysisPreset, enable_ai: bool) -
 
     env = os.environ.copy()
     env.setdefault("PYTHONIOENCODING", "utf-8")
+    env.setdefault("PYTHONUTF8", "1")
 
     timed_out = False
     completed = None
@@ -1267,6 +1272,8 @@ def execute_preset(sample_path: Path, preset: AnalysisPreset, enable_ai: bool) -
             cwd=str(BASE_DIR),
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=ANALYSIS_TIMEOUT_SECONDS,
             env=env,
         )

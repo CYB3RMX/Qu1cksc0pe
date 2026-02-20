@@ -438,7 +438,7 @@ class LinuxAnalyzer:
 def run(sc0pe_path, target_file, emit_report=False):
     allstrs = perform_strings(target_file)
     conf = configparser.ConfigParser()
-    conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}linux.conf")
+    conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}linux.conf", encoding="utf-8-sig")
 
     # TODO once I sort out the actual filenames to be consistent, we can get rid off all these cases
     _special_cases = {

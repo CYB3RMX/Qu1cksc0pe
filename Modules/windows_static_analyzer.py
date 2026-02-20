@@ -156,13 +156,14 @@ winrep = {
 
 #------------------------------------ Read and parse config file
 conf = configparser.ConfigParser()
-conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf")
+conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf", encoding="utf-8-sig")
 
 class WindowsAnalyzer:
     def __init__(self, target_file):
         self.target_file = target_file
         self.allFuncs = 0
         self.windows_imports_and_exports = []
+        self.binaryfile = None
         self.executable_buffer = open(self.target_file, "rb").read()
         self.all_strings = perform_strings(self.target_file)
         self.blacklisted_patterns = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}dotnet_blacklisted_methods.txt", "r").read().split("\n")
@@ -185,18 +186,34 @@ class WindowsAnalyzer:
             print(f"{infoS} File Type: [bold green]Windows Executable[white]\n")
             self.gather_windows_imports_and_exports()
 
+    def ensure_binaryfile(self, parse_data_dirs=False):
+        if self.binaryfile is None:
+            try:
+                self.binaryfile = pf.PE(self.target_file, fast_load=True)
+            except Exception:
+                self.binaryfile = None
+                return False
+
+        if parse_data_dirs:
+            try:
+                self.binaryfile.parse_data_directories(
+                    directories=[
+                        pf.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_IMPORT"],
+                        pf.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_EXPORT"],
+                        pf.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_DEBUG"],
+                    ]
+                )
+            except Exception:
+                # Best effort: keep already-parsed PE object and continue with available data.
+                pass
+        return self.binaryfile is not None
+
     def gather_windows_imports_and_exports(self):
         print(f"{infoS} Performing extraction of imports and exports. Please wait...")
         try:
             # Fast path: avoid parsing every directory; we only need import/export/debug here.
-            self.binaryfile = pf.PE(self.target_file, fast_load=True)
-            self.binaryfile.parse_data_directories(
-                directories=[
-                    pf.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_IMPORT"],
-                    pf.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_EXPORT"],
-                    pf.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_DEBUG"],
-                ]
-            )
+            if not self.ensure_binaryfile(parse_data_dirs=True):
+                raise ValueError("PE parser could not load target file.")
             # -- Extract imports
             for imps in self.binaryfile.DIRECTORY_ENTRY_IMPORT:
                 try:
@@ -419,6 +436,10 @@ class WindowsAnalyzer:
             print(f"{errorS} There is no embedded PE file!\n")
 
     def section_parser(self):
+        if not self.ensure_binaryfile(parse_data_dirs=False):
+            print(f"{errorS} Could not parse PE section table.")
+            return
+
         peStatistics = Table(title="* Informations About Sections *", title_style="bold italic cyan", title_justify="center")
         peStatistics.add_column("Section Name", justify="center")
         peStatistics.add_column("Virtual Size", justify="center")
@@ -465,6 +486,12 @@ class WindowsAnalyzer:
         print(peStatistics)
 
     def statistics_method(self):
+        if not self.ensure_binaryfile(parse_data_dirs=False):
+            print(f"{errorS} Could not parse PE metadata for detailed statistics.")
+            winrep["filename"] = self.target_file
+            calc_hashes(self.target_file, winrep)
+            return
+
         datestamp = self.gather_timestamp()
         print(f"\n[bold green]-> [white]Statistics for: [bold green][i]{self.target_file}[/i]")
         print(f"[bold magenta]>>[white] Time Date Stamp: [bold green][i]{datestamp}[/i]")
@@ -496,7 +523,7 @@ class WindowsAnalyzer:
         if self.allFuncs < 20:
             print("[bold white on red]This file might be obfuscated or encrypted. [white]Try [bold green][i]--packer[/i] [white]to scan this file for packers.")
             print("[bold]You can also use [green][i]--hashscan[/i] [white]to scan this file.")
-            sys.exit(0)
+            return
 
     def get_debug_information(self):
         try:
@@ -732,7 +759,6 @@ def main():
     print(f"\n{infoS} Performing YARA rule matching...")
     yara_rule_scanner(windows_analyzer.rule_path, fileName, winrep)
     windows_analyzer.section_parser()
-
     windows_analyzer.statistics_method()
 
     # Print reports
