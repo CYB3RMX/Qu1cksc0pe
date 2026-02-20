@@ -54,7 +54,7 @@ def _load_conf(sc0pe_path, path_seperator="/"):
     conf = configparser.ConfigParser()
     conf_path = f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}multiple.conf"
     if os.path.exists(conf_path):
-        conf.read(conf_path)
+        conf.read(conf_path, encoding="utf-8-sig")
     return conf
 
 

@@ -83,7 +83,7 @@ allstr = "\n".join(perform_strings(targetFile))
 
 # Parsing config file to get rule path
 conf = configparser.ConfigParser()
-conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}multiple.conf")
+conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}multiple.conf", encoding="utf-8-sig")
 
 # Report
 report = {

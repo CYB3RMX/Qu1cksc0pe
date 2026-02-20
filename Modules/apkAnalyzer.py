@@ -101,7 +101,7 @@ pattern_file = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperat
 
 # Read config file
 conf = configparser.ConfigParser()
-conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Android{path_seperator}libScanner.conf")
+conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Android{path_seperator}libScanner.conf", encoding="utf-8-sig")
 
 class APKAnalyzer:
     def __init__(self, target_file):

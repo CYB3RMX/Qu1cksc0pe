@@ -200,7 +200,7 @@ class ArchiveAnalyzer:
 
         # Parsing config file to get rule path
         conf = configparser.ConfigParser()
-        conf.read(self.config_file)
+        conf.read(self.config_file, encoding="utf-8-sig")
         rule_path = conf["Rule_PATH"]["rulepath"]
         rep = {"matched_rules": []}
         hit = yara_rule_scanner(rule_path, self.yara_target, rep, quiet_nomatch=True, quiet_errors=False, print_matches=False)

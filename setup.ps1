@@ -15,10 +15,220 @@ $Default = [char]27 + "[0m"
 $InfoS = "$Cyan[$Yellow*$Cyan]$Default"
 $OkS = "$Cyan[$Green+$Cyan]$Default"
 $ErrS = "$Cyan[$Red!$Cyan]$Default"
+$script:OllamaSigninNoticeShown = $false
 
 function Write-Info([string]$Message) { Write-Host "$InfoS $Message" }
 function Write-Ok([string]$Message) { Write-Host "$OkS $Message" }
 function Write-Err([string]$Message) { Write-Host "$ErrS $Message" }
+
+function Write-OllamaSigninNotice([string]$ModelName) {
+    if ($script:OllamaSigninNoticeShown) {
+        return
+    }
+    $script:OllamaSigninNoticeShown = $true
+
+    Write-Err "================ OLLAMA CLOUD AUTH NOTICE ================"
+    Write-Err "This setup uses a cloud Ollama model and may require login."
+    Write-Err "Run: ollama signin"
+    if (-not [string]::IsNullOrWhiteSpace($ModelName)) {
+        Write-Info "After sign-in, pull the model: ollama pull $ModelName"
+    }
+    Write-Err "=========================================================="
+}
+
+function Invoke-NativeCommandCapture([string]$FilePath, [string[]]$Arguments) {
+    $output = @()
+    $exitCode = 1
+    if ([string]::IsNullOrWhiteSpace($FilePath)) {
+        return [PSCustomObject]@{
+            ExitCode = 127
+            Output   = @("Executable path is empty.")
+        }
+    }
+
+    $looksLikePath =
+        [System.IO.Path]::IsPathRooted($FilePath) -or
+        ($FilePath -like "*\*") -or
+        ($FilePath -like "*/*")
+    if ($looksLikePath -and (-not (Test-Path -LiteralPath $FilePath))) {
+        return [PSCustomObject]@{
+            ExitCode = 127
+            Output   = @("Executable not found: $FilePath")
+        }
+    }
+
+    $prevPreference = $ErrorActionPreference
+    try {
+        # Some tools (notably pip) write useful diagnostics to stderr even when we want to handle failures ourselves.
+        $ErrorActionPreference = "Continue"
+        try {
+            $output = & $FilePath @Arguments 2>&1
+        } catch {
+            $output = @($_.Exception.Message)
+            $exitCode = 127
+            return [PSCustomObject]@{
+                ExitCode = $exitCode
+                Output   = @($output)
+            }
+        }
+        $exitCode = $LASTEXITCODE
+        if ($null -eq $exitCode) {
+            $exitCode = 0
+        }
+    } finally {
+        $ErrorActionPreference = $prevPreference
+    }
+
+    return [PSCustomObject]@{
+        ExitCode = $exitCode
+        Output   = @($output)
+    }
+}
+
+function Invoke-ProcessWithTimeoutCapture([string]$FilePath, [string[]]$Arguments, [int]$TimeoutSeconds = 0) {
+    $output = @()
+    $exitCode = 1
+    $timedOut = $false
+
+    if ([string]::IsNullOrWhiteSpace($FilePath)) {
+        return [PSCustomObject]@{
+            ExitCode = 127
+            TimedOut = $false
+            Output   = @("Executable path is empty.")
+        }
+    }
+    if ([System.IO.Path]::IsPathRooted($FilePath) -and (-not (Test-Path -LiteralPath $FilePath))) {
+        return [PSCustomObject]@{
+            ExitCode = 127
+            TimedOut = $false
+            Output   = @("Executable not found: $FilePath")
+        }
+    }
+
+    $tmpDir = Join-Path ([System.IO.Path]::GetTempPath()) ("cmd-out-{0}" -f ([guid]::NewGuid().ToString("N")))
+    Ensure-Directory $tmpDir
+    $stdoutPath = Join-Path $tmpDir "stdout.txt"
+    $stderrPath = Join-Path $tmpDir "stderr.txt"
+
+    try {
+        $proc = Start-Process -FilePath $FilePath -ArgumentList $Arguments -PassThru -NoNewWindow -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath
+        if ($TimeoutSeconds -gt 0) {
+            if (-not $proc.WaitForExit($TimeoutSeconds * 1000)) {
+                $timedOut = $true
+                try { $proc.Kill() } catch {}
+            } else {
+                $exitCode = $proc.ExitCode
+            }
+        } else {
+            $proc.WaitForExit()
+            $exitCode = $proc.ExitCode
+        }
+
+        if ($timedOut) {
+            $exitCode = 124
+        }
+    } catch {
+        $output = @($_.Exception.Message)
+        return [PSCustomObject]@{
+            ExitCode = 127
+            TimedOut = $false
+            Output   = @($output)
+        }
+    } finally {
+        if (Test-Path -LiteralPath $stdoutPath) {
+            $output += Get-Content -LiteralPath $stdoutPath -ErrorAction SilentlyContinue
+        }
+        if (Test-Path -LiteralPath $stderrPath) {
+            $output += Get-Content -LiteralPath $stderrPath -ErrorAction SilentlyContinue
+        }
+        if (Test-Path -LiteralPath $tmpDir) { Remove-Item -LiteralPath $tmpDir -Force -Recurse }
+    }
+
+    return [PSCustomObject]@{
+        ExitCode = $exitCode
+        TimedOut = $timedOut
+        Output   = @($output)
+    }
+}
+
+function Get-PythonExecutable() {
+    if (-not [string]::IsNullOrWhiteSpace($script:PythonExe)) {
+        if ([System.IO.Path]::IsPathRooted($script:PythonExe) -and (-not (Test-Path -LiteralPath $script:PythonExe))) {
+            $script:PythonExe = $null
+        } else {
+            return $script:PythonExe
+        }
+    }
+    if (-not [string]::IsNullOrWhiteSpace($script:PythonExe)) {
+        return $script:PythonExe
+    }
+    $cmd = Get-Command python -ErrorAction SilentlyContinue
+    if (($null -ne $cmd) -and (-not [string]::IsNullOrWhiteSpace($cmd.Source))) {
+        return $cmd.Source
+    }
+    return "python"
+}
+
+function Resolve-UsablePython() {
+    $candidates = @()
+
+    $cmd = Get-Command python -ErrorAction SilentlyContinue
+    if (($null -ne $cmd) -and (-not [string]::IsNullOrWhiteSpace($cmd.Source))) {
+        $candidates += $cmd.Source
+    }
+
+    $knownCandidates = @(
+        (Join-Path $env:LOCALAPPDATA "Microsoft\\WindowsApps\\python.exe"),
+        (Join-Path $env:LOCALAPPDATA "Programs\\Python\\Python312\\python.exe"),
+        (Join-Path $env:LOCALAPPDATA "Programs\\Python\\Python311\\python.exe"),
+        (Join-Path $env:ProgramFiles "Python312\\python.exe"),
+        (Join-Path $env:ProgramFiles "Python311\\python.exe"),
+        (Join-Path ${env:ProgramFiles(x86)} "Python312\\python.exe"),
+        (Join-Path ${env:ProgramFiles(x86)} "Python311\\python.exe")
+    ) | Where-Object { $_ }
+    $candidates += $knownCandidates
+
+    $searchBases = @(
+        (Join-Path $env:LOCALAPPDATA "Programs\\Python"),
+        $env:ProgramFiles,
+        ${env:ProgramFiles(x86)}
+    ) | Where-Object { $_ -and (Test-Path -LiteralPath $_) }
+
+    foreach ($base in $searchBases) {
+        $pythonDirs = Get-ChildItem -LiteralPath $base -Directory -Filter "Python*" -ErrorAction SilentlyContinue
+        foreach ($dir in $pythonDirs) {
+            $exe = Join-Path $dir.FullName "python.exe"
+            if (Test-Path -LiteralPath $exe) {
+                $candidates += $exe
+            }
+        }
+    }
+
+    $uniqueCandidates = @(
+        $candidates |
+            Where-Object {
+                if ([string]::IsNullOrWhiteSpace($_)) { return $false }
+                if ([System.IO.Path]::IsPathRooted($_)) { return (Test-Path -LiteralPath $_) }
+                return $true
+            } |
+            Select-Object -Unique
+    )
+    foreach ($candidate in $uniqueCandidates) {
+        $probe = Invoke-NativeCommandCapture -FilePath $candidate -Arguments @("-c", "import sys; print('%d.%d' % sys.version_info[:2])")
+        if ($probe.ExitCode -ne 0) {
+            continue
+        }
+        $ver = (($probe.Output | ForEach-Object { $_.ToString().Trim() } | Where-Object { $_ }) | Select-Object -Last 1)
+        if ($ver -match "^\d+\.\d+$") {
+            return [PSCustomObject]@{
+                Path    = $candidate
+                Version = $ver
+            }
+        }
+    }
+
+    return $null
+}
 
 function Ensure-Directory([string]$Path) {
     if (-not (Test-Path -LiteralPath $Path)) {
@@ -108,16 +318,56 @@ function Update-IniLine([string]$Path, [string]$Key, [string]$Value) {
     if (-not $updated) {
         $out += ("{0} = {1}" -f $Key, $Value)
     }
-    Set-Content -LiteralPath $Path -Value $out -Encoding UTF8
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    [System.IO.File]::WriteAllLines($Path, [string[]]$out, $utf8NoBom)
 }
 
 function Ensure-Python() {
-    $py = Get-Command python -ErrorAction SilentlyContinue
+    $py = Resolve-UsablePython
     if ($null -eq $py) {
-        throw "Python is not installed (python not found in PATH). Install Python 3.10+ and try again."
+        Write-Info "Python not found. Installing Python 3.12 via winget..."
+        $null = Ensure-Winget
+        $pyInstall = Invoke-NativeCommandCapture -FilePath "winget" -Arguments @(
+            "install",
+            "-e",
+            "--id", "Python.Python.3.12",
+            "--scope", "user",
+            "--accept-package-agreements",
+            "--accept-source-agreements"
+        )
+        if ($pyInstall.ExitCode -ne 0) {
+            $outText = ($pyInstall.Output | ForEach-Object { $_.ToString() }) -join "`n"
+            throw "Python installation via winget failed.`n$outText"
+        }
+
+        $windowsApps = Join-Path $env:LOCALAPPDATA "Microsoft\\WindowsApps"
+        if (Test-Path -LiteralPath $windowsApps) {
+            $null = Ensure-PathEntry -PathToAdd $windowsApps -Scope "Process"
+            $null = Ensure-PathEntry -PathToAdd $windowsApps -Scope "User"
+        }
+
+        $py = Resolve-UsablePython
+        if ($null -eq $py) {
+            throw "Python installation attempted but a usable python.exe was not found. Restart terminal and re-run setup."
+        }
     }
 
-    $ver = & python -c "import sys; print('%d.%d' % sys.version_info[:2])"
+    $script:PythonExe = $py.Path
+    $pythonDir = Split-Path -Parent $script:PythonExe
+    if (-not [string]::IsNullOrWhiteSpace($pythonDir)) {
+        $null = Ensure-PathEntry -PathToAdd $pythonDir -Scope "Process"
+        $null = Ensure-PathEntry -PathToAdd $pythonDir -Scope "User"
+        $pythonScriptsDir = Join-Path $pythonDir "Scripts"
+        if (Test-Path -LiteralPath $pythonScriptsDir) {
+            $null = Ensure-PathEntry -PathToAdd $pythonScriptsDir -Scope "Process"
+            $null = Ensure-PathEntry -PathToAdd $pythonScriptsDir -Scope "User"
+        }
+    }
+
+    $ver = $py.Version
+    if ([string]::IsNullOrWhiteSpace($ver) -or (-not ($ver -match "^\d+\.\d+$"))) {
+        throw "Python version probe returned an invalid value: '$ver'"
+    }
     $majorMinor = $ver.Split(".")
     $maj = [int]$majorMinor[0]
     $min = [int]$majorMinor[1]
@@ -126,7 +376,11 @@ function Ensure-Python() {
     }
 
     # Ensure pip
-    & python -m pip --version | Out-Null
+    $pipProbe = Invoke-NativeCommandCapture -FilePath (Get-PythonExecutable) -Arguments @("-m", "pip", "--version")
+    if ($pipProbe.ExitCode -ne 0) {
+        $pipText = ($pipProbe.Output | ForEach-Object { $_.ToString() }) -join "`n"
+        throw "pip is not available for Python at $($script:PythonExe).`n$pipText"
+    }
 }
 
 function Ensure-PythonRequirements([string]$RepoRoot) {
@@ -134,27 +388,130 @@ function Ensure-PythonRequirements([string]$RepoRoot) {
     if (-not (Test-Path -LiteralPath $req)) {
         throw "requirements.txt not found in: $RepoRoot"
     }
+    $lines = Get-Content -LiteralPath $req
+    $hasYaraDependency = $false
+    foreach ($line in $lines) {
+        $trimmed = $line.Trim()
+        if ($trimmed -match "^\s*yara-python(\s|=|>|<|!|~|$)") {
+            $hasYaraDependency = $true
+            break
+        }
+    }
+
     Write-Info "Installing python modules from requirements.txt..."
-    & python -m pip install -r $req | Out-Null
-    Write-Ok "Python modules installed."
+    $installResult = Invoke-NativeCommandCapture -FilePath (Get-PythonExecutable) -Arguments @("-m", "pip", "install", "-r", $req)
+    $installOut = $installResult.Output
+    if ($installResult.ExitCode -eq 0) {
+        Write-Ok "Python modules installed."
+        return
+    }
+
+    $installText = ($installOut | ForEach-Object { $_.ToString() }) -join "`n"
+    $isYaraBuildFailure =
+        ($installText -match "(?i)yara-python") -and
+        ($installText -match "(?i)Microsoft Visual C\+\+ 14|failed building wheel|failed-wheel-build-for-install")
+
+    if (-not $hasYaraDependency) {
+        throw "Failed to install Python requirements.`n$installText"
+    }
+
+    if ($isYaraBuildFailure -or ($installText -match "(?i)subprocess-exited-with-error")) {
+        Write-Err "Initial requirements installation failed (likely yara-python build). Retrying without yara-python..."
+    } else {
+        Write-Err "Initial requirements installation failed. requirements.txt contains yara-python, retrying without it..."
+    }
+    Write-Info "Retrying requirements installation without yara-python so setup can continue..."
+
+    $tmpReq = Join-Path ([System.IO.Path]::GetTempPath()) ("requirements-no-yara-{0}.txt" -f ([guid]::NewGuid().ToString("N")))
+    try {
+        $filtered = @()
+        foreach ($line in $lines) {
+            $trimmed = $line.Trim()
+            if ([string]::IsNullOrWhiteSpace($trimmed) -or $trimmed.StartsWith("#")) {
+                $filtered += $line
+                continue
+            }
+            if ($trimmed -match "^\s*yara-python(\s|=|>|<|!|~|$)") {
+                continue
+            }
+            $filtered += $line
+        }
+
+        Set-Content -LiteralPath $tmpReq -Value $filtered -Encoding UTF8
+        $retryResult = Invoke-NativeCommandCapture -FilePath (Get-PythonExecutable) -Arguments @("-m", "pip", "install", "-r", $tmpReq)
+        $retryOut = $retryResult.Output
+        if ($retryResult.ExitCode -ne 0) {
+            $retryText = ($retryOut | ForEach-Object { $_.ToString() }) -join "`n"
+            throw "Fallback requirements installation failed.`n--- First attempt ---`n$installText`n--- Second attempt (without yara-python) ---`n$retryText"
+        }
+    } finally {
+        if (Test-Path -LiteralPath $tmpReq) { Remove-Item -LiteralPath $tmpReq -Force }
+    }
+
+    Write-Err "yara-python was skipped."
+    Write-Info "Setup will continue and force-install yara-python in a dedicated step."
+    Write-Ok "Python modules installed (without yara-python for now)."
+}
+
+function Ensure-YaraPython() {
+    $probeResult = Invoke-NativeCommandCapture -FilePath (Get-PythonExecutable) -Arguments @("-c", "import yara")
+    if ($probeResult.ExitCode -eq 0) {
+        Write-Info "yara-python is already available."
+        return
+    }
+
+    Write-Info "Installing yara-python (preferring prebuilt wheel)..."
+    $wheelResult = Invoke-NativeCommandCapture -FilePath (Get-PythonExecutable) -Arguments @("-m", "pip", "install", "--only-binary=:all:", "yara-python==4.5.0")
+    $wheelOut = $wheelResult.Output
+    if ($wheelResult.ExitCode -eq 0) {
+        $verifyWheel = Invoke-NativeCommandCapture -FilePath (Get-PythonExecutable) -Arguments @("-c", "import yara; print(yara.__version__)")
+        if ($verifyWheel.ExitCode -eq 0) {
+            Write-Ok "yara-python installed from wheel."
+            return
+        }
+    }
+
+    Write-Info "Prebuilt yara-python wheel is not available. Installing Microsoft C++ Build Tools..."
+    $null = Ensure-Winget
+    $buildToolsResult = Invoke-NativeCommandCapture -FilePath "winget" -Arguments @(
+        "install",
+        "-e",
+        "--id", "Microsoft.VisualStudio.2022.BuildTools",
+        "--accept-package-agreements",
+        "--accept-source-agreements",
+        "--override", "--quiet --wait --norestart --nocache --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
+    )
+    if ($buildToolsResult.ExitCode -ne 0) {
+        $wheelText = ($wheelOut | ForEach-Object { $_.ToString() }) -join "`n"
+        throw "yara-python requires Microsoft C++ Build Tools but automatic installation failed.`n--- pip output ---`n$wheelText`nInstall Build Tools manually and re-run setup."
+    }
+    Write-Ok "Microsoft C++ Build Tools installed."
+
+    Write-Info "Retrying yara-python installation from source..."
+    $srcResult = Invoke-NativeCommandCapture -FilePath (Get-PythonExecutable) -Arguments @("-m", "pip", "install", "--no-binary=:all:", "yara-python==4.5.0")
+    $srcOut = $srcResult.Output
+    if ($srcResult.ExitCode -ne 0) {
+        $srcText = ($srcOut | ForEach-Object { $_.ToString() }) -join "`n"
+        throw "Failed to install yara-python even after Build Tools setup.`n$srcText"
+    }
+
+    $verifySrc = Invoke-NativeCommandCapture -FilePath (Get-PythonExecutable) -Arguments @("-c", "import yara; print(yara.__version__)")
+    if ($verifySrc.ExitCode -ne 0) {
+        throw "yara-python installation finished but import test failed."
+    }
+
+    Write-Ok "yara-python installed successfully."
 }
 
 function Ensure-PyOneNote() {
-    $ok = $false
-    try {
-        & python -c "from pyOneNote.Main import OneDocment" | Out-Null
-        $ok = $true
-    } catch {
-        $ok = $false
-    }
-
-    if ($ok) {
+    $probeResult = Invoke-NativeCommandCapture -FilePath (Get-PythonExecutable) -Arguments @("-c", "from pyOneNote.Main import OneDocment")
+    if ($probeResult.ExitCode -eq 0) {
         Write-Info "pyOneNote is already available."
         return
     }
 
     Write-Info "Installing pyOneNote..."
-    & python -m pip install -U --force-reinstall "https://github.com/DissectMalware/pyOneNote/archive/master.zip" | Out-Null
+    & (Get-PythonExecutable) -m pip install -U --force-reinstall "https://github.com/DissectMalware/pyOneNote/archive/master.zip" | Out-Null
     Write-Ok "pyOneNote installed."
 }
 
@@ -313,9 +670,32 @@ function Ensure-FileCommand([string]$ToolsBin) {
     Write-Ok "file command installed into $ToolsBin"
 }
 
+function Ensure-StringsEulaAccepted([string]$StringsExe) {
+    if ([string]::IsNullOrWhiteSpace($StringsExe) -or (-not (Test-Path -LiteralPath $StringsExe))) {
+        return
+    }
+
+    $eulaPath = "HKCU:\\Software\\Sysinternals\\Strings"
+    try {
+        if (-not (Test-Path -LiteralPath $eulaPath)) {
+            $null = New-Item -Path $eulaPath -Force
+        }
+        $existing = Get-ItemProperty -Path $eulaPath -Name "EulaAccepted" -ErrorAction SilentlyContinue
+        if (($null -eq $existing) -or ([int]$existing.EulaAccepted -ne 1)) {
+            $null = New-ItemProperty -Path $eulaPath -Name "EulaAccepted" -PropertyType DWord -Value 1 -Force
+        }
+    } catch {
+        # Best effort only.
+    }
+
+    # Also pass -accepteula once to cover edge cases where registry path/value differs by build.
+    $null = Invoke-NativeCommandCapture -FilePath $StringsExe -Arguments @("-accepteula", "-nobanner")
+}
+
 function Ensure-StringsCommand([string]$ToolsBin) {
     $stringsExe = Join-Path $ToolsBin "strings.exe"
     if (Test-Path -LiteralPath $stringsExe) {
+        Ensure-StringsEulaAccepted -StringsExe $stringsExe
         Write-Info "strings command already exists in $ToolsBin"
         return
     }
@@ -339,28 +719,40 @@ function Ensure-StringsCommand([string]$ToolsBin) {
         if (Test-Path -LiteralPath $tmpExtract) { Remove-Item -LiteralPath $tmpExtract -Force -Recurse }
     }
 
+    Ensure-StringsEulaAccepted -StringsExe $stringsExe
     Write-Ok "strings command installed into $ToolsBin"
 }
 
-function Ensure-7Zip() {
+function Resolve-SevenZipExecutable() {
     $cmd = Get-Command 7z -ErrorAction SilentlyContinue
-    if ($null -ne $cmd) {
-        Write-Info "7z is already available: $($cmd.Source)"
-        return
+    if (($null -ne $cmd) -and (-not [string]::IsNullOrWhiteSpace($cmd.Source))) {
+        return $cmd.Source
     }
 
-    $candidatePaths = @(
+    $candidates = @(
         (Join-Path $env:ProgramFiles "7-Zip\\7z.exe"),
-        (Join-Path ${env:ProgramFiles(x86)} "7-Zip\\7z.exe")
+        (Join-Path ${env:ProgramFiles(x86)} "7-Zip\\7z.exe"),
+        (Join-Path $env:LOCALAPPDATA "Programs\\7-Zip\\7z.exe"),
+        (Join-Path $env:LOCALAPPDATA "Microsoft\\WinGet\\Links\\7z.exe"),
+        (Join-Path $env:LOCALAPPDATA "Programs\\7-Zip\\7zz.exe"),
+        (Join-Path $env:LOCALAPPDATA "Microsoft\\WinGet\\Links\\7zz.exe")
     ) | Where-Object { $_ -and (Test-Path -LiteralPath $_) }
 
-    $candidatePaths = @($candidatePaths)
-    if ($candidatePaths.Length -gt 0) {
-        $sevenZipDir = Split-Path -Parent $candidatePaths[0]
-        if (-not ($env:PATH -split ";" | Where-Object { $_ -eq $sevenZipDir })) {
-            $env:PATH = "$sevenZipDir;$env:PATH"
-        }
-        Write-Ok "7z found at $($candidatePaths[0]) (added to PATH for this session)."
+    $candidates = @($candidates)
+    if ($candidates.Length -gt 0) {
+        return $candidates[0]
+    }
+
+    return ""
+}
+
+function Ensure-7Zip() {
+    $sevenZipExe = Resolve-SevenZipExecutable
+    if (-not [string]::IsNullOrWhiteSpace($sevenZipExe)) {
+        $sevenZipDir = Split-Path -Parent $sevenZipExe
+        $null = Ensure-PathEntry -PathToAdd $sevenZipDir -Scope "Process"
+        $null = Ensure-PathEntry -PathToAdd $sevenZipDir -Scope "User"
+        Write-Info "7-Zip is already available: $sevenZipExe"
         return
     }
 
@@ -369,9 +761,17 @@ function Ensure-7Zip() {
     if ($null -ne $winget) {
         Write-Info "Installing 7-Zip via winget (user scope)..."
         & winget install -e --id 7zip.7zip --scope user --accept-package-agreements --accept-source-agreements | Out-Null
-        $cmd = Get-Command 7z -ErrorAction SilentlyContinue
-        if ($null -ne $cmd) {
-            Write-Ok "7z installed: $($cmd.Source)"
+        if ($LASTEXITCODE -ne 0) {
+            Write-Info "Retrying 7-Zip installation via winget (without scope)..."
+            & winget install -e --id 7zip.7zip --accept-package-agreements --accept-source-agreements | Out-Null
+        }
+
+        $sevenZipExe = Resolve-SevenZipExecutable
+        if (-not [string]::IsNullOrWhiteSpace($sevenZipExe)) {
+            $sevenZipDir = Split-Path -Parent $sevenZipExe
+            $null = Ensure-PathEntry -PathToAdd $sevenZipDir -Scope "Process"
+            $null = Ensure-PathEntry -PathToAdd $sevenZipDir -Scope "User"
+            Write-Ok "7-Zip installed: $sevenZipExe"
             return
         }
     }
@@ -380,9 +780,12 @@ function Ensure-7Zip() {
     if ($null -ne $choco) {
         Write-Info "Installing 7-Zip via Chocolatey..."
         & choco install 7zip -y | Out-Null
-        $cmd = Get-Command 7z -ErrorAction SilentlyContinue
-        if ($null -ne $cmd) {
-            Write-Ok "7z installed: $($cmd.Source)"
+        $sevenZipExe = Resolve-SevenZipExecutable
+        if (-not [string]::IsNullOrWhiteSpace($sevenZipExe)) {
+            $sevenZipDir = Split-Path -Parent $sevenZipExe
+            $null = Ensure-PathEntry -PathToAdd $sevenZipDir -Scope "Process"
+            $null = Ensure-PathEntry -PathToAdd $sevenZipDir -Scope "User"
+            Write-Ok "7-Zip installed: $sevenZipExe"
             return
         }
     }
@@ -391,14 +794,103 @@ function Ensure-7Zip() {
     if ($null -ne $scoop) {
         Write-Info "Installing 7-Zip via Scoop..."
         & scoop install 7zip | Out-Null
-        $cmd = Get-Command 7z -ErrorAction SilentlyContinue
-        if ($null -ne $cmd) {
-            Write-Ok "7z installed: $($cmd.Source)"
+        $sevenZipExe = Resolve-SevenZipExecutable
+        if (-not [string]::IsNullOrWhiteSpace($sevenZipExe)) {
+            $sevenZipDir = Split-Path -Parent $sevenZipExe
+            $null = Ensure-PathEntry -PathToAdd $sevenZipDir -Scope "Process"
+            $null = Ensure-PathEntry -PathToAdd $sevenZipDir -Scope "User"
+            Write-Ok "7-Zip installed: $sevenZipExe"
             return
         }
     }
 
-    throw "7z (7-Zip) is required for ACE archive extraction. Install 7-Zip (7z) and re-run setup."
+    throw "7-Zip is required for ACE archive extraction. Install 7-Zip (7z/7zz) and re-run setup."
+}
+
+function Ensure-WindowsAppRuntimeFramework() {
+    $installed = Get-AppxPackage -Name "Microsoft.WindowsAppRuntime.1.8*" -ErrorAction SilentlyContinue
+    if ($null -ne $installed) {
+        Write-Info "Microsoft.WindowsAppRuntime.1.8 is already installed."
+        return
+    }
+
+    Write-Info "Installing Microsoft.WindowsAppRuntime.1.8 dependency..."
+    $tmpDir = Join-Path ([System.IO.Path]::GetTempPath()) ("windowsappruntime-{0}" -f ([guid]::NewGuid().ToString("N")))
+    Ensure-Directory $tmpDir
+    $runtimeInstaller = Join-Path $tmpDir "WindowsAppRuntimeInstall.exe"
+
+    $runtimeUrl = if ([Environment]::Is64BitOperatingSystem) {
+        "https://aka.ms/windowsappsdk/1.8/1.8.260209005/windowsappruntimeinstall-x64.exe"
+    } else {
+        "https://aka.ms/windowsappsdk/1.8/1.8.260209005/windowsappruntimeinstall-x86.exe"
+    }
+
+    try {
+        Invoke-Download -Uri $runtimeUrl -OutFile $runtimeInstaller
+        $installResult = Invoke-NativeCommandCapture -FilePath $runtimeInstaller -Arguments @("--quiet", "--force")
+        if ($installResult.ExitCode -ne 0) {
+            $outText = ($installResult.Output | ForEach-Object { $_.ToString() }) -join "`n"
+            throw "Windows App Runtime installer failed (exit code: $($installResult.ExitCode)).`n$outText"
+        }
+    } finally {
+        if (Test-Path -LiteralPath $tmpDir) { Remove-Item -LiteralPath $tmpDir -Force -Recurse }
+    }
+
+    $installed = Get-AppxPackage -Name "Microsoft.WindowsAppRuntime.1.8*" -ErrorAction SilentlyContinue
+    if ($null -eq $installed) {
+        throw "Microsoft.WindowsAppRuntime.1.8 installation completed but framework was not detected."
+    }
+
+    Write-Ok "Microsoft.WindowsAppRuntime.1.8 installed."
+}
+
+function Install-WingetFromReleaseAssets() {
+    Write-Info "Falling back to official winget release assets..."
+    $tmpDir = Join-Path ([System.IO.Path]::GetTempPath()) ("winget-release-{0}" -f ([guid]::NewGuid().ToString("N")))
+    Ensure-Directory $tmpDir
+
+    $releaseJsonPath = Join-Path $tmpDir "release.json"
+    $depsZipPath = Join-Path $tmpDir "DesktopAppInstaller_Dependencies.zip"
+    $depsExtractPath = Join-Path $tmpDir "dependencies"
+    $bundlePath = Join-Path $tmpDir "Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
+
+    try {
+        Invoke-Download -Uri "https://api.github.com/repos/microsoft/winget-cli/releases/latest" -OutFile $releaseJsonPath
+        $release = Get-Content -LiteralPath $releaseJsonPath -Raw | ConvertFrom-Json
+        if ($null -eq $release -or $null -eq $release.assets) {
+            throw "Unable to parse winget release metadata from GitHub."
+        }
+
+        $depsAsset = $release.assets | Where-Object { $_.name -eq "DesktopAppInstaller_Dependencies.zip" } | Select-Object -First 1
+        $bundleAsset = $release.assets | Where-Object { $_.name -eq "Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle" } | Select-Object -First 1
+        if (($null -eq $depsAsset) -or ($null -eq $bundleAsset)) {
+            throw "Required winget release assets were not found in latest GitHub release."
+        }
+
+        Invoke-Download -Uri $depsAsset.browser_download_url -OutFile $depsZipPath
+        Invoke-Download -Uri $bundleAsset.browser_download_url -OutFile $bundlePath
+
+        Ensure-Directory $depsExtractPath
+        Expand-Archive -LiteralPath $depsZipPath -DestinationPath $depsExtractPath -Force
+
+        $depPackages = Get-ChildItem -LiteralPath $depsExtractPath -Recurse -Filter "*.appx" -File |
+            Sort-Object FullName
+        if (@($depPackages).Length -eq 0) {
+            throw "No dependency APPX packages were found in DesktopAppInstaller_Dependencies.zip."
+        }
+
+        foreach ($pkg in $depPackages) {
+            try {
+                Add-AppxPackage -Path $pkg.FullName -ErrorAction Stop | Out-Null
+            } catch {
+                # Continue: dependency bundles can include optional/older packages on some systems.
+            }
+        }
+
+        Add-AppxPackage -Path $bundlePath -ErrorAction Stop | Out-Null
+    } finally {
+        if (Test-Path -LiteralPath $tmpDir) { Remove-Item -LiteralPath $tmpDir -Force -Recurse }
+    }
 }
 
 function Ensure-Winget() {
@@ -419,7 +911,28 @@ function Ensure-Winget() {
 
         # VCLibs may already be installed. Ignore errors and continue.
         try { Add-AppxPackage -Path $vclibsPath -ErrorAction Stop | Out-Null } catch {}
-        Add-AppxPackage -Path $bundlePath -ErrorAction Stop | Out-Null
+        try {
+            Add-AppxPackage -Path $bundlePath -ErrorAction Stop | Out-Null
+        } catch {
+            $msg = $_.Exception.Message
+            if (
+                ($msg -match "0x80073CF3") -or
+                ($msg -match "Microsoft\.WindowsAppRuntime\.1\.8") -or
+                ($msg -match "Microsoft\.VCLibs\.140\.00\.UWPDesktop")
+            ) {
+                if ($msg -match "Microsoft\.WindowsAppRuntime\.1\.8") {
+                    Write-Err "App Installer dependency missing: Microsoft.WindowsAppRuntime.1.8"
+                    Ensure-WindowsAppRuntimeFramework
+                }
+                try {
+                    Add-AppxPackage -Path $bundlePath -ErrorAction Stop | Out-Null
+                } catch {
+                    Install-WingetFromReleaseAssets
+                }
+            } else {
+                throw
+            }
+        }
     } finally {
         if (Test-Path -LiteralPath $tmpDir) { Remove-Item -LiteralPath $tmpDir -Force -Recurse }
     }
@@ -476,9 +989,34 @@ function Ensure-Ollama() {
     $wingetExe = Ensure-Winget
 
     Write-Info "Installing Ollama via winget (user scope)..."
-    & $wingetExe install -e --id Ollama.Ollama --scope user --accept-package-agreements --accept-source-agreements | Out-Null
-    if ($LASTEXITCODE -ne 0) {
-        throw "winget failed to install Ollama. Try manually: winget install -e --id Ollama.Ollama --scope user"
+    $ollamaInstallResult = Invoke-NativeCommandCapture -FilePath $wingetExe -Arguments @(
+        "install",
+        "-e",
+        "--id", "Ollama.Ollama",
+        "--scope", "user",
+        "--accept-package-agreements",
+        "--accept-source-agreements"
+    )
+    if ($ollamaInstallResult.ExitCode -ne 0) {
+        Write-Info "Retrying Ollama installation via winget (without scope)..."
+        $retryResult = Invoke-NativeCommandCapture -FilePath $wingetExe -Arguments @(
+            "install",
+            "-e",
+            "--id", "Ollama.Ollama",
+            "--accept-package-agreements",
+            "--accept-source-agreements"
+        )
+        if ($retryResult.ExitCode -eq 0) {
+            $ollamaInstallResult = $retryResult
+        } else {
+            # Keep both outputs for diagnostics, but still check whether ollama.exe became available.
+            $allOut = (($ollamaInstallResult.Output | ForEach-Object { $_.ToString() }) + ($retryResult.Output | ForEach-Object { $_.ToString() })) -join "`n"
+            $ollamaExe = Resolve-OllamaPath
+            if ([string]::IsNullOrWhiteSpace($ollamaExe)) {
+                throw "winget failed to install Ollama.`n$allOut"
+            }
+            Write-Err "winget reported errors during Ollama installation, but ollama.exe is available."
+        }
     }
 
     $ollamaExe = Resolve-OllamaPath
@@ -498,16 +1036,31 @@ function Ensure-OllamaModel([string]$OllamaExe, [string]$ModelName) {
         throw "Model name is empty."
     }
     $isCloudModel = $ModelName.Trim().ToLowerInvariant().EndsWith(":cloud")
+    if ($isCloudModel) {
+        Write-OllamaSigninNotice -ModelName $ModelName
+    }
 
-    $existing = & $OllamaExe list 2>$null
-    if (($LASTEXITCODE -eq 0) -and ($existing | Where-Object { $_ -match ("^\s*{0}(?:\s|$)" -f [regex]::Escape($ModelName)) })) {
+    $listResult = Invoke-NativeCommandCapture -FilePath $OllamaExe -Arguments @("list")
+    $existing = $listResult.Output
+    if (($listResult.ExitCode -eq 0) -and ($existing | Where-Object { $_ -match ("^\s*{0}(?:\s|$)" -f [regex]::Escape($ModelName)) })) {
         Write-Info "Ollama model already exists: $ModelName"
         return $true
     }
+    if (($listResult.ExitCode -ne 0) -and $isCloudModel) {
+        Write-Info "Could not query existing Ollama models cleanly; continuing with pull attempt."
+    }
 
     Write-Info "Pulling Ollama model: $ModelName"
-    $pullOutput = & $OllamaExe pull $ModelName 2>&1
-    if ($LASTEXITCODE -ne 0) {
+    $pullTimeout = if ($isCloudModel) { 240 } else { 0 }
+    $pullResult = Invoke-ProcessWithTimeoutCapture -FilePath $OllamaExe -Arguments @("pull", $ModelName) -TimeoutSeconds $pullTimeout
+    $pullOutput = $pullResult.Output
+    if ($pullResult.TimedOut -and $isCloudModel) {
+        Write-Err "Timed out while pulling cloud model '$ModelName'."
+        Write-OllamaSigninNotice -ModelName $ModelName
+        Write-Info "Setup will continue without pulling this model."
+        return $false
+    }
+    if ($pullResult.ExitCode -ne 0) {
         Write-Info "Model pull failed on first attempt. Trying to start Ollama service and retry..."
         try {
             Start-Process -FilePath $OllamaExe -ArgumentList "serve" -WindowStyle Hidden | Out-Null
@@ -515,12 +1068,26 @@ function Ensure-OllamaModel([string]$OllamaExe, [string]$ModelName) {
         } catch {
             # best-effort; retry pull anyway
         }
-        $retryOutput = & $OllamaExe pull $ModelName 2>&1
-        if ($LASTEXITCODE -ne 0) {
+        $retryResult = Invoke-ProcessWithTimeoutCapture -FilePath $OllamaExe -Arguments @("pull", $ModelName) -TimeoutSeconds $pullTimeout
+        $retryOutput = $retryResult.Output
+        if ($retryResult.TimedOut -and $isCloudModel) {
+            Write-Err "Timed out while pulling cloud model '$ModelName' after retry."
+            Write-OllamaSigninNotice -ModelName $ModelName
+            Write-Info "Setup will continue without pulling this model."
+            return $false
+        }
+        if ($retryResult.ExitCode -ne 0) {
             $allOutput = (($pullOutput | ForEach-Object { $_.ToString() }) + ($retryOutput | ForEach-Object { $_.ToString() })) -join "`n"
             if ($isCloudModel -and ($allOutput -match "(?i)\b401\b|unauthorized|authentication|auth")) {
-                Write-Err "Cloud model pull requires Ollama authentication. Run: ollama signin"
-                Write-Info "Then retry manually: ollama pull $ModelName"
+                Write-Err "Cloud model pull requires Ollama authentication."
+                Write-OllamaSigninNotice -ModelName $ModelName
+                Write-Info "Setup will continue without pulling this model."
+                return $false
+            }
+            if ($isCloudModel) {
+                Write-Err "Failed to pull cloud model '$ModelName'."
+                Write-OllamaSigninNotice -ModelName $ModelName
+                Write-Info "Try manually later: ollama pull $ModelName"
                 Write-Info "Setup will continue without pulling this model."
                 return $false
             }
@@ -537,8 +1104,11 @@ try {
     Set-Location -LiteralPath $RepoRoot
 
     Ensure-ZipTooling
+    $null = Ensure-Winget
     Ensure-Python
+    Ensure-7Zip
     Ensure-PythonRequirements -RepoRoot $RepoRoot
+    Ensure-YaraPython
 
     $BaseDir = Join-Path $HOME "sc0pe_Base"
     Ensure-Directory $BaseDir
@@ -547,11 +1117,11 @@ try {
     $ToolsBin = Ensure-ToolsBin -BaseDir $BaseDir
     Ensure-FileCommand -ToolsBin $ToolsBin
     Ensure-StringsCommand -ToolsBin $ToolsBin
-    Ensure-7Zip
     $OllamaExe = Ensure-Ollama
     $ollamaModelReady = Ensure-OllamaModel -OllamaExe $OllamaExe -ModelName "kimi-k2.5:cloud"
     if (-not $ollamaModelReady) {
         Write-Info "Continuing setup without a pulled Ollama cloud model."
+        Write-OllamaSigninNotice -ModelName "kimi-k2.5:cloud"
     }
 
     $JadxVersion = "1.5.3"
