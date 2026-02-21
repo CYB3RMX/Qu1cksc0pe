@@ -14,7 +14,7 @@ import configparser
 import urllib.parse
 from bs4 import BeautifulSoup
 from analysis.multiple.multi import chk_wlist, perform_strings, yara_rule_scanner, calc_hashes
-from utils.helpers import err_exit, user_confirm, get_argv, save_report
+from utils.helpers import err_exit, get_argv, save_report
 
 # Checking for rich
 try:
@@ -556,10 +556,11 @@ class DocumentAnalyzer:
                 self._add_finding("Macro", "filepass_record")
                 self._attempt_default_decrypt()
 
-            # If there is macro we can extract it!
+            # If there is macro we can extract it automatically.
             if macro_state_vba != 0 or macro_state_xlm != 0:
-                if user_confirm("\n>>> Do you want to extract macros [Y/n]?: "):
-                    print(f"{infoS} Attempting to extraction...\n")
+                auto_extract = str(os.environ.get("SC0PE_DOC_AUTO_EXTRACT_MACROS", "1")).strip().lower() not in ("0", "false", "no")
+                if auto_extract:
+                    print(f"\n{infoS} Automatic macro extraction is enabled. Attempting extraction...\n")
                     report["macros"]["extracted"] = True
                     max_macro_chars = int(os.environ.get("SC0PE_REPORT_MAX_MACRO_CHARS", "50000"))
 
@@ -604,6 +605,8 @@ class DocumentAnalyzer:
                                 report["macros"]["truncated"]["xlm"] += 1
                             print(mac)
                     print(f"\n{infoS} Extraction completed.")
+                else:
+                    print(f"{infoS} Automatic macro extraction disabled by env [bold green]SC0PE_DOC_AUTO_EXTRACT_MACROS=0[white].")
 
         except:
             print(f"{errorS} An error occured while parsing that file for macro scan.")

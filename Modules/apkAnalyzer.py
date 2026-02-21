@@ -83,6 +83,7 @@ sc0pe_path = open(".path_handler", "r").read()
 # necessary variables
 danger = 0
 normal = 0
+special = 0
 
 # Gathering all strings from file
 allStrings = perform_strings(targetAPK)
@@ -144,6 +145,11 @@ class APKAnalyzer:
             "libraries": [],
             "signatures": [],
             "permissions": [],
+            "permission_summary": {
+                "dangerous": 0,
+                "special": 0,
+                "info": 0
+            },
             "matched_rules": [],
             # Backwards-compatible: keep `matched_rules` as-is, and store a richer form here.
             "yara_detailed_matches": [],
@@ -1636,6 +1642,10 @@ class APKAnalyzer:
     def Analyzer(self, parsed):
         global danger
         global normal
+        global special
+        danger = 0
+        normal = 0
+        special = 0
         statistics = Table()
         statistics.add_column("[bold green]Permissions", justify="center")
         statistics.add_column("[bold green]State", justify="center")
@@ -1645,25 +1655,49 @@ class APKAnalyzer:
             permissions = json.load(f)
 
         apkPerms = parsed.get_permissions()
-        permArr = []
+        risk_by_name = {}
+        risk_by_constant = {}
 
-        # Getting target APK file's permissions
-        for p in range(len(permissions)):
-            permArr.append(permissions[p]["permission"])
+        for perm_obj in permissions:
+            if not isinstance(perm_obj, dict):
+                continue
+            risk_level = str(perm_obj.get("risk", "dangerous")).strip().lower()
+            if risk_level not in ("dangerous", "special", "info"):
+                risk_level = "dangerous"
+            p_name = str(perm_obj.get("permission", "")).strip()
+            p_const = str(perm_obj.get("constant-value", "")).strip()
+            if p_name:
+                risk_by_name[p_name] = risk_level
+            if p_const:
+                risk_by_constant[p_const] = risk_level
 
         # Parsing permissions
         for pp in apkPerms:
-            if pp.split(".")[-1] in permArr:
-                statistics.add_row(str(pp), "[bold red]Risky")
-                self.reportz["permissions"].append({str(pp): "Risky"})
+            perm_full = str(pp).strip()
+            perm_short = perm_full.split(".")[-1] if "." in perm_full else perm_full
+            risk_level = risk_by_constant.get(perm_full) or risk_by_name.get(perm_short)
+
+            if risk_level == "dangerous":
+                statistics.add_row(perm_full, "[bold red]Dangerous")
+                self.reportz["permissions"].append({perm_full: "Dangerous"})
                 danger += 1
+            elif risk_level == "special":
+                statistics.add_row(perm_full, "[bold magenta]Special")
+                self.reportz["permissions"].append({perm_full: "Special"})
+                special += 1
             else:
-                statistics.add_row(str(pp), "[bold yellow]Info")
-                self.reportz["permissions"].append({str(pp): "Info"})
+                statistics.add_row(perm_full, "[bold yellow]Info")
+                self.reportz["permissions"].append({perm_full: "Info"})
                 normal += 1
 
+        self.reportz["permission_summary"] = {
+            "dangerous": danger,
+            "special": special,
+            "info": normal,
+        }
+
         # If there is no permission:
-        if danger == 0 and normal == 0:
+        if danger == 0 and normal == 0 and special == 0:
             print("\n[bold white on red]There is no permissions found!\n")
         else:
             print(statistics)

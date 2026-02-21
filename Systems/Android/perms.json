@@ -1,152 +1,290 @@
 [
     {
-        "permission":"ACCEPT_HANDOVER",
-        "description":"Allows a calling app to continue a call which was started in another app. An example is a video calling app that wants to continue a voice call on the user's mobile network.",
-        "constant-value":"android.permission.ACCEPT_HANDOVER"
+        "permission": "ACCEPT_HANDOVER",
+        "description": "Allows a calling app to continue a call started in another app.",
+        "constant-value": "android.permission.ACCEPT_HANDOVER",
+        "risk": "dangerous"
     },
     {
-        "permission":"ACCESS_BACKGROUND_LOCATION",
-        "description":"Allows an app to access location in the background. If you're requesting this permission, you must also request either ACCESS_COARSE_LOCATION or ACCESS_FINE_LOCATION. Requesting this permission by itself doesn't give you location access",
-        "constant-value": "android.permission.ACCESS_BACKGROUND_LOCATION"
-    },
-    {   
-        "permission":"ACCESS_COARSE_LOCATION",
-        "description":"Allows an app to access approximate location. Alternatively, you might want ACCESS_FINE_LOCATION.",
-        "constant-value":"android.permission.ACCESS_COARSE_LOCATION"
+        "permission": "ACCESS_BACKGROUND_LOCATION",
+        "description": "Allows location access while the app runs in the background (requires coarse or fine location as well).",
+        "constant-value": "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "risk": "dangerous"
     },
     {
-        "permission":"ACCESS_FINE_LOCATION", 
-        "description":"Allows an app to access precise location. Alternatively, you might want ACCESS_COARSE_LOCATION.",
-        "constant-value":"android.permission.ACCESS_FINE_LOCATION"
-    },
-    {  
-        "permission":"ACCESS_MEDIA_LOCATION",
-        "description":"Allows an application to access any geographic locations persisted in the user's shared collection.",
-        "constant-value":"android.permission.ACCESS_MEDIA_LOCATION"
+        "permission": "ACCESS_COARSE_LOCATION",
+        "description": "Allows access to approximate device location.",
+        "constant-value": "android.permission.ACCESS_COARSE_LOCATION",
+        "risk": "dangerous"
     },
     {
-        "permission":"ACTIVITY_RECOGNITION", 
-        "description":"Allows an application to recognize physical activity.",
-        "constant-value":"android.permission.ACTIVITY_RECOGNITION"
-    },
-    {   
-        "permission":"ADD_VOICEMAIL",
-        "description":"Allows an application to add voicemails into the system.",
-        "constant-value":"com.android.voicemail.permission.ADD_VOICEMAIL"
-    },
-    {   
-        "permission":"ANSWER_PHONE_CALLS",
-        "description":"Allows the app to answer an incoming phone call.",
-        "constant-value":"android.permission.ANSWER_PHONE_CALLS"
+        "permission": "ACCESS_FINE_LOCATION",
+        "description": "Allows access to precise device location (GPS and other high-accuracy sources).",
+        "constant-value": "android.permission.ACCESS_FINE_LOCATION",
+        "risk": "dangerous"
     },
     {
-        "permission":"BODY_SENSORS",
-        "description":"Allows an application to access data from sensors that the user uses to measure what is happening inside his/her body, such as heart rate.",
-        "constant-value":"android.permission.BODY_SENSORS"
+        "permission": "ACCESS_MEDIA_LOCATION",
+        "description": "Allows reading embedded location metadata from media files in shared storage.",
+        "constant-value": "android.permission.ACCESS_MEDIA_LOCATION",
+        "risk": "dangerous"
     },
     {
-        "permission":"CALL_PHONE",
-        "description":"Allows an application to initiate a phone call without going through the Dialer user interface for the user to confirm the call.",
-        "constant-value":"android.permission.CALL_PHONE"
+        "permission": "ACTIVITY_RECOGNITION",
+        "description": "Allows recognition of user physical activity (walking, driving, etc.).",
+        "constant-value": "android.permission.ACTIVITY_RECOGNITION",
+        "risk": "dangerous"
     },
     {
-        "permission":"CAMERA",
-        "description":"Required to be able to access the camera device.",
-        "constant-value":"android.permission.CAMERA"
+        "permission": "ADD_VOICEMAIL",
+        "description": "Allows adding voicemails to the system provider.",
+        "constant-value": "com.android.voicemail.permission.ADD_VOICEMAIL",
+        "risk": "dangerous"
     },
     {
-        "permission":"GET_ACCOUNTS",
-        "description":"Allows access to the list of accounts in the Accounts Service.",
-        "constant-value":"android.permission.GET_ACCOUNTS"
-    },
-    {  
-        "permission":"PROCESS_OUTGOING_CALLS",
-        "description":"Allows an application to see the number being dialed during an outgoing call with the option to redirect the call to a different number or abort the call altogether.",
-        "constant-value":"android.permission.PROCESS_OUTGOING_CALLS"
+        "permission": "ANSWER_PHONE_CALLS",
+        "description": "Allows answering incoming phone calls.",
+        "constant-value": "android.permission.ANSWER_PHONE_CALLS",
+        "risk": "dangerous"
     },
     {
-        "permission":"READ_CALENDAR",    
-        "description":"Allows an application to read the user's calendar data.",
-        "constant-value":"android.permission.READ_CALENDAR"
+        "permission": "BLUETOOTH_ADVERTISE",
+        "description": "Allows advertising to nearby Bluetooth devices (Android 12+).",
+        "constant-value": "android.permission.BLUETOOTH_ADVERTISE",
+        "risk": "dangerous"
     },
     {
-        "permission":"READ_CALL_LOG",
-        "description":"Allows an application to read the user's call log.",
-        "constant-value":"android.permission.READ_CALL_LOG"
+        "permission": "BLUETOOTH_CONNECT",
+        "description": "Allows connecting to paired Bluetooth devices (Android 12+).",
+        "constant-value": "android.permission.BLUETOOTH_CONNECT",
+        "risk": "dangerous"
     },
     {
-        "permission":"READ_CONTACTS",
-        "description":"Allows an application to read the user's contacts data.",
-        "constant-value":"android.permission.READ_CONTACTS"
+        "permission": "BLUETOOTH_SCAN",
+        "description": "Allows scanning for nearby Bluetooth devices (Android 12+).",
+        "constant-value": "android.permission.BLUETOOTH_SCAN",
+        "risk": "dangerous"
     },
     {
-        "permission":"READ_EXTERNAL_STORAGE",
-        "description":"Allows an application to read from external storage.",
-        "constant-value":"android.permission.READ_EXTERNAL_STORAGE"
+        "permission": "BODY_SENSORS",
+        "description": "Allows access to body sensor data such as heart rate.",
+        "constant-value": "android.permission.BODY_SENSORS",
+        "risk": "dangerous"
     },
     {
-        "permission":"READ_PHONE_NUMBERS",
-        "description":"Allows read access to the device's phone number(s).",
-        "constant-value":"android.permission.READ_PHONE_NUMBERS"
+        "permission": "BODY_SENSORS_BACKGROUND",
+        "description": "Allows background access to body sensor data.",
+        "constant-value": "android.permission.BODY_SENSORS_BACKGROUND",
+        "risk": "dangerous"
     },
     {
-        "permission":"READ_PHONE_STATE",
-        "description":"Allows read only access to phone state, including the current cellular network information, the status of any ongoing calls, and a list of any PhoneAccounts registered on the device.",
-        "constant-value":"android.permission.READ_PHONE_STATE"
+        "permission": "CALL_PHONE",
+        "description": "Allows initiating phone calls without using the dialer UI confirmation flow.",
+        "constant-value": "android.permission.CALL_PHONE",
+        "risk": "dangerous"
     },
     {
-        "permission":"READ_SMS",
-        "description":"Allows an application to read SMS messages.",
-        "constant-value":"android.permission.READ_SMS"
+        "permission": "CAMERA",
+        "description": "Allows access to the camera device.",
+        "constant-value": "android.permission.CAMERA",
+        "risk": "dangerous"
     },
     {
-        "permission":"RECEIVE_MMS",
-        "description":"Allows an application to monitor incoming MMS messages.",
-        "constant-value":"android.permission.RECEIVE_MMS"
+        "permission": "GET_ACCOUNTS",
+        "description": "Legacy permission for reading account list from AccountManager (older Android versions).",
+        "constant-value": "android.permission.GET_ACCOUNTS",
+        "risk": "dangerous"
     },
     {
-        "permission":"RECEIVE_SMS",
-        "description":"Allows an application to receive SMS messages.",
-        "constant-value":"android.permission.RECEIVE_SMS"
+        "permission": "MANAGE_EXTERNAL_STORAGE",
+        "description": "Grants broad all-files access on shared storage (special high-risk permission).",
+        "constant-value": "android.permission.MANAGE_EXTERNAL_STORAGE",
+        "risk": "special"
     },
     {
-        "permission":"RECEIVE_WAP_PUSH",
-        "description":"Allows an application to receive WAP push messages.",
-        "constant-value":"android.permission.RECEIVE_WAP_PUSH"
+        "permission": "NEARBY_WIFI_DEVICES",
+        "description": "Allows discovery and interaction with nearby Wi-Fi devices (Android 13+).",
+        "constant-value": "android.permission.NEARBY_WIFI_DEVICES",
+        "risk": "dangerous"
     },
     {
-        "permission":"RECORD_AUDIO",
-        "description":"Allows an application to record audio.",
-        "constant-value":"android.permission.RECORD_AUDIO"
+        "permission": "PACKAGE_USAGE_STATS",
+        "description": "Allows app usage access via UsageStatsManager (special app-op; can reveal user behavior).",
+        "constant-value": "android.permission.PACKAGE_USAGE_STATS",
+        "risk": "special"
     },
     {
-        "permission":"SEND_SMS",
-        "description":"Allows an application to send SMS messages.",
-        "constant-value":"android.permission.SEND_SMS"
+        "permission": "POST_NOTIFICATIONS",
+        "description": "Allows posting notifications (runtime permission on Android 13+).",
+        "constant-value": "android.permission.POST_NOTIFICATIONS",
+        "risk": "dangerous"
     },
     {
-        "permission":"USE_SIP",
-        "description":"Allows an application to use SIP service.",
-        "constant-value":"android.permission.USE_SIP"
+        "permission": "PROCESS_OUTGOING_CALLS",
+        "description": "Legacy permission for monitoring/modifying outgoing calls (deprecated/restricted on modern Android).",
+        "constant-value": "android.permission.PROCESS_OUTGOING_CALLS",
+        "risk": "dangerous"
     },
     {
-        "permission":"WRITE_CALENDAR",
-        "description":"Allows an application to write the user's calendar data.",
-        "constant-value":"android.permission.WRITE_CALENDAR"
+        "permission": "QUERY_ALL_PACKAGES",
+        "description": "Allows broad visibility into installed apps (special high-privacy-impact permission).",
+        "constant-value": "android.permission.QUERY_ALL_PACKAGES",
+        "risk": "special"
     },
     {
-        "permission":"WRITE_CALL_LOG",
-        "description":"Allows an application to write (but not read) the user's call log data.",
-        "constant-value":"android.permission.WRITE_CALL_LOG"
+        "permission": "READ_CALENDAR",
+        "description": "Allows reading calendar events and metadata.",
+        "constant-value": "android.permission.READ_CALENDAR",
+        "risk": "dangerous"
     },
     {
-        "permission":"WRITE_CONTACTS",
-        "description":"Allows an application to write the user's contacts data.",
-        "constant-value":"android.permission.WRITE_CONTACTS"
+        "permission": "READ_CALL_LOG",
+        "description": "Allows reading call history.",
+        "constant-value": "android.permission.READ_CALL_LOG",
+        "risk": "dangerous"
     },
     {
-        "permission":"WRITE_EXTERNAL_STORAGE",
-        "description":"Allows an application to write to external storage.",
-        "constant-value":"android.permission.WRITE_EXTERNAL_STORAGE"
+        "permission": "READ_CONTACTS",
+        "description": "Allows reading contacts data.",
+        "constant-value": "android.permission.READ_CONTACTS",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "READ_EXTERNAL_STORAGE",
+        "description": "Legacy permission for reading shared storage (superseded by media-scoped permissions on newer Android).",
+        "constant-value": "android.permission.READ_EXTERNAL_STORAGE",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "READ_MEDIA_AUDIO",
+        "description": "Allows reading audio files from shared storage (Android 13+).",
+        "constant-value": "android.permission.READ_MEDIA_AUDIO",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "READ_MEDIA_IMAGES",
+        "description": "Allows reading image files from shared storage (Android 13+).",
+        "constant-value": "android.permission.READ_MEDIA_IMAGES",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "READ_MEDIA_VIDEO",
+        "description": "Allows reading video files from shared storage (Android 13+).",
+        "constant-value": "android.permission.READ_MEDIA_VIDEO",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "READ_MEDIA_VISUAL_USER_SELECTED",
+        "description": "Allows read access only to user-selected photos/videos in the system picker flow (Android 14+).",
+        "constant-value": "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "READ_PHONE_NUMBERS",
+        "description": "Allows reading the device phone number(s).",
+        "constant-value": "android.permission.READ_PHONE_NUMBERS",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "READ_PHONE_STATE",
+        "description": "Allows reading phone/network state and active call information.",
+        "constant-value": "android.permission.READ_PHONE_STATE",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "READ_SMS",
+        "description": "Allows reading SMS messages.",
+        "constant-value": "android.permission.READ_SMS",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "RECEIVE_MMS",
+        "description": "Allows receiving/monitoring incoming MMS messages.",
+        "constant-value": "android.permission.RECEIVE_MMS",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "RECEIVE_SMS",
+        "description": "Allows receiving SMS messages.",
+        "constant-value": "android.permission.RECEIVE_SMS",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "RECEIVE_WAP_PUSH",
+        "description": "Allows receiving WAP push messages.",
+        "constant-value": "android.permission.RECEIVE_WAP_PUSH",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "RECORD_AUDIO",
+        "description": "Allows recording audio from microphone input.",
+        "constant-value": "android.permission.RECORD_AUDIO",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "REQUEST_DELETE_PACKAGES",
+        "description": "Allows requesting package deletion/uninstall flows for other apps.",
+        "constant-value": "android.permission.REQUEST_DELETE_PACKAGES",
+        "risk": "special"
+    },
+    {
+        "permission": "REQUEST_INSTALL_PACKAGES",
+        "description": "Allows requesting package installs from unknown sources (outside official app store flow).",
+        "constant-value": "android.permission.REQUEST_INSTALL_PACKAGES",
+        "risk": "special"
+    },
+    {
+        "permission": "SEND_SMS",
+        "description": "Allows sending SMS messages.",
+        "constant-value": "android.permission.SEND_SMS",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "SYSTEM_ALERT_WINDOW",
+        "description": "Allows drawing overlay windows on top of other apps (special high-abuse permission).",
+        "constant-value": "android.permission.SYSTEM_ALERT_WINDOW",
+        "risk": "special"
+    },
+    {
+        "permission": "USE_SIP",
+        "description": "Allows usage of SIP services and accounts.",
+        "constant-value": "android.permission.USE_SIP",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "UWB_RANGING",
+        "description": "Allows use of Ultra Wideband (UWB) ranging capabilities.",
+        "constant-value": "android.permission.UWB_RANGING",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "WRITE_CALENDAR",
+        "description": "Allows creating and modifying calendar events.",
+        "constant-value": "android.permission.WRITE_CALENDAR",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "WRITE_CALL_LOG",
+        "description": "Allows writing call history entries.",
+        "constant-value": "android.permission.WRITE_CALL_LOG",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "WRITE_CONTACTS",
+        "description": "Allows creating/modifying contacts data.",
+        "constant-value": "android.permission.WRITE_CONTACTS",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "WRITE_EXTERNAL_STORAGE",
+        "description": "Legacy permission for writing shared storage (limited/deprecated on modern Android).",
+        "constant-value": "android.permission.WRITE_EXTERNAL_STORAGE",
+        "risk": "dangerous"
+    },
+    {
+        "permission": "WRITE_SETTINGS",
+        "description": "Allows modifying system settings values (special high-impact permission).",
+        "constant-value": "android.permission.WRITE_SETTINGS",
+        "risk": "special"
     }
 ]

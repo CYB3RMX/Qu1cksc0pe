@@ -1,9 +1,12 @@
 {
-    "PsExec": {
+    "PsExec/RemCom": {
         "patterns": [
             "psserve_path",
+            "PSEXESVC",
             "Psexec",
-            "Psexec service"
+            "PsExec service",
+            "RemComSvc",
+            "RemCom_communication"
         ]
     },
     "Rubeus/KrbRelayUp": {
@@ -17,7 +20,10 @@
             "KrbRelayUp.exe",
             "KRB_CRED",
             "KerbCredOffset",
-            "KERB_CHECKSUM_Initialize"
+            "KERB_CHECKSUM_Initialize",
+            "Rubeus",
+            "S4U2Self",
+            "S4U2Proxy"
         ]
     },
     "Mimikatz": {
@@ -32,7 +38,109 @@
             "kdcsvc!",
             "gentilkiwi",
             "KIWI_MSV1_0_PRIMARY_CREDENTIALS",
-            "KIWI_MSV1_0_CREDENTIALS"
+            "KIWI_MSV1_0_CREDENTIALS",
+            "sekurlsa::logonpasswords",
+            "lsadump::sam"
+        ]
+    },
+    "CobaltStrike/Beacon": {
+        "patterns": [
+            "Cobalt Strike",
+            "beacon.dll",
+            "beacon.x64",
+            "ReflectiveLoader",
+            "sleep_mask",
+            "spawnto_x86",
+            "spawnto_x64",
+            "malleable",
+            "https-certificate",
+            "metadata\"\":\"beacon"
+        ]
+    },
+    "Metasploit/Meterpreter": {
+        "patterns": [
+            "meterpreter",
+            "metsrv.x86.dll",
+            "metsrv.x64.dll",
+            "stdapi_net_config_get_interfaces",
+            "core_channel_open",
+            "railgun",
+            "reverse_tcp",
+            "reverse_http",
+            "reverse_https"
+        ]
+    },
+    "Sliver": {
+        "patterns": [
+            "github.com/bishopfox/sliver",
+            "sliver.pb.go",
+            "sliver-client",
+            "sliver-server",
+            "sliver implant",
+            "mtls://",
+            "wg://"
+        ]
+    },
+    "Havoc": {
+        "patterns": [
+            "Havoc Demon",
+            "havoc.yaotl",
+            "Demon.x64.exe",
+            "demon.dll",
+            "teamserver",
+            "TaskDispatch",
+            "HavocFramework"
+        ]
+    },
+    "Covenant/Grunt": {
+        "patterns": [
+            "Covenant",
+            "GruntHTTP",
+            "GruntSMB",
+            "GruntStager",
+            "SharpSploit",
+            "Covenant.Models"
+        ]
+    },
+    "SharpHound/BloodHound": {
+        "patterns": [
+            "SharpHound",
+            "BloodHound",
+            "BloodHound.Ingestor",
+            "CollectionMethods",
+            "LDAPFilter",
+            "DCOnly"
+        ]
+    },
+    "Seatbelt": {
+        "patterns": [
+            "Seatbelt",
+            "Seatbelt.Commands",
+            "GhostPack",
+            "-group=all",
+            "WindowsCredentialFilesCommand",
+            "InstalledProductsCommand"
+        ]
+    },
+    "DonutLoader": {
+        "patterns": [
+            "DONUT_INSTANCE",
+            "DONUT_CONFIG",
+            "DonutModule",
+            "DonutCreate",
+            "donut shellcode",
+            "TheWover/donut"
+        ]
+    },
+    "RAT_AsyncRAT_Quasar": {
+        "patterns": [
+            "AsyncRAT",
+            "Quasar RAT",
+            "Quasar.Client",
+            "ClientSocket",
+            "Packet.Read",
+            "Packet.Write",
+            "Keylogger"
         ]
     }
 }

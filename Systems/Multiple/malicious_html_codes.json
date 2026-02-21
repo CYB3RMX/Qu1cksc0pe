@@ -1,67 +1,212 @@
 {
     "_0x": {
-        "description": "There might be obfuscated code present in the file. The '_0x' prefix is often used to obfuscate variable and function names.",
+        "description": "Common obfuscation naming scheme used in packed JavaScript.",
         "type": "obfuscation",
         "count": 0
     },
     "eval": {
-        "description": "The 'eval' function is commonly used by attackers to dynamically execute JavaScript code, which can be a security risk.",
+        "description": "Dynamic code execution primitive frequently abused in malicious JavaScript.",
         "type": "execution",
         "count": 0
     },
+    "Function\\s*\\(": {
+        "description": "Dynamic Function constructor usage can indicate runtime payload execution.",
+        "type": "execution",
+        "count": 0
+    },
+    "setTimeout": {
+        "description": "Delayed execution primitive often used for anti-analysis or staged behavior.",
+        "type": "evasion",
+        "count": 0
+    },
+    "setInterval": {
+        "description": "Repeated execution primitive potentially used by malicious loops/beacons.",
+        "type": "evasion",
+        "count": 0
+    },
     "atob": {
-        "description": "The 'atob' function is used to decode base64-encoded strings. It can be used for obfuscation or evading security mechanisms.",
+        "description": "Base64 decode API often used to unpack hidden script payloads.",
+        "type": "obfuscation",
+        "count": 0
+    },
+    "btoa": {
+        "description": "Base64 encode API sometimes used in staged exfiltration/packing logic.",
         "type": "obfuscation",
         "count": 0
     },
     "parseInt": {
-        "description": "The 'parseInt' function converts a string to an integer. Attackers might use it to extract data from obfuscated strings.",
+        "description": "Numeric parsing frequently used in obfuscated string reconstruction.",
         "type": "obfuscation",
-        "count": 0
-    },
-    "iframe": {
-        "description": "The 'iframe' element is used to embed another HTML document within the current page. Attackers might use it for malicious activities like clickjacking or drive-by downloads.",
-        "type": "attack",
-        "count": 0
-    },
-    "unescape": {
-        "description": "The 'unescape' function is used to decode URI-encoded characters. It can be exploited by attackers to decode malicious content encoded in URLs.",
-        "type": "obfuscation",
-        "count": 0
-    },
-    "window.location": {
-        "description": "The 'window.location' object is used to manipulate the current URL of the browser. Attackers might abuse it to redirect users to malicious websites or perform phishing attacks.",
-        "type": "phishing",
-        "count": 0
-    },
-    "setTimeout": {
-        "description": "The 'setTimeout' function is used to schedule the execution of a function after a specified delay.",
-        "type": "evasion",
-        "count": 0
-    },
-    "document.write": {
-        "description": "The 'document.write' method is used to dynamically write content to a document. Attackers might use it to inject malicious content into a page.",
-        "type": "attack",
-        "count": 0
-    },
-    "XMLHttpRequest": {
-        "description": "The 'XMLHttpRequest' object is used to make HTTP requests from a web page. Attackers might use it to perform cross-site request forgery (CSRF) attacks.",
-        "type": "attack",
         "count": 0
     },
     "fromCharCode": {
-        "description": "The 'fromCharCode' method is used to create a string from a sequence of Unicode values. Attackers might use it to obfuscate malicious strings.",
+        "description": "Character-code reconstruction often used to hide malicious strings.",
         "type": "obfuscation",
         "count": 0
     },
-    "pass-btn": {
-        "description": "This pattern is frequently seen in phishing pages.",
+    "unescape": {
+        "description": "URI-decoding primitive frequently abused to decode obfuscated payload fragments.",
+        "type": "obfuscation",
+        "count": 0
+    },
+    "decodeURIComponent": {
+        "description": "Percent-decoding primitive used in encoded phishing or script payloads.",
+        "type": "obfuscation",
+        "count": 0
+    },
+    "document.write": {
+        "description": "Dynamic DOM/script injection primitive often seen in malicious pages.",
+        "type": "attack",
+        "count": 0
+    },
+    "innerHTML\\s*=": {
+        "description": "Runtime HTML injection sink commonly used for hidden form/script insertion.",
+        "type": "attack",
+        "count": 0
+    },
+    "outerHTML\\s*=": {
+        "description": "DOM replacement sink that may indicate aggressive script-driven page rewriting.",
+        "type": "attack",
+        "count": 0
+    },
+    "iframe": {
+        "description": "Iframe usage may indicate hidden content loading, clickjacking, or drive-by staging.",
+        "type": "embedding",
+        "count": 0
+    },
+    "<iframe[^>]+display\\s*:\\s*none": {
+        "description": "Hidden iframe pattern commonly used in exploit kits and phishing redirects.",
+        "type": "embedding",
+        "count": 0
+    },
+    "srcdoc\\s*=": {
+        "description": "Inline iframe HTML (srcdoc) can embed obfuscated script payloads.",
+        "type": "embedding",
+        "count": 0
+    },
+    "window\\.location": {
+        "description": "Location manipulation is commonly used for malicious redirection chains.",
         "type": "phishing",
-        "count":0
+        "count": 0
+    },
+    "location\\.replace": {
+        "description": "Forced navigation replacement primitive seen in phishing redirect flows.",
+        "type": "phishing",
+        "count": 0
+    },
+    "window\\.open": {
+        "description": "Programmatic window open calls can indicate pop-up phishing behavior.",
+        "type": "phishing",
+        "count": 0
+    },
+    "onbeforeunload": {
+        "description": "Navigation trap primitive that can be abused by scam/phishing pages.",
+        "type": "phishing",
+        "count": 0
+    },
+    "XMLHttpRequest": {
+        "description": "HTTP request primitive potentially used for command retrieval or exfiltration.",
+        "type": "network",
+        "count": 0
+    },
+    "fetch\\s*\\(": {
+        "description": "Modern HTTP request API often used by web-based malware and stealers.",
+        "type": "network",
+        "count": 0
+    },
+    "navigator\\.sendBeacon": {
+        "description": "Background beaconing API that can be abused for stealthy data exfiltration.",
+        "type": "network",
+        "count": 0
+    },
+    "WebSocket": {
+        "description": "Persistent C2-like communication channel indicator in malicious web payloads.",
+        "type": "network",
+        "count": 0
+    },
+    "ActiveXObject": {
+        "description": "Legacy ActiveX object creation often seen in malicious/legacy exploit pages.",
+        "type": "execution",
+        "count": 0
+    },
+    "WScript\\.Shell": {
+        "description": "Script host shell object enabling command execution from script context.",
+        "type": "execution",
+        "count": 0
+    },
+    "powershell": {
+        "description": "PowerShell invocation marker in HTML/JS payloads.",
+        "type": "execution",
+        "count": 0
+    },
+    "cmd\\.exe": {
+        "description": "Command shell invocation marker in scripted payloads.",
+        "type": "execution",
+        "count": 0
+    },
+    "mshta": {
+        "description": "LOLBIN marker frequently used to execute remote HTA payloads.",
+        "type": "execution",
+        "count": 0
+    },
+    "rundll32": {
+        "description": "LOLBIN marker associated with DLL execution chains.",
+        "type": "execution",
+        "count": 0
+    },
+    "regsvr32": {
+        "description": "LOLBIN marker associated with scriptlet and COM-based execution.",
+        "type": "execution",
+        "count": 0
+    },
+    "certutil": {
+        "description": "LOLBIN marker that may indicate staged decode/download behavior.",
+        "type": "execution",
+        "count": 0
+    },
+    "DownloadFile": {
+        "description": "Downloader primitive indicating remote payload retrieval logic.",
+        "type": "network",
+        "count": 0
+    },
+    "URLDownloadToFile": {
+        "description": "URLMon/WinINet downloader API marker embedded in scripts.",
+        "type": "network",
+        "count": 0
+    },
+    "data:text/html;base64": {
+        "description": "Inline base64 HTML payload indicator frequently used for obfuscated staging.",
+        "type": "obfuscation",
+        "count": 0
+    },
+    "password": {
+        "description": "Credential-themed keyword often present in phishing form content.",
+        "type": "phishing",
+        "count": 0
+    },
+    "pass-btn": {
+        "description": "UI element id/class frequently seen in phishing login pages.",
+        "type": "phishing",
+        "count": 0
     },
     "Enter password": {
-        "description": "This pattern is frequently seen in phishing pages.",
+        "description": "Common phishing lure text in credential-harvesting pages.",
         "type": "phishing",
-        "count":0
+        "count": 0
+    },
+    "verify your account": {
+        "description": "Social engineering phrase commonly used in phishing portals.",
+        "type": "phishing",
+        "count": 0
+    },
+    "wallet": {
+        "description": "Crypto wallet lure keyword frequently observed in scam/phishing pages.",
+        "type": "phishing",
+        "count": 0
+    },
+    "seed phrase": {
+        "description": "High-risk crypto credential harvesting phrase.",
+        "type": "phishing",
+        "count": 0
     }
 }

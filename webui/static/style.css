@@ -663,6 +663,34 @@ h2 {
   text-decoration: underline;
 }
 
+.perm-state {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 0.14rem 0.5rem;
+  border: 1px solid rgba(120, 151, 190, 0.35);
+}
+
+.perm-state.dangerous {
+  background: rgba(201, 62, 62, 0.17);
+  color: #ffc3c3;
+  border-color: rgba(255, 122, 122, 0.45);
+}
+
+.perm-state.special {
+  background: rgba(167, 116, 240, 0.2);
+  color: #e9d4ff;
+  border-color: rgba(194, 154, 255, 0.45);
+}
+
+.perm-state.info {
+  background: rgba(66, 139, 217, 0.15);
+  color: #bfdeff;
+  border-color: rgba(122, 183, 255, 0.45);
+}
+
 .open-link {
   display: inline-flex;
   align-items: center;

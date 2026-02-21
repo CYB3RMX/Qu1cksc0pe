@@ -193,6 +193,83 @@
       </article>
       {% endif %}
 
+      {% set perm = job.report_ui.permissions_section %}
+      {% if perm and perm.available %}
+      <article class="glass report-section">
+        <h2>Android Permissions</h2>
+        <div class="summary-grid">
+          <article class="metric">
+            <span>Dangerous</span>
+            <strong>{{ perm.counts.dangerous }}</strong>
+          </article>
+          <article class="metric">
+            <span>Special</span>
+            <strong>{{ perm.counts.special }}</strong>
+          </article>
+          <article class="metric">
+            <span>Info</span>
+            <strong>{{ perm.counts.info }}</strong>
+          </article>
+        </div>
+        {% if perm.rows %}
+        <div class="table-wrap">
+          <table class="data-table compact">
+            <thead>
+              <tr>
+                <th>Permission</th>
+                <th>State</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in perm.rows %}
+              <tr>
+                <td>{{ row.name }}</td>
+                <td><span class="perm-state {{ row.state }}">{{ row.state_label }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+      </article>
+      {% endif %}
+
+      {% if job.report_ui.mitre_rows %}
+      <article class="glass report-section">
+        <h2>MITRE ATT&CK Mapping</h2>
+        <div class="rules-grid">
+          {% for tactic in job.report_ui.mitre_rows %}
+          <section class="rule-card">
+            <header>
+              <h3>{{ tactic.tactic }}</h3>
+              <span>{{ tactic.technique_count }} techniques | {{ tactic.score }} score</span>
+            </header>
+            <div class="table-wrap">
+              <table class="data-table compact">
+                <thead>
+                  <tr>
+                    <th>Technique</th>
+                    <th>Score</th>
+                    <th>Matched APIs</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for row in tactic.techniques %}
+                  <tr>
+                    <td>{{ row.technique }}</td>
+                    <td>{{ row.score }}</td>
+                    <td>{{ row.matched_apis|join(', ') if row.matched_apis else '-' }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+          {% endfor %}
+        </div>
+      </article>
+      {% endif %}
+
       {% if job.report_ui.interesting_patterns %}
       <article class="glass report-section">
         <h2>Interesting String Patterns</h2>
@@ -201,6 +278,43 @@
           <li>{{ value }}</li>
           {% endfor %}
         </ul>
+      </article>
+      {% endif %}
+
+      {% if job.report_ui.source_pattern_rows %}
+      <article class="glass report-section">
+        <h2>Source Pattern Findings</h2>
+        <div class="rules-grid">
+          {% for row in job.report_ui.source_pattern_rows %}
+          <section class="rule-card">
+            <header>
+              <h3>{{ row.file_name }}</h3>
+              <span>{{ row.pattern_count }} patterns</span>
+            </header>
+            {% if row.categories %}
+            <p class="meta">Categories: {{ row.categories|join(', ') }}</p>
+            {% endif %}
+            {% if row.patterns %}
+            <div class="table-wrap">
+              <table class="data-table compact">
+                <thead>
+                  <tr>
+                    <th>Pattern</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for pattern in row.patterns %}
+                  <tr>
+                    <td>{{ pattern }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% endif %}
+          </section>
+          {% endfor %}
+        </div>
       </article>
       {% endif %}
 

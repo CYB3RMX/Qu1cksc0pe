@@ -1,57 +1,217 @@
 {
     "%28%22%45%6E%61%62%6C%65%20%65%64%69%74%69%6E%67%22%29": {
-        "description": "This pattern is commonly used by malwares. It detects the string ('Enable editing') in obfuscated form.",
+        "description": "Obfuscated URL-encoded lure text for 'Enable editing'.",
+        "type": "phishing",
+        "count": 0
+    },
+    "%4E%6F%3A%20%32%30%37%32%34%34%31%34": {
+        "description": "URL-encoded variant of a frequently observed malicious RTF marker.",
         "type": "obfuscation",
         "count": 0
     },
     "Enable editing": {
-        "description": "Encourages users to enable macros or editing in RTF documents, often used in malicious contexts.",
+        "description": "Social engineering phrase encouraging user interaction.",
         "type": "phishing",
         "count": 0
     },
-    "\\objhtml": {
-        "description": "This pattern is used to identify embedded HTML objects in RTF documents.",
-        "type": "embedding",
-        "count": 0
-    },
-    "\\objdata": {
-        "description": "This pattern identifies embedded binary data objects in RTF documents.",
-        "type": "embedding",
-        "count": 0
-    },
-    "\\bin": {
-        "description": "This pattern is used to identify binary data in RTF documents.",
-        "type": "binary",
-        "count": 0
-    },
-    "\\objautlink": {
-        "description": "This pattern identifies automatic links to external content within RTF documents.",
-        "type": "link",
+    "No: 20724414": {
+        "description": "Frequently seen campaign marker in malicious RTF lure docs.",
+        "type": "campaign marker",
         "count": 0
     },
     "unescape": {
-        "description": "The 'unescape' function is used to decode URI-encoded characters. It can be exploited by attackers to decode malicious content encoded in URLs.",
+        "description": "JavaScript unescape usage to decode hidden/obfuscated payload fragments.",
+        "type": "obfuscation",
+        "count": 0
+    },
+    "fromCharCode": {
+        "description": "JavaScript string reconstruction often used in staged payload building.",
+        "type": "obfuscation",
+        "count": 0
+    },
+    "atob": {
+        "description": "Base64 decoding API commonly abused for script deobfuscation.",
         "type": "obfuscation",
         "count": 0
     },
     "document.write": {
-        "description": "The 'document.write' method is used to dynamically write content to a document. Attackers might use it to inject malicious content into a page.",
-        "type": "attack",
+        "description": "Scripted HTML/JS injection primitive in embedded content.",
+        "type": "script execution",
         "count": 0
     },
-    "No: 20724414": {
-        "description": "This pattern is frequently seen in most of malicious RTF documents.",
-        "type": "common malicious pattern",
+    "ActiveXObject": {
+        "description": "ActiveX object creation pattern in legacy exploit stagers.",
+        "type": "script execution",
         "count": 0
     },
-    "%4E%6F%3A%20%32%30%37%32%34%34%31%34": {
-        "description": "This pattern is frequently seen in most of malicious RTF documents.",
-        "type": "obfuscation",
+    "WScript.Shell": {
+        "description": "Windows script shell object typically used for command execution.",
+        "type": "execution",
+        "count": 0
+    },
+    "powershell": {
+        "description": "PowerShell invocation indicator within document/script content.",
+        "type": "execution",
+        "count": 0
+    },
+    "cmd.exe": {
+        "description": "Command shell invocation indicator from embedded script/macro logic.",
+        "type": "execution",
+        "count": 0
+    },
+    "mshta": {
+        "description": "LOLBIN often used to execute remote or embedded HTA script payloads.",
+        "type": "execution",
+        "count": 0
+    },
+    "regsvr32": {
+        "description": "LOLBIN indicator that can be abused for scriptlet execution.",
+        "type": "execution",
+        "count": 0
+    },
+    "rundll32": {
+        "description": "LOLBIN indicator commonly used for DLL-based payload execution.",
+        "type": "execution",
+        "count": 0
+    },
+    "msiexec": {
+        "description": "Installer execution indicator potentially used for payload retrieval/execution.",
+        "type": "execution",
+        "count": 0
+    },
+    "certutil": {
+        "description": "LOLBIN often used for download/decode operations in intrusion chains.",
+        "type": "execution",
+        "count": 0
+    },
+    "bitsadmin": {
+        "description": "Background transfer utility often abused for staged downloads.",
+        "type": "network/download",
+        "count": 0
+    },
+    "Invoke-WebRequest": {
+        "description": "PowerShell web download primitive frequently used in droppers.",
+        "type": "network/download",
+        "count": 0
+    },
+    "Invoke-Expression": {
+        "description": "PowerShell dynamic execution primitive (IEX) commonly seen in malware scripts.",
+        "type": "execution",
+        "count": 0
+    },
+    "DownloadFile": {
+        "description": "Network file retrieval indicator in script-based stagers.",
+        "type": "network/download",
+        "count": 0
+    },
+    "URLDownloadToFile": {
+        "description": "WinINet-based downloader API artifact.",
+        "type": "network/download",
         "count": 0
     },
     "passwordhash": {
-        "description": "There might be a password protection!",
+        "description": "Password/hash protection marker that may indicate anti-analysis or protected content.",
         "type": "anti-analysis",
+        "count": 0
+    },
+    "\\objhtml": {
+        "description": "Embedded HTML object indicator inside RTF container.",
+        "type": "embedding",
+        "count": 0
+    },
+    "\\objdata": {
+        "description": "Embedded OLE/binary object indicator in RTF.",
+        "type": "embedding",
+        "count": 0
+    },
+    "\\objautlink": {
+        "description": "Automatic external object linking indicator.",
+        "type": "external reference",
+        "count": 0
+    },
+    "\\objlink": {
+        "description": "OLE object link field; can reference remote content.",
+        "type": "external reference",
+        "count": 0
+    },
+    "\\objupdate": {
+        "description": "Object auto-update behavior that may trigger external fetch/execution.",
+        "type": "external reference",
+        "count": 0
+    },
+    "\\oleclsid": {
+        "description": "OLE class metadata marker often present in embedded object abuse.",
+        "type": "embedding",
+        "count": 0
+    },
+    "\\bin": {
+        "description": "RTF binary segment marker used in exploit/embedded payload storage.",
+        "type": "binary",
+        "count": 0
+    },
+    "\\field": {
+        "description": "RTF field construct that can embed dynamic behavior.",
+        "type": "field instruction",
+        "count": 0
+    },
+    "\\fldinst": {
+        "description": "Field instruction block marker used with DDE/INCLUDE directives.",
+        "type": "field instruction",
+        "count": 0
+    },
+    "DDEAUTO": {
+        "description": "Dynamic Data Exchange auto-execution indicator.",
+        "type": "dde/execution",
+        "count": 0
+    },
+    "INCLUDEPICTURE": {
+        "description": "External content include directive, often abused for remote retrieval.",
+        "type": "external reference",
+        "count": 0
+    },
+    "EQNEDT32": {
+        "description": "Equation Editor exploit-related component indicator.",
+        "type": "exploit",
+        "count": 0
+    },
+    "Equation.3": {
+        "description": "Equation OLE object marker linked to historical Office exploits.",
+        "type": "exploit",
+        "count": 0
+    },
+    "MSComctlLib": {
+        "description": "ActiveX control artifact that can appear in weaponized documents.",
+        "type": "activex",
+        "count": 0
+    },
+    "\\listoverridecount": {
+        "description": "Large malformed list override structures can indicate crafted RTF exploit files.",
+        "type": "exploit heuristic",
+        "count": 0
+    },
+    "\\*\\datastore": {
+        "description": "Embedded datastore block that can hide secondary data blobs.",
+        "type": "embedding",
+        "count": 0
+    },
+    "\\xmlnstbl": {
+        "description": "XML namespace table marker observed in some crafted exploit docs.",
+        "type": "exploit heuristic",
+        "count": 0
+    },
+    "\\mhtmltag": {
+        "description": "MHTML relation marker which can indicate external content trickery.",
+        "type": "external reference",
+        "count": 0
+    },
+    "\\htmltag": {
+        "description": "Embedded HTML tag marker in RTF body.",
+        "type": "embedding",
+        "count": 0
+    },
+    "\\generator": {
+        "description": "Generator metadata field; can help identify suspicious crafting tooling.",
+        "type": "metadata",
         "count": 0
     }
 }

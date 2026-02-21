@@ -2,61 +2,129 @@
     "Obfuscation/Encoding": {
         "patterns": [
             "FromBase64String",
-            "System.Text.Encoding",
-            "UTF8.GetString",
-            "-bxor",
+            "ToBase64String",
+            "System\\.Text\\.Encoding",
+            "UTF8\\.GetString",
+            "-enc(?:odedcommand)?\\b",
+            "-bxor\\b",
             "fromHEXString",
-            "System.Convert",
-            "sYsTem.io.comprEsSIOn.CoMPReSsIONmOdE",
-            "EncodedCommand"
+            "System\\.Convert",
+            "IO\\.Compression\\.(?:GZipStream|DeflateStream)",
+            "Char\\[\\]\\]\\(\\s*\\d+(?:\\s*,\\s*\\d+){5,}"
         ],
         "occurence": 0
     },
     "Evasion/Bypass": {
         "patterns": [
-            "Microsoft.Win32.UnsafeNativeMethods",
+            "Microsoft\\.Win32\\.UnsafeNativeMethods",
+            "AmsiScanBuffer",
+            "AmsiUtils",
+            "AmsiInitFailed",
+            "Set-MpPreference",
+            "Add-MpPreference",
+            "DisableRealtimeMonitoring",
             "Start-Job",
-            "-EP BYPASS",
-            "-ExecutionPolicy"
+            "-ExecutionPolicy\\s+Bypass",
+            "-EP\\s+Bypass",
+            "Set-ExecutionPolicy",
+            "Unblock-File"
         ],
         "occurence": 0
     },
     "FileSystem": {
         "patterns": [
-            "env:APPDATA",
+            "env:(?:APPDATA|TEMP|PUBLIC|ProgramData)",
             "Remove-Item",
-            "expand-archive",
+            "Expand-Archive",
+            "Compress-Archive",
             "New-Item",
+            "Set-Content",
+            "Add-Content",
+            "Out-File",
             "WriteAllText",
-            "IO.File"
+            "WriteAllBytes",
+            "IO\\.File",
+            "Start Menu\\\\\\\\Programs\\\\\\\\Startup"
         ],
         "occurence": 0
     },
     "Networking": {
         "patterns": [
             "Start-BitsTransfer",
-            "MSXML2.XMLH",
-            "IEX",
-            "TcpClient",
-            "Net.Sockets",
-            "Text.AsciiEncoding",
-            "Reverse TCP",
-            "System.Net.WebRequest",
-            "GetSystemWebProxy",
-            "webclient",
-            "Host",
-            "user-agent",
-            "Mozilla/4.0",
-            "Headers.add",
-            "DownloadFile",
-            "PowerShellTcp",
-            "IPAddress",
-            "Port",
-            "AcceptTcpClient",
+            "MSXML2\\.XMLHTTP",
             "Invoke-WebRequest",
             "Invoke-RestMethod",
-            "-Uri",
-            "System.Net.HTTPWebRequest"
+            "Invoke-WebRequest\\s+-Uri",
+            "System\\.Net\\.WebRequest",
+            "System\\.Net\\.HttpWebRequest",
+            "System\\.Net\\.WebClient",
+            "GetSystemWebProxy",
+            "New-Object\\s+(?:Net|System\\.Net)\\.WebClient",
+            "Download(?:File|String|Data)",
+            "TcpClient",
+            "Net\\.Sockets",
+            "AcceptTcpClient",
+            "PowerShellTcp",
+            "user-agent",
+            "Mozilla/4\\.0"
+        ],
+        "occurence": 0
+    },
+    "Execution/Process": {
+        "patterns": [
+            "Invoke-Expression",
+            "\\bIEX\\b",
+            "Start-Process",
+            "cmd\\.exe",
+            "powershell(?:\\.exe)?\\s+-w(?:indowstyle)?\\s+hidden",
+            "-WindowStyle\\s+Hidden",
+            "rundll32(?:\\.exe)?",
+            "regsvr32(?:\\.exe)?",
+            "mshta(?:\\.exe)?",
+            "NoProfile"
+        ],
+        "occurence": 0
+    },
+    "Persistence": {
+        "patterns": [
+            "HKCU:\\\\\\\\Software\\\\\\\\Microsoft\\\\\\\\Windows\\\\\\\\CurrentVersion\\\\\\\\Run",
+            "HKLM:\\\\\\\\Software\\\\\\\\Microsoft\\\\\\\\Windows\\\\\\\\CurrentVersion\\\\\\\\Run",
+            "Register-ScheduledTask",
+            "schtasks(?:\\.exe)?",
+            "New-Service",
+            "sc\\.exe\\s+create",
+            "Register-WmiEvent",
+            "Set-ItemProperty",
+            "New-ItemProperty",
+            "Startup"
+        ],
+        "occurence": 0
+    },
+    "Credential Access": {
+        "patterns": [
+            "Get-Credential",
+            "ConvertTo-SecureString",
+            "ConvertFrom-SecureString",
+            "Get-Clipboard",
+            "Invoke-Mimikatz",
+            "Mimikatz",
+            "LSASS",
+            "DumpCreds"
+        ],
+        "occurence": 0
+    },
+    "Reconnaissance": {
+        "patterns": [
+            "Get-Process",
+            "Get-Service",
+            "Get-ChildItem",
+            "Get-WmiObject",
+            "Get-CimInstance",
+            "Get-LocalUser",
+            "whoami",
+            "systeminfo",
+            "ipconfig",
+            "net\\s+user"
         ],
         "occurence": 0
     }

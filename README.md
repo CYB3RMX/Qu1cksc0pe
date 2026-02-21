@@ -11,7 +11,8 @@
 - Functions and APIs.
 - Sections and segments.
 - URLs, IP addresses and emails.
-- Android permissions.
+- Android permissions (Dangerous/Special/Info).
+- MITRE ATT&CK mappings (Windows + Linux static analysis).
 - File extensions and their names.
 - Embedded executables/exploits.
 <br><b>And so on...</b><br>
@@ -48,6 +49,16 @@ python3 qu1cksc0pe.py --ui
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
+<b>21/02/2026</b>
+- [X] Linux static analyzer now performs automatic MITRE ATT&CK mapping and stores results in report fields: `mitre_attack`, `mitre_technique_count`, `mitre_api_match_count`.
+- [X] MITRE output is now shown in Web UI as detailed tactic/technique tables.
+- [X] Android permission triage was upgraded to 3 states: `Dangerous`, `Special`, `Info`; JSON report now includes `permission_summary`.
+- [X] Web UI report page now renders Android permissions in a dedicated section with state badges.
+- [X] `Systems/Android/perms.json` was expanded/normalized with modern Android permissions (Android 12+/13+ additions included).
+- [X] PowerShell analyzer now writes decoded Base64 outputs into a single aggregate file: `qu1cksc0pe_decoded_b64_values.txt`.
+- [X] AI IoC sanitizer now filters whitelisted/legit domains using `Systems/Multiple/whitelist_domains.txt` (enabled by default).
+- [X] Archive analyzer now supports JSON report export (`--archive --report`) and AI report analysis (`--archive --ai`).
+
 <b>20/02/2026</b>
 - [X] Windows setup script (`setup.ps1`) was hardened: automatic `winget` fallback installation, Python/7-Zip bootstrap, Sysinternals `strings` EULA auto-accept, and resilient Ollama install flow.
 - [X] Ollama cloud-model handling in setup was improved: clear `ollama signin` guidance is shown once, and setup continues gracefully if cloud model pull fails.
@@ -194,10 +205,17 @@ python .\\qu1cksc0pe.py --file app.apk --analyze --report
 | `SC0PE_AI_OLLAMA_RETRY_NUM_PREDICT` | `1400` | AI analyzer: generation token budget for retry when output looks truncated. |
 | `SC0PE_AI_OLLAMA_NUM_CTX` | `8192` | AI analyzer: Ollama context window setting. |
 | `SC0PE_AI_DISABLE_THINK` | `1` | AI analyzer: sends `think=false` (if supported) and removes thinking artifacts from displayed/saved output. |
+| `SC0PE_AI_ALLOW_MODEL_FALLBACK` | `1` | AI analyzer: when `1`, can try locally available Ollama models if configured model fails/unavailable. |
+| `SC0PE_AI_SKIP_CLOUD_WHEN_LOCAL` | `1` | AI analyzer: prefer local models over cloud-tagged models when local options exist. |
+| `SC0PE_AI_SKIP_CLOUD_CLI` | `1` | AI analyzer: skip cloud-tagged models for CLI fallback attempts. |
+| `SC0PE_AI_MAX_MODEL_CANDIDATES` | `4` | AI analyzer: maximum number of candidate models to try in fallback chain. |
+| `SC0PE_AI_FILTER_WHITELIST_DOMAINS` | `1` | AI IoC sanitizer: filter legit/whitelisted domains using `Systems/Multiple/whitelist_domains.txt`. |
 | `SC0PE_AI_ALLOW_SHORT_DOMAINS` | `0` | IoC sanitizer: allow very short SLD domains (disabled by default to reduce false positives). |
 | `SC0PE_AI_MIN_SLD_LEN` | `4` | IoC sanitizer: minimum registrable-label length for domain validation. |
 | `SC0PE_AI_ALLOW_FILELIKE_TLDS` | `0` | IoC sanitizer: when `0`, filters file-like pseudo-domains such as `sheet1.xml`. |
 | `SC0PE_AI_KEEP_LOCAL_PATHS` | `0` | IoC sanitizer: when `0`, removes local analysis machine paths from `file_paths`. |
+| `SC0PE_DOC_AUTO_EXTRACT_MACROS` | `1` | Document analyzer: automatically extract detected VBA/XLM macros into report output (`0` disables). |
+| `SC0PE_REPORT_MAX_MACRO_CHARS` | `50000` | Document analyzer: per-macro text cap used while saving extracted macro content into JSON report. |
 | `SC0PE_EMAIL_DNSBL_FILTER_NOISY` | `1` | Email analyzer: filter noisy DNSBL providers to reduce false positives. |
 | `SC0PE_EMAIL_DNSBL_ALLOW_UNKNOWN` | `0` | Email analyzer: include/exclude DNSBL hits with unknown category. |
 | `SC0PE_EMAIL_DNSBL_NOISY_PROVIDERS` | unset | Email analyzer: comma-separated extra DNSBL providers to treat as noisy. |
@@ -248,7 +266,7 @@ python .\\qu1cksc0pe.py --file app.apk --analyze --report
 
 <b>Usage for --vtFile</b>: ```python qu1cksc0pe.py --file suspicious_file --vtFile```<br>
 > [!NOTE]
-> In Web UI flow, `Standart Analysis` and `Document` presets also execute VirusTotal file lookup in background and show the result in the report page.
+> In Web UI flow, `Standart Analysis`, `Document`, and `Archive` presets also execute VirusTotal file lookup in background and show the result in the report page.
 
 ![total](https://user-images.githubusercontent.com/42123683/189416676-06216d52-4882-492d-9ee4-4ff7c04b6358.gif)
 
@@ -283,7 +301,9 @@ python .\\qu1cksc0pe.py --file app.apk --analyze --report
 - RAR 
 - ACE
  
-<b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_archive_file --archive```
+<b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_archive_file --archive```<br>
+<b>With report</b>: ```python qu1cksc0pe.py --file suspicious_archive_file --archive --report```<br>
+<b>With AI support</b>: ```python qu1cksc0pe.py --file suspicious_archive_file --archive --ai```
 
 > [!NOTE]
 > ACE archive support requires `7z`/`7zz` to be installed (setup scripts install it on supported systems).
@@ -299,13 +319,22 @@ python .\\qu1cksc0pe.py --file app.apk --analyze --report
 ![carving](https://user-images.githubusercontent.com/42123683/189416908-31a06ac7-778a-48bd-a5f7-26708a255340.gif)
 
 ## MITRE ATT&CK Technique Extraction
-<i><b>Description</b>: This feature allows you to generate potential MITRE ATT&CK tables based on the import/export table or functions contained within the given file.</i>
+<i><b>Description</b>: MITRE ATT&CK mapping is generated automatically during static analysis based on detected APIs/functions/patterns.</i>
 
 <b>Effective Against</b>:
 - Windows Executables
+- Linux Executables
 
-<b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_file --mitre```<br>
+<b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_file --analyze```<br>
 ![mitre](https://user-images.githubusercontent.com/42123683/189416941-46e8be6b-2eec-4145-b0b8-b0da78d6611e.gif)
+
+## Android Permission Risk Classification
+<i><b>Description</b>: Android permission analysis now classifies permissions as `Dangerous`, `Special`, or `Info` and writes an aggregate `permission_summary` into JSON reports.</i>
+
+<b>Usage</b>: ```python qu1cksc0pe.py --file suspicious_app.apk --analyze --report```<br>
+
+> [!NOTE]
+> In Web UI report page, Android permissions are shown in a dedicated section with counters and per-permission state badges.
 
 ## Programming language detection
 <i><b>Description</b>: You can get programming language information from given file.</i>

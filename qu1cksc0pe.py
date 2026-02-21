@@ -120,7 +120,6 @@ ARG_NAMES_TO_KWARG_OPTS = {
     "install": {"help": "Install or Uninstall Qu1cksc0pe.", "action": "store_true"},
     "key_init": {"help": "Enter your VirusTotal API key.", "action": "store_true"},
     "lang": {"help": "Detect programming language.", "action": "store_true"},
-    "mitre": {"help": "Generate MITRE ATT&CK table for target sample (Windows samples for now.).", "action": "store_true"},
     "packer": {"help": "Check if your file is packed with common packers.", "action": "store_true"},
     "resource": {"help": "Analyze resources in target file", "action": "store_true"},
     "report": {"help": "Export analysis reports into a file (JSON Format for now).", "action": "store_true"},
@@ -168,9 +167,11 @@ def _maybe_run_ai(fast_mode=False):
     env = os.environ.copy()
     env.setdefault("SC0PE_AI_TOTAL_BUDGET", "45")
     env.setdefault("SC0PE_AI_OLLAMA_HTTP_TIMEOUT", "25")
+    env.setdefault("SC0PE_AI_HTTP_PROBE_TIMEOUT", "8")
     env.setdefault("SC0PE_AI_OLLAMA_CLI_TIMEOUT", "35")
     env.setdefault("SC0PE_AI_OLLAMA_NUM_PREDICT", "280")
     env.setdefault("SC0PE_AI_OLLAMA_RETRY_NUM_PREDICT", "560")
+    env.setdefault("SC0PE_AI_MAX_MODEL_CANDIDATES", "4")
     env.setdefault("SC0PE_AI_MAX_REPORT_CHARS", "65000")
     env.setdefault("SC0PE_AI_COMPACT_MAX_LIST_ITEMS", "24")
     env.setdefault("SC0PE_AI_TEMP_PARSE_MAX_LINES", "2500")
@@ -206,9 +207,9 @@ def BasicAnalyzer(analyzeFile):
     if "Windows Executable" in fileType or ".msi" in fileType or ".dll" in fileType or ".exe" in fileType:
         print(f"{infoS} Target OS: [bold green]Windows[white]\n")
         if args.report:
-            execute_module(f"windows_static_analyzer.py \"{analyzeFile}\" True")
+            execute_module(f"windows_static_analyzer.py \"{analyzeFile}\" True True")
         else:
-            execute_module(f"windows_static_analyzer.py \"{analyzeFile}\" False")
+            execute_module(f"windows_static_analyzer.py \"{analyzeFile}\" False True")
         _maybe_run_ai()
 
     # Linux Analysis
@@ -331,7 +332,11 @@ def Qu1cksc0pe():
                 if args.archive:
                     # Because why not!
                     print(f"{infoS} Analyzing: [bold green]{args.file}[white]")
-                    execute_module(f"archiveAnalyzer.py \"{args.file}\"")
+                    if args.report:
+                        execute_module(f"archiveAnalyzer.py \"{args.file}\" True")
+                    else:
+                        execute_module(f"archiveAnalyzer.py \"{args.file}\" False")
+                    _maybe_run_ai(fast_mode=True)
                     sys.exit(0)
 
                 # Check for embedded executables by default!
@@ -356,7 +361,11 @@ def Qu1cksc0pe():
         # Handling --file argument
         if args.file is not None:
             print(f"{infoS} Analyzing: [bold green]{args.file}[white]")
-            execute_module(f"archiveAnalyzer.py \"{args.file}\"")
+            if args.report:
+                execute_module(f"archiveAnalyzer.py \"{args.file}\" True")
+            else:
+                execute_module(f"archiveAnalyzer.py \"{args.file}\" False")
+            _maybe_run_ai(fast_mode=True)
         # Handling --folder argument
         if args.folder is not None:
             err_exit("[bold white on red][blink]--docs[/blink] argument is not supported for folder analyzing!\n")
@@ -401,15 +410,6 @@ def Qu1cksc0pe():
         # Handling --folder argument
         if args.folder is not None:
             err_exit("[bold white on red][blink]--resource[/blink] argument is not supported for folder analyzing!\n")
-
-    # MITRE ATT&CK
-    if args.mitre:
-        # Handling --file argument
-        if args.file is not None:
-            execute_module(f"mitre.py \"{args.file}\"")
-        # Handling --folder argument
-        if args.folder is not None:
-            err_exit("[bold white on red][blink]--mitre[/blink] argument is not supported for folder analyzing!\n")
 
     # Language detection
     if args.lang:

@@ -8,8 +8,13 @@
                 "GetUserNameEx",
                 "NetUserEnum",
                 "NetLocalGroupEnum",
-                "NetQueryDisplayInformation"
-            ], 
+                "NetQueryDisplayInformation",
+                "GetUserNameW",
+                "NetUserGetInfo",
+                "NetWkstaUserEnum",
+                "LookupAccountNameA",
+                "LookupAccountNameW"
+            ],
             "score": 0
         },
         "Application Window Discovery": {
@@ -26,7 +31,14 @@
                 "EnumWindows",
                 "GetWindowText",
                 "EnumChildWindows",
-                "EnumDesktopWindows"
+                "EnumDesktopWindows",
+                "FindWindowW",
+                "FindWindowExA",
+                "FindWindowExW",
+                "GetWindowTextA",
+                "GetWindowTextW",
+                "GetClassNameA",
+                "GetClassNameW"
             ],
             "score": 0
         },
@@ -44,7 +56,13 @@
                 "GetWindowsDirectory",
                 "GetSystemDirectoryA",
                 "GetTempPathA",
-                "GetTempPathW"
+                "GetTempPathW",
+                "GetSystemDirectoryW",
+                "GetCurrentDirectoryW",
+                "FindFirstFileW",
+                "FindNextFileW",
+                "GetFileAttributesA",
+                "GetFileAttributesW"
             ],
             "score": 0
         },
@@ -52,7 +70,16 @@
             "api_list": [
                 "EnumProcesses",
                 "CreateToolhelp32Snapshot",
-                "GetProcessImageFileNameA"
+                "GetProcessImageFileNameA",
+                "GetProcessImageFileNameW",
+                "Process32First",
+                "Process32Next",
+                "Process32FirstW",
+                "Process32NextW",
+                "Module32First",
+                "Module32Next",
+                "EnumProcessModules",
+                "EnumProcessModulesEx"
             ],
             "score": 0
         },
@@ -67,7 +94,51 @@
                 "RegOpenKey",
                 "RegEnumKey",
                 "RegEnumValueA",
-                "RegEnumValueW"
+                "RegEnumValueW",
+                "RegOpenKeyExA",
+                "RegOpenKeyExW",
+                "RegEnumKeyA",
+                "RegEnumKeyW",
+                "RegEnumKeyExA",
+                "RegEnumKeyExW",
+                "RegQueryMultipleValuesA"
+            ],
+            "score": 0
+        },
+        "System Information Discovery": {
+            "api_list": [
+                "GetSystemInfo",
+                "GetNativeSystemInfo",
+                "RtlGetVersion",
+                "GetVersionExA",
+                "GetVersionExW",
+                "GetComputerNameA",
+                "GetComputerNameW",
+                "GetSystemMetrics",
+                "GetLogicalProcessorInformation",
+                "GetLogicalProcessorInformationEx",
+                "GetSystemDirectoryA",
+                "GetSystemDirectoryW",
+                "GetWindowsDirectoryA",
+                "GetWindowsDirectoryW",
+                "EnumSystemFirmwareTables",
+                "GetSystemFirmwareTable"
+            ],
+            "score": 0
+        },
+        "Network Service Discovery": {
+            "api_list": [
+                "GetAdaptersInfo",
+                "GetAdaptersAddresses",
+                "GetTcpTable",
+                "GetExtendedTcpTable",
+                "GetExtendedUdpTable",
+                "NetShareEnum",
+                "NetShareGetInfo",
+                "WNetEnumResourceA",
+                "WNetEnumResourceW",
+                "DnsQuery_A",
+                "DnsQuery_W"
             ],
             "score": 0
         }
@@ -84,7 +155,26 @@
                 "CreateProcess",
                 "OpenProcessToken",
                 "AdjustTokenPrivileges",
-                "CreateRestrictedToken"
+                "CreateRestrictedToken",
+                "OpenThreadToken",
+                "SetTokenInformation",
+                "LookupPrivilegeValueA",
+                "LookupPrivilegeValueW",
+                "LogonUserA",
+                "LogonUserW",
+                "CreateProcessAsUserW",
+                "ImpersonateSelf",
+                "RevertToSelf"
+            ],
+            "score": 0
+        },
+        "Bypass User Account Control": {
+            "api_list": [
+                "ShellExecuteA",
+                "ShellExecuteW",
+                "ShellExecuteExW",
+                "CreateProcessWithTokenW",
+                "CreateProcessAsUserW"
             ],
             "score": 0
         }
@@ -94,12 +184,15 @@
             "api_list": [
                 "CreateProcess",
                 "CreateProcessAsUser",
-                "CreateProcessWithLoginW",
+                "CreateProcessWithLogonW",
                 "CreateProcessWithTokenW",
                 "WinExec",
                 "RegisterWaitForSingleObject",
                 "CreateRemoteThread",
-                "CreateRemoteThreadEx"
+                "CreateRemoteThreadEx",
+                "CreateProcessW",
+                "CreateProcessAsUserW",
+                "QueueUserAPC"
             ],
             "score": 0
         },
@@ -109,7 +202,31 @@
                 "CreateService",
                 "ChangeServiceConfig",
                 "RegSetValueA",
-                "RegSetValueW"
+                "RegSetValueW",
+                "CreateServiceA",
+                "CreateServiceW",
+                "ChangeServiceConfigA",
+                "ChangeServiceConfigW",
+                "RegSetValueExA",
+                "RegSetValueExW",
+                "RegCreateKeyExA",
+                "RegCreateKeyExW",
+                "OpenSCManagerA",
+                "OpenSCManagerW",
+                "OpenServiceA",
+                "OpenServiceW",
+                "StartServiceA",
+                "StartServiceW"
+            ],
+            "score": 0
+        },
+        "Scheduled Task/Job": {
+            "api_list": [
+                "NetScheduleJobAdd",
+                "RegisterTaskDefinition",
+                "TaskScheduler",
+                "IRegisteredTask",
+                "CreateProcessWithLogonW"
             ],
             "score": 0
         }
@@ -119,7 +236,14 @@
             "api_list": [
                 "CopyFromScreen",
                 "PrintWindow",
-                "BitBlt"
+                "BitBlt",
+                "GetDC",
+                "GetDCEx",
+                "GetWindowDC",
+                "CreateCompatibleDC",
+                "CreateCompatibleBitmap",
+                "SelectObject",
+                "StretchBlt"
             ],
             "score": 0
         },
@@ -138,7 +262,13 @@
                 "AttachThreadInput",
                 "GetRawInputData",
                 "GetForegroundWindow",
-                "GetWindowText"
+                "GetWindowText",
+                "GetKeyboardState",
+                "GetKeyNameTextW",
+                "MapVirtualKeyA",
+                "MapVirtualKeyExA",
+                "GetWindowTextA",
+                "GetWindowTextW"
             ],
             "score": 0
         }
@@ -166,7 +296,12 @@
                 "CredReadA",
                 "CredReadW",
                 "CredUnPackAuthenticationBufferA",
-                "CredUnPackAuthenticationBufferW"
+                "CredUnPackAuthenticationBufferW",
+                "GetWindowTextA",
+                "GetWindowTextW",
+                "GetKeyboardState",
+                "MapVirtualKeyA",
+                "MapVirtualKeyExA"
             ],
             "score": 0
         },
@@ -174,7 +309,27 @@
             "api_list": [
                 "WSAIoctl",
                 "WinPcap",
-                "PacketGetNetInfo"
+                "PacketGetNetInfo",
+                "PacketOpenAdapter",
+                "PacketReceivePacket",
+                "pcap_open_live",
+                "pcap_next_ex"
+            ],
+            "score": 0
+        },
+        "Credentials from Password Stores": {
+            "api_list": [
+                "CredEnumerateA",
+                "CredEnumerateW",
+                "CredReadA",
+                "CredReadW",
+                "CredUnPackAuthenticationBufferA",
+                "CredUnPackAuthenticationBufferW",
+                "CryptUnprotectData",
+                "LsaEnumerateLogonSessions",
+                "LsaGetLogonSessionData",
+                "VaultEnumerateItems",
+                "VaultGetItem"
             ],
             "score": 0
         }
@@ -198,14 +353,52 @@
                 "RegLoadKeyW",
                 "RegLoadKeyA",
                 "RegReplaceKeyW",
-                "RegReplaceKeyA"
+                "RegReplaceKeyA",
+                "RegSetValueA",
+                "RegSaveKeyA",
+                "RegSaveKeyW"
             ],
             "score": 0
         },
         "Time Based Evasion": {
             "api_list": [
                 "NtDelayExecution",
-                "Sleep"
+                "Sleep",
+                "SleepEx",
+                "WaitForSingleObject",
+                "WaitForSingleObjectEx",
+                "NtWaitForSingleObject"
+            ],
+            "score": 0
+        },
+        "Process Injection": {
+            "api_list": [
+                "VirtualAllocEx",
+                "VirtualProtectEx",
+                "WriteProcessMemory",
+                "ReadProcessMemory",
+                "CreateRemoteThread",
+                "CreateRemoteThreadEx",
+                "NtCreateThreadEx",
+                "NtWriteVirtualMemory",
+                "NtReadVirtualMemory",
+                "QueueUserAPC",
+                "NtQueueApcThread",
+                "SetThreadContext",
+                "ResumeThread"
+            ],
+            "score": 0
+        },
+        "Debugger Evasion": {
+            "api_list": [
+                "IsDebuggerPresent",
+                "CheckRemoteDebuggerPresent",
+                "NtQueryInformationProcess",
+                "ZwQueryInformationProcess",
+                "OutputDebugStringA",
+                "OutputDebugStringW",
+                "SetUnhandledExceptionFilter",
+                "UnhandledExceptionFilter"
             ],
             "score": 0
         }
