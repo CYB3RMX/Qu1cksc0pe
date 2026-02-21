@@ -82,9 +82,12 @@ class PowerShellAnalyzer:
                 "non_xored_detected": False,
                 "non_xored_files": [],
                 "normal_base64_decoded_files": [],
+                "decoded_base64_values_file": "",
+                "decoded_base64_values_count": 0,
             },
             "errors": [],
         }
+        self.decoded_b64_entries = []
         self._calc_hashes_into_report()
         self._write_temp_txt()
 
@@ -141,7 +144,61 @@ class PowerShellAnalyzer:
             self.report["payloads"]["decoded_files"].append(output_file)
         except Exception:
             pass
-	
+
+    def _record_decoded_b64_text(self, decoded_text, output_file=""):
+        text = str(decoded_text or "").replace("\x00", "").strip()
+        if len(text) < 10:
+            return
+        entry = {
+            "output_file": str(output_file or ""),
+            "decoded_text": text,
+        }
+        if entry not in self.decoded_b64_entries:
+            self.decoded_b64_entries.append(entry)
+
+    def _maybe_record_bytes_as_text(self, blob, output_file=""):
+        try:
+            raw = bytes(blob)
+        except Exception:
+            return
+        try:
+            text = raw.decode("utf-8", errors="ignore").replace("\x00", "").strip()
+        except Exception:
+            text = ""
+        # Prefer readable text; if not readable, keep a hex representation so decoded value is still preserved.
+        if len(text) < 10:
+            hex_text = raw.hex()
+            if hex_text:
+                self._record_decoded_b64_text(decoded_text=f"[non-printable-bytes-hex]\n{hex_text}", output_file=output_file)
+            return
+        printable_ratio = sum(ch.isprintable() for ch in text) / max(len(text), 1)
+        if printable_ratio >= 0.85:
+            self._record_decoded_b64_text(decoded_text=text, output_file=output_file)
+            return
+        hex_text = raw.hex()
+        if hex_text:
+            self._record_decoded_b64_text(decoded_text=f"[non-printable-bytes-hex]\n{hex_text}", output_file=output_file)
+
+    def write_decoded_b64_list_file(self):
+        if not self.decoded_b64_entries:
+            return
+
+        out_name = "qu1cksc0pe_decoded_b64_values.txt"
+        try:
+            with open(out_name, "w", encoding="utf-8", errors="ignore") as ff:
+                for idx, entry in enumerate(self.decoded_b64_entries, 1):
+                    ff.write(f"[{idx}] output_file: {entry['output_file'] or '-'}\n")
+                    ff.write(entry["decoded_text"])
+                    if not entry["decoded_text"].endswith("\n"):
+                        ff.write("\n")
+                    ff.write("-" * 70 + "\n")
+            print(f"{infoS} Decoded BASE64 values list saved into: [bold green]{out_name}[white]")
+            self.report["payloads"]["decoded_base64_values_file"] = out_name
+            self.report["payloads"]["decoded_base64_values_count"] = len(self.decoded_b64_entries)
+            self.report["payloads"]["normal_base64_decoded_files"] = [out_name]
+        except Exception as exc:
+            self.report["errors"].append(f"decoded_base64_values_write_error: {exc}")
+		
     def scan_code_patterns(self):
         print(f"{infoS} Performing pattern scan...")
         self.report["matched_patterns"] = {}
@@ -234,7 +291,8 @@ class PowerShellAnalyzer:
             byte_arr = bytearray(base64.b64decode(payload))
             for byt in range(len(byte_arr)):
                 byte_arr[byt] = byte_arr[byt] ^ int(xor_key)
-            self.save_data_into_file(output_file="qu1cksc0pe_decoded_b64_payload.bin", data=byte_arr)
+            self._maybe_record_bytes_as_text(blob=byte_arr, output_file="base64_xored_payload")
+            print(f"{infoS} Decoded BASE64 payload added to [bold green]qu1cksc0pe_decoded_b64_values.txt[white] list queue")
         elif payload_type == "ascii":
             temp_array = []
             for num in payload:
@@ -341,23 +399,20 @@ class PowerShellAnalyzer:
                 decompress_obj = zlib.decompressobj(-zlib.MAX_WBITS)
                 decompressed_data = decompress_obj.decompress(b64_data)
                 output = io.BytesIO(decompressed_data).read().decode('ascii')
-                out_name = "qu1cksc0pe_decoded_b64_payload.bin"
-                self.save_data_into_file(output_file=out_name, data=output.encode())
-                self.report["payloads"]["non_xored_files"].append(out_name)
+                self._record_decoded_b64_text(decoded_text=output, output_file="base64_non_xored_deflate")
+                print(f"{infoS} Decoded BASE64 payload added to [bold green]qu1cksc0pe_decoded_b64_values.txt[white] list queue")
             elif gzipstream != []:
                 print(f"{infoS} Gzip data found! Attempting to decompress...")
                 decompressed_data = gzip.decompress(b64_data)
-                out_name = "qu1cksc0pe_decoded_b64_payload.bin"
-                self.save_data_into_file(output_file=out_name, data=decompressed_data)
-                self.report["payloads"]["non_xored_files"].append(out_name)
+                self._maybe_record_bytes_as_text(blob=decompressed_data, output_file="base64_non_xored_gzip")
+                print(f"{infoS} Decoded BASE64 payload added to [bold green]qu1cksc0pe_decoded_b64_values.txt[white] list queue")
             else:
                 print(f"{infoS} There is no compression. Extracting payload anyway...")
-                out_name = "qu1cksc0pe_decoded_b64_payload.bin"
-                self.save_data_into_file(output_file=out_name, data=b64_data)
-                self.report["payloads"]["non_xored_files"].append(out_name)
+                self._maybe_record_bytes_as_text(blob=b64_data, output_file="base64_non_xored_raw")
+                print(f"{infoS} Decoded BASE64 payload added to [bold green]qu1cksc0pe_decoded_b64_values.txt[white] list queue")
         else:
             print(f"{errorS} There is no pattern about BASE64 encoded payloads!\n")
-
+	
     def check_only_legit_base64(self):
         print(f"\n{infoS} Searching for: [bold green]Normal BASE64[white] patterns...")
         b64_match = re.findall(self.pattern_b64[1], str(self.all_strings), re.IGNORECASE)
@@ -366,17 +421,10 @@ class PowerShellAnalyzer:
             for enc in b64_match:
                 try:
                     decbf = base64.b64decode(enc)
-                    if len(decbf.decode()) > 10:
-                        out_name = f"qu1cksc0pe_decoded_b64_{len(decbf.decode())}.bin"
-                        with open(out_name, "w") as ff:
-                            ff.write(decbf.decode())
-                        print(f"{infoS} Decoded payload saved into: [bold green]{out_name}[white]")
-                        try:
-                            self.report["payloads"]["normal_base64_decoded_files"].append(out_name)
-                        except Exception:
-                            pass
+                    self._maybe_record_bytes_as_text(blob=decbf, output_file="base64_normal_match")
                 except:
                     continue
+            print(f"{infoS} Decoded BASE64 payload values queued for [bold green]qu1cksc0pe_decoded_b64_values.txt[white]")
         else:
             print(f"{errorS} There is no pattern about BASE64 encoded payloads!\n")
 
@@ -428,6 +476,9 @@ def main():
         except Exception:
             pass
         print(f"{errorS} PowerShell analysis error: {e}")
+
+    # Aggregate decoded BASE64 text values into a single list file.
+    pwsh_analyzer.write_decoded_b64_list_file()
 
     if get_argv(2) == "True":
         save_report("powershell", pwsh_analyzer.report)

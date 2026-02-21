@@ -1,6 +1,7 @@
 import re
 import sys
 import json
+import copy
 import warnings
 import configparser
 import shutil
@@ -54,11 +55,13 @@ CATEGORIES = {
 }
 
 class LinuxAnalyzer:
-    def __init__(self, base_path, target_file, rule_path, strings_lines):
+    def __init__(self, base_path, target_file, rule_path, strings_lines, mitre_data=None, enable_mitre=True):
         self.base_path = base_path
         self.target_file = target_file
         self.rule_path = rule_path
         self.strings_output = strings_lines
+        self.enable_mitre = bool(enable_mitre)
+        self.mitre_data_linux = copy.deepcopy(mitre_data) if isinstance(mitre_data, dict) else {}
         self.report = self.__class__.init_blank_report(default="")
         _binary = lief.parse(target_file)
         if not _binary:
@@ -310,9 +313,117 @@ class LinuxAnalyzer:
             self.report["libraries"].append(x)
         print(libs)
 
+    def _detected_symbol_index(self):
+        detected = set()
+
+        for val in self.strings_output or []:
+            sval = str(val).strip()
+            if not sval:
+                continue
+            low = sval.lower()
+            detected.add(low)
+            if "@" in low:
+                detected.add(low.split("@", 1)[0].strip())
+
+        for sym in self.symbol_names or []:
+            sname = str(sym).strip()
+            if not sname:
+                continue
+            low = sname.lower()
+            detected.add(low)
+            if "@" in low:
+                detected.add(low.split("@", 1)[0].strip())
+
+        for entries in CATEGORIES.values():
+            for indicator in entries:
+                sval = str(indicator).strip().lower()
+                if sval:
+                    detected.add(sval)
+
+        return detected
+
+    def perform_mitre_analysis(self):
+        if not self.enable_mitre:
+            return
+        if not isinstance(self.mitre_data_linux, dict) or self.mitre_data_linux == {}:
+            return
+
+        print(f"\n{infoS} Performing MITRE ATT&CK mapping...")
+        detected_items = self._detected_symbol_index()
+        mitre_results = {}
+        total_techniques = 0
+        total_matches = 0
+
+        for tactic in self.mitre_data_linux:
+            tactic_rows = []
+            tactic_payload = self.mitre_data_linux.get(tactic)
+            if not isinstance(tactic_payload, dict):
+                continue
+
+            for technique, payload in tactic_payload.items():
+                if not isinstance(payload, dict):
+                    continue
+                api_list = payload.get("api_list")
+                if not isinstance(api_list, list):
+                    continue
+
+                matched = []
+                seen = set()
+                for api in api_list:
+                    indicator = str(api).strip()
+                    if not indicator:
+                        continue
+                    low = indicator.lower()
+                    if low in seen:
+                        continue
+                    if low not in detected_items:
+                        continue
+                    seen.add(low)
+                    matched.append(indicator)
+
+                score = len(matched)
+                if score <= 0:
+                    continue
+
+                tactic_rows.append(
+                    {
+                        "technique": str(technique),
+                        "score": score,
+                        "matched_apis": matched,
+                    }
+                )
+                total_techniques += 1
+                total_matches += score
+
+            if tactic_rows == []:
+                continue
+
+            tactic_rows.sort(key=lambda row: row["score"], reverse=True)
+            tactic_table = Table()
+            tactic_table.add_column(f"[bold green]{tactic}", justify="left")
+            tactic_table.add_column("[bold cyan]Score", justify="center")
+            tactic_table.add_column("[bold magenta]Matched Indicators", justify="left")
+            for row in tactic_rows:
+                samples = ", ".join(row["matched_apis"][:6])
+                if len(row["matched_apis"]) > 6:
+                    samples = f"{samples}, ..."
+                tactic_table.add_row(row["technique"], str(row["score"]), samples)
+            print(tactic_table)
+
+            mitre_results[tactic] = tactic_rows
+
+        if mitre_results == {}:
+            print(f"{errorS} There is no MITRE ATT&CK technique detected!")
+
+        self.report["mitre_attack"] = mitre_results
+        self.report["mitre_technique_count"] = total_techniques
+        self.report["mitre_api_match_count"] = total_matches
+
     def analyze(self, indicators_by_category, emit_report=False):
         """Execute all analysis methods, including strings matching based on indicator input."""
-        
+        for cat in CATEGORIES:
+            CATEGORIES[cat] = []
+
         self.report["filename"] = self.target_file
 
         for category in indicators_by_category:
@@ -378,6 +489,8 @@ class LinuxAnalyzer:
                     self.report["golang"]["error"] = str(e)
                     print(f"{errorS} Golang analysis failed: {e}")
 
+        self.perform_mitre_analysis()
+
         if self.categorized_func_count != 0:
             print(f"\n[bold green]->[white] Statistics for: [bold green][i]{self.target_file}[/i]")
             stats = init_table("Categories", "Number of Functions or Strings")
@@ -422,6 +535,9 @@ class LinuxAnalyzer:
             "sections": [], "segments": [],
             "categories": {},
             "matched_rules": [],
+            "mitre_attack": {},
+            "mitre_technique_count": 0,
+            "mitre_api_match_count": 0,
             "security": {"NX": False, "PIE": False},
             "golang": {
                 "detected": False,
@@ -452,11 +568,14 @@ def run(sc0pe_path, target_file, emit_report=False):
         "Other/Unknown": "Others"
     }
     indicators_by_category = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}linux_func_categories.json"))
+    mitre_data = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Linux{path_seperator}mitre_for_linux.json"))
 
     lina = LinuxAnalyzer(
         base_path=sc0pe_path, target_file=target_file,
         rule_path=conf["Rule_PATH"]["rulepath"],
         strings_lines=allstrs,
+        mitre_data=mitre_data,
+        enable_mitre=True,
     )
     lina.emit_general_information()
     lina.analyze(indicators_by_category, emit_report=emit_report)

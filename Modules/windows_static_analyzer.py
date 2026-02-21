@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import json
+import copy
 import sqlite3
 import binascii
 import subprocess
@@ -65,6 +66,7 @@ except Exception:
 #--------------------------------------------------------------------- Keywords for categorized scanning
 windows_api_list = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows_api_categories.json"))
 dotnet_malware_pattern = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}dotnet_malware_patterns.json"))
+mitre_windows_data = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}mitre_for_windows.json"))
 
 
 # --- .NET helpers (dnfile)
@@ -149,6 +151,9 @@ winrep = {
     "interesting_string_patterns": [],
     "matched_rules": [],
     "linked_dll": [],
+    "mitre_attack": {},
+    "mitre_technique_count": 0,
+    "mitre_api_match_count": 0,
     "pdb_file_name": "",
     "debug_signature": "",
     "sections": {}
@@ -158,12 +163,17 @@ winrep = {
 conf = configparser.ConfigParser()
 conf.read(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows.conf", encoding="utf-8-sig")
 
+def _arg_is_true(value):
+    return str(value).strip().lower() in ("true", "1", "yes", "y")
+
 class WindowsAnalyzer:
-    def __init__(self, target_file):
+    def __init__(self, target_file, enable_mitre=False):
         self.target_file = target_file
+        self.enable_mitre = bool(enable_mitre)
         self.allFuncs = 0
         self.windows_imports_and_exports = []
         self.binaryfile = None
+        self.mitre_data_windows = copy.deepcopy(mitre_windows_data)
         self.executable_buffer = open(self.target_file, "rb").read()
         self.all_strings = perform_strings(self.target_file)
         self.blacklisted_patterns = open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}dotnet_blacklisted_methods.txt", "r").read().split("\n")
@@ -305,6 +315,82 @@ class WindowsAnalyzer:
                                 winrep["categories"][key].append(api)
                                 seen_api.add(api)
                 print(tables)
+
+    def _detected_api_index(self):
+        detected = set()
+        for entry in self.windows_imports_and_exports:
+            if not isinstance(entry, (list, tuple)) or len(entry) == 0:
+                continue
+            api_name = str(entry[0]).strip().lower()
+            if api_name:
+                detected.add(api_name)
+
+        for sval in self.all_strings:
+            sval_norm = str(sval).strip().lower()
+            if sval_norm in _API_LOWER_TO_API_AND_CATEGORY:
+                detected.add(sval_norm)
+        return detected
+
+    def perform_mitre_analysis(self):
+        if not self.enable_mitre:
+            return
+
+        print(f"\n{infoS} Performing MITRE ATT&CK mapping...")
+        detected_apis = self._detected_api_index()
+        mitre_results = {}
+        total_techniques = 0
+        total_matches = 0
+
+        for tactic in self.mitre_data_windows:
+            tactic_rows = []
+            for technique, payload in self.mitre_data_windows[tactic].items():
+                matched_apis = []
+                matched_seen = set()
+                for api in payload.get("api_list", []):
+                    api_lower = str(api).strip().lower()
+                    if not api_lower or api_lower not in detected_apis or api_lower in matched_seen:
+                        continue
+                    matched_seen.add(api_lower)
+                    matched_apis.append(str(api))
+
+                score = len(matched_apis)
+                payload["score"] = score
+                if score <= 0:
+                    continue
+
+                tactic_rows.append(
+                    {
+                        "technique": technique,
+                        "score": score,
+                        "matched_apis": matched_apis
+                    }
+                )
+                total_techniques += 1
+                total_matches += score
+
+            if not tactic_rows:
+                continue
+
+            tactic_rows.sort(key=lambda row: row["score"], reverse=True)
+            mitre_table = Table()
+            mitre_table.add_column(f"[bold green]{tactic}", justify="left")
+            mitre_table.add_column("[bold cyan]Score", justify="center")
+            mitre_table.add_column("[bold magenta]Matched API Samples", justify="left")
+            for row in tactic_rows:
+                sample_apis = ", ".join(row["matched_apis"][:6])
+                if len(row["matched_apis"]) > 6:
+                    sample_apis = f"{sample_apis}, ..."
+                mitre_table.add_row(row["technique"], str(row["score"]), sample_apis)
+            print(mitre_table)
+
+            mitre_results[tactic] = tactic_rows
+
+        if mitre_results == {}:
+            print(f"{errorS} There is no MITRE ATT&CK technique detected!")
+
+        winrep["mitre_attack"] = mitre_results
+        winrep["mitre_technique_count"] = total_techniques
+        winrep["mitre_api_match_count"] = total_matches
 
     def dll_files(self):
         try:
@@ -665,6 +751,7 @@ class WindowsAnalyzer:
         self.check_for_valid_registry_keys()
         self.check_for_interesting_stuff()
         self.detect_embedded_PE()
+        self.perform_mitre_analysis()
 
         # Get debug information
         self.get_debug_information()
@@ -684,7 +771,7 @@ class WindowsAnalyzer:
         yara_rule_scanner(self.rule_path, self.target_file, winrep)
         self.statistics_method()
         # Print reports
-        if get_argv(2) == "True":
+        if _arg_is_true(get_argv(2, "False")):
             save_report("windows", winrep)
 
     def msi_file_analyzer(self):
@@ -693,6 +780,7 @@ class WindowsAnalyzer:
         self.check_for_valid_registry_keys()
         self.check_for_interesting_stuff()
         self.detect_embedded_PE()
+        self.perform_mitre_analysis()
 
         # Some MSI samples may fail PE parsing in gather_windows_imports_and_exports fallback path.
         # Try a best-effort parse here; if still unavailable, continue without PE-dependent stages.
@@ -738,22 +826,25 @@ class WindowsAnalyzer:
             except Exception as e:
                 print(f"{errorS} MSI statistics stage failed: [bold red]{e}[white]")
 
-        if get_argv(2) == "True":
+        if _arg_is_true(get_argv(2, "False")):
             save_report("windows", winrep)
 
 def main():
     if len(sys.argv) < 2:
-        err_exit("Usage: windows_static_analyzer.py <file> [save_report=True|False]")
+        err_exit("Usage: windows_static_analyzer.py <file> [save_report=True|False] [mitre=True|False]")
     fileName = sys.argv[1]
+    report_enabled = _arg_is_true(get_argv(2, "False"))
+    mitre_enabled = _arg_is_true(get_argv(3, "False"))
 
     # Execute
-    windows_analyzer = WindowsAnalyzer(target_file=str(fileName))
+    windows_analyzer = WindowsAnalyzer(target_file=str(fileName), enable_mitre=mitre_enabled)
     windows_analyzer.dll_files()
     windows_analyzer.get_debug_information()
     windows_analyzer.scan_for_special_artifacts()
     windows_analyzer.check_for_valid_registry_keys()
     windows_analyzer.check_for_interesting_stuff()
     windows_analyzer.detect_embedded_PE()
+    windows_analyzer.perform_mitre_analysis()
 
     # Yara rule match
     print(f"\n{infoS} Performing YARA rule matching...")
@@ -762,7 +853,7 @@ def main():
     windows_analyzer.statistics_method()
 
     # Print reports
-    if get_argv(2) == "True":
+    if report_enabled:
         save_report("windows", winrep)
 
 if __name__ == "__main__":

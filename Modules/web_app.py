@@ -63,8 +63,9 @@ PRESETS: "OrderedDict[str, AnalysisPreset]" = OrderedDict(
         ),
         "archive": AnalysisPreset(
             label="Archive",
-            description="Archive inspection and nested rule scanning.",
+            description="Archive inspection with nested IOC/YARA triage, JSON report, optional AI support, and VirusTotal file lookup.",
             args=("--archive",),
+            report_default=True,
         ),
         "hashscan": AnalysisPreset(
             label="Hash Scan",
@@ -259,6 +260,7 @@ def _load_report_for_job(job: dict) -> dict:
         "hashes": [],
         "categories": [],
         "windows_api_categories": [],
+        "mitre_rows": [],
         "vt_section": {
             "available": False,
             "summary": [],
@@ -430,6 +432,40 @@ def build_summary(report_data: Optional[dict]) -> List[dict]:
         if key in report_data:
             summary.append({"label": label, "value": str(_count_items(report_data.get(key)))})
 
+    # Some analyzers (e.g., Android/JAR source analysis) keep category counts under
+    # source_summary.category_counts instead of top-level "categories".
+    has_categorized_hits = any(str(item.get("label")) == "Categorized Hits" for item in summary)
+    if not has_categorized_hits:
+        derived_categories = _extract_categories(report_data)
+        if derived_categories:
+            total_hits = sum(int(row.get("count") or 0) for row in derived_categories)
+            summary.append({"label": "Categorized Hits", "value": str(total_hits)})
+
+    mitre_rows = _extract_mitre_rows(report_data)
+    if mitre_rows:
+        summary.append({"label": "MITRE Tactics", "value": str(len(mitre_rows))})
+        summary.append(
+            {
+                "label": "MITRE Techniques",
+                "value": str(int(report_data.get("mitre_technique_count") or sum(int(t.get("technique_count") or 0) for t in mitre_rows))),
+            }
+        )
+        summary.append(
+            {
+                "label": "MITRE API Matches",
+                "value": str(int(report_data.get("mitre_api_match_count") or sum(int(t.get("score") or 0) for t in mitre_rows))),
+            }
+        )
+
+    perm_section = _extract_permissions_section(report_data)
+    perm_counts = perm_section.get("counts", {}) if isinstance(perm_section, dict) else {}
+    dangerous_count = int(perm_counts.get("dangerous") or 0)
+    special_count = int(perm_counts.get("special") or 0)
+    if dangerous_count > 0:
+        summary.append({"label": "Dangerous Perms", "value": str(dangerous_count)})
+    if special_count > 0:
+        summary.append({"label": "Special Perms", "value": str(special_count)})
+
     return summary[:12]
 
 
@@ -518,16 +554,45 @@ def _preview_items(value: object, limit: int = 18) -> List[str]:
 
 
 def _extract_categories(report_data: dict) -> List[dict]:
-    categories = report_data.get("categories")
-    if not isinstance(categories, dict):
-        return []
+    merged: Dict[str, int] = {}
 
-    rows: List[dict] = []
-    for key, value in categories.items():
-        count = _count_items(value)
-        if count > 0:
-            rows.append({"name": str(key), "count": count})
+    def _merge_counts(cat_obj: object) -> None:
+        if not isinstance(cat_obj, dict):
+            return
+        for key, value in cat_obj.items():
+            count = _count_items(value)
+            if count <= 0:
+                continue
+            name = str(key).strip()
+            if not name:
+                continue
+            merged[name] = merged.get(name, 0) + int(count)
 
+    # Generic analyzer format (Windows/Linux/etc.).
+    _merge_counts(report_data.get("categories"))
+
+    # Android/JAR source scanner format.
+    source_summary = report_data.get("source_summary")
+    if isinstance(source_summary, dict):
+        _merge_counts(source_summary.get("category_counts"))
+
+    # Last-resort derivation from source findings when summary counts are absent.
+    if not merged:
+        findings = report_data.get("source_findings")
+        if isinstance(findings, list):
+            for item in findings:
+                if not isinstance(item, dict):
+                    continue
+                cats = item.get("categories")
+                if not isinstance(cats, list):
+                    continue
+                for cat in cats:
+                    cname = str(cat).strip()
+                    if not cname:
+                        continue
+                    merged[cname] = merged.get(cname, 0) + 1
+
+    rows = [{"name": name, "count": count} for name, count in merged.items() if count > 0]
     rows.sort(key=lambda row: row["count"], reverse=True)
     return rows
 
@@ -554,6 +619,62 @@ def _extract_interesting_patterns(report_data: dict) -> List[str]:
         seen.add(candidate)
         values.append(candidate)
     return values[:200]
+
+
+def _extract_source_pattern_rows(report_data: dict) -> List[dict]:
+    raw = report_data.get("source_findings")
+    if not isinstance(raw, list):
+        return []
+
+    rows: List[dict] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+
+        file_name = _normalize_inline_text(str(item.get("file_name") or item.get("file") or ""))
+        categories_raw = item.get("categories")
+        patterns_raw = item.get("patterns")
+
+        categories: List[str] = []
+        if isinstance(categories_raw, list):
+            seen_cat = set()
+            for cat in categories_raw:
+                cname = _normalize_inline_text(str(cat or ""))
+                if not cname:
+                    continue
+                key = cname.lower()
+                if key in seen_cat:
+                    continue
+                seen_cat.add(key)
+                categories.append(cname)
+
+        patterns: List[str] = []
+        if isinstance(patterns_raw, list):
+            seen_pat = set()
+            for pat in patterns_raw:
+                pname = _normalize_inline_text(str(pat or ""))
+                if not pname:
+                    continue
+                key = pname.lower()
+                if key in seen_pat:
+                    continue
+                seen_pat.add(key)
+                patterns.append(pname)
+
+        if not file_name and not patterns:
+            continue
+
+        rows.append(
+            {
+                "file_name": file_name or "-",
+                "categories": categories[:12],
+                "patterns": patterns[:40],
+                "pattern_count": len(patterns),
+            }
+        )
+
+    rows.sort(key=lambda row: (int(row.get("pattern_count") or 0), len(row.get("categories") or [])), reverse=True)
+    return rows[:120]
 
 
 def _extract_matched_rules(report_data: dict) -> List[dict]:
@@ -629,6 +750,139 @@ def _extract_matched_rules(report_data: dict) -> List[dict]:
         )
     rows.sort(key=lambda item: item["count"], reverse=True)
     return rows
+
+
+def _extract_mitre_rows(report_data: dict) -> List[dict]:
+    raw = report_data.get("mitre_attack")
+    if not isinstance(raw, dict):
+        return []
+
+    tactic_rows: List[dict] = []
+    for tactic, techniques_raw in raw.items():
+        tactic_name = _normalize_inline_text(str(tactic or ""))
+        if not tactic_name:
+            continue
+        if not isinstance(techniques_raw, list):
+            continue
+
+        techniques: List[dict] = []
+        total_score = 0
+        for item in techniques_raw:
+            if not isinstance(item, dict):
+                continue
+            technique_name = _normalize_inline_text(str(item.get("technique") or ""))
+            if not technique_name:
+                continue
+
+            matched_apis: List[str] = []
+            seen_api = set()
+            api_raw = item.get("matched_apis")
+            if isinstance(api_raw, list):
+                for api in api_raw:
+                    api_name = _normalize_inline_text(str(api or ""))
+                    if not api_name:
+                        continue
+                    k = api_name.lower()
+                    if k in seen_api:
+                        continue
+                    seen_api.add(k)
+                    matched_apis.append(api_name)
+
+            score = int(item.get("score") or len(matched_apis))
+            if score <= 0:
+                continue
+            total_score += score
+            techniques.append(
+                {
+                    "technique": technique_name,
+                    "score": score,
+                    "matched_apis": matched_apis[:24],
+                }
+            )
+
+        if not techniques:
+            continue
+
+        techniques.sort(key=lambda row: row["score"], reverse=True)
+        tactic_rows.append(
+            {
+                "tactic": tactic_name,
+                "technique_count": len(techniques),
+                "score": total_score,
+                "techniques": techniques[:80],
+            }
+        )
+
+    tactic_rows.sort(key=lambda row: (int(row.get("score") or 0), int(row.get("technique_count") or 0)), reverse=True)
+    return tactic_rows[:24]
+
+
+def _extract_permissions_section(report_data: dict) -> dict:
+    out = {
+        "available": False,
+        "counts": {"dangerous": 0, "special": 0, "info": 0},
+        "rows": [],
+    }
+    if not isinstance(report_data, dict):
+        return out
+
+    raw = report_data.get("permissions")
+    if not isinstance(raw, list):
+        summary = report_data.get("permission_summary")
+        if isinstance(summary, dict):
+            out["counts"] = {
+                "dangerous": int(summary.get("dangerous") or 0),
+                "special": int(summary.get("special") or 0),
+                "info": int(summary.get("info") or 0),
+            }
+            out["available"] = any(int(v) > 0 for v in out["counts"].values())
+        return out
+
+    state_rank = {"dangerous": 3, "special": 2, "info": 1}
+    merged: Dict[str, str] = {}
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        for perm_name, state_raw in item.items():
+            perm = _normalize_inline_text(str(perm_name or ""))
+            if not perm:
+                continue
+
+            state = _normalize_inline_text(str(state_raw or "")).lower()
+            if state in ("risky", "dangerous"):
+                norm_state = "dangerous"
+            elif state == "special":
+                norm_state = "special"
+            else:
+                norm_state = "info"
+
+            prev = merged.get(perm)
+            if not prev or state_rank[norm_state] > state_rank[prev]:
+                merged[perm] = norm_state
+
+    if not merged:
+        summary = report_data.get("permission_summary")
+        if isinstance(summary, dict):
+            out["counts"] = {
+                "dangerous": int(summary.get("dangerous") or 0),
+                "special": int(summary.get("special") or 0),
+                "info": int(summary.get("info") or 0),
+            }
+            out["available"] = any(int(v) > 0 for v in out["counts"].values())
+        return out
+
+    rows = []
+    counts = {"dangerous": 0, "special": 0, "info": 0}
+    for perm, state in merged.items():
+        counts[state] += 1
+        rows.append({"name": perm, "state": state, "state_label": state.capitalize()})
+
+    rows.sort(key=lambda row: (-state_rank.get(str(row.get("state")), 0), str(row.get("name", "")).lower()))
+
+    out["counts"] = counts
+    out["rows"] = rows[:200]
+    out["available"] = True
+    return out
 
 
 def _build_detailed_panels(report_data: dict) -> List[dict]:
@@ -792,7 +1046,9 @@ def build_frontend_payload(report_data: Optional[dict]) -> dict:
             "summary": [],
             "hashes": [],
             "categories": [],
+            "permissions_section": {"available": False, "counts": {"dangerous": 0, "special": 0, "info": 0}, "rows": []},
             "windows_api_categories": [],
+            "mitre_rows": [],
             "vt_section": {
                 "available": False,
                 "summary": [],
@@ -802,6 +1058,7 @@ def build_frontend_payload(report_data: Optional[dict]) -> dict:
                 "error": "",
             },
             "interesting_patterns": [],
+            "source_pattern_rows": [],
             "matched_rules_rows": [],
             "sections": [],
             "metadata": [],
@@ -826,6 +1083,11 @@ def build_frontend_payload(report_data: Optional[dict]) -> dict:
         "matched_rules",
         "interesting_string_patterns",
         "virustotal_file",
+        "mitre_attack",
+        "mitre_technique_count",
+        "mitre_api_match_count",
+        "permissions",
+        "permission_summary",
     }
 
     ai_output = ""
@@ -882,7 +1144,10 @@ def build_frontend_payload(report_data: Optional[dict]) -> dict:
         windows_api_categories.sort(key=lambda row: row["count"], reverse=True)
 
     interesting_patterns = _extract_interesting_patterns(report_data)
+    source_pattern_rows = _extract_source_pattern_rows(report_data)
     matched_rules_rows = _extract_matched_rules(report_data)
+    mitre_rows = _extract_mitre_rows(report_data)
+    permissions_section = _extract_permissions_section(report_data)
 
     for key, label in (("hash_md5", "MD5"), ("hash_sha1", "SHA1"), ("hash_sha256", "SHA256"), ("imphash", "Imphash")):
         if report_data.get(key):
@@ -961,9 +1226,12 @@ def build_frontend_payload(report_data: Optional[dict]) -> dict:
         "summary": build_summary(report_data),
         "hashes": hashes,
         "categories": _extract_categories(report_data),
+        "permissions_section": permissions_section,
         "windows_api_categories": windows_api_categories,
+        "mitre_rows": mitre_rows,
         "vt_section": vt_section,
         "interesting_patterns": interesting_patterns,
+        "source_pattern_rows": source_pattern_rows,
         "matched_rules_rows": matched_rules_rows,
         "sections": sections,
         "metadata": metadata,
@@ -1237,7 +1505,7 @@ def execute_preset(sample_path: Path, preset: AnalysisPreset, enable_ai: bool) -
     if preset.args == ("--vtFile",):
         return execute_vtfile_scan(sample_path=sample_path, command_display=command_display)
 
-    vt_enabled_presets = {("--analyze",), ("--docs",)}
+    vt_enabled_presets = {("--analyze",), ("--docs",), ("--archive",)}
     vt_future: Optional[concurrent.futures.Future] = None
     vt_executor: Optional[concurrent.futures.ThreadPoolExecutor] = None
     vt_result: Optional[dict] = None

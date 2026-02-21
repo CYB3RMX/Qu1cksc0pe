@@ -1,0 +1,318 @@
+{
+    "Discovery": {
+        "System Information Discovery": {
+            "api_list": [
+                "uname",
+                "sysinfo",
+                "gethostname",
+                "getdomainname",
+                "getauxval",
+                "/proc/version",
+                "/proc/cpuinfo",
+                "/proc/meminfo",
+                "/etc/hostname",
+                "/etc/machine-id"
+            ],
+            "score": 0
+        },
+        "File and Directory Discovery": {
+            "api_list": [
+                "opendir",
+                "readdir",
+                "scandir",
+                "getcwd",
+                "realpath",
+                "stat",
+                "lstat",
+                "readlink",
+                "/proc/self/maps",
+                "/proc/self/exe",
+                "/etc/passwd",
+                "/etc/group"
+            ],
+            "score": 0
+        },
+        "Process Discovery": {
+            "api_list": [
+                "getpid",
+                "getppid",
+                "waitpid",
+                "wait4",
+                "times",
+                "sched_getscheduler",
+                "/proc/self/status",
+                "/proc/stat",
+                "/proc/net/dev"
+            ],
+            "score": 0
+        },
+        "Network Service Discovery": {
+            "api_list": [
+                "socket",
+                "connect",
+                "getaddrinfo",
+                "getifaddrs",
+                "getsockname",
+                "getpeername",
+                "/proc/net/tcp",
+                "ssdp:discover"
+            ],
+            "score": 0
+        }
+    },
+    "Execution": {
+        "Command and Scripting Interpreter": {
+            "api_list": [
+                "system",
+                "popen",
+                "execve",
+                "execv",
+                "execvp",
+                "execveat",
+                "/bin/sh"
+            ],
+            "score": 0
+        },
+        "Shared Modules": {
+            "api_list": [
+                "dlopen",
+                "dlsym",
+                "dlclose",
+                "uselib",
+                "init_module",
+                "finit_module"
+            ],
+            "score": 0
+        }
+    },
+    "Persistence": {
+        "Scheduled Task/Job": {
+            "api_list": [
+                "crontab",
+                "/etc/crontab",
+                "/etc/cron.d",
+                "/var/spool/cron"
+            ],
+            "score": 0
+        },
+        "Boot or Logon Autostart Execution": {
+            "api_list": [
+                "rc.local",
+                "/etc/rc.local",
+                "~/.bashrc",
+                "~/.profile",
+                "/etc/profile"
+            ],
+            "score": 0
+        },
+        "Create or Modify System Process": {
+            "api_list": [
+                "systemctl",
+                "service",
+                "update-rc.d",
+                "chkconfig",
+                "/etc/systemd/system",
+                "/etc/systemd/user"
+            ],
+            "score": 0
+        }
+    },
+    "Privilege Escalation": {
+        "Setuid and Setgid": {
+            "api_list": [
+                "setuid",
+                "setgid",
+                "setresuid",
+                "setresgid",
+                "setfsuid",
+                "setfsgid"
+            ],
+            "score": 0
+        },
+        "Sudo and Sudo Caching": {
+            "api_list": [
+                "/etc/sudoers",
+                "/etc/sudoers.d",
+                "/etc/pam.d",
+                "/etc/shadow"
+            ],
+            "score": 0
+        },
+        "Access Token Manipulation": {
+            "api_list": [
+                "capset",
+                "capget",
+                "setreuid",
+                "setregid",
+                "setgroups"
+            ],
+            "score": 0
+        }
+    },
+    "Defense Evasion": {
+        "Debugger Evasion": {
+            "api_list": [
+                "anti_gdb_entry",
+                "ptrace",
+                "PTRACE_TRACEME",
+                "PTRACE_ATTACH",
+                "TracerPid",
+                "/proc/self/status",
+                "nanosleep",
+                "__syscall_nanosleep"
+            ],
+            "score": 0
+        },
+        "Hijack Execution Flow": {
+            "api_list": [
+                "LD_PRELOAD",
+                "LD_LIBRARY_PATH",
+                "LD_AUDIT",
+                "LD_DEBUG",
+                "/etc/ld.so.preload",
+                "ld.so.preload",
+                "/etc/ld.so.conf"
+            ],
+            "score": 0
+        },
+        "Indicator Removal on Host": {
+            "api_list": [
+                "unlink",
+                "unlinkat",
+                "remove",
+                "truncate",
+                "ftruncate"
+            ],
+            "score": 0
+        }
+    },
+    "Credential Access": {
+        "Credentials from Password Stores": {
+            "api_list": [
+                "/etc/shadow",
+                "/etc/passwd",
+                "getpwnam",
+                "getpwuid",
+                "getpwnam_r",
+                "getpwuid_r",
+                "~/.ssh/authorized_keys",
+                "authorized_keys",
+                "/etc/ssh/sshd_config"
+            ],
+            "score": 0
+        },
+        "Unsecured Credentials": {
+            "api_list": [
+                "getenv",
+                "localeconv",
+                "getlogin",
+                "getlogin_r"
+            ],
+            "score": 0
+        }
+    },
+    "Collection": {
+        "Data from Local System": {
+            "api_list": [
+                "open",
+                "openat",
+                "fopen",
+                "read",
+                "pread",
+                "readv",
+                "fread",
+                "getenv",
+                "/proc/self/fd"
+            ],
+            "score": 0
+        },
+        "Data from Information Repositories": {
+            "api_list": [
+                "/etc/passwd",
+                "/etc/group",
+                "/etc/shadow",
+                "/usr/share/zoneinfo",
+                "/var/run/nscd/socket"
+            ],
+            "score": 0
+        }
+    },
+    "Command and Control": {
+        "Application Layer Protocol": {
+            "api_list": [
+                "socket",
+                "connect",
+                "send",
+                "recv",
+                "sendto",
+                "recvfrom",
+                "curl_easy_perform",
+                "CURLOPT_URL",
+                "smtp_perform",
+                "smtp_setup_connection",
+                "attack_http",
+                "attack_http2"
+            ],
+            "score": 0
+        },
+        "Non-Application Layer Protocol": {
+            "api_list": [
+                "attack_udp_generic",
+                "attack_udp_plain",
+                "attack_tcp_ack",
+                "attack_tcp_stomp",
+                "attack_icmpecho",
+                "attack_dnsamp",
+                "attack_ntp"
+            ],
+            "score": 0
+        }
+    },
+    "Exfiltration": {
+        "Exfiltration Over C2 Channel": {
+            "api_list": [
+                "send",
+                "sendto",
+                "sendmsg",
+                "smtp_perform",
+                "curl_easy_perform"
+            ],
+            "score": 0
+        },
+        "Exfiltration to Cloud Storage": {
+            "api_list": [
+                "CURLOPT_URL",
+                "CURLOPT_POSTFIELDS",
+                "CURLOPT_HTTPHEADER",
+                "CURLOPT_USERAGENT"
+            ],
+            "score": 0
+        }
+    },
+    "Impact": {
+        "Data Encrypted for Impact": {
+            "api_list": [
+                "encrypt_file",
+                "EVP_EncryptInit_ex",
+                "EVP_EncryptUpdate",
+                "EVP_EncryptFinal_ex",
+                "AES_set_encrypt_key",
+                "AES_encrypt",
+                "crypto_secretbox_easy"
+            ],
+            "score": 0
+        },
+        "Resource Hijacking": {
+            "api_list": [
+                "setpriority",
+                "sched_setscheduler",
+                "sched_setaffinity",
+                "nice",
+                "attack_udp_pps",
+                "attack_memcached",
+                "attack_chargen"
+            ],
+            "score": 0
+        }
+    }
+}

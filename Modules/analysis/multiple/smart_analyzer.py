@@ -50,6 +50,61 @@ def _read_sc0pe_path():
         return os.getcwd()
 
 
+_DOMAIN_WHITELIST_CACHE = {
+    "sc0pe_path": "",
+    "tokens": [],
+}
+
+
+def _load_domain_whitelist(sc0pe_path=None):
+    base = str(sc0pe_path or _read_sc0pe_path()).strip()
+    if _DOMAIN_WHITELIST_CACHE["sc0pe_path"] == base and _DOMAIN_WHITELIST_CACHE["tokens"]:
+        return _DOMAIN_WHITELIST_CACHE["tokens"]
+
+    path_sep = "\\" if sys.platform == "win32" else "/"
+    wl_path = f"{base}{path_sep}Systems{path_sep}Multiple{path_sep}whitelist_domains.txt"
+    tokens = []
+    try:
+        with open(wl_path, "r", encoding="utf-8", errors="ignore") as wf:
+            for ln in wf:
+                tok = str(ln).strip().lower()
+                if not tok or tok.startswith("#"):
+                    continue
+                tokens.append(tok)
+    except Exception:
+        tokens = []
+
+    _DOMAIN_WHITELIST_CACHE["sc0pe_path"] = base
+    _DOMAIN_WHITELIST_CACHE["tokens"] = tokens
+    return tokens
+
+
+def _is_whitelisted_domain(domain, whitelist_tokens):
+    host = _normalize_domain(domain)
+    if not host:
+        return False
+
+    for raw in whitelist_tokens or []:
+        tok = str(raw or "").strip().lower()
+        if not tok:
+            continue
+
+        if tok.endswith("."):
+            prefix = tok.rstrip(".")
+            if host == prefix or host.startswith(prefix + "."):
+                return True
+            continue
+
+        if "." in tok and (host == tok or host.endswith("." + tok)):
+            return True
+
+        # Some entries are intentionally partial.
+        if len(tok) >= 5 and tok in host:
+            return True
+
+    return False
+
+
 def _load_conf(sc0pe_path, path_seperator="/"):
     conf = configparser.ConfigParser()
     conf_path = f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}multiple.conf"
@@ -627,7 +682,7 @@ def _summarize_report(report):
     for it in perms:
         if isinstance(it, dict):
             for k, v in it.items():
-                if str(v).lower() == "risky":
+                if str(v).lower() in ("risky", "dangerous", "special"):
                     risky_perms.append(k)
 
     category_counts = source_summary.get("category_counts", {}) if isinstance(source_summary, dict) else {}
@@ -1034,6 +1089,9 @@ def _sanitize_llm_iocs(iocs):
         return {}
     wanted = ["urls", "domains", "ips", "emails", "hashes", "registry_keys", "file_paths", "mutexes", "system_commands"]
     out = {k: [] for k in wanted}
+    whitelist_domains = []
+    if _env_bool("SC0PE_AI_FILTER_WHITELIST_DOMAINS", True):
+        whitelist_domains = _load_domain_whitelist()
     for k in wanted:
         vals = iocs.get(k, [])
         if not isinstance(vals, list):
@@ -1053,9 +1111,16 @@ def _sanitize_llm_iocs(iocs):
                     continue
                 if u.scheme not in ("http", "https") or not u.netloc:
                     continue
+                host = _normalize_domain(u.hostname or "")
+                if not host or (not _is_valid_domain(host)):
+                    continue
+                if whitelist_domains and _is_whitelisted_domain(host, whitelist_domains):
+                    continue
             elif k == "domains":
                 s = _normalize_domain(s)
                 if not _is_valid_domain(s):
+                    continue
+                if whitelist_domains and _is_whitelisted_domain(s, whitelist_domains):
                     continue
                 key = s
             elif k == "ips":
@@ -1081,6 +1146,8 @@ def _sanitize_llm_iocs(iocs):
         except Exception:
             host = ""
         host = _normalize_domain(host)
+        if whitelist_domains and _is_whitelisted_domain(host, whitelist_domains):
+            continue
         if host and _is_valid_domain(host) and host.lower() not in dseen:
             out["domains"].append(host)
             dseen.add(host.lower())
@@ -1553,14 +1620,40 @@ def main():
         print(status_msg)
     status_ctx = RICH_CONSOLE.status(status_msg, spinner="bouncingBar", spinner_style="bold magenta") if RICH_CONSOLE is not None else nullcontext()
     with status_ctx:
-        # Use only the model configured in multiple.conf.
+        # Prefer configured model, but optionally fall back to available local models.
         model_candidates = [model]
+        err_log = []
+        allow_model_fallback = _env_bool("SC0PE_AI_ALLOW_MODEL_FALLBACK", True)
+        skip_cloud_when_local = _env_bool("SC0PE_AI_SKIP_CLOUD_WHEN_LOCAL", True)
+        skip_cloud_cli = _env_bool("SC0PE_AI_SKIP_CLOUD_CLI", True)
+        max_model_candidates = _env_int("SC0PE_AI_MAX_MODEL_CANDIDATES", 4, min_value=1, max_value=20)
+        if allow_model_fallback and (has_ollama_http or has_ollama_cli):
+            discovered = []
+            if has_ollama_http and requests is not None:
+                try:
+                    discovered.extend(_list_ollama_models_http(timeout_s=min(5, http_probe_timeout_s)))
+                except Exception as exc:
+                    err_log.append(f"model-list:http: {str(exc).strip()[:180]}")
+            if has_ollama_cli:
+                try:
+                    discovered.extend(_list_ollama_models_cli(timeout_s=min(8, cli_timeout_s)))
+                except Exception as exc:
+                    err_log.append(f"model-list:cli: {str(exc).strip()[:180]}")
+
+            discovered = _unique_preserve(discovered)
+            if discovered:
+                ranked_all = _rank_model_candidates(discovered, prefer_local=True)
+                ranked_local = [m for m in ranked_all if not _is_probably_cloud_model(m)]
+                if skip_cloud_when_local and _is_probably_cloud_model(model) and ranked_local:
+                    model_candidates = _unique_preserve(ranked_local + [model] + ranked_all)
+                else:
+                    model_candidates = _unique_preserve([model] + ranked_all)
+        model_candidates = model_candidates[:max_model_candidates]
 
         # Choose the fastest working engine/model; don't attempt HTTP if not reachable.
         engine = "heuristic"
         text = ""
         chosen_model = ""
-        err_log = []
         deadline = time.time() + total_budget_s
         if has_ollama_http and requests is not None:
             for candidate in model_candidates:
@@ -1607,6 +1700,9 @@ def main():
                     err_log.append(f"http:{candidate}: {err_msg[:180]}")
                     # If HTTP timed out, try one direct CLI retry for the same model.
                     if (not text) and has_ollama_cli and ("timed out" in err_msg.lower()):
+                        if skip_cloud_cli and _is_probably_cloud_model(candidate):
+                            err_log.append(f"cli:{candidate}: skipped (cloud model)")
+                            continue
                         remain_cli = int(deadline - time.time())
                         if remain_cli > 10:
                             try:
@@ -1620,6 +1716,9 @@ def main():
                                 err_log.append(f"cli:{candidate}: {str(cli_exc).strip()[:180]}")
         if not text and has_ollama_cli:
             for candidate in model_candidates:
+                if skip_cloud_cli and _is_probably_cloud_model(candidate):
+                    err_log.append(f"cli:{candidate}: skipped (cloud model)")
+                    continue
                 remain = int(deadline - time.time())
                 if remain <= 0:
                     err_log.append("cli: budget exhausted")
