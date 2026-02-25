@@ -12,7 +12,6 @@ import zipfile
 import subprocess
 import configparser
 import urllib.parse
-from bs4 import BeautifulSoup
 from analysis.multiple.multi import chk_wlist, perform_strings, yara_rule_scanner, calc_hashes
 from utils.helpers import err_exit, get_argv, save_report
 
@@ -349,6 +348,10 @@ class DocumentAnalyzer:
             return "vbscript"
         elif "vbscript" in lower_magic or "visual basic" in lower_magic:
             return "vbscript"
+        if lower_file.endswith(".js"):
+            return "javascript"
+        if lower_file.endswith(".hta"):
+            return "hta"
         if "Microsoft Word" in decoded_doc_type or "Microsoft Excel" in decoded_doc_type or "Microsoft Office Word" in decoded_doc_type:
             return "docscan"
         elif "PDF document" in decoded_doc_type:
@@ -952,60 +955,6 @@ class DocumentAnalyzer:
         yara_rule_scanner(self.rule_path, self.targetFile, report)
 
     # HTML analysis
-    def HTMLanalysis(self):
-        print(f"{infoS} Performing HTML analysis...")
-        soup_analysis = BeautifulSoup(allstr, "html.parser")
-
-        # Check for malicious code patterns
-        self.html_detect_malicious_code(given_buffer=allstr)
-
-        # Fetch url values
-        self.html_fetch_urls(given_buffer=allstr)
-
-        # Dump javascript
-        self.html_dump_javascript(soup_obj=soup_analysis)
-
-        # Check for input points
-        self.html_check_input_points(soup_obj=soup_analysis)
-
-        # Check for iframe presence
-        self.html_check_iframe_tag(soup_obj=soup_analysis)
-
-        # Check for powershell patterns
-        self.html_check_powershell_codes(given_buffer=allstr)
-
-        # Print possible base64 decoded values
-        print(f"\n{infoS} Extracting possible decoded [bold green]BASE64[white] values...")
-        decodd = self.chk_b64(given_buffer=allstr)
-        if decodd:
-            for dd in decodd:
-                print(f"[bold magenta]>>>[white] {dd}")
-            self._add_finding("HTML", f"decoded_base64={len(decodd)}")
-        else:
-            print(f"{errorS} There is no potential encoded BASE64 value found!")
-
-        # Check suspicious files
-        self.html_check_suspicious_files(given_buffer=allstr)
-
-        # Check for unescape pattern
-        if self.mal_code["unescape"]["count"] != 0:
-            print(f"\n{infoS} Looks like we have a obfuscated data (via [bold green]unescape[white])")
-            print(f"{infoS} Performing extraction...")
-            un_dat = re.findall(r"unescape\('([^']+)'", allstr)
-            if un_dat != []:
-                for escape in un_dat:
-                    deobf = urllib.parse.unquote(escape)
-                    self.output_writer(out_file=f"qu1cksc0pe_decoded_unescape-{len(deobf)}.bin", mode="w", buffer=deobf)
-
-                    # After extracting the data also we need to scan it!
-                    print(f"\n{infoS} Performing analysis against [bold yellow]qu1cksc0pe_decoded_unescape-{len(deobf)}.bin[white]")
-                    if "html" in deobf:
-                        new_soup = BeautifulSoup(deobf, "html.parser")
-                        self.html_check_input_points(soup_obj=new_soup)
-                        self.html_check_iframe_tag(soup_obj=new_soup)
-                        self.html_detect_malicious_code(given_buffer=deobf)
-                        self.html_check_suspicious_files(given_buffer=deobf)
-
     def html_fetch_urls(self, given_buffer):
         print(f"\n{infoS} Checking URL values...")
         url_vals = self._extract_normalized_urls(given_buffer)
@@ -1021,165 +970,6 @@ class DocumentAnalyzer:
             url_table.add_row(url)
         print(url_table)
         self._add_finding("Other", f"url_count={len(url_vals)}")
-
-    def chk_b64(self, given_buffer):
-        keywords_to_check = [r"function", r"_0x", r"parseInt", r"script", r"var", r"document", r"src", r"atob", r"eval"]
-        decc = []
-        for cod in re.findall(self.base64_pattern, given_buffer):
-            try:
-                decoded_text = base64.b64decode(cod).decode()
-            except:
-                continue
-
-            if self._is_short_symbolic_string(decoded_text):
-                continue
-
-            key_count = 0
-            for key in keywords_to_check:
-                km = re.findall(key, decoded_text)
-                if km != []:
-                    key_count += 1
-
-            # If we have target patterns and the decoded payload is very large, save it as file.
-            if key_count != 0 and len(decoded_text) >= 150:
-                print(f"\n{infoS} Warning length of the decoded data is bigger than as we expected!")
-                self.output_writer(
-                    out_file=f"qu1cksc0pe_decoded_javascript-{len(decoded_text)}.js",
-                    mode="w",
-                    buffer=decoded_text
-                )
-                continue
-            decc.append(decoded_text)
-
-        return decc if decc != [] else None
-
-    def html_dump_javascript(self, soup_obj):
-        # Dump javascript
-        print(f"\n{infoS} Checking for Javascript...")
-        javscr = soup_obj.find_all("script")
-        if javscr != []:
-            print(f"{infoS} Found [bold red]{len(javscr)}[white]. If there is a potential malicious one we will extract it...")
-            self._add_finding("HTML", f"javascript_tag_count={len(javscr)}")
-            for jv in javscr:
-                jav_buf = jv.getText().replace("<script>", "").replace("</script>", "")
-                # We need only malicious codes!
-                mal_ind = 0
-                for mcode in self.mal_code:
-                    mtc = re.findall(mcode, jav_buf)
-                    if mtc != []:
-                        mal_ind += 1
-
-                if mal_ind != 0 and len(jav_buf) > 0:
-                    self.output_writer(out_file=f"qu1cksc0pe_carved_javascript-{len(jav_buf)}.js", mode="w", buffer=jav_buf)
-        else:
-            print(f"{errorS} There is no Javascript found!")
-    def html_detect_malicious_code(self, given_buffer):
-        # Check for malicious code patterns
-        print(f"\n{infoS} Performing detection of the malicious code patterns...")
-        mind = 0
-        for mc in self.mal_code:
-            mtc = re.findall(mc, given_buffer, re.IGNORECASE)
-            if mtc != []:
-                mind += 1
-                self.mal_code[mc]["count"] = len(mtc)
-        if mind != 0:
-            att_types = []
-            mal_table = Table()
-            mal_table.add_column("[bold green]Pattern", justify="center")
-            mal_table.add_column("[bold green]Description", justify="center")
-            for mc in self.mal_code:
-                if self.mal_code[mc]["count"] != 0:
-                    mal_table.add_row(str(mc), self.mal_code[mc]["description"])
-                    self._add_finding("HTML", f"{mc}:{self.mal_code[mc]['count']}")
-
-                    # Parsing attack keywords
-                    if self.mal_code[mc]["type"] not in att_types:
-                        att_types.append(self.mal_code[mc]["type"])
-            print(mal_table)
-            print(f"{infoS} Keywords for this sample: [bold red]{att_types}[white]")
-            self._register_section("html_attack_keywords", att_types)
-        else:
-            print(f"{errorS} There is no pattern found!")
-    def html_check_input_points(self, soup_obj):
-        # Check for input points
-        print(f"\n{infoS} Checking for input points...")
-        inputz = soup_obj.find_all("input")
-        if inputz != []:
-            inp_table = Table()
-            inp_table.add_column("[bold green]ID", justify="center")
-            inp_table.add_column("[bold green]Name", justify="center")
-            inp_table.add_column("[bold green]Type", justify="center")
-            inp_table.add_column("[bold green]Value", justify="center")
-            for inp in inputz:
-                input_template = {
-                    "id": None,
-                    "name": None,
-                    "type": None,
-                    "value": None
-                }
-                try:
-                    # Check for values
-                    for key in input_template:
-                        input_template[key] = inp.get(key)
-
-                    inp_table.add_row(str(input_template["id"]), str(input_template["name"]), str(input_template["type"]), str(input_template["value"]))
-                except:
-                    continue
-            print(inp_table)
-        else:
-            print(f"{errorS} There is no input point found!")
-    def html_check_iframe_tag(self, soup_obj):
-        # Check for iframe tag
-        print(f"\n{infoS} Checking for iframe presence...")
-        ifr = soup_obj.find_all("iframe")
-        if ifr != []:
-            ifr_table = Table()
-            ifr_table.add_column("[bold green]Source", justify="center")
-            for ii in ifr:
-                ifr_template = {
-                    "src": None
-                }
-                try:
-                    #Check values
-                    for key in ifr_template:
-                        ifr_template[key] = ii.get(key)
-
-                    ifr_table.add_row(str(ifr_template["src"]))
-                except:
-                    continue
-            print(ifr_table)
-        else:
-            print(f"{errorS} There is no iframe presence!")
-    def html_check_suspicious_files(self, given_buffer):
-        # Check suspicious files
-        susp_file_pattern = [r'\b\w+\.exe\b', r'\b\w+\.ps1\b', r'\b\w+\.hta\b', r'\b\w+\.bat\b', r'\b\w+\.zip\b', r'\b\w+\.rar\b']
-        print(f"\n{infoS} Checking for suspicious filename patterns...")
-        indicator = 0
-        for sus in susp_file_pattern:
-            smt = re.findall(sus, given_buffer)
-            if smt != []:
-                indicator += 1
-                for pat in smt:
-                    print(f"[bold magenta]>>>[white] {pat}")
-                    self._add_finding("HTML", f"suspicious_file:{pat}")
-
-        if indicator == 0:
-            print(f"{errorS} There is no suspicious pattern found!")
-    def html_check_powershell_codes(self, given_buffer):
-        pow_code = [r"AppData", r"Get-Random", r"New-Object", r"System.Random", r"Start-BitsTransfer", r"Remove-Item", r"New-ItemProperty"]
-        powe_table = Table()
-        powe_table.add_column("[bold green]Pattern", justify="center")
-        powe_table.add_column("[bold green]Occurence", justify="center")
-        pind = 0
-        for co in pow_code:
-            mtch = re.findall(co, given_buffer, re.IGNORECASE)
-            if mtch != []:
-                pind += 1
-                powe_table.add_row(co, str(len(mtch)))
-                self._add_finding("HTML", f"powershell_pattern:{co}")
-        if pind != 0:
-            print(f"\n{infoS} Looks like we found powershell code patterns!")
-            print(powe_table)
 
     def output_writer(self, out_file, mode, buffer):
         with open(out_file, mode) as ff:
@@ -1578,8 +1368,8 @@ try:
         docObj.PDFAnalysis()
     elif ext == "onenote":
         docObj.OneNoteAnalysis()
-    elif  ext == "html":
-        docObj.HTMLanalysis()
+    elif ext in ("html", "javascript", "hta"):
+        print(f"{errorS} HTML, JavaScript, and HTA files are not supported by [bold green]--docs[white]. Use [bold green]--analyze[white] instead.")
     elif ext == "rtf":
         docObj.RTFAnalysis()
     elif ext == "vbscript":

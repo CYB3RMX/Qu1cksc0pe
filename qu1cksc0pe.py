@@ -286,6 +286,33 @@ def BasicAnalyzer(analyzeFile):
             execute_module(f"document_analyzer.py \"{analyzeFile}\" False")
         _maybe_run_ai()
 
+    # HTML analysis
+    elif lower_ext in (".html", ".htm"):
+        print(f"{infoS} Performing [bold green]HTML[white] analysis...\n")
+        if args.report:
+            execute_module(f"html_script_analyzer.py \"{analyzeFile}\" True")
+        else:
+            execute_module(f"html_script_analyzer.py \"{analyzeFile}\" False")
+        _maybe_run_ai()
+
+    # JavaScript analysis
+    elif lower_ext == ".js":
+        print(f"{infoS} Performing [bold green]JavaScript[white] analysis...\n")
+        if args.report:
+            execute_module(f"html_script_analyzer.py \"{analyzeFile}\" True")
+        else:
+            execute_module(f"html_script_analyzer.py \"{analyzeFile}\" False")
+        _maybe_run_ai()
+
+    # HTA (HTML Application) analysis
+    elif lower_ext == ".hta":
+        print(f"{infoS} Performing [bold green]HTA[white] analysis...\n")
+        if args.report:
+            execute_module(f"html_script_analyzer.py \"{analyzeFile}\" True")
+        else:
+            execute_module(f"html_script_analyzer.py \"{analyzeFile}\" False")
+        _maybe_run_ai()
+
     # Windows Batch Script analysis
     elif lower_ext in (".bat", ".cmd"):
         print(f"{infoS} Performing [bold green]Batch Script[white] analysis...\n")
@@ -293,6 +320,15 @@ def BasicAnalyzer(analyzeFile):
             execute_module(f"batch_analyzer.py \"{analyzeFile}\" True")
         else:
             execute_module(f"batch_analyzer.py \"{analyzeFile}\" False")
+        _maybe_run_ai()
+
+    # Windows Shortcut (LNK) analysis
+    elif lower_ext == ".lnk":
+        print(f"{infoS} Performing [bold green]Windows Shortcut (LNK)[white] analysis...\n")
+        if args.report:
+            execute_module(f"lnk_analyzer.py \"{analyzeFile}\" True")
+        else:
+            execute_module(f"lnk_analyzer.py \"{analyzeFile}\" False")
         _maybe_run_ai()
 
     # Email file analysis

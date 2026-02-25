@@ -29,7 +29,11 @@ Qu1cksc0pe aims to get even more information about suspicious files and helps us
 | Golang Binaries (Linux) | Static |
 | Document Files | Static |
 | VBScript/VBA Family (.vbs, .vbe, .vba, .vb, .bas, .cls, .frm) | Static (`--docs`) |
+| HTML Documents (.html, .htm) | Static (`--analyze`) |
+| JavaScript (.js) | Static (`--analyze`) |
+| HTA / HTML Application (.hta) | Static (`--analyze`) |
 | Windows Batch Scripts (.bat, .cmd) | Static (`--analyze`) |
+| Windows Shortcut (.lnk) | Static (`--analyze`) |
 | Archive Files (.zip, .rar, .ace) | Static |
 | PCAP Files (.pcap) | Static |
 | Powershell Scripts | Static |
@@ -50,9 +54,11 @@ python3 qu1cksc0pe.py --ui
 
 # Updates
 <b>25/02/2026</b>
+- [X] NEW: Added Windows Shortcut (`.lnk`) file analysis support via `--analyze` (`Modules/lnk_analyzer.py`). Parses the MS-SHLLINK binary format without external dependencies: extracts target path, command line arguments, working directory, icon location, timestamps (FILETIME), ShowCommand, hotkey, and network share. Detects suspicious indicators (hidden/minimized window, excessively long arguments, Base64 payloads, UNC paths, temp/AppData targets, icon spoofing) and LOLBAS binaries. Category pattern scanning (Execution / Persistence / Defense Evasion / Download/Network / Obfuscation) operates per-field and reports the full field value for each match — no context-window truncation. YARA rule matching included.
 - [X] AI analyzer bug fix: configured model (e.g. `kimi-k2.5:cloud` in `multiple.conf`) is now always tried first; discovered local models are used as fallbacks only. Previously, `SC0PE_AI_SKIP_CLOUD_WHEN_LOCAL` was demoting the configured model behind local ones, causing the entire time budget to be consumed before the intended model was reached.
 - [X] AI analyzer bug fix: per-call HTTP generation timeout is no longer capped by `SC0PE_AI_HTTP_PROBE_TIMEOUT` (which is intended for lightweight model-list probing only). Generation calls now correctly use `SC0PE_AI_OLLAMA_HTTP_TIMEOUT` as the upper bound.
 - [X] MSI analysis bug fix: statistics table is now always printed after Microsoft Software Installer analysis. Previously, when the MSI could not be parsed as a native PE (fallback string-scan path), `statistics_method()` was skipped entirely. PE-specific fields (Time Date Stamp, IMPHASH) are omitted gracefully when the file is not a standalone PE.
+- [X] NEW: Added HTML (`.html`, `.htm`), JavaScript (`.js`), and HTA/HTML Application (`.hta`) file analysis support via `--analyze`. Analysis is handled by the new `Modules/html_script_analyzer.py` module (extracted from `document_analyzer.py`). HTML/JS analysis covers malicious code patterns, obfuscation, network, execution, shell/Node.js, filesystem, and persistence indicators with Base64 decode hints and YARA scanning. HTA analysis performs full HTML-layer checks (malicious code patterns, URLs, iframe, PowerShell) plus inline script block pattern scanning with automatic VBScript/JScript language detection. These file types are not supported by `--docs`.
 
 <b>21/02/2026</b>
 - [X] Linux static analyzer now performs automatic MITRE ATT&CK mapping and stores results in report fields: `mitre_attack`, `mitre_technique_count`, `mitre_api_match_count`.
@@ -283,7 +289,6 @@ python .\\qu1cksc0pe.py --file app.apk --analyze --report
 - Excel Documents (.xls, .xlsm, .xlsx)
 - Portable Document Format (.pdf)
 - OneNote Documents (.one)
-- HTML Documents (.htm, .html)
 - Rich Text Format Documents (.rtf)
 - VBScript/VBA Family (.vbs, .vbe, .vba, .vb, .bas, .cls, .frm)
 
