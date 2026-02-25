@@ -49,6 +49,11 @@ python3 qu1cksc0pe.py --ui
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
+<b>25/02/2026</b>
+- [X] AI analyzer bug fix: configured model (e.g. `kimi-k2.5:cloud` in `multiple.conf`) is now always tried first; discovered local models are used as fallbacks only. Previously, `SC0PE_AI_SKIP_CLOUD_WHEN_LOCAL` was demoting the configured model behind local ones, causing the entire time budget to be consumed before the intended model was reached.
+- [X] AI analyzer bug fix: per-call HTTP generation timeout is no longer capped by `SC0PE_AI_HTTP_PROBE_TIMEOUT` (which is intended for lightweight model-list probing only). Generation calls now correctly use `SC0PE_AI_OLLAMA_HTTP_TIMEOUT` as the upper bound.
+- [X] MSI analysis bug fix: statistics table is now always printed after Microsoft Software Installer analysis. Previously, when the MSI could not be parsed as a native PE (fallback string-scan path), `statistics_method()` was skipped entirely. PE-specific fields (Time Date Stamp, IMPHASH) are omitted gracefully when the file is not a standalone PE.
+
 <b>21/02/2026</b>
 - [X] Linux static analyzer now performs automatic MITRE ATT&CK mapping and stores results in report fields: `mitre_attack`, `mitre_technique_count`, `mitre_api_match_count`.
 - [X] MITRE output is now shown in Web UI as detailed tactic/technique tables.

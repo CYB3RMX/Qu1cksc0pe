@@ -572,20 +572,16 @@ class WindowsAnalyzer:
         print(peStatistics)
 
     def statistics_method(self):
-        if not self.ensure_binaryfile(parse_data_dirs=False):
-            print(f"{errorS} Could not parse PE metadata for detailed statistics.")
-            winrep["filename"] = self.target_file
-            calc_hashes(self.target_file, winrep)
-            return
-
-        datestamp = self.gather_timestamp()
+        has_pe = self.ensure_binaryfile(parse_data_dirs=False)
         print(f"\n[bold green]-> [white]Statistics for: [bold green][i]{self.target_file}[/i]")
-        print(f"[bold magenta]>>[white] Time Date Stamp: [bold green][i]{datestamp}[/i]")
         winrep["filename"] = self.target_file
-        winrep["timedatestamp"] = datestamp
         calc_hashes(self.target_file, winrep)
-        print(f"[bold magenta]>>[white] IMPHASH: [bold green]{self.binaryfile.get_imphash()}")
-        winrep["imphash"] = self.binaryfile.get_imphash()
+        if has_pe:
+            datestamp = self.gather_timestamp()
+            print(f"[bold magenta]>>[white] Time Date Stamp: [bold green][i]{datestamp}[/i]")
+            winrep["timedatestamp"] = datestamp
+            print(f"[bold magenta]>>[white] IMPHASH: [bold green]{self.binaryfile.get_imphash()}")
+            winrep["imphash"] = self.binaryfile.get_imphash()
 
         # printing all function statistics
         statistics = Table()
@@ -813,18 +809,16 @@ class WindowsAnalyzer:
         print(f"\n{infoS} Performing YARA rule matching...")
         yara_rule_scanner(self.rule_path, self.target_file, winrep)
 
-        # Always fill basic fields, even when binaryfile metadata is unavailable.
-        winrep["filename"] = self.target_file
-        calc_hashes(self.target_file, winrep)
-
-        if self.binaryfile is not None:
-            try:
-                self.statistics_method()
-            except SystemExit:
-                # statistics_method may exit early for low-function samples; still allow report save.
-                pass
-            except Exception as e:
-                print(f"{errorS} MSI statistics stage failed: [bold red]{e}[white]")
+        try:
+            self.statistics_method()
+        except SystemExit:
+            # statistics_method may exit early for low-function samples; still allow report save.
+            winrep["filename"] = self.target_file
+            calc_hashes(self.target_file, winrep)
+        except Exception as e:
+            print(f"{errorS} MSI statistics stage failed: [bold red]{e}[white]")
+            winrep["filename"] = self.target_file
+            calc_hashes(self.target_file, winrep)
 
         if _arg_is_true(get_argv(2, "False")):
             save_report("windows", winrep)

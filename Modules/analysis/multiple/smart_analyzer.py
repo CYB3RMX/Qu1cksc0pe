@@ -1624,7 +1624,6 @@ def main():
         model_candidates = [model]
         err_log = []
         allow_model_fallback = _env_bool("SC0PE_AI_ALLOW_MODEL_FALLBACK", True)
-        skip_cloud_when_local = _env_bool("SC0PE_AI_SKIP_CLOUD_WHEN_LOCAL", True)
         skip_cloud_cli = _env_bool("SC0PE_AI_SKIP_CLOUD_CLI", True)
         max_model_candidates = _env_int("SC0PE_AI_MAX_MODEL_CANDIDATES", 4, min_value=1, max_value=20)
         if allow_model_fallback and (has_ollama_http or has_ollama_cli):
@@ -1643,11 +1642,8 @@ def main():
             discovered = _unique_preserve(discovered)
             if discovered:
                 ranked_all = _rank_model_candidates(discovered, prefer_local=True)
-                ranked_local = [m for m in ranked_all if not _is_probably_cloud_model(m)]
-                if skip_cloud_when_local and _is_probably_cloud_model(model) and ranked_local:
-                    model_candidates = _unique_preserve(ranked_local + [model] + ranked_all)
-                else:
-                    model_candidates = _unique_preserve([model] + ranked_all)
+                # Configured model is ALWAYS first; discovered models are fallbacks only.
+                model_candidates = _unique_preserve([model] + ranked_all)
         model_candidates = model_candidates[:max_model_candidates]
 
         # Choose the fastest working engine/model; don't attempt HTTP if not reachable.
@@ -1666,7 +1662,7 @@ def main():
                 engine = "ollama_http"
                 try:
                     # Fast HTTP probe first; if it times out we'll attempt CLI for same model.
-                    per_call_timeout = max(10, min(http_timeout_s, http_probe_timeout_s, remain))
+                    per_call_timeout = max(10, min(http_timeout_s, remain))
                     text, meta = _call_ollama_http(
                         model=candidate,
                         prompt=prompt,
