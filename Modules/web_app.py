@@ -885,9 +885,74 @@ def _extract_permissions_section(report_data: dict) -> dict:
     return out
 
 
-def _build_detailed_panels(report_data: dict) -> List[dict]:
+def _build_carved_panels(carved_list: list) -> List[dict]:
+    """Build detailed_panels entries for each carved_executables triage entry."""
+    panels: List[dict] = []
+    for entry in carved_list:
+        if not isinstance(entry, dict):
+            continue
+        triage = entry.get("triage") or {}
+        fname = entry.get("filename") or "carved_executable"
+
+        # Basic info: top-level fields + flattened triage metadata
+        kv: List[dict] = []
+        for k, label in (
+            ("filename",          "File"),
+            ("offset_hex",        "Offset"),
+            ("size_bytes",        "Size (bytes)"),
+        ):
+            val = entry.get(k)
+            if val is not None:
+                kv.append({"key": label, "value": _safe_panel_text(val)})
+        for k, label in (
+            ("file_type",         "File Type"),
+            ("mime_type",         "MIME Type"),
+            ("architecture",      "Architecture"),
+            ("subsystem",         "Subsystem"),
+            ("compile_timestamp", "Compile Timestamp"),
+            ("md5",               "MD5"),
+            ("sha256",            "SHA-256"),
+            ("imphash",           "Import Hash"),
+        ):
+            val = triage.get(k)
+            if val:
+                kv.append({"key": label, "value": _safe_panel_text(val)})
+        if kv:
+            panels.append({"title": f"Carved: {fname}", "kind": "kv", "count": len(kv), "rows": kv})
+
+        # PE sections table
+        pe_sections = triage.get("sections") or []
+        if pe_sections and all(isinstance(s, dict) for s in pe_sections):
+            cols = ["name", "raw_size", "entropy", "packed"]
+            rows = [[_safe_panel_text(s.get(c)) for c in cols] for s in pe_sections]
+            panels.append({"title": f"PE Sections: {fname}", "kind": "table",
+                           "count": len(pe_sections), "columns": cols, "rows": rows})
+
+        # Suspicious imports
+        imports = triage.get("suspicious_imports") or []
+        if imports:
+            panels.append({"title": f"Suspicious Imports: {fname}", "kind": "list",
+                           "count": len(imports), "items": [_safe_panel_text(i) for i in imports]})
+
+        # Embedded IoCs
+        for ioc_key, ioc_label in (
+            ("embedded_urls",   "Embedded URLs"),
+            ("embedded_ips",    "Embedded IPs"),
+            ("embedded_emails", "Embedded Emails"),
+        ):
+            iocs = triage.get(ioc_key) or []
+            if iocs:
+                panels.append({"title": f"{ioc_label}: {fname}", "kind": "list",
+                               "count": len(iocs), "items": [_safe_panel_text(i) for i in iocs]})
+
+    return panels
+
+
+def _build_detailed_panels(report_data: dict, skip_keys: Optional[set] = None) -> List[dict]:
     panels: List[dict] = []
     for key, value in report_data.items():
+        if skip_keys and key in skip_keys:
+            continue
         title = _labelize_key(str(key))
 
         if _is_scalar(value):
@@ -1185,6 +1250,22 @@ def build_frontend_payload(report_data: Optional[dict]) -> dict:
     if "golang" in report_data and not _has_meaningful_golang_data(report_data.get("golang")):
         consumed_keys.add("golang")
 
+    # --- PCAP-specific handling ---
+    # http_requests and suspicious_connections are lists-of-dicts; they render
+    # as proper tables inside detailed_panels, so suppress the coarser
+    # extra_panels preview to avoid duplicate display.
+    pcap_panels: List[dict] = []
+    for _pcap_list_key in ("http_requests", "suspicious_connections"):
+        if _pcap_list_key in report_data:
+            consumed_keys.add(_pcap_list_key)
+    # carved_executables carries nested triage data that the generic table
+    # renderer can't display cleanly; delegate to the dedicated builder.
+    if "carved_executables" in report_data:
+        consumed_keys.add("carved_executables")
+        _carved = report_data.get("carved_executables") or []
+        if isinstance(_carved, list):
+            pcap_panels = _build_carved_panels(_carved)
+
     metadata: List[dict] = []
     extra_panels: List[dict] = []
     for key, value in report_data.items():
@@ -1236,7 +1317,7 @@ def build_frontend_payload(report_data: Optional[dict]) -> dict:
         "sections": sections,
         "metadata": metadata,
         "extra_panels": extra_panels,
-        "detailed_panels": _build_detailed_panels(report_data),
+        "detailed_panels": _build_detailed_panels(report_data, skip_keys={"carved_executables"}) + pcap_panels,
         "ai_output": ai_output,
         "ai_iocs": ai_iocs,
         "ai_context": ai_context,

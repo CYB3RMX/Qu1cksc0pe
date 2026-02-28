@@ -16,6 +16,21 @@
                 "bot.sms.MmsReceiver",
                 "bot.sms.SmsReceiver",
                 "bot.receivers.MainReceiver"
+            ],
+            "SourcePatterns": [
+                "bot.components.locker",
+                "InjAccessibilityService",
+                "injects_core",
+                "PeriodicJobService",
+                "bot.receivers.MainReceiver",
+                "ScreencastStartActivity"
+            ]
+        },
+        "FluBot": {
+            "SourcePatterns": [
+                "FluBot",
+                "Flubot",
+                "flubot"
             ]
         },
         "MoqHao": {
@@ -37,6 +52,13 @@
                 "idReceiver",
                 "vcService",
                 "knReceiver"
+            ],
+            "SourcePatterns": [
+                "vzcActivity",
+                "lcijActivity",
+                "fnoService",
+                "xcmService",
+                "sdkService"
             ]
         },
         "SharkBot": {
@@ -54,6 +76,26 @@
                 ".MyReceiverSMS",
                 ".MyReceiverMMS",
                 ".aaBootReceiver"
+            ],
+            "SourcePatterns": [
+                "aaOverlay",
+                "MyServicePush",
+                "MyReceiverSMS",
+                "MyReceiverMMS",
+                "aaBootReceiver",
+                "dropperInstall"
+            ]
+        },
+        "SpyNote/SpyMax": {
+            "SourcePatterns": [
+                "SERVER_IP",
+                "SERVER_NAME",
+                "screamHacker",
+                "screamon",
+                "SensorRestarterBroadcastReceiver",
+                "_ask_remove_",
+                "SimpleIME",
+                "spymax.stub"
             ]
         },
         "Sova": {
@@ -73,6 +115,44 @@
                 ".MyAdminReceiver",
                 ".SmsReceiver",
                 ".MmsReceiver"
+            ],
+            "SourcePatterns": [
+                "XiaomiLoadActivity",
+                "EncryptorService",
+                "OverlayService",
+                "MyAdminReceiver",
+                "AccessibilityActivity",
+                "nointernet"
+            ]
+        },
+        "Cerberus": {
+            "SourcePatterns": [
+                "grabbing_google_authenticator2",
+                "grabbing_pass_gmail",
+                "change_url_connect",
+                "change_url_recover",
+                "send_mailing_sms",
+                "access_notifications",
+                "sms_mailing_phonebook",
+                "run_app"
+            ]
+        },
+        "Anubis": {
+            "SourcePatterns": [
+                "Send_GO_SMS",
+                "del_sws",
+                "U2VuZF9HT19TTVM=",
+                "QUxMU0VUVElOR1NHTw=="
+            ]
+        },
+        "EventBot": {
+            "SourcePatterns": [
+                "eventBot",
+                "GETAPPS",
+                "STARTFORWARD",
+                "GETCONTACTS",
+                "STARTRECORDAUDIO",
+                "GRABLOGPASS"
             ]
         }
 }

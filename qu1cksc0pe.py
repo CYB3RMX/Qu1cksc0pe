@@ -264,8 +264,11 @@ def BasicAnalyzer(analyzeFile):
 
     # Pcap analysis
     elif "pcap" in fileType or "capture file" in fileType:
-        print(f"{infoS} Performing [bold green]PCAP[while] analysis...\n")
-        execute_module(f"pcap_analyzer.py \"{analyzeFile}\"")
+        print(f"{infoS} Performing [bold green]PCAP[white] analysis...\n")
+        if args.report:
+            execute_module(f"pcap_analyzer.py \"{analyzeFile}\" True")
+        else:
+            execute_module(f"pcap_analyzer.py \"{analyzeFile}\" False")
         _maybe_run_ai()
 
     # Powershell analysis
