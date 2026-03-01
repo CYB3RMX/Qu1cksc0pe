@@ -881,7 +881,7 @@ def run_pid_monitoring_menu():
 def linux_dynamic_menu():
     print(f"\n{infoS} Linux Dynamic Analysis Menu")
     print("[bold cyan][[bold red]1[bold cyan]][white] Binary Emulation (isolated environment)")
-    print("[bold cyan][[bold red]2[bold cyan]][white] PID Monitoring (strace/ltrace/psutil)")
+    print("[bold cyan][[bold red]2[bold cyan]][white] PID Monitoring")
     choice = _input_text(
         ">>> Select [1/2] [TAB for autocomplete]: ",
         completer=_build_menu_completer(),

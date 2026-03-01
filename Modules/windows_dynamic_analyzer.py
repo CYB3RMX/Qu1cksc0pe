@@ -10,7 +10,7 @@ from utils.helpers import update_table
 from windows_process_reader import WindowsProcessReader
 
 try:
-    from rich import print
+    from rich import print, box
     from rich.table import Table
     from rich.live import Live
     from rich.layout import Layout
@@ -18,15 +18,17 @@ try:
 except Exception:
     err_exit("Error: >rich< module not found.")
 
+from datetime import datetime
+
 try:
     import pymem
 except Exception:
     err_exit("Error: >pymem< module not found.")
 
 try:
-    import frida
+    from windows_api_hooker import WindowsAPIHooker
 except Exception:
-    err_exit("Error: >frida< module not found.")
+    err_exit("Error: >windows_api_hooker< could not be loaded.")
 
 try:
     from colorama import Fore, Style
@@ -88,8 +90,6 @@ _TG_TOKEN   = re.compile(r"\b(\d{8,12}:[A-Za-z0-9_-]{35})\b")
 _TG_CHATID  = re.compile(r"chat_id=(-?\d{5,15})")
 _DISCORD_WH = re.compile(r"https://discord(?:app)?\.com/api/webhooks/\d{17,20}/[A-Za-z0-9_-]{60,80}")
 _DISCORD_TK = re.compile(r"[MNO][A-Za-z0-9_-]{23}\.[A-Za-z0-9_-]{6}\.[A-Za-z0-9_-]{27}")
-_BTC_RE     = re.compile(r"\b(?:bc1[a-zA-HJ-NP-Z0-9]{25,39}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})\b")
-_ETH_RE     = re.compile(r"\b0x[a-fA-F0-9]{40}\b")
 _REG_RE     = re.compile(
     r"(?:HKEY_LOCAL_MACHINE|HKEY_CURRENT_USER|HKEY_CLASSES_ROOT|HKLM|HKCU|HKCR)"
     r"\\[\\A-Za-z0-9_\\ ]{5,80}", re.IGNORECASE
@@ -108,16 +108,13 @@ class WindowsDynamicAnalyzer:
         with open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Multiple{path_seperator}whitelist_domains.txt", "r") as f:
             self.whitelist_domains = f.read().split("\n")
 
-        with open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}FridaScripts{path_seperator}sc0pe_windows_dynamic.js", "r") as f:
-            self.frida_script = f.read()
-
         with open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}windows_api_trace_list.txt", "r") as f:
             self.target_api_list = f.read().split("\n")
 
         self.proc_handler = psutil.Process(self.target_pid)
         self.target_processes.append(self.target_pid)
 
-        self._frida_session = None   # kept alive so hooks remain active
+        self._hooker = None   # kept alive so hooks remain active
 
         self.report = {
             "network_connections": [],
@@ -127,7 +124,7 @@ class WindowsDynamicAnalyzer:
             "open_files":          {},
             "loaded_modules":      {},
             "extracted_urls":      {},
-            "frida_info": {
+            "hook_info": {
                 "hooked": [],
                 "failed": [],
             },
@@ -138,8 +135,6 @@ class WindowsDynamicAnalyzer:
                 "discord_token":      [],
                 "email":              [],
                 "email_password":     [],
-                "bitcoin_address":    [],
-                "ethereum_address":   [],
                 "ip_addresses":       [],
                 "registry_keys":      [],
                 "encoded_commands":   [],
@@ -196,17 +191,17 @@ class WindowsDynamicAnalyzer:
                             tmp_rep[self.target_pid]["childs"].append(chld.pid)
                         if chld.pid not in self.target_processes:
                             if chld.name().lower() in _SUSPICIOUS_PROCESSES:
-                                update_table(table_object, 4,
+                                update_table(table_object, 8,
                                              f"[bold red]{chld.name()}[white]",
                                              f"[bold red]{chld.pid}[white]")
                             else:
-                                update_table(table_object, 4, chld.name(), str(chld.pid))
+                                update_table(table_object, 8, chld.name(), str(chld.pid))
                             self.target_processes.append(chld.pid)
                     if self.target_pid not in self.report["process_ids"]:
                         self.report["process_ids"].update(tmp_rep)
                 else:
                     if str(self.proc_handler.pid) not in table_object.columns[1]._cells:
-                        update_table(table_object, 4,
+                        update_table(table_object, 8,
                                      self.proc_handler.name(), str(self.proc_handler.pid))
                     if self.target_pid not in self.report["process_ids"]:
                         self.report["process_ids"].update(tmp_rep)
@@ -265,26 +260,44 @@ class WindowsDynamicAnalyzer:
             await asyncio.sleep(2)
 
     async def memory_dumper(self, table_obj):
+        loop = asyncio.get_running_loop()
         while True:
-            for t_p in list(self.target_processes):
-                w_p_r = WindowsProcessReader(t_p)
-                state = w_p_r.dump_memory()
-                if state:
+            try:
+                for t_p in list(self.target_processes):
                     dump_name = f"qu1cksc0pe_memory_dump_{t_p}.bin"
-                    if dump_name not in self.dumped_files:
+                    if dump_name in self.dumped_files:
+                        continue  # already dumped this PID, don't re-dump
+                    w_p_r = WindowsProcessReader(t_p)
+                    try:
+                        state = await loop.run_in_executor(None, w_p_r.dump_memory)
+                    except Exception:
+                        state = False
+                    if state:
                         self.dumped_files.append(dump_name)
-                        size = os.path.getsize(dump_name)
-                        update_table(table_obj, 5, str(t_p), dump_name, str(size))
+                        try:
+                            size = os.path.getsize(dump_name)
+                        except (OSError, KeyboardInterrupt):
+                            size = 0
+                        update_table(table_obj, 8, str(t_p), dump_name, str(size))
+            except (Exception, KeyboardInterrupt):
+                pass
             await asyncio.sleep(1.5)
 
+    def _load_and_extract(self, dump_path):
+        """Read dump file and extract strings — runs in thread executor."""
+        with open(dump_path, "rb") as fh:
+            raw = fh.read()
+        return self._extract_strings_from_raw(raw)
+
     async def extract_url_and_interesting_from_memory(self, table_object):
+        loop = asyncio.get_running_loop()
         while True:
             for tpu in list(self.target_processes):
                 dump_path = f"qu1cksc0pe_memory_dump_{tpu}.bin"
                 if not os.path.exists(dump_path):
                     continue
 
-                # Skip re-reading if the dump file hasn't changed
+                # Skip re-processing if the dump file hasn't changed
                 try:
                     mtime = os.path.getmtime(dump_path)
                 except OSError:
@@ -293,13 +306,15 @@ class WindowsDynamicAnalyzer:
                     continue
                 self._dump_mtimes[tpu] = mtime
 
+                # File read + regex string extraction run in a thread so they
+                # don't block the event loop (50 MB file + re.findall is slow)
                 try:
-                    with open(dump_path, "rb") as fh:
-                        raw = fh.read()
+                    ascii_strs, wide_strs = await loop.run_in_executor(
+                        None, self._load_and_extract, dump_path
+                    )
                 except OSError:
                     continue
 
-                ascii_strs, wide_strs = self._extract_strings_from_raw(raw)
                 all_strs = ascii_strs + wide_strs
                 fi       = self.report["interesting_findings"]
 
@@ -329,14 +344,35 @@ class WindowsDynamicAnalyzer:
                         except (ValueError, IndexError):
                             pass
 
-                # Crypto addresses
-                self._add_finding("bitcoin_address",  self._search(_BTC_RE, all_strs))
-                self._add_finding("ethereum_address",  self._search(_ETH_RE, all_strs))
 
-                # Non-loopback IP addresses
+                # Non-loopback, non-private, non-version-like IP addresses
+                def _is_ioc_ip(ip):
+                    if ip.startswith(("127.", "0.", "169.254.", "255.", "10.", "192.168.")):
+                        return False
+                    try:
+                        parts = [int(o) for o in ip.split(".")]
+                        if parts[0] == 172 and 16 <= parts[1] <= 31:
+                            return False
+                        # All octets small → version string (e.g. 1.2.3.4)
+                        if max(parts) < 20:
+                            return False
+                        # Last octet 0 → network/subnet address (e.g. 145.0.0.0, 77.1.0.0)
+                        if parts[3] == 0:
+                            return False
+                        # Second octet 0 → version string or subnet (e.g. 21.0.2.14)
+                        if parts[1] == 0:
+                            return False
+                        # Last three octets identical → placeholder (e.g. 37.7.7.7)
+                        if parts[1] == parts[2] == parts[3]:
+                            return False
+                        # Low first + low second octet → version string (e.g. 14.5.201.12)
+                        if parts[0] < 20 and parts[1] < 10:
+                            return False
+                    except (ValueError, IndexError):
+                        return False
+                    return True
                 self._add_finding("ip_addresses", [
-                    ip for ip in self._search(_IP_RE, all_strs)
-                    if not ip.startswith(("127.", "0.", "169.254.", "255."))
+                    ip for ip in self._search(_IP_RE, all_strs) if _is_ioc_ip(ip)
                 ])
 
                 # Registry keys
@@ -356,12 +392,12 @@ class WindowsDynamicAnalyzer:
                             seen_urls.add(url)
                 self.report["extracted_urls"][tpu] = tpu_urls
 
-            await asyncio.sleep(1)
+            await asyncio.sleep(2)
 
     def _monitor_handler(self, data_type, table_object, description):
         for item in self.report["interesting_findings"].get(data_type, []):
             if item not in self.logged_things:
-                update_table(table_object, 6, description, str(item))
+                update_table(table_object, 12, description, str(item))
                 self.logged_things.append(item)
 
     async def interesting_findings_monitor(self, table_object):
@@ -372,8 +408,6 @@ class WindowsDynamicAnalyzer:
             "discord_token":      "Discord Bot Token",
             "email":              "E-Mail Address",
             "email_password":     "Possible E-Mail Password",
-            "bitcoin_address":    "Bitcoin Address",
-            "ethereum_address":   "Ethereum Address",
             "ip_addresses":       "Embedded IP",
             "registry_keys":      "Registry Key",
             "encoded_commands":   "Encoded PS Command",
@@ -383,53 +417,58 @@ class WindowsDynamicAnalyzer:
                 self._monitor_handler(data_type=key, table_object=table_object, description=label)
             await asyncio.sleep(1)
 
-    async def attach_process_to_frida(self, on_message_cb):
+    async def attach_process_with_hooker(self, on_api_call_cb):
         loop = asyncio.get_running_loop()
 
-        def _setup():
-            # Frida fires its message handler from its own internal thread.
-            # Use call_soon_threadsafe so the callback runs on the asyncio thread.
-            def _threadsafe_cb(message, data):
-                loop.call_soon_threadsafe(on_message_cb, message, data)
+        def _threadsafe_cb(api_name, args_str):
+            loop.call_soon_threadsafe(on_api_call_cb, api_name, args_str)
 
-            session = frida.attach(self.target_pid)
-            script  = session.create_script(self.frida_script)
-            script.on("message", _threadsafe_cb)
-            script.load()
-
-            agent    = script.exports
-            api_list = [a for a in self.target_api_list if a.strip()]
-
-            try:
-                # Single batch RPC call instead of one call per API
-                results = agent.hook_windows_api_batch(api_list)
-                self.report["frida_info"] = {
-                    "hooked": results.get("ok",     []),
-                    "failed": results.get("failed", []),
-                }
-            except Exception as exc:
-                self.report["frida_info"] = {
-                    "hooked": [],
-                    "failed": [{"api": "batch", "reason": str(exc)}],
-                }
-
-            # Store session on self so it stays alive (hooks die with the session)
-            self._frida_session = session
-
+        hooker = WindowsAPIHooker(
+            self.target_pid,
+            [a for a in self.target_api_list if a.strip()],
+            _threadsafe_cb,
+        )
         try:
-            await loop.run_in_executor(None, _setup)
-        except Exception:
-            pass
+            # start() only allocates resources; DebugActiveProcess runs inside the thread
+            await loop.run_in_executor(None, hooker.start)
+        except Exception as exc:
+            self.report["hook_info"] = {
+                "hooked": [],
+                "failed": [{"api": "attach", "reason": str(exc)}],
+            }
+            return
+
+        self._hooker = hooker   # keep alive – hooks die with the object
+
+        # Continuously sync hook status from the background debug thread.
+        # Wait for the thread to actually start (attach_error might be set early).
+        await asyncio.sleep(0.5)
+
+        while self._hooker is hooker and self._hooker._running:
+            self.report["hook_info"] = {
+                "hooked": list(hooker.hooked),
+                "failed": list(hooker.failed),
+                "loop_error": hooker.loop_error or "",
+            }
+            await asyncio.sleep(2)
+
+        # Final sync after debug loop exits
+        self.report["hook_info"] = {
+            "hooked": list(hooker.hooked),
+            "failed": list(hooker.failed),
+            "loop_error": hooker.loop_error or "",
+        }
 
     async def get_open_files(self):
+        loop = asyncio.get_running_loop()
         while True:
             for tprc in list(self.target_processes):
                 try:
                     opfl  = psutil.Process(tprc)
-                    files = opfl.open_files()
+                    files = await loop.run_in_executor(None, opfl.open_files)
                     if files:
                         self.report["open_files"][tprc] = [ff.path for ff in files]
-                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                except Exception:
                     continue
             await asyncio.sleep(1.5)
 
@@ -441,95 +480,167 @@ class WindowsDynamicAnalyzer:
 
 
 def main_app(target_pid):
+    start_time     = datetime.now()
     wda            = WindowsDynamicAnalyzer(target_pid)
     program_layout = Layout(name="RootLayout")
 
-    # Split screen horizontal
+    # Root: fixed header strip + main body
     program_layout.split_column(
-        Layout(name="Top"),
-        Layout(name="Bottom")
+        Layout(name="Header", size=3),
+        Layout(name="Main"),
     )
-    # Split top vertical
-    program_layout["Top"].split_row(
-        Layout(name="top_left"),
-        Layout(name="top_right")
+    # Main body: left (ratio 3) + right (ratio 2)
+    program_layout["Main"].split_row(
+        Layout(name="Left",  ratio=3),
+        Layout(name="Right", ratio=2),
     )
-    # Split top_right horizontal
-    program_layout["top_right"].split_column(
-        Layout(name="top_right_up"),
-        Layout(name="top_right_down")
+    # Left: network on top (ratio 2) + api/url row below (ratio 3)
+    program_layout["Left"].split_column(
+        Layout(name="network", ratio=2),
+        Layout(name="api_row", ratio=3),
     )
-    # Split bottom
-    program_layout["Bottom"].split_row(
-        Layout(name="bottom_left"),
-        Layout(name="bottom_right")
+    program_layout["api_row"].split_row(
+        Layout(name="api"),
+        Layout(name="urls"),
+    )
+    # Right: process/dump row (ratio 1) + findings (ratio 2)
+    program_layout["Right"].split_column(
+        Layout(name="proc_row", ratio=1),
+        Layout(name="findings", ratio=2),
+    )
+    program_layout["proc_row"].split_row(
+        Layout(name="processes"),
+        Layout(name="dumps"),
     )
 
     # Network connections table
-    conn_table = Table()
-    conn_table.add_column("[bold green]PID",          justify="center")
-    conn_table.add_column("[bold green]Process Name", justify="center")
-    conn_table.add_column("[bold green]Connection",   justify="center")
-    conn_table.add_column("[bold green]Status")
+    conn_table = Table(show_header=True, header_style="bold green",
+                       box=box.SIMPLE_HEAD, expand=True)
+    conn_table.add_column("PID",        justify="right",  style="cyan",   no_wrap=True, width=7)
+    conn_table.add_column("Process",    justify="left",   style="white",  no_wrap=True)
+    conn_table.add_column("Connection", justify="left",   style="yellow", no_wrap=True)
+    conn_table.add_column("Status",     justify="center", style="green",  no_wrap=True, width=14)
 
-    # Process information table
-    proc_info_table = Table()
-    proc_info_table.add_column("[bold green]Process Name", justify="center")
-    proc_info_table.add_column("[bold green]PID",          justify="center")
+    # Process tree table
+    proc_info_table = Table(show_header=True, header_style="bold yellow",
+                            box=box.SIMPLE_HEAD, expand=True)
+    proc_info_table.add_column("Process Name", justify="left",  style="white")
+    proc_info_table.add_column("PID",          justify="right", style="cyan", no_wrap=True, width=7)
 
     # Windows API calls table
-    win_api_ct = Table()
-    win_api_ct.add_column("[bold green]API/Function Name", justify="center")
-    win_api_ct.add_column("[bold green]Arguments",         justify="center")
+    win_api_ct = Table(show_header=True, header_style="bold red",
+                       box=box.SIMPLE_HEAD, expand=True)
+    win_api_ct.add_column("API / Function", justify="left", style="bold white", no_wrap=True)
+    win_api_ct.add_column("Arguments",      justify="left", style="yellow")
 
     # Extracted URLs table
-    ex_url_mem = Table()
-    ex_url_mem.add_column("[bold green]Extracted URL Values", justify="center")
+    ex_url_mem = Table(show_header=True, header_style="bold blue",
+                       box=box.SIMPLE_HEAD, expand=True)
+    ex_url_mem.add_column("Extracted URL", justify="left", style="bright_blue")
 
     # Memory dumps table
-    mem_dumpy = Table()
-    mem_dumpy.add_column("[bold green]PID",       justify="center")
-    mem_dumpy.add_column("[bold green]File Name", justify="center")
-    mem_dumpy.add_column("[bold green]Size",      justify="center")
+    mem_dumpy = Table(show_header=True, header_style="bold magenta",
+                      box=box.SIMPLE_HEAD, expand=True)
+    mem_dumpy.add_column("PID",       justify="right", style="cyan",    no_wrap=True, width=7)
+    mem_dumpy.add_column("File Name", justify="left",  style="white",   no_wrap=True)
+    mem_dumpy.add_column("Size (B)",  justify="right", style="magenta", no_wrap=True, width=10)
 
     # Interesting findings table
-    ifds = Table()
-    ifds.add_column("[bold green]Type",  justify="center")
-    ifds.add_column("[bold green]Value", justify="center")
+    ifds = Table(show_header=True, header_style="bold cyan",
+                 box=box.SIMPLE_HEAD, expand=True)
+    ifds.add_column("Type",  justify="left", style="bold cyan",   no_wrap=True)
+    ifds.add_column("Value", justify="left", style="bold yellow")
 
-    # Layout: top-left → network connections
-    program_layout["top_left"].update(
-        Panel(Table.grid().add_row(conn_table),
-              border_style="bold green", title="Network Connection Tracer")
+    # Assign panels to layout nodes
+    program_layout["Header"].update(Panel("", border_style="bold blue"))
+    program_layout["network"].update(
+        Panel(conn_table, border_style="bold green", title="Network Connection Tracer")
     )
-    # Layout: top-right-up → process info
-    program_layout["top_right_up"].update(
-        Panel(proc_info_table, border_style="bold yellow", title="Process Information")
+    program_layout["api"].update(
+        Panel(win_api_ct, border_style="bold red", title="Windows API Tracer")
     )
-    # Layout: top-right-down → memory dumps
-    program_layout["top_right_down"].update(
+    program_layout["urls"].update(
+        Panel(ex_url_mem, border_style="bold blue", title="Extracted URL Values")
+    )
+    program_layout["processes"].update(
+        Panel(proc_info_table, border_style="bold yellow", title="Process Tree")
+    )
+    program_layout["dumps"].update(
         Panel(mem_dumpy, border_style="bold magenta", title="Memory Dumps")
     )
-    # Layout: bottom-left → API tracer + URLs
-    bottom_left_grid = Table.grid()
-    bottom_left_grid.add_row(
-        Panel(win_api_ct, border_style="bold red",  title="Windows API Tracer"),
-        Panel(ex_url_mem, border_style="bold blue", title="Extracted URL Values"),
-    )
-    program_layout["bottom_left"].update(bottom_left_grid)
-    # Layout: bottom-right → interesting findings
-    program_layout["bottom_right"].update(
+    program_layout["findings"].update(
         Panel(ifds, border_style="bold cyan", title="Interesting Findings")
     )
 
-    # Frida message callback
-    def on_message(message, data):
-        if message.get("type") == "send":
-            payload   = message.get("payload", {})
-            api_name  = payload.get("target_api", "")
-            arguments = payload.get("args", "")
-            update_table(win_api_ct, 13, api_name, arguments)
-            wda.report["api_calls"].append((api_name, arguments))
+    # API hook callback — called from the hooker's background thread (via call_soon_threadsafe)
+    def on_api_call(api_name, args_str):
+        update_table(win_api_ct, 13, api_name, args_str)
+        wda.report["api_calls"].append((api_name, args_str))
+
+    # Status coroutine — live-updates the API Tracer panel title every 2 seconds
+    async def update_hook_status():
+        while True:
+            await asyncio.sleep(2)
+            fi         = wda.report.get("hook_info", {})
+            hooked     = len(fi.get("hooked", []))
+            failed     = fi.get("failed", [])
+            loop_err   = fi.get("loop_error", "")
+
+            # attach_error is either in hook_info["failed"] or directly on the hooker object
+            attach_err = next(
+                (f["reason"] for f in failed if f.get("api") == "attach"), None
+            )
+            if not attach_err and wda._hooker and wda._hooker.attach_error:
+                attach_err = wda._hooker.attach_error
+            write_fail = sum(1 for f in failed if "write_failed" in f.get("reason", ""))
+            not_found  = sum(1 for f in failed if f.get("reason") == "export_not_found")
+
+            if attach_err:
+                title = f"[bold red]Windows API Tracer[/] [dim red]({attach_err[:70]})[/]"
+            elif loop_err:
+                title = f"[bold red]Windows API Tracer[/] [dim red](loop error: {loop_err[:60]})[/]"
+            elif hooked:
+                extra = ""
+                if write_fail:
+                    extra = f", {write_fail} ACG-blocked"
+                if not_found:
+                    extra += f", {not_found} not found"
+                title = f"[bold red]Windows API Tracer[/] [dim green]({hooked} hooks active{extra})[/]"
+            elif wda._hooker is not None:
+                title = "[bold red]Windows API Tracer[/] [dim yellow](attaching...)[/]"
+            else:
+                title = "[bold red]Windows API Tracer[/] [dim](waiting for attach)[/]"
+
+            program_layout["api"].update(
+                Panel(win_api_ct, border_style="bold red", title=title)
+            )
+
+    # Header coroutine — updates PID, process name, status and uptime every second
+    async def update_header():
+        while True:
+            elapsed = datetime.now() - start_time
+            h, rem  = divmod(int(elapsed.total_seconds()), 3600)
+            m, s    = divmod(rem, 60)
+            try:
+                proc    = psutil.Process(wda.target_pid)
+                pname   = proc.name()
+                pstatus = "[bold green]● RUNNING[/]"
+            except psutil.NoSuchProcess:
+                pname   = "N/A"
+                pstatus = "[bold red]● TERMINATED[/]"
+            g = Table.grid(expand=True)
+            g.add_column(justify="left",   ratio=1)
+            g.add_column(justify="center", ratio=1)
+            g.add_column(justify="right",  ratio=1)
+            g.add_row(
+                f"  [bold cyan]PID[/]: [white]{wda.target_pid}[/]  "
+                f"[bold cyan]Process[/]: [white]{pname}[/]  {pstatus}",
+                "[bold red]Qu1cksc0pe[/] [bold white]Windows Dynamic Analyzer[/]",
+                f"[bold cyan]Monitored[/]: [white]{len(wda.target_processes)}[/]  "
+                f"[bold cyan]Uptime[/]: [white]{h:02d}:{m:02d}:{s:02d}[/]  ",
+            )
+            program_layout["Header"].update(Panel(g, border_style="bold blue"))
+            await asyncio.sleep(1)
 
     # Event loop + tasks
     loop = asyncio.new_event_loop()
@@ -543,8 +654,10 @@ def main_app(target_pid):
     loop.create_task(wda.get_loaded_modules())
     loop.create_task(wda.extract_url_and_interesting_from_memory(ex_url_mem))
     loop.create_task(wda.interesting_findings_monitor(ifds))
-    loop.create_task(wda.attach_process_to_frida(on_message))
+    loop.create_task(wda.attach_process_with_hooker(on_api_call))
     loop.create_task(wda.get_open_files())
+    loop.create_task(update_header())
+    loop.create_task(update_hook_status())
 
     with Live(program_layout, refresh_per_second=1.8):
         loop.run_forever()
@@ -579,5 +692,7 @@ if __name__ == "__main__":
         print(f"\n{infoS} Monitoring PID: [bold green]{target_pid}[white]. ([bold blink yellow]Ctrl+C to stop![white])")
         print(f"{infoS} For detailed information please check: [bold green]sc0pe_process-{target_pid}.json[white]")
         main_app(target_pid)
+    except KeyboardInterrupt:
+        err_exit(f"{errorS} Keyboard interrupt detected...")
     except Exception:
         err_exit(f"{errorS} Program terminated!")

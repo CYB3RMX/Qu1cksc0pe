@@ -42,31 +42,29 @@ class WindowsProcessReader:
             return None
         return mbi
 
+    MAX_DUMP_BYTES = 50 * 1024 * 1024  # 50 MB cap — enough for IOC hunting
+
     def dump_memory(self):
-        # Dump readable memory regions of the process
+        # Dump readable memory regions directly to file, capped at MAX_DUMP_BYTES
         process_handle = self.get_process_handle()
         if not process_handle:
             return False
         try:
             address = 0
-            memory_dump = {}
-
-            while True:
-                mbi = self.query_memory(process_handle, ctypes.c_void_p(address))
-                if not mbi:
-                    break
-
-                if (mbi.Protect & 0x04 or mbi.Protect & 0x02) and mbi.State == 0x1000:  # PAGE_READWRITE or PAGE_READONLY
-                    data = self.read_memory(process_handle, ctypes.c_void_p(address), mbi.RegionSize)
-                    if data:
-                        memory_dump[hex(address)] = data
-
-                address += mbi.RegionSize
-
-            # Save memory dump to file
+            written = 0
             with open(f"qu1cksc0pe_memory_dump_{self.target_pid}.bin", "wb") as dump_file:
-                for region in memory_dump.values():
-                    dump_file.write(region)
-            return True
+                while written < self.MAX_DUMP_BYTES:
+                    mbi = self.query_memory(process_handle, ctypes.c_void_p(address))
+                    if not mbi:
+                        break
+                    if (mbi.Protect & 0x04 or mbi.Protect & 0x02) and mbi.State == 0x1000:
+                        data = self.read_memory(process_handle, ctypes.c_void_p(address), mbi.RegionSize)
+                        if data:
+                            dump_file.write(data)
+                            written += len(data)
+                    address += mbi.RegionSize
+            return written > 0
+        except Exception:
+            return False
         finally:
             ctypes.windll.kernel32.CloseHandle(process_handle)

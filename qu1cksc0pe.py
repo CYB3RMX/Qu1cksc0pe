@@ -116,7 +116,7 @@ def execute_module(target, path=MODULE_PREFIX, invoker=py_binary):
     parts  = target.split(" ", 1)
     script = parts[0]
     extra  = f" {parts[1]}" if len(parts) > 1 else ""
-    os.system(f'"{invoker}" "{path}{script}"{extra}')
+    os.system(f'{invoker} "{path}{script}"{extra}')
 
 import Modules.banners # show a banner
 

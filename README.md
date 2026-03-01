@@ -54,6 +54,9 @@ python3 qu1cksc0pe.py --ui
 
 # Updates
 <b>01/03/2026</b>
+- [X] Windows dynamic analysis (`--watch` → Process Monitor) now uses a pure-Python Windows Debug API hook engine (`Modules/windows_api_hooker.py`) instead of Frida. API calls are intercepted at runtime via INT3 software breakpoints with single-step trap flag reinstatement to reinstall the hook after each hit. No Frida dependency is required for Windows dynamic analysis.
+- [X] Windows API Tracer panel shows real-time interception of 45+ monitored APIs across `kernel32`, `ntdll`, `advapi32`, `ws2_32`, `wininet`, `user32`, and `shell32`. Argument details (file paths, registry keys, socket addresses, hostnames, VK codes, hook types) are extracted from the x64 register context (RCX/RDX/R8/R9 + stack shadow space). ACG-protected processes (e.g. Chrome renderer) are reported as `write_failed` hooks rather than crashing.
+- [X] `frida` package is no longer required for Windows dynamic analysis. It is still used for Android dynamic analysis only.
 - [X] Linux dynamic analysis (PID monitoring) now uses `strace`/`ltrace` instead of Frida for syscall and library call tracing. `strace -f` automatically follows forked children; `ltrace` is used as fallback when strace is unavailable. Frida dependency and `sc0pe_linux_dynamic.js` script removed entirely.
 - [X] Syscall/API Tracer table in the Linux dynamic analysis TUI now uses a rotating display: rows scroll upward as new events arrive, keeping the last 14 entries visible at all times. Same rotation applied to the Interesting Findings table (11 rows).
 - [X] Binary IPC noise filter improved: strace octal/hex escape sequences (e.g. `\372`) are stripped before the printable-character check, so pipe IPC data no longer leaks into the syscall table.
@@ -339,7 +342,7 @@ https://github.com/user-attachments/assets/7b27abb9-f18e-4611-8bdd-cd65106b5cf0
 
 After selecting Linux:
 - Option `1`: Binary Emulation (isolated environment).
-- Option `2`: PID Monitoring (`Frida` + `psutil`).
+- Option `2`: PID Monitoring.
 
 Notes:
 - PID monitoring accepts both numeric PID and process name.
