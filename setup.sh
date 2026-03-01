@@ -279,6 +279,8 @@ ensure_cmd_or_install strings binutils
 ensure_cmd_or_install dos2unix dos2unix
 ensure_cmd_or_install unzip unzip
 ensure_cmd_or_install 7z "$PKG_7Z" "Installing 7-Zip CLI (required for ACE archive extraction in archiveAnalyzer)."
+ensure_cmd_or_install strace strace "Installing strace (required for Linux dynamic analysis - PID monitoring)."
+ensure_cmd_or_install ltrace ltrace "Installing ltrace (required for Linux dynamic analysis - PID monitoring)."
 
 # Ensure downloader is available
 if command_exists curl; then

@@ -53,6 +53,13 @@ python3 qu1cksc0pe.py --ui
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
+<b>01/03/2026</b>
+- [X] Linux dynamic analysis (PID monitoring) now uses `strace`/`ltrace` instead of Frida for syscall and library call tracing. `strace -f` automatically follows forked children; `ltrace` is used as fallback when strace is unavailable. Frida dependency and `sc0pe_linux_dynamic.js` script removed entirely.
+- [X] Syscall/API Tracer table in the Linux dynamic analysis TUI now uses a rotating display: rows scroll upward as new events arrive, keeping the last 14 entries visible at all times. Same rotation applied to the Interesting Findings table (11 rows).
+- [X] Binary IPC noise filter improved: strace octal/hex escape sequences (e.g. `\372`) are stripped before the printable-character check, so pipe IPC data no longer leaks into the syscall table.
+- [X] `setup.sh` updated: `strace` and `ltrace` are now installed automatically as system dependencies during setup.
+- [X] Removed orphaned files: `Systems/Linux/linux_trace_list.json` (leftover Frida-era syscall definitions) and `Modules/mitre.py` (deprecated wrapper superseded by integrated Windows static analysis).
+
 <b>28/02/2026</b>
 - [X] PCAP analyzer now supports `--report` and `--ai` flags. All analysis results (URLs, IPs, DNS queries, DGA suspects, HTTP requests, TLS SNI hostnames, JA3 digests/matches, interesting strings, connection analysis, external IPs, carved executables) are collected into `sc0pe_pcap_report.json` and fed to the AI analyzer automatically.
 - [X] PCAP analyzer: four new detection methods added — `detect_dga_domains()` (Shannon entropy + label length + digit-ratio heuristics), `analyze_connections()` (suspicious/C2 port detection + external IP inventory), `analyze_http_requests()` (dpkt HTTP parsing, suspicious User-Agent flagging), `extract_tls_sni()` (manual TLS ClientHello byte-level SNI extraction).
@@ -79,58 +86,6 @@ python3 qu1cksc0pe.py --ui
 - [X] PowerShell analyzer now writes decoded Base64 outputs into a single aggregate file: `qu1cksc0pe_decoded_b64_values.txt`.
 - [X] AI IoC sanitizer now filters whitelisted/legit domains using `Systems/Multiple/whitelist_domains.txt` (enabled by default).
 - [X] Archive analyzer now supports JSON report export (`--archive --report`) and AI report analysis (`--archive --ai`).
-
-<b>20/02/2026</b>
-- [X] Windows setup script (`setup.ps1`) was hardened: automatic `winget` fallback installation, Python/7-Zip bootstrap, Sysinternals `strings` EULA auto-accept, and resilient Ollama install flow.
-- [X] Ollama cloud-model handling in setup was improved: clear `ollama signin` guidance is shown once, and setup continues gracefully if cloud model pull fails.
-- [X] Config parsing was hardened for Windows/analysis modules with `utf-8-sig` support to avoid BOM-related `configparser` errors.
-- [X] Windows static analyzer report flow was fixed to avoid early exit on low-import samples, so `--report/--ai` can still produce JSON output.
-- [X] Web UI worker subprocess decoding was made robust on Windows (`utf-8` with replacement) to prevent `UnicodeDecodeError` crashes.
-- [X] Added/updated Windows Batch Script (`.bat`, `.cmd`) analysis support in `--analyze` flow with JSON report output.
-
-<b>15/02/2026</b>
-- [X] Linux setup script (`setup.sh`) was improved with automatic Ollama installation and model pull support from `Systems/Multiple/multiple.conf`.
-
-<b>14/02/2026</b>
-- [X] Windows setup script (`setup.ps1`) was improved with persistent user PATH updates, automatic `winget`/Ollama setup, and graceful `kimi-k2.5:cloud` auth-error handling.
-
-<b>13/02/2026</b>
-- [X] NEW FEATURE: Added Web UI.
-
-<b>12/02/2026</b>
-- [X] Linux dynamic analyzer: added a dedicated Linux menu with separate actions for Binary Emulation and PID Monitoring.
-- [X] PID monitoring improvements: target can now be selected by PID or process name, with better Frida attach retries and child-process attach handling.
-- [X] Linux emulation fallback chain improved: Docker SDK -> Docker CLI -> host `qemu` fallback (when available).
-- [X] Linux dynamic prompts now support TAB autocomplete (menu selection, binary path, PID/process name).
-- [X] Linux PID monitoring exits gracefully on `Ctrl+C` without traceback.
-
-<b>11/02/2026</b>
-- [X] Document analyzer: added VBScript/VBA family static analysis for `.vbs`, `.vbe`, `.vba`, `.vb`, `.bas`, `.cls`, `.frm` (pattern summary, `CreateObject` values, shell command hits, decoded payload hints).
-- [X] AI analyzer model selection is now explicit: only the model in `Systems/Multiple/multiple.conf` (`[Ollama] model`) is used.
-- [X] AI analyzer performance/stability: `temp.txt` is parsed/sampled before prompt building; large reports are compacted with size guards; incomplete/truncated LLM output is retried.
-- [X] AI output cleanup: hidden/internal thinking blocks are stripped; partial `<<SC0PE_IOCS_JSON_*>>` blocks are removed from UI/report when response is cut.
-- [X] LLM IoC quality improvements: local analysis paths are filtered from `file_paths`; stricter domain/IP validation added; file-like pseudo-domains (e.g. `sheet1.xml`) are dropped.
-- [X] Email analyzer hardening: Python 3.14 event loop compatibility for DNSBL checks, noisy DNSBL false-positive filtering, and reliable extracted-attachment cleanup.
-
-<b>10/02/2026</b>
-- [X] Removed FLOSS/Vivisect from the project (no string decode/emulation stage in Windows analysis).
-- [X] Linux static analyzer: Golang special analysis findings are now saved into the Linux JSON report under `golang`.
-- [X] AI analyzer (`--ai`): full report JSON is included in the LLM prompt (`report_full`); model thinking blocks are stripped from console output and the saved AI report; extracted IoCs are displayed in a separate table.
-
-<b>09/02/2026</b>
-- [X] Windows static analyzer improvements: faster import/export extraction (`pefile` fast load + parsing only required directories).
-- [X] .NET analysis no longer requires `pythonnet`/Mono (pure-Python metadata parsing via `dnfile`).
-- [X] Windows static analyzer cleanup: removed FLOSS integration (string decode/emulation) due to stability/performance issues.
-- [X] Setup/Docker cleanup: removed `mono-complete` / `pythonnet` dependency.
-- [X] Archive analyzer: removed `acefile` dependency. ACE archives are extracted via `7z`/`7zz` when available.
-- [X] Android analyzer: APK resource/content scan is now part of `--analyze` and is saved into the JSON report under `resource_scan`.
-
-<b>08/02/2026</b>
-- [X] **NEW FEATURE**: AI report analysis via `--ai` (auto-enables `--report`)
-- [X] Android analyzer improvements: faster source pattern scanning and cleaner report outputs.
-- [X] Setup improvements: JADX updated to `v1.5.3` and setup scripts made more robust (`setup.sh`, `setup.ps1`).
-- [X] Better handling for problematic APKs: detect encrypted ZIP entries and report the reason when decompilation is skipped/failed.
-- [X] Document analyzer improvements: automatic decryption attempt for `FILEPASS`-protected Office documents.
 
 # Available On
 <img width="400" src="https://user-images.githubusercontent.com/42123683/189416163-4ffd12ce-dd62-4510-b496-924396ce77c2.png" alt="logo"><img width="400" src="https://user-images.githubusercontent.com/42123683/189416193-a709291f-be8f-469c-b649-c6201fa86677.jpeg" alt="logo">
@@ -409,3 +364,7 @@ https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/a2c84b8f-c12c-47ac-96e9-c3
 - <a href="https://isc.sans.edu/diary/The+Importance+of+Malware+Triage/29984">SANS ISC - Blog Post</a>
 - <a href="https://korben.info/qu1cksc0pe-analyse-logiciels-malveillants.html">Korben - Blog Post</a>
 - <a href="https://www.heise.de/ratgeber/Malware-Analysetool-Schadpotenzial-von-Daten-mit-Qu1cksc0pe-ermitteln-10001929.html">heise online - Blog Post</a>
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=CYB3RMX/Qu1cksc0pe&type=date&legend=top-left)](https://www.star-history.com/#CYB3RMX/Qu1cksc0pe&type=date&legend=top-left)

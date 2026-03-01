@@ -1,75 +1,201 @@
 {
     "Networking/Web": {
         "patterns": [
-            "http2clientConnPool",
-            "dialCall",
-            "clientStream",
-            "http2clientStream",
-            "clientHelloMsg",
-            "serverHelloMsg",
-            "http2addConnCall"
+            "http2clientConnPool", "dialCall", "clientStream", "http2clientStream",
+            "clientHelloMsg", "serverHelloMsg", "http2addConnCall",
+            "NSURLSession", "NSURLConnection", "URLRequest", "URLSession",
+            "URLSessionDataTask", "URLSessionDownloadTask", "URLSessionUploadTask",
+            "CFHTTPMessageCreateRequest", "CFHTTPMessageCopyResponseStatusCode",
+            "SCNetworkReachability", "getaddrinfo", "gethostbyname", "gethostbyaddr",
+            "CFSocketCreate", "CFSocketConnectToAddress",
+            "socketpair", "connect", "bind", "listen", "accept",
+            "sendto", "recvfrom",
+            "CFReadStreamCreateForHTTPRequest", "CFWriteStreamCreateMemory",
+            "NSStream", "inputStreamWithData", "outputStreamToMemory",
+            "WebView", "WKWebView", "UIWebView",
+            "CFNetworkCopyProxiesForURL", "CFNetworkCopySystemProxySettings"
         ],
         "occurence": 0
     },
     "Cryptography/SSL Handling": {
         "patterns": [
-            "InsecureAlgorithmError",
-            "PublicKeyAlgorithm",
-            "SignatureAlgorithm",
-            "CheckSignatureFrom",
-            "SecCertificateCopyData",
-            "SecCertificateCreateWithData",
-            "SecPolicyCreateSSL",
-            "SecTrustCreateWithCertificates",
-            "SecTrustEvaluateWithError",
-            "SecTrustGetCertificateAtIndex",
-            "SecTrustGetCertificateCount",
-            "SecTrustSetVerifyDate",
-            "encodeString",
-            "decodeString"
+            "InsecureAlgorithmError", "PublicKeyAlgorithm", "SignatureAlgorithm",
+            "CheckSignatureFrom", "SecCertificateCopyData", "SecCertificateCreateWithData",
+            "SecPolicyCreateSSL", "SecTrustCreateWithCertificates", "SecTrustEvaluateWithError",
+            "SecTrustGetCertificateAtIndex", "SecTrustGetCertificateCount", "SecTrustSetVerifyDate",
+            "encodeString", "decodeString",
+            "SSLHandshake", "SSLSetVerifyData", "SSLSetPeerID",
+            "kSecTrustResultProceed", "kSecTrustResultUnspecified",
+            "CCCrypt", "CCKeyDerivationPBKDF", "CCHmac", "CCDigest",
+            "RC4", "kCCAlgorithmDES", "kCCAlgorithm3DES",
+            "EVP_EncryptInit", "EVP_DecryptInit", "EVP_DigestInit",
+            "SecKeyCreateWithData", "SecKeyEncrypt", "SecKeyDecrypt",
+            "kSecAttrKeyTypeRSA", "kSecAttrKeyTypeECSECPrimeRandom",
+            "CryptoKit", "SymmetricKey", "AES.GCM", "ChaChaPoly",
+            "base64EncodedString", "base64DecodedData",
+            "MD5", "SHA1", "SHA256", "PBKDF2"
         ],
         "occurence": 0
     },
     "Information Gathering": {
         "patterns": [
-            "getenv",
-            "geteuid",
-            "getegid",
-            "getrlimit",
-            "getnetconfig",
-            "Setenv",
-            "Environ",
-            "LookupEnv"
+            "getenv", "geteuid", "getegid", "getrlimit", "getnetconfig",
+            "Setenv", "Environ", "LookupEnv",
+            "IOServiceGetMatchingService", "IOServiceMatching",
+            "IORegistryEntryCreateCFProperties", "IORegistryEntryGetName",
+            "sysctlbyname", "sysctl",
+            "NSProcessInfo", "hostName", "operatingSystemVersionString",
+            "IOPlatformSerialNumber", "IOPlatformUUID",
+            "getpwuid", "getpwnam", "getgrgid",
+            "CFPreferencesCopyAppValue", "NSUserDefaults",
+            "kMDItemPath", "NSMetadataQuery", "MDQueryCreate",
+            "LSSharedFileListCreate", "LSCopyDefaultApplicationURLForURL",
+            "addressbook", "ABPeoplePickerNavigationController",
+            "CNContactStore", "CNContact",
+            "CLLocationManager", "kCLLocationAccuracyBest",
+            "NSCalendar", "EKEventStore",
+            "CMMotionManager", "CMAccelerometerData"
         ],
         "occurence": 0
     },
     "Memory Management": {
         "patterns": [
-            "alloc",
-            "calloc",
-            "dealloc",
-            "malloc",
-            "realloc",
-            "memset",
-            "memcmp"
+            "alloc", "calloc", "dealloc", "malloc", "realloc", "memset", "memcmp",
+            "mmap", "mprotect", "munmap",
+            "vm_allocate", "vm_deallocate", "vm_protect",
+            "task_vm_info", "mach_vm_allocate", "mach_vm_write", "mach_vm_read",
+            "NSData", "NSMutableData",
+            "CFDataCreate", "CFDataCreateMutable",
+            "OSAtomicAdd", "OSSpinLockLock",
+            "dispatch_async", "dispatch_sync",
+            "pthread_create", "pthread_join", "pthread_mutex"
         ],
         "occurence": 0
     },
     "Process/Execution": {
         "patterns": [
-            "processInfo",
-            "processName",
-            "SysProcAttr",
-            "CmdError",
-            "CombinedOutput",
-            "StdinPipe",
-            "StdoutPipe",
-            "StderrPipe",
-            "LookPath",
-            "FindProcess",
-            "StartProcess",
-            "SyscallError",
-            "ProcAttr"
+            "processInfo", "processName", "SysProcAttr", "CmdError",
+            "CombinedOutput", "StdinPipe", "StdoutPipe", "StderrPipe",
+            "LookPath", "FindProcess", "StartProcess", "SyscallError", "ProcAttr",
+            "NSTask", "NSWorkspace", "launchWithDictionary", "terminationStatus",
+            "posix_spawn", "posix_spawnattr_init",
+            "execve", "execl", "execlp", "execvp",
+            "fork", "vfork", "waitpid", "wait4",
+            "popen", "system",
+            "NSAppleScript", "executeAndReturnError",
+            "AECreateDesc", "AESendMessage", "kAEOpenApplication",
+            "NSRunningApplication", "activateWithOptions",
+            "kill", "raise", "signal",
+            "launchctl", "xpc_connection_create"
+        ],
+        "occurence": 0
+    },
+    "Anti-Analysis": {
+        "patterns": [
+            "ptrace", "PT_DENY_ATTACH",
+            "P_TRACED", "PTRACE_TRACEME",
+            "task_get_exception_ports", "task_set_exception_ports",
+            "mach_msg", "exc_server",
+            "csops", "CS_DEBUGGED",
+            "sandbox_check", "kSBXProfileNoNetwork",
+            "SecStaticCodeCheckValidity", "SecCodeCopyGuestWithAttributes",
+            "dyld_get_image_name", "dyld_image_count", "_dyld_get_image_header",
+            "objc_copyImageNames",
+            "vm_region_64", "mach_vm_region",
+            "getppid",
+            "IsDebuggerPresent",
+            "timingsafe_bcmp",
+            "gettimeofday", "clock_gettime",
+            "NSBundle mainBundle", "bundleIdentifier",
+            "kstat_ctl_openfd"
+        ],
+        "occurence": 0
+    },
+    "Keychain/Credential Access": {
+        "patterns": [
+            "SecKeychainFindGenericPassword", "SecKeychainFindInternetPassword",
+            "SecKeychainItemCopyAttributesAndData", "SecKeychainAddGenericPassword",
+            "SecKeychainItemModifyAttributesAndData", "SecKeychainItemDelete",
+            "SecItemCopyMatching", "SecItemAdd", "SecItemUpdate", "SecItemDelete",
+            "kSecClassGenericPassword", "kSecClassInternetPassword",
+            "kSecClassCertificate", "kSecClassKey", "kSecClassIdentity",
+            "kSecAttrAccount", "kSecAttrService",
+            "kSecValueData", "kSecReturnData",
+            "SecAccessCreate", "SecACLCreateWithSimpleContents",
+            "SecIdentityCopyCertificate", "SecIdentityCopyPrivateKey",
+            "kSecMatchLimitAll", "kSecReturnAttributes"
+        ],
+        "occurence": 0
+    },
+    "Persistence": {
+        "patterns": [
+            "LaunchDaemon", "LaunchAgent",
+            "com.apple.launchd",
+            "Library/LaunchAgents",
+            "Library/LaunchDaemons",
+            "Library/StartupItems",
+            "loginItemsWithLoginWindow", "LSSharedFileListInsertItemURL",
+            "SMLoginItemSetEnabled", "SMJobBless",
+            "kSMDomainUserLaunchd", "kSMDomainSystemLaunchd",
+            "StartupItems",
+            "crontab", "crond",
+            "NSWorkspace openFile",
+            "CFPreferencesSetValue", "CFPreferencesAppSynchronize",
+            "registerForRemoteNotifications",
+            "UNUserNotificationCenter"
+        ],
+        "occurence": 0
+    },
+    "Screen/Input Capture": {
+        "patterns": [
+            "CGWindowListCreateImage", "CGDisplayCreateImage", "CGDisplayCreateImageForRect",
+            "AVCaptureDevice", "AVCaptureSession", "AVCaptureDeviceInput",
+            "AVMediaTypeVideo", "AVMediaTypeAudio", "AVCaptureMovieFileOutput",
+            "AVCaptureScreenInput",
+            "CGEventCreateKeyboardEvent", "CGEventPost", "CGEventPostToPSN",
+            "CGEventTapCreate", "CGEventTapEnable",
+            "CGEventSourceCreate",
+            "NSEvent addGlobalMonitorForEventsMatchingMask",
+            "NSEvent addLocalMonitorForEventsMatchingMask",
+            "IOHIDManagerCreate", "IOHIDDeviceRegisterInputValueCallback",
+            "SCStreamCreate", "SCContentFilter", "SCStreamConfiguration",
+            "NSAccessibilityElement", "kAXTrustedCheckOptionPrompt",
+            "AXIsProcessTrusted", "AXUIElementCreateApplication",
+            "RPScreenRecorder", "startCaptureWithHandler"
+        ],
+        "occurence": 0
+    },
+    "Privilege Escalation": {
+        "patterns": [
+            "AuthorizationCreate", "AuthorizationExecuteWithPrivileges",
+            "AuthorizationCopyRights", "AuthorizationMakeExternalForm",
+            "AuthorizationFreeItemSet",
+            "setuid", "setgid", "seteuid", "setegid", "setreuid",
+            "kAuthorizationFlagDefaults", "kAuthorizationFlagExtendRights",
+            "kAuthorizationFlagInteractionAllowed",
+            "SMJobBless", "STPrivilegedTask",
+            "authopen", "security_tool",
+            "NSAppleEventDescriptor", "kAEInteractWithSelf",
+            "chmod", "chown",
+            "xpc_dictionary_set_string", "xpc_connection_send_message_with_reply"
+        ],
+        "occurence": 0
+    },
+    "File System": {
+        "patterns": [
+            "NSFileManager", "fileExistsAtPath", "isExecutableFileAtPath",
+            "createFileAtPath", "removeItemAtPath", "copyItemAtPath", "moveItemAtPath",
+            "writeToFile", "contentsAtPath", "contentsOfDirectoryAtPath",
+            "NSDirectoryEnumerator", "enumeratorAtPath", "enumeratorAtURL",
+            "fopen", "fwrite", "fread", "fclose",
+            "unlink", "rename", "mkdir", "rmdir", "chmod", "chown",
+            "removexattr", "setxattr", "getxattr", "listxattr",
+            "kqueue", "kevent",
+            "FSEventStreamCreate", "FSEventStreamStart",
+            "open", "read", "write", "close", "stat", "lstat",
+            "NSFileHandle", "fileHandleForWriting", "fileHandleForReading",
+            "quarantine", "LSSetItemAttribute",
+            "NSTemporaryDirectory", "NSCachesDirectory"
         ],
         "occurence": 0
     }

@@ -19,25 +19,37 @@ if sys.version_info[0] == 2:
     print(f"{errorS} Looks like you are using Python 2. But we need Python 3!")
     sys.exit(1)
 
+# When invoked via `sudo`, root's Python env lacks the original user's pip packages.
+# Add that user's site-packages so all dependencies remain accessible.
+_sudo_user = os.environ.get("SUDO_USER")
+if _sudo_user and os.getuid() == 0:
+    _pyver     = f"python{sys.version_info.major}.{sys.version_info.minor}"
+    _user_home = os.path.expanduser(f"~{_sudo_user}")
+    _user_site = os.path.join(_user_home, ".local", "lib", _pyver, "site-packages")
+    if os.path.isdir(_user_site) and _user_site not in sys.path:
+        sys.path.insert(0, _user_site)
+    del _user_home, _user_site, _pyver
+del _sudo_user
+
 # Testing rich existence
 try:
     from rich import print
-except ModuleNotFoundError as e:
-    print("Error: >rich< module not found.")
-    raise e
+except ModuleNotFoundError:
+    print("Error: >rich< module not found. Run: pip3 install -r requirements.txt")
+    sys.exit(1)
 
 # Testing puremagic existence
 try:
     import puremagic as pr
-except ModuleNotFoundError as e:
-    print("Error: >puremagic< module not found.")
-    raise e
+except ModuleNotFoundError:
+    print("Error: >puremagic< module not found. Run: pip3 install -r requirements.txt")
+    sys.exit(1)
 
 try:
     from colorama import Fore, Style
-except ModuleNotFoundError as e:
-    print("Error: >colorama< module not found.")
-    raise e
+except ModuleNotFoundError:
+    print("Error: >colorama< module not found. Run: pip3 install -r requirements.txt")
+    sys.exit(1)
 
 # Colors
 red = Fore.LIGHTRED_EX
@@ -101,8 +113,10 @@ def execute_module(target, path=MODULE_PREFIX, invoker=py_binary):
         # instead of warning with a PendingDeprecationWarning
         DEV_NOTE = "[DEV NOTE]: when switching to import statements, remember to adjust any downstream imports! (e.g. `from .utils import err_exit` vs `from utils import err_exit`)"
         warnings.warn("Direct execution of Python files won't be supported much longer." + f" {DEV_NOTE}", PendingDeprecationWarning)
-
-    os.system(f"{invoker} {path}{target}")
+    parts  = target.split(" ", 1)
+    script = parts[0]
+    extra  = f" {parts[1]}" if len(parts) > 1 else ""
+    os.system(f'"{invoker}" "{path}{script}"{extra}')
 
 import Modules.banners # show a banner
 

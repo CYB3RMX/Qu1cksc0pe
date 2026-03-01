@@ -132,3 +132,6 @@ jetbrains.com
 youtrack.jetbrains.com
 publicsuffix.org
 projects.eclipse.org
+globalsign.net
+firebaseapp.com
+crashlytics.com
