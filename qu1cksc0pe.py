@@ -95,13 +95,11 @@ if os.name != "nt":
         path_handler = open(".path_handler", "w")
         path_handler.write(sc0pe_path)
         path_handler.close()
-        libscan = configparser.ConfigParser()
 else:
     sc0pe_path = str(os.getcwd())
     path_handler = open(".path_handler", "w")
     path_handler.write(sc0pe_path)
     path_handler.close()
-    libscan = configparser.ConfigParser()
 
 # Utility functions
 from Modules.utils.helpers import err_exit
@@ -126,7 +124,6 @@ ARG_NAMES_TO_KWARG_OPTS = {
     "folder": {"help": "Specify a folder to scan or analyze."},
     "analyze": {"help": "Analyze target file.", "action": "store_true"},
     "archive": {"help": "Analyze archive files.", "action": "store_true"},
-    "console": {"help": "Use Qu1cksc0pe on interactive shell.", "action": "store_true"},
     "db_update": {"help": "Update malware hash database.", "action": "store_true"},
     "docs": {"help": "Analyze document files.", "action": "store_true"},
     "domain": {"help": "Extract URLs and IP addresses from file.", "action": "store_true"},
@@ -273,8 +270,6 @@ def BasicAnalyzer(analyzeFile):
                 choice = str(input(f"\n{infoC} Do you want to check target app\'s security? This process will take a while.[Y/n]: "))
                 if choice == "Y" or choice == "y":
                     execute_module(f"apkSecCheck.py")
-                else:
-                    pass
 
     # Pcap analysis
     elif "pcap" in fileType or "capture file" in fileType:
@@ -526,10 +521,6 @@ def Qu1cksc0pe():
     if args.watch:
         execute_module(f"emulator.py")
 
-    # Interactive shell
-    if args.console:
-        execute_module(f"console.py")
-
     # Database update
     if args.db_update:
         execute_module(f"hashScanner.py --db_update")
@@ -554,7 +545,7 @@ def Qu1cksc0pe():
         if sys.platform == "win32":
             err_exit(f"{errorS} This feature is not suitable for Windows systems for now!")
 
-        execute_module(f"installer.sh {sc0pe_path} {username}", invoker="sudo bash")
+        execute_module(f'installer.sh "{sc0pe_path}" "{username}"', invoker="sudo bash")
 
 def cleanup_junks():
     junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt", "TargetAPK/", "TargetSource/"]

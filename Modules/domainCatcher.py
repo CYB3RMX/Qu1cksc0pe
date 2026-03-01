@@ -33,8 +33,6 @@ if sys.platform == "win32":
    strings_param = "-a"
 elif sys.platform == "darwin":
    strings_param = "-a"
-else:
-   pass
 
 # All strings
 allStrings = perform_strings(target_file)

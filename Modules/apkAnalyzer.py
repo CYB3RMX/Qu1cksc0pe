@@ -66,13 +66,9 @@ else:
 # Compatibility
 homeD = os.path.expanduser("~")
 path_seperator = "/"
-setup_scr = "setup.sh"
 strings_param = "-a"
 if sys.platform == "win32":
     path_seperator = "\\"
-    setup_scr = "setup.ps1"
-else:
-    pass
 
 # Getting target APK
 targetAPK = sys.argv[1]
@@ -1713,8 +1709,6 @@ class APKAnalyzer:
                 featStat.add_row(str(ff))
                 self.reportz["features"].append(ff)
             print(featStat)
-        else:
-            pass
 
         # Activities
         activeStat = Table()
@@ -1725,8 +1719,6 @@ class APKAnalyzer:
                 activeStat.add_row(str(aa))
                 self.reportz["activities"].append(aa)
             print(activeStat)
-        else:
-            pass
 
         # Services
         servStat = Table()
@@ -1737,8 +1729,6 @@ class APKAnalyzer:
                 servStat.add_row(str(ss))
                 self.reportz["services"].append(ss)
             print(servStat)
-        else:
-            pass
 
         # Receivers
         recvStat = Table()
@@ -1749,8 +1739,6 @@ class APKAnalyzer:
                 recvStat.add_row(str(rr))
                 self.reportz["receivers"].append(rr)
             print(recvStat)
-        else:
-            pass
 
         # Providers
         provStat = Table()
@@ -1761,8 +1749,6 @@ class APKAnalyzer:
                 provStat.add_row(str(pp))
                 self.reportz["providers"].append(pp)
             print(provStat)
-        else:
-            pass
 
     def GeneralInformation(self, targetAPK, axml_obj):
         print(f"\n{infoS} General Informations about [bold green]{targetAPK}[white]")

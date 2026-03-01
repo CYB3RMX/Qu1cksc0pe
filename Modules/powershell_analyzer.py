@@ -40,8 +40,6 @@ if sys.platform == "darwin":
 elif sys.platform == "win32":
     strings_param = "-a"
     path_seperator = "\\"
-else:
-    pass
 
 # Load patterns
 powershell_code_patterns = json.load(open(f"{sc0pe_path}{path_seperator}Systems{path_seperator}Windows{path_seperator}powershell_code_patterns.json"))
@@ -306,8 +304,6 @@ class PowerShellAnalyzer:
             for byt in range(len(byte_arr)):
                 byte_arr[byt] = byte_arr[byt] ^ int(xor_key)
             self.save_data_into_file(output_file="qu1cksc0pe_decoded_hex_values_payload.bin", data=byte_arr)
-        else:
-            pass
 
     def detect_and_carve_base64_payloads_xored(self):
         print(f"\n{infoS} Searching for: [bold green]BASE64 Encoded[white] payloads...")

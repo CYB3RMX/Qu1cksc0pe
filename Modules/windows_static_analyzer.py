@@ -49,12 +49,8 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 # Compatibility
 homeD = os.path.expanduser("~")
 path_seperator = "/"
-setup_scr = "setup.sh"
 if sys.platform == "win32":
     path_seperator = "\\"
-    setup_scr = "setup.ps1"
-else:
-    pass
 
 #--------------------------------------------- Gathering Qu1cksc0pe path variable
 try:
