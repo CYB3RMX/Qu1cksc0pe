@@ -53,6 +53,13 @@ python3 qu1cksc0pe.py --ui
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
+<b>02/03/2026</b>
+- [X] Removed `--console` flag and `Modules/console.py` (interactive shell mode). All analysis capabilities remain fully available via the standard CLI flags.
+- [X] Dead code cleanup across the codebase: removed unused `libscan` variable (`qu1cksc0pe.py`), unused `setup_scr` variable (`windows_static_analyzer.py`, `apkAnalyzer.py`), and 11 no-op `else: pass` blocks (`qu1cksc0pe.py`, `apkAnalyzer.py`, `domainCatcher.py`, `powershell_analyzer.py`). All bare `except:` clauses in import guards tightened to `except ImportError`.
+- [X] Bug fix: `Modules/android_dynamic_analyzer.py` was missing `import configparser` — on Windows the ADB path lookup (`adb_conf = configparser.ConfigParser()`) would raise `NameError` at runtime. Import added.
+- [X] Installer hardened (`Modules/installer.sh`): added `set -euo pipefail`, argument count and validity checks, source directory integrity verification, system user validation (rejects `root` as target user), `python3`/`pip3` dependency checks, overwrite detection with confirmation prompt, `trap ERR` rollback on failure, fixed `cp -r` bug that nested the directory inside `/opt/Qu1cksc0pe` when destination already existed, pip now runs as the target user (`sudo -u`) instead of root, `dos2unix` guarded by `command -v`, uninstaller requires confirmation and reports when nothing is installed.
+- [X] Git history rewritten to remove large blobs that were deleted from the working tree but still downloaded on every clone: `.animations/` (GIF demo files, ~80 MB across all historical versions) and `RansomWare.WannaCry` (test sample). Full clone size reduced from ~110 MB to ~5 MB.
+
 <b>01/03/2026</b>
 - [X] Windows dynamic analysis (`--watch` → Process Monitor) now uses a pure-Python Windows Debug API hook engine (`Modules/windows_api_hooker.py`) instead of Frida. API calls are intercepted at runtime via INT3 software breakpoints with single-step trap flag reinstatement to reinstall the hook after each hit. No Frida dependency is required for Windows dynamic analysis.
 - [X] Windows API Tracer panel shows real-time interception of 45+ monitored APIs across `kernel32`, `ntdll`, `advapi32`, `ws2_32`, `wininet`, `user32`, and `shell32`. Argument details (file paths, registry keys, socket addresses, hostnames, VK codes, hook types) are extracted from the x64 register context (RCX/RDX/R8/R9 + stack shadow space). ACG-protected processes (e.g. Chrome renderer) are reported as `write_failed` hooks rather than crashing.
