@@ -45,7 +45,7 @@ _NIX_PATH_RE = re.compile(r"(?:/home/|/tmp/|/etc/|/var/|/usr/)[^\s\"']+")
 
 def _read_sc0pe_path():
     try:
-        return open(".path_handler", "r").read().strip()
+        return open(os.path.join(os.path.expanduser("~"), ".qu1cksc0pe_path"), "r").read().strip()
     except Exception:
         return os.getcwd()
 

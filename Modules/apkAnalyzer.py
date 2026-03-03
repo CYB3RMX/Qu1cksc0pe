@@ -57,11 +57,9 @@ infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 foundS = f"[bold cyan][[bold red]+[bold cyan]][white]"
 errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 
-# Get python binary
-if shutil.which("python"):
-    py_binary = "python"
-else:
-    py_binary = "python3"
+# Use the same interpreter that launched this script so subprocesses
+# inherit the active virtual environment.
+py_binary = sys.executable
 
 # Compatibility
 homeD = os.path.expanduser("~")
@@ -74,7 +72,7 @@ if sys.platform == "win32":
 targetAPK = sys.argv[1]
 
 # Gathering Qu1cksc0pe path variable
-sc0pe_path = open(".path_handler", "r").read()
+sc0pe_path = open(os.path.join(os.path.expanduser("~"), ".qu1cksc0pe_path"), "r").read().strip()
 
 # necessary variables
 danger = 0
@@ -477,9 +475,13 @@ class APKAnalyzer:
         ]
         for lib_dir in possible_libs:
             if os.path.isdir(lib_dir):
-                for fname in os.listdir(lib_dir):
-                    if (fname.startswith("jadx-cli-") and fname.endswith(".jar")) or (fname.startswith("jadx-") and fname.endswith("-all.jar")):
-                        return True
+                try:
+                    for fname in os.listdir(lib_dir):
+                        if (fname.startswith("jadx-cli-") and fname.endswith(".jar")) or (fname.startswith("jadx-") and fname.endswith("-all.jar")):
+                            return True
+                except PermissionError:
+                    # lib dir exists but isn't readable; trust the binary exists
+                    return os.access(launcher_path, os.X_OK) or os.path.isfile(launcher_path)
         return False
 
     def resolve_decompiler_path(self, configured_path):
@@ -504,6 +506,20 @@ class APKAnalyzer:
                 if os.path.isdir(subdir_full):
                     candidates.append(f"{subdir_full}{path_seperator}bin{path_seperator}jadx")
                     candidates.append(f"{subdir_full}{path_seperator}jadx")
+
+        # Deb-installed location: /opt/Qu1cksc0pe/jadx/bin/jadx
+        system_jadx_dir = os.path.join(sc0pe_path, "jadx")
+        candidates.append(os.path.join(system_jadx_dir, "bin", "jadx"))
+        candidates.append(os.path.join(system_jadx_dir, "jadx"))
+        if os.path.isdir(system_jadx_dir):
+            try:
+                for subdir in os.listdir(system_jadx_dir):
+                    subdir_full = os.path.join(system_jadx_dir, subdir)
+                    if os.path.isdir(subdir_full):
+                        candidates.append(os.path.join(subdir_full, "bin", "jadx"))
+                        candidates.append(os.path.join(subdir_full, "jadx"))
+            except PermissionError:
+                pass
 
         if sys.platform == "win32":
             candidates.append(f"{default_jadx_dir}{path_seperator}bin{path_seperator}jadx.bat")
@@ -555,7 +571,7 @@ class APKAnalyzer:
             self.last_decompile_error = "encrypted_zip_entries_detected"
             self.last_decompile_error_detail = f"encrypted_entry_count={len(encrypted_entries)}"
             print(f"{errorS} Decompiler execution skipped.")
-            print(f">>> [bold yellow]Details:[white] encrypted zip entries detected ({len(encrypted_entries)}).")
+            print(f">>> [bold yellow]Details:[white] encrypted DEX entries detected ({len(encrypted_entries)}).")
             print(f">>> [bold yellow]First entry:[white] {encrypted_entries[0]}")
             return False
 
@@ -618,9 +634,14 @@ class APKAnalyzer:
         return True
 
     def get_encrypted_zip_entries(self, file_path):
+        """Return encrypted DEX entries. Only DEX files matter for JADX;
+        encrypted asset/resource entries do not block decompilation."""
         try:
             with zipfile.ZipFile(file_path, "r") as zf:
-                return [info.filename for info in zf.infolist() if info.flag_bits & 0x1]
+                return [
+                    info.filename for info in zf.infolist()
+                    if (info.flag_bits & 0x1) and info.filename.endswith(".dex")
+                ]
         except Exception:
             return None
 

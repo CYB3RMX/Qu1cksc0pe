@@ -32,8 +32,8 @@ if sys.platform == "win32":
     path_seperator = "\\"
 
 # Gathering Qu1cksc0pe path variable
-with open(".path_handler", "r") as _ph:
-    sc0pe_path = _ph.read()
+with open(os.path.join(os.path.expanduser("~"), ".qu1cksc0pe_path"), "r") as _ph:
+    sc0pe_path = _ph.read().strip()
 
 targetApk = sys.argv[1]
 

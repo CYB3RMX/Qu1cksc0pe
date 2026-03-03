@@ -54,7 +54,7 @@ if sys.platform == "win32":
 
 #--------------------------------------------- Gathering Qu1cksc0pe path variable
 try:
-    sc0pe_path = open(".path_handler", "r").read().strip()
+    sc0pe_path = open(os.path.join(os.path.expanduser("~"), ".qu1cksc0pe_path"), "r").read().strip()
 except Exception:
     # Backwards-compat: allow running without setup, using repo root as base.
     sc0pe_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))

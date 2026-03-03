@@ -54,9 +54,13 @@ except:
 # Checking for pyOneNote module
 try:
     from pyOneNote.Main import OneDocment
-except:
-    print("Error: >pyOneNote< module not found. Don\'t worry I can handle it...")
-    os.system("pip install -U https://github.com/DissectMalware/pyOneNote/archive/master.zip --force")
+except ImportError:
+    print("Error: >pyOneNote< module not found. Don't worry I can handle it...")
+    _pip_cmd = [sys.executable, "-m", "pip", "install", "-U",
+                "https://github.com/DissectMalware/pyOneNote/archive/master.zip"]
+    if sys.prefix == sys.base_prefix:  # not in a venv — avoid breaking system packages
+        _pip_cmd += ["--user", "--break-system-packages"]
+    subprocess.run(_pip_cmd, check=False)
     print("[bold yellow]Now try to re-execute program again!")
     sys.exit(0)
 
@@ -75,7 +79,7 @@ if sys.platform == "win32":
     path_seperator = "\\"
 
 # Gathering Qu1cksc0pe path variable
-sc0pe_path = open(".path_handler", "r").read()
+sc0pe_path = open(os.path.join(os.path.expanduser("~"), ".qu1cksc0pe_path"), "r").read().strip()
 
 # All strings
 allstr = "\n".join(perform_strings(targetFile))
@@ -1276,6 +1280,19 @@ class DocumentAnalyzer:
 
         print(summary_table)
 
+        # Print per-category matched values for categories with hits.
+        for cat, hits in report["script_analysis"]["categories"].items():
+            if not hits:
+                continue
+            det_table = Table(
+                title=f"* {cat} Matches *",
+                title_style="bold italic cyan", title_justify="center"
+            )
+            det_table.add_column("[bold green]Matched Value", justify="left")
+            for h in hits[:50]:
+                det_table.add_row(h)
+            print(det_table)
+
         # Common COM object and command extraction.
         create_obj = []
         for mt in re.finditer(r'CreateObject\s*\(\s*"([^"]+)"\s*\)', script_text, re.IGNORECASE):
@@ -1309,26 +1326,38 @@ class DocumentAnalyzer:
                 self._add_finding("VBScript", "shell_command")
             print(cmd_table)
 
-        # Decode likely long Base64 payloads for quick triage hints.
+        # Decode Base64 payloads for quick triage hints.
+        # Minimum 8 groups of 4 chars (32 chars) to avoid false positives.
+        # Try UTF-16-LE first (PowerShell -EncodedCommand uses it), then UTF-8.
         decoded_hints = []
-        b64_candidates = re.findall(r"(?:[A-Za-z0-9+/]{4}){30,}(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?", script_text)
-        for candidate in b64_candidates[:30]:
-            try:
-                decoded = base64.b64decode(candidate).decode("utf-8", errors="ignore")
-            except Exception:
-                continue
-            decoded = decoded.strip()
-            if len(decoded) < 20:
-                continue
-            printable_ratio = sum(ch.isprintable() for ch in decoded) / max(len(decoded), 1)
-            if printable_ratio < 0.80:
+        b64_candidates = re.findall(
+            r"(?:[A-Za-z0-9+/]{4}){8,}(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?",
+            script_text
+        )
+        for candidate in b64_candidates[:60]:
+            decoded = None
+            for encoding in ("utf-16-le", "utf-8", "latin-1"):
+                try:
+                    raw = base64.b64decode(candidate + "==")
+                    text = raw.decode(encoding, errors="ignore")
+                    text = text.strip()
+                    if len(text) < 8:
+                        continue
+                    printable_ratio = sum(ch.isprintable() for ch in text) / max(len(text), 1)
+                    if printable_ratio < 0.65:
+                        continue
+                    decoded = text
+                    break
+                except Exception:
+                    continue
+            if not decoded:
                 continue
             hint, truncated = self._sanitize_and_truncate(decoded, 200)
             if hint and hint not in decoded_hints:
                 decoded_hints.append(hint)
             if truncated:
                 self._add_finding("VBScript", "decoded_payload_truncated")
-            if len(decoded_hints) >= 15:
+            if len(decoded_hints) >= 20:
                 break
         report["script_analysis"]["decoded_payload_hints"] = decoded_hints
         self._register_section("vbscript_decoded_payload_hint_count", len(decoded_hints))

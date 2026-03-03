@@ -33,11 +33,9 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 infoS = f"[bold cyan][[bold red]*[bold cyan]][white]"
 infoC = f"{cyan}[{red}*{cyan}]{white}"
 
-# Get python binary
-if shutil.which("python"):
-    py_binary = "python"
-else:
-    py_binary = "python3"
+# Use the same interpreter that launched this script so subprocesses
+# inherit the active virtual environment.
+py_binary = sys.executable
 
 # Compatibility
 path_seperator = "/"
@@ -45,7 +43,7 @@ if sys.platform == "win32":
     path_seperator = "\\"
 
 # Gathering Qu1cksc0pe path variable
-sc0pe_path = open(".path_handler", "r").read()
+sc0pe_path = open(os.path.join(os.path.expanduser("~"), ".qu1cksc0pe_path"), "r").read().strip()
 
 class DynamicAnalyzer:
     def __init__(self):

@@ -40,7 +40,7 @@ if sys.platform == "win32":
 
 # Sc0pe path
 try:
-    sc0pe_path = open(".path_handler", "r").read().strip()
+    sc0pe_path = open(os.path.join(os.path.expanduser("~"), ".qu1cksc0pe_path"), "r").read().strip()
 except Exception:
     sc0pe_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 

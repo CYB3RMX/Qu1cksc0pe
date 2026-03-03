@@ -31,6 +31,13 @@ except Exception:
 
 try:
     import rarfile
+    # Use 7z as fallback extractor when unrar is not installed
+    if not shutil.which(rarfile.UNRAR_TOOL):
+        for _alt in ("7z", "7zz", "unar"):
+            if shutil.which(_alt):
+                rarfile.ALT_TOOL = _alt
+                rarfile.CURRENT_SETUP_CONF = None  # force re-detect
+                break
 except Exception:
     err_exit("Error: >rarfile< module not found.")
 
@@ -49,7 +56,7 @@ elif sys.platform == "win32":
 
 # Gathering Qu1cksc0pe path variable
 try:
-    sc0pe_path = open(".path_handler", "r").read().strip()
+    sc0pe_path = open(os.path.join(os.path.expanduser("~"), ".qu1cksc0pe_path"), "r").read().strip()
 except Exception:
     sc0pe_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -216,11 +223,40 @@ class ArchiveAnalyzer:
         self.perform_basic_scans(arch_object=zip_data, arch_type="zip")
 
     def rar_file_analysis(self):
-        # Parsing rar file
+        # Try rarfile first; fall back to 7z if the result is empty
+        # (unrar-free doesn't support RAR5 and returns an empty infolist).
         rar_data = rarfile.RarFile(self.targetFile)
+        if rar_data.infolist():
+            self.perform_basic_scans(arch_object=rar_data, arch_type="rar")
+            return
 
-        # Perform basic scans
-        self.perform_basic_scans(arch_object=rar_data, arch_type="rar")
+        seven_zip = shutil.which("7z") or shutil.which("7zz")
+        if not seven_zip:
+            print(f"{errorS} RAR archive appears empty and 7z is not available. Install p7zip-full or unrar (non-free).")
+            self.perform_basic_scans(arch_object=rar_data, arch_type="rar")
+            return
+
+        print(f"{infoS} rarfile returned empty list — retrying with 7z (RAR5/encrypted support)...")
+        try:
+            list_proc = subprocess.run(
+                [seven_zip, "l", self.targetFile],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                stdin=subprocess.DEVNULL,
+                text=True,
+                timeout=30,
+            )
+            entries = _parse_7z_list(list_proc.stdout)
+        except subprocess.TimeoutExpired:
+            entries = []
+
+        if not entries:
+            print(f"{errorS} Could not list archive contents. The archive may be password-protected or corrupt.")
+            self.perform_basic_scans(arch_object=rar_data, arch_type="rar")
+            return
+
+        rar_list_data = ListOnlyArchive(entries)
+        self.perform_basic_scans(arch_object=rar_list_data, arch_type="rar")
 
     def ace_file_analysis(self):
         # `acefile` dependency removed: try extracting with 7-Zip if present.
@@ -234,7 +270,9 @@ class ArchiveAnalyzer:
                 [seven_zip, "x", "-y", f"-o{tmpdir}", self.targetFile],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
+                stdin=subprocess.DEVNULL,
                 text=True,
+                timeout=60,
             )
             if proc.returncode != 0:
                 err_exit(f"{errorS} Failed to extract ACE archive with 7-Zip.\n{proc.stderr.strip() or proc.stdout.strip()}")
@@ -507,6 +545,67 @@ class ExtractedArchive:
             raise ValueError("invalid archive member path")
         with open(full, "rb") as f:
             return f.read()
+
+
+def _parse_7z_list(stdout_text):
+    """Parse `7z l` stdout into a list of ExtractedArchiveEntry objects.
+
+    7z l output (relevant columns):
+      Date      Time    Attr         Size   Compressed  Name
+      ------------------- ----- ------------ ------------  ----------
+      2023-01-01 00:00:00 .....         1234         5678  some/file.txt
+      2023-01-01 00:00:00 D....            0            0  some/dir/
+    Attributes: first char 'D' means directory.
+    """
+    entries = []
+    in_data = False
+    separator_re = re.compile(r"^-{5,}")
+
+    for line in stdout_text.splitlines():
+        stripped = line.rstrip()
+        if separator_re.match(stripped):
+            in_data = not in_data
+            continue
+        if not in_data:
+            continue
+        # Line format (fixed-width):
+        #   col  0-18 : date+time  (19 chars)
+        #   col 20-24 : attributes (5 chars)
+        #   col 26-37 : size       (12 chars)
+        #   col 39-50 : compressed (12 chars)
+        #   col 53+   : name
+        if len(stripped) < 53:
+            continue
+        attr_field = stripped[20:25]
+        size_field = stripped[26:38].strip()
+        name_field = stripped[53:].strip()
+        if not name_field:
+            continue
+        is_dir = attr_field.startswith("D")
+        try:
+            file_size = int(size_field) if size_field.isdigit() else 0
+        except ValueError:
+            file_size = 0
+        entries.append(ExtractedArchiveEntry(name_field, file_size, is_dir))
+
+    return entries
+
+
+class ListOnlyArchive:
+    """
+    Read-only archive wrapper backed by a pre-built entry list (e.g. from `7z l`).
+    Cannot extract file contents (used for password-protected or RAR5 archives where
+    listing is possible but extraction is not).  `read()` always returns empty bytes.
+    """
+
+    def __init__(self, entries):
+        self._entries = list(entries)
+
+    def infolist(self):
+        return self._entries
+
+    def read(self, name):  # noqa: ARG002
+        return b""
 
 
 # Execution

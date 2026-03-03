@@ -53,6 +53,13 @@ python3 qu1cksc0pe.py --ui
 ![Screenshot](https://github.com/user-attachments/assets/84b72c33-8ca6-48f5-a613-52fca7c596e2)
 
 # Updates
+<b>03/03/2026</b>
+- [X] Debian package (`build_deb.sh`): `.deb` post-install now bundles JADX v1.5.3 download, Ollama installation, and pyOneNote pip install so a fresh Kali/Parrot system is fully functional without any manual post-setup. Depends on `default-jre-headless`, `unzip`, `curl | wget`; `adb`/`strace`/`ltrace` moved to Recommends (non-blocking on systems that lack them).
+- [X] Bug fix: all subprocess module-launch calls across `qu1cksc0pe.py`, `apkAnalyzer.py`, `emulator.py`, `pcap_analyzer.py`, and `email_analyzer.py` now use `sys.executable` instead of `shutil.which("python3")`. Previously, sub-analyzers launched inside a virtualenv fell back to the system Python and raised `ModuleNotFoundError` for every pip-installed dependency (puremagic, androguard, pyaxmlparser, …).
+- [X] Bug fix: `apkAnalyzer.py` — `resolve_decompiler_path()` and `is_valid_jadx_launcher()` now catch `PermissionError` when scanning the `/opt/Qu1cksc0pe/jadx/lib/` directory, falling back to an `os.access()` check. Previously the tool exited with an unhandled permission exception when run as a normal user and JADX was installed by root.
+- [X] Bug fix: `archiveAnalyzer.py` — RAR5 archives (and RAR archives on systems with `unrar-free`) returned an empty file list because `unrar-free` does not support RAR5. Added a two-stage fallback: (1) try `rarfile` with the best available extractor; (2) if `infolist()` is empty, fall back to `7z l` (list-only, no password needed) parsed via the new `_parse_7z_list()` helper into a `ListOnlyArchive` wrapper. Password-protected archives are now listed without hanging — `read()` returns empty bytes so content scanning is skipped gracefully.
+- [X] Debian post-install: added a prominent ASCII-box summary printed at the end of `apt install` reminding the user to run `ollama signin` (AI features) and `qu1cksc0pe --key_init` (VirusTotal API key setup).
+
 <b>02/03/2026</b>
 - [X] Removed `--console` flag and `Modules/console.py` (interactive shell mode). All analysis capabilities remain fully available via the standard CLI flags.
 - [X] Dead code cleanup across the codebase: removed unused `libscan` variable (`qu1cksc0pe.py`), unused `setup_scr` variable (`windows_static_analyzer.py`, `apkAnalyzer.py`), and 11 no-op `else: pass` blocks (`qu1cksc0pe.py`, `apkAnalyzer.py`, `domainCatcher.py`, `powershell_analyzer.py`). All bare `except:` clauses in import guards tightened to `except ImportError`.

@@ -407,6 +407,55 @@
         </div>
       </article>
       {% endif %}
+
+      {% if job.report_ui.script_analysis_section and job.report_ui.script_analysis_section.available %}
+      {% set sa = job.report_ui.script_analysis_section %}
+      <article class="glass report-section">
+        <h2>Script Analysis
+          {% if sa.language %}<span class="badge">{{ sa.language }}</span>{% endif %}
+          {% if sa.vbe_encoded %}<span class="badge badge-danger">VBE Encoded</span>{% endif %}
+        </h2>
+
+        {% if sa.categories %}
+        <div class="signal-grid">
+          {% for cat in sa.categories %}
+          <section class="signal-card">
+            <header>
+              <h3>{{ cat.name }}</h3>
+              <span>{{ cat.count }}</span>
+            </header>
+            <ul>
+              {% for hit in cat.hits %}
+              <li><code>{{ hit }}</code></li>
+              {% endfor %}
+            </ul>
+          </section>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if sa.createobject_values %}
+        <h3 style="margin-top:1rem">CreateObject Values</h3>
+        <ul class="findings-list">
+          {% for v in sa.createobject_values %}<li><code>{{ v }}</code></li>{% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if sa.shell_commands %}
+        <h3 style="margin-top:1rem">Shell Commands</h3>
+        <ul class="findings-list">
+          {% for cmd in sa.shell_commands %}<li><code>{{ cmd }}</code></li>{% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if sa.decoded_payload_hints %}
+        <h3 style="margin-top:1rem">Decoded Payload Hints</h3>
+        <ul class="findings-list">
+          {% for hint in sa.decoded_payload_hints %}<li><code>{{ hint }}</code></li>{% endfor %}
+        </ul>
+        {% endif %}
+      </article>
+      {% endif %}
   </section>
   {% endif %}
 

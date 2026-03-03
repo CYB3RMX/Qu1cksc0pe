@@ -39,11 +39,9 @@ if not shutil.which("ja3"):
     print(f"[bold red]>>>[white] Execute: [bold green]pip3 install pyja3[white]")
     sys.exit(1)
 
-# Get python binary
-if shutil.which("python"):
-    py_binary = "python"
-else:
-    py_binary = "python3"
+# Use the same interpreter that launched this script so subprocesses
+# inherit the active virtual environment.
+py_binary = sys.executable
 
 # Compatibility
 path_seperator = "/"
@@ -51,8 +49,8 @@ if sys.platform == "win32":
     path_seperator = "\\"
 
 #--------------------------------------------- Gathering Qu1cksc0pe path variable
-with open(".path_handler", "r") as _ph:
-    sc0pe_path = _ph.read()
+with open(os.path.join(os.path.expanduser("~"), ".qu1cksc0pe_path"), "r") as _ph:
+    sc0pe_path = _ph.read().strip()
 
 # Report generation is enabled when qu1cksc0pe.py passes "True" as the second argument,
 # matching the convention used by powershell_analyzer.py, document_analyzer.py, etc.

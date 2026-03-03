@@ -27,3 +27,4 @@ pymem
 pyja3
 docker
 flask
+https://github.com/DissectMalware/pyOneNote/archive/master.zip

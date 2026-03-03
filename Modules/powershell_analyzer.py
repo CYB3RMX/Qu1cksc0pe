@@ -27,9 +27,9 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 	
 # Gathering Qu1cksc0pe path variable
 try:
-    sc0pe_path = open(".path_handler", "r").read().strip()
+    sc0pe_path = open(os.path.join(os.path.expanduser("~"), ".qu1cksc0pe_path"), "r").read().strip()
 except Exception:
-    # Allow running module directly without `.path_handler`.
+    # Allow running module directly without the path cache.
     sc0pe_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 # Configurating strings parameter and make compatability
@@ -84,6 +84,9 @@ class PowerShellAnalyzer:
                 "decoded_base64_values_count": 0,
             },
             "errors": [],
+            "extracted_urls": [],
+            "extracted_ips": [],
+            "large_variable_blobs": [],
         }
         self.decoded_b64_entries = []
         self._calc_hashes_into_report()
@@ -221,7 +224,20 @@ class PowerShellAnalyzer:
             r'(start\s+\w+\.exe)',
             r'CMD\s+/C\s+powershell\b.*',
             r'powershell\s+-exec\s+bypass\s+-c',
-            r'(Start-Process\s+\"[^\"]+\.exe\")'
+            r'(Start-Process\s+\"[^\"]+\.exe\")',
+            r'(?:IEX|Invoke-Expression)\s*\(',
+            r'&\s*\(\s*\$\w+',
+            r'&\s*\$\w+',
+            r'Invoke-Command\b',
+            r'WMIC\s+process\s+call\s+create',
+            r'mshta(?:\.exe)?\s+',
+            r'(?:c|w)script(?:\.exe)?\s+',
+            r'rundll32(?:\.exe)?\s+',
+            r'msiexec(?:\.exe)?\s+/[iq]',
+            r'bitsadmin\s+/transfer',
+            r'certutil\s+-decode',
+            r'(?:New-Object|\.)\s*Net\.WebClient',
+            r'(?:DownloadFile|DownloadString|DownloadData)\s*\(',
         ]
         swc = 0
         exec_table = Table()
@@ -243,30 +259,48 @@ class PowerShellAnalyzer:
 
     def extract_path_values(self):
         print(f"\n{infoS} Performing extraction of path values...")
-        path_regex = r"'([A-Z]:\\[^']+)'"
+        path_patterns = [
+            r"'([A-Z]:\\[^']+)'",           # single-quoted drive paths
+            r'"([A-Z]:\\[^"]+)"',           # double-quoted drive paths
+            r"'(\\\\[^']+)'",               # single-quoted UNC paths
+            r'"(\\\\[^"]+)"',               # double-quoted UNC paths
+            r'(\$env:\w+\\[^\s\'">\]]+)',   # environment variable paths
+        ]
         path_table = Table()
         path_table.add_column("Extracted [bold green]PATH[white] values", justify="center")
-        mathces = re.findall(path_regex, str(self.all_strings), re.IGNORECASE)
-        if mathces != []:
-            for path in mathces:
+        found = False
+        seen = set()
+        for path_regex in path_patterns:
+            for path in re.findall(path_regex, str(self.all_strings), re.IGNORECASE):
+                if path in seen:
+                    continue
+                seen.add(path)
                 path_table.add_row(path)
+                found = True
                 try:
                     if path not in self.report["extracted_paths"]:
                         self.report["extracted_paths"].append(path)
                 except Exception:
                     pass
+        if found:
             print(path_table)
         else:
             print(f"{errorS} There is no pattern about path values...\n")
 
     # ------------------------------------ XORED Payload detection and extratcion
     def check_for_xor_key(self):
-        pattern = r'-bxor\s+(\d+)'
-        matches = re.findall(pattern, str(self.all_strings), re.IGNORECASE)
-        if matches != []:
-            return matches[0]
-        else:
-            return None
+        text = str(self.all_strings)
+        # Literal integer key: -bxor 0x1F or -bxor 31
+        for pattern in (r'-bxor\s+(0x[0-9a-fA-F]+)', r'-bxor\s+(\d+)'):
+            m = re.findall(pattern, text, re.IGNORECASE)
+            if m:
+                val = m[0]
+                return str(int(val, 16)) if val.startswith(("0x", "0X")) else val
+        # Variable key: -bxor $keyVar  → return variable name for reporting
+        mv = re.findall(r'-bxor\s+(\$\w+)', text, re.IGNORECASE)
+        if mv:
+            return mv[0]   # e.g. "$key" — caller receives a string, won't cast to int
+        return None
 
     def find_payloads_xored(self):
         print(f"\n{infoS} Performing [bold green]XOR\'ed[white] payload detection...")
@@ -285,10 +319,15 @@ class PowerShellAnalyzer:
             print(f"{errorS} There is no pattern about XOR\'ed payloads!\n")
 
     def xor_decrypt_and_save(self, payload_type, payload, xor_key):
+        try:
+            xor_int = int(xor_key) & 0xFF
+        except (ValueError, TypeError):
+            print(f"{errorS} XOR key [bold yellow]{xor_key}[white] is a variable — cannot decrypt statically.\n")
+            return
         if payload_type == "base64":
             byte_arr = bytearray(base64.b64decode(payload))
             for byt in range(len(byte_arr)):
-                byte_arr[byt] = byte_arr[byt] ^ int(xor_key)
+                byte_arr[byt] = byte_arr[byt] ^ xor_int
             self._maybe_record_bytes_as_text(blob=byte_arr, output_file="base64_xored_payload")
             print(f"{infoS} Decoded BASE64 payload added to [bold green]qu1cksc0pe_decoded_b64_values.txt[white] list queue")
         elif payload_type == "ascii":
@@ -297,12 +336,12 @@ class PowerShellAnalyzer:
                 temp_array.append(int(num))
             byte_arr = bytearray(temp_array)
             for byt in range(len(byte_arr)):
-                byte_arr[byt] = byte_arr[byt] ^ int(xor_key)
+                byte_arr[byt] = byte_arr[byt] ^ xor_int
             self.save_data_into_file(output_file="qu1cksc0pe_decoded_ascii_numbers_payload.bin", data=byte_arr)
         elif payload_type == "hex":
             byte_arr = bytearray(binascii.unhexlify(payload))
             for byt in range(len(byte_arr)):
-                byte_arr[byt] = byte_arr[byt] ^ int(xor_key)
+                byte_arr[byt] = byte_arr[byt] ^ xor_int
             self.save_data_into_file(output_file="qu1cksc0pe_decoded_hex_values_payload.bin", data=byte_arr)
 
     def detect_and_carve_base64_payloads_xored(self):
@@ -443,6 +482,64 @@ class PowerShellAnalyzer:
         else:
             print(f"{errorS} There is no possible PE executable pattern found!\n")
 
+    def extract_network_iocs(self):
+        """Extract URLs and IP addresses from the script."""
+        print(f"\n{infoS} Performing network IOC extraction...")
+        text = str(self.all_strings)
+        found = False
+
+        urls = list(dict.fromkeys(re.findall(r'https?://[^\s\'"<>\]]+', text, re.IGNORECASE)))
+        if urls:
+            url_table = Table()
+            url_table.add_column("Extracted [bold green]URL[white] values", justify="left")
+            for u in urls[:50]:
+                url_table.add_row(u)
+            print(url_table)
+            self.report["extracted_urls"] = urls[:50]
+            found = True
+
+        ips = list(dict.fromkeys(re.findall(r'\b(?:\d{1,3}\.){3}\d{1,3}\b', text)))
+        # filter obviously non-IP version strings (0.0.0.0 is still valid)
+        ips = [ip for ip in ips if all(0 <= int(o) <= 255 for o in ip.split("."))]
+        if ips:
+            ip_table = Table()
+            ip_table.add_column("Extracted [bold green]IP[white] values", justify="center")
+            for ip in ips[:50]:
+                ip_table.add_row(ip)
+            print(ip_table)
+            self.report["extracted_ips"] = ips[:50]
+            found = True
+
+        if not found:
+            print(f"{errorS} There are no network IOCs found!\n")
+
+    def detect_large_variable_blobs(self):
+        """Detect variables holding large Base64-like blobs (e.g. encrypted payloads)."""
+        print(f"\n{infoS} Performing large variable blob detection...")
+        # Read source directly for multi-line variable assignments
+        try:
+            with open(self.target_file, "r", encoding="utf-8", errors="ignore") as fh:
+                source = fh.read()
+        except Exception:
+            source = str(self.all_strings)
+
+        pattern = r'\$(\w+)\s*=\s*["\']([A-Za-z0-9+/=]{200,})["\']'
+        blobs = re.findall(pattern, source)
+        if not blobs:
+            print(f"{errorS} There are no large variable blobs found!\n")
+            return
+
+        blob_table = Table()
+        blob_table.add_column("[bold green]Variable[white]", justify="center")
+        blob_table.add_column("[bold green]Length[white]", justify="center")
+        blob_table.add_column("[bold green]Preview (first 60 chars)[white]", justify="left")
+        report_blobs = []
+        for var_name, blob in blobs[:20]:
+            blob_table.add_row(f"${var_name}", str(len(blob)), blob[:60] + "...")
+            report_blobs.append({"variable": f"${var_name}", "length": len(blob), "preview": blob[:60]})
+        print(blob_table)
+        self.report["large_variable_blobs"] = report_blobs
+
     def buffer_sanitizer(self, executable_buffer):
         # Unwanted characters
         unwanted = ['@', '\t', '\n', " ", "\'"]
@@ -462,6 +559,8 @@ def main():
         pwsh_analyzer.scan_code_patterns()
         pwsh_analyzer.extract_path_values()
         pwsh_analyzer.check_executions()
+        pwsh_analyzer.extract_network_iocs()
+        pwsh_analyzer.detect_large_variable_blobs()
         pwsh_analyzer.find_payloads_xored()
         pwsh_analyzer.check_for_non_xored_payloads_presence()
         pwsh_analyzer.check_only_legit_base64()

@@ -41,7 +41,7 @@ if sys.platform == "win32":
     path_seperator = "\\"
 
 # Path variable
-sc0pe_path = open(".path_handler", "r").read().strip()
+sc0pe_path = open(os.path.join(os.path.expanduser("~"), ".qu1cksc0pe_path"), "r").read().strip()
 
 # Ensure `analysis.*` imports resolve when running as a script.
 modules_dir = os.path.join(sc0pe_path, "Modules")
@@ -87,7 +87,7 @@ def _is_true(value):
 
 def _read_sc0pe_path():
     try:
-        p = open(".path_handler", "r").read().strip()
+        p = open(os.path.join(os.path.expanduser("~"), ".qu1cksc0pe_path"), "r").read().strip()
         if p:
             return p
     except Exception:

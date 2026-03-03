@@ -66,17 +66,19 @@ errorS = f"[bold cyan][[bold red]![bold cyan]][white]"
 # Gathering username
 username = getpass.getuser()
 
-# Get python binary
-if shutil.which("python"):
-    py_binary = "python"
-else:
-    py_binary = "python3"
+# Always use the same interpreter that is running this script so that
+# all subprocesses inherit the active virtual environment.
+py_binary = sys.executable
 
 # Make Qu1cksc0pe work on Windows, Linux, OSX
 homeD = os.path.expanduser("~")
 path_seperator = "/"
 if sys.platform == "win32":
     path_seperator = "\\"
+
+# Path handler file: written to the user's home directory so it is
+# always writable regardless of the current working directory.
+_PH_FILE = os.path.join(os.path.expanduser("~"), ".qu1cksc0pe_path")
 
 # Is Qu1cksc0pe installed??
 if os.name != "nt":
@@ -86,20 +88,17 @@ if os.name != "nt":
         sc0peConf.read(f"/etc/qu1cksc0pe.conf", encoding="utf-8-sig")
         sc0pe_path = str(sc0peConf["Qu1cksc0pe_PATH"]["sc0pe"])
         sys.path.append(sc0pe_path)
-        path_handler = open(".path_handler", "w")
-        path_handler.write(sc0pe_path)
-        path_handler.close()
+        with open(_PH_FILE, "w") as _ph:
+            _ph.write(sc0pe_path)
     else:
         # Parsing current path and write into handler
         sc0pe_path = str(os.getcwd())
-        path_handler = open(".path_handler", "w")
-        path_handler.write(sc0pe_path)
-        path_handler.close()
+        with open(_PH_FILE, "w") as _ph:
+            _ph.write(sc0pe_path)
 else:
     sc0pe_path = str(os.getcwd())
-    path_handler = open(".path_handler", "w")
-    path_handler.write(sc0pe_path)
-    path_handler.close()
+    with open(_PH_FILE, "w") as _ph:
+        _ph.write(sc0pe_path)
 
 # Utility functions
 from Modules.utils.helpers import err_exit
@@ -188,7 +187,7 @@ def _maybe_run_ai(fast_mode=False):
     env.setdefault("SC0PE_AI_TEMP_PARSE_MAX_LINES", "2500")
     env.setdefault("SC0PE_AI_TEMP_SAMPLE_LINES", "600")
     try:
-        subprocess.run([py_binary, smart_analyzer_path, report_path], env=env, check=False)
+        subprocess.run([sys.executable, smart_analyzer_path, report_path], env=env, check=False)
     except Exception:
         execute_module(f"analysis/multiple/smart_analyzer.py \"{report_path}\"")
 
@@ -198,7 +197,7 @@ def launch_web_ui():
         err_exit(f"{errorS} UI entrypoint not found: {web_app_path}")
     print(f"{infoS} Launching [bold green]Qu1cksc0pe Web UI[white]...")
     try:
-        ui_proc = subprocess.run([py_binary, web_app_path], check=False)
+        ui_proc = subprocess.run([sys.executable, web_app_path], check=False)
     except KeyboardInterrupt:
         print("\n[bold white on red]Web UI terminated by user.\n")
         return
@@ -240,7 +239,7 @@ def BasicAnalyzer(analyzeFile):
         _maybe_run_ai()
 
     # Android Analysis
-    elif ("PK" in fileType and "Java archive" in fileType) or "Dalvik (Android) executable" in fileType:
+    elif ("PK" in fileType and "Java archive" in fileType) or "Dalvik (Android) executable" in fileType or lower_ext in (".apk", ".dex", ".jar"):
         print(f"{infoS} Target OS: [bold green]Android[white]")
 
         # Extension parsing
@@ -272,7 +271,7 @@ def BasicAnalyzer(analyzeFile):
                     execute_module(f"apkSecCheck.py")
 
     # Pcap analysis
-    elif "pcap" in fileType or "capture file" in fileType:
+    elif "pcap" in fileType or "capture file" in fileType or lower_ext in (".pcap", ".pcapng"):
         print(f"{infoS} Performing [bold green]PCAP[white] analysis...\n")
         if args.report:
             execute_module(f"pcap_analyzer.py \"{analyzeFile}\" True")
@@ -360,6 +359,7 @@ def Qu1cksc0pe():
     if args.ui:
         launch_web_ui()
         return
+
 
     # Getting all strings from the file if the target file exists.
     if args.file:
@@ -548,7 +548,7 @@ def Qu1cksc0pe():
         execute_module(f'installer.sh "{sc0pe_path}" "{username}"', invoker="sudo bash")
 
 def cleanup_junks():
-    junkFiles = ["temp.txt", ".path_handler", ".target-file.txt", ".target-folder.txt", "TargetAPK/", "TargetSource/"]
+    junkFiles = ["temp.txt", ".target-file.txt", ".target-folder.txt", "TargetAPK/", "TargetSource/"]
     for junk in junkFiles:
         if os.path.exists(junk):
             try: # assume simple file

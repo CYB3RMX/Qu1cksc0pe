@@ -158,7 +158,7 @@ def _normalize_inline_text(text: str) -> str:
 
 def _report_snapshot() -> Dict[Path, int]:
     snap: Dict[Path, int] = {}
-    for candidate in BASE_DIR.glob("sc0pe_*_report.json"):
+    for candidate in REPORTS_ROOT.glob("sc0pe_*_report.json"):
         try:
             snap[candidate] = candidate.stat().st_mtime_ns
         except OSError:
@@ -168,7 +168,7 @@ def _report_snapshot() -> Dict[Path, int]:
 
 def _detect_new_reports(before: Dict[Path, int]) -> List[Path]:
     changed: List[Tuple[int, Path]] = []
-    for candidate in BASE_DIR.glob("sc0pe_*_report.json"):
+    for candidate in REPORTS_ROOT.glob("sc0pe_*_report.json"):
         try:
             mtime_ns = candidate.stat().st_mtime_ns
         except OSError:
@@ -1129,6 +1129,7 @@ def build_frontend_payload(report_data: Optional[dict]) -> dict:
             "metadata": [],
             "extra_panels": [],
             "detailed_panels": [],
+            "script_analysis_section": {"available": False, "language": "", "vbe_encoded": False, "categories": [], "createobject_values": [], "shell_commands": [], "decoded_payload_hints": []},
             "ai_output": "",
             "ai_iocs": [],
             "ai_context": [],
@@ -1213,6 +1214,28 @@ def build_frontend_payload(report_data: Optional[dict]) -> dict:
     matched_rules_rows = _extract_matched_rules(report_data)
     mitre_rows = _extract_mitre_rows(report_data)
     permissions_section = _extract_permissions_section(report_data)
+
+    # VBScript/VBA script analysis section
+    script_analysis_section: dict = {"available": False, "language": "", "vbe_encoded": False, "categories": [], "createobject_values": [], "shell_commands": [], "decoded_payload_hints": []}
+    sa = report_data.get("script_analysis")
+    if isinstance(sa, dict):
+        consumed_keys.add("script_analysis")
+        script_analysis_section["available"] = True
+        script_analysis_section["language"] = str(sa.get("language") or "")
+        script_analysis_section["vbe_encoded"] = bool(sa.get("vbe_encoded"))
+        cats_raw = sa.get("categories") or {}
+        if isinstance(cats_raw, dict):
+            for cat_name, cat_hits in cats_raw.items():
+                if isinstance(cat_hits, list) and cat_hits:
+                    script_analysis_section["categories"].append({
+                        "name": str(cat_name),
+                        "count": len(cat_hits),
+                        "hits": [str(h) for h in cat_hits[:50]],
+                    })
+        for field in ("createobject_values", "shell_commands", "decoded_payload_hints"):
+            val = sa.get(field)
+            if isinstance(val, list):
+                script_analysis_section[field] = [str(v) for v in val[:50]]
 
     for key, label in (("hash_md5", "MD5"), ("hash_sha1", "SHA1"), ("hash_sha256", "SHA256"), ("imphash", "Imphash")):
         if report_data.get(key):
@@ -1318,6 +1341,7 @@ def build_frontend_payload(report_data: Optional[dict]) -> dict:
         "metadata": metadata,
         "extra_panels": extra_panels,
         "detailed_panels": _build_detailed_panels(report_data, skip_keys={"carved_executables"}) + pcap_panels,
+        "script_analysis_section": script_analysis_section,
         "ai_output": ai_output,
         "ai_iocs": ai_iocs,
         "ai_context": ai_context,
@@ -1618,7 +1642,7 @@ def execute_preset(sample_path: Path, preset: AnalysisPreset, enable_ai: bool) -
     try:
         completed = subprocess.run(
             command,
-            cwd=str(BASE_DIR),
+            cwd=str(REPORTS_ROOT),
             capture_output=True,
             text=True,
             encoding="utf-8",
