@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Istanbul
 
 # Gather dependencies
-RUN apt update && apt install -y curl wget git binutils sudo unzip python3 python3-pip default-jre
+RUN apt update && apt install -y curl wget git binutils sudo unzip python3 python3-pip default-jre file
 RUN pip3 install setuptools wheel
 
 # Install application
