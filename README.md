@@ -424,4 +424,4 @@ https://github.com/CYB3RMX/Qu1cksc0pe/assets/42123683/a2c84b8f-c12c-47ac-96e9-c3
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=CYB3RMX/Qu1cksc0pe&type=date&legend=top-left)](https://www.star-history.com/#CYB3RMX/Qu1cksc0pe&type=date&legend=top-left)
+[![Star History Chart](https://star-history.dera.page/svg?repos=CYB3RMX/Qu1cksc0pe&type=date&legend=top-left)](https://star-history.dera.page/#CYB3RMX/Qu1cksc0pe&type=date&legend=top-left)
